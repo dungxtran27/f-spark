@@ -1,8 +1,19 @@
 import mongoose, { Schema } from "mongoose";
 
+const GradingCriteriaSchema = new Schema({
+  description: {
+    type: String,
+    required: false, 
+  }
+},{ _id: true });
+
 const ClassworkSchema = new Schema(
   {
     name: {
+      type: String,
+      required: true,
+    },
+    title: {
       type: String,
       required: true,
     },
@@ -13,6 +24,10 @@ const ClassworkSchema = new Schema(
     attachment: {
       type: String,
       required: false, 
+    },
+    startDate: {
+      type: Date,
+      required: true,
     },
     dueDate: {
       type: Date,
@@ -30,20 +45,7 @@ const ClassworkSchema = new Schema(
     },
     GradingCriteria: [
       {
-        name: {
-          type: String,
-          required: true,
-        },
-        description: {
-          type: String,
-          required: false, 
-        },
-        weight: {
-          type: Number,
-          required: true,
-          min: 0,
-          max: 100,
-        },
+        type: GradingCriteriaSchema,
       },
     ],
   },

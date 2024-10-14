@@ -7,7 +7,7 @@ const verifyToken = (req, res, next) => {
     if (!token) {
       return res
         .status(401)
-        .json({ error: "No cookie for accessToken was provided" });
+        .json({  });
     }
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.decodedToken = decodedToken;

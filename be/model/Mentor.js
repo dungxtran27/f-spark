@@ -19,6 +19,27 @@ const MentorSchema = new Schema(
       type: String,
       required: false, 
     },
+    assignedClasses: [
+      {
+        id: {
+          type: Schema.Types.ObjectId,
+          ref: 'Class', 
+          required: true,
+        },
+        classCode: {
+          type: String,
+          required: true,
+        },
+        backgroundImage: {
+          type: String,
+          required: false, 
+        },
+      },
+    ],
+    profilePicture: {
+      type: String,
+      required: false, 
+    }
   },
   { timestamps: true, collection: 'Mentors' }
 );

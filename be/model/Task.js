@@ -1,7 +1,13 @@
 import mongoose, { Schema } from "mongoose";
-
+import Student from "./Student.js";
+import TimeBlock from "./TimeBlock.js";
 const TaskSchema = new Schema(
   {
+    taskType: {
+      type: String,
+      required: true,
+      enum: ["Class work", "Group task"],
+    },
     taskName: {
       type: String,
       required: true,
@@ -11,38 +17,51 @@ const TaskSchema = new Schema(
       required: true,
     },
     attachment: {
-      type: String, 
-      required: false, 
+      type: String,
     },
     status: {
       type: String,
-      enum: ['pending', 'in progress', 'done'],
-      default: 'pending', 
-      required: true,
+      enum: ["Pending", "In Progress", "Done", "Need Review"],
+      default: "Pending",
     },
     assignee: {
       type: Schema.Types.ObjectId,
-      ref: 'User', 
+      ref: "Student",
       required: true,
     },
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: 'User', 
+      ref: "Student",
+    },
+    group: {
+      type: Schema.Types.ObjectId,
+      ref: "Group",
       required: true,
     },
     classwork: {
       type: Schema.Types.ObjectId,
-      ref: 'Classwork', 
-      required: true,
+      ref: "Classwork",
     },
     timeblock: {
       type: Schema.Types.ObjectId,
-      ref: 'Timeblock', 
-      required: true,
+      ref: "TimeBlock",
     },
+    dueDate: {
+      type: Date,
+    },
+    parentTask: {
+      type: Schema.Types.ObjectId,
+      ref: "Task",
+    },
+    childTasks: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
   },
-  { timestamps: true, collection: 'Tasks' }
+  { timestamps: true, collection: "Tasks" }
 );
 
-const Task = mongoose.model('Task', TaskSchema);
+const Task = mongoose.model("Task", TaskSchema);
 export default Task;

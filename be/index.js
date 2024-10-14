@@ -28,7 +28,7 @@ const app = express();
 const server = http.createServer(app);
 dotenv.config();
 const corsOptions = {
-  origin: "https://fspark.vercel.app/",
+  origin: ["http://localhost:3000", "https://fspark.vercel.app"],
   methods: "PUT, POST, GET, DELETE, OPTIONS, PATCH",
   credentials: true,
 };
@@ -76,7 +76,8 @@ app.use("/api/task", TaskRouter);
 app.use("/api/timeblock", TimeBlockRouter);
 const port = process.env.PORT || 9999;
 const MONGODB_URI = process.env.MONGODB_URI;
-eventScheduler();
+//for Periodic tasks
+// eventScheduler();
 const io = new Server(server, {
   cors: corsOptions,
 });
