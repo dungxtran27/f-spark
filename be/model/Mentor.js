@@ -39,7 +39,7 @@ const MentorSchema = new Schema(
       {
         id: {
           type: Schema.Types.ObjectId,
-          ref: 'TagMentor', 
+          ref: 'TagMajor', 
           required: true,
         },
         name: {

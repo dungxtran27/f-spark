@@ -1,30 +1,39 @@
 import mongoose from 'mongoose';
 import Mentor from "../model/Mentor.js";
-import TagMentor from "../model/TagMenter.js";
+import TagMajor from '../model/TagMajor.js';
 import Group from '../model/Group.js';
 const getMentor = async() => {
     try { 
-        const result = await Mentor.aggregate([
-            { $unwind: '$tag' },
-            { $match: { isActive: true } },
-            {
-              $group: {
-                _id: '$tag.id',
-                tagName: { $first: '$tag.name' },  
-                mentors: {
-                  $push: {
-                    _id: '$_id',
-                    name: '$name',
-                    email: '$email',
-                    phoneNumber: '$phoneNumber',
-                    profile: '$profile',
-                    assignedClasses: '$assignedClasses',
-                    profilePicture: '$profilePicture',
-                  }
-                }
+      const result = await Mentor.aggregate([
+        { $match: { isActive: true } }, 
+        {
+          $lookup: {
+            from: 'TagMajors',   
+            localField: 'tag.id',      
+            foreignField: '_id',        
+            as: 'tagMajors'           
+          }
+        },
+        { $unwind: '$tagMajors' },
+        {
+          $group: {
+            _id: '$tagMajors._id', 
+            tagName: { $first: '$tagMajors.name' }, 
+            mentors: {
+              $push: {
+                _id: '$_id',
+                name: '$name',
+                email: '$email',
+                phoneNumber: '$phoneNumber',
+                profile: '$profile',
+                assignedClasses: '$assignedClasses',
+                profilePicture: '$profilePicture',
+                isActive: '$isActive'
               }
             }
-          ]);
+          }
+        }
+      ]);
           return result;
     } catch (error) {
         throw new Error(error.message);

@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const TagMentorSchema = new Schema(
+const TagMenjorSchema = new Schema(
   {
     name: {
       type: String,
@@ -11,8 +11,8 @@ const TagMentorSchema = new Schema(
       required: false,
     },
   },
-  { timestamps: true, collection: 'TagMentors' }
+  { timestamps: true, collection: 'TagMajors' }
 );
 
-const TagMentor = mongoose.model('TagMentor', TagMentorSchema);
-export default TagMentor;
+const TagMajor = mongoose.model('TagMajor', TagMenjorSchema);
+export default TagMajor;
