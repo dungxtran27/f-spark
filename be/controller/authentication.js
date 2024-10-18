@@ -1,6 +1,7 @@
 import {
   AccountRepository,
   AuthenticateRepository,
+  TeacherRepository,
 } from "../repository/index.js";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
@@ -125,8 +126,20 @@ const login = async (req, res) => {
         userDetail = student;
         userDetail.role = ROLE_NAME.student;
         break;
+
       case ROLE_NAME.teacher:
-        return res.status(404).json({ error: "Unimplemented" });
+        const teacher = await TeacherRepository.findTeacherByAccountId(
+          existingAccount._id
+        );
+        if (!teacher) {
+          return res.status(404).json({
+            error: "No such teacher found matched with provided credential",
+          });
+        }
+        userDetail = teacher;
+        userDetail.role = ROLE_NAME.teacher;
+        break;
+
       case ROLE_NAME.startUpDepartment:
         return res.status(404).json({ error: "Unimplemented" });
       case ROLE_NAME.admin:
@@ -141,7 +154,7 @@ const login = async (req, res) => {
     if (socket) {
       socket.accountId = existingAccount._id.toString();
     } else {
-      console.log("No socket");
+      // console.log("No socket");
     }
     // io.sockets.sockets.forEach((sk) => {
     //   console.log(`socket ${sk.id} account ${sk?.accountId}`);
@@ -302,7 +315,17 @@ const refreshToken1 = async (req, res) => {
         userDetail.role = ROLE_NAME.student;
         break;
       case ROLE_NAME.teacher:
-        return res.status(404).json({ error: "Unimplemented" });
+        const teacher = await TeacherRepository.findTeacherByAccountId(
+          existingAccount._id
+        );
+        if (!teacher) {
+          return res.status(404).json({
+            error: "No such teacher found matched with provided credential",
+          });
+        }
+        userDetail = teacher;
+        userDetail.role = ROLE_NAME.teacher;
+        break;
       case ROLE_NAME.startUpDepartment:
         return res.status(404).json({ error: "Unimplemented" });
       case ROLE_NAME.admin:
