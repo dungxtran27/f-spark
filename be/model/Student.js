@@ -27,7 +27,7 @@ const StudentSchema = new Schema(
     group: {
       type: Schema.Types.ObjectId,
       ref: 'Group', 
-      required: true,
+      // required: true,
     },
     classId: {
       type: Schema.Types.ObjectId,
