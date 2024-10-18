@@ -97,11 +97,23 @@ const findAllStudentByGroupId = async (classId) => {
     throw new Error(error.message);
   }
 }
+
+const getAllStudentUngroupByClassId = async (classId) => {
+  try {
+    const students = await Student.find({
+       classId: classId, group:null 
+      }).select('_id name studentId ');
+    return students;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   findStudentByAccountId,
   getStudentsByGroup,
   getTeacherByStudentId,
   getStudentsByGroup,
   findAllStudentByGroupId,
-  getAllStudentByClassId
+  getAllStudentByClassId,
+  getAllStudentUngroupByClassId
 };

@@ -8,5 +8,6 @@ studentRouter.get('/getAllStudentByGroupId', verifyToken, authorization.checkGro
 studentRouter.get("/getTeacherByStudentId", verifyToken, StudentController.getTeacherByStudentId)
 studentRouter.get('/viewStudentByGroup', verifyToken, StudentController.getStudentsInSameGroup);
 studentRouter.get('/getAllStudentByClassId', verifyToken, StudentController.getAllStudentByClassId);
+studentRouter.get('/:classId', verifyToken, StudentController.getAllStudentUnGroupByClassId);
 export default studentRouter;
 
