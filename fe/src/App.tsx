@@ -7,6 +7,9 @@ import DashBoard from "./pages/Student/DashBoard";
 import Class from "./pages/Student/Class";
 import Timeline from "./pages/Student/Timeline";
 import TaskDetail from "./pages/Student/TaskDetail";
+import Classes from "./pages/Teacher/Classess";
+import ClassDetail from "./pages/Teacher/ClassDetail";
+import TeacherDashboard from "./pages/Teacher/Dashboard";
 function App() {
   return (
     <BrowserRouter>
@@ -19,6 +22,9 @@ function App() {
         <Route path="/class" element={<Class />} />
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/taskDetail/:taskKey" element={<TaskDetail />} />
+        <Route path="/classes" element={<Classes />} />
+        <Route path="/class/:classId" element={<ClassDetail />} />
+        <Route path="/dashboard" element={<TeacherDashboard />} />
       </Routes>
     </BrowserRouter>
   );

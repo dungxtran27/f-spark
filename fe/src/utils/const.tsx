@@ -5,10 +5,20 @@ import Outcome from "../component/student/Overview/Outcome";
 import Outcomes from "../component/student/Class/Outcomes";
 import People from "../component/student/Class/People";
 import Stream from "../component/student/Class/Stream";
+import TeacherOutcomes from "../component/teacher/ClassDetail/Outcomes";
 
 export const LOGIN_DATA = {
   email: "email",
   password: "password",
+};
+export const DATE_FORMAT = {
+  withYear: "MMM D, YYYY",
+  withoutYear: "MMM D",
+  withYearAndTime: "h:mm, MMM D, YYYY",
+};
+export const TEACHER_OUTCOMES_MODAL_TYPES = {
+  grading: "GRADING",
+  editOutcome: "EDIT_OUTCOME",
 };
 export const ROLE = {
   teacher: "TEACHER",
@@ -22,6 +32,11 @@ export const DASHBOARD_TABS = [
 ];
 export const CLASS_TABS = [
   { key: "outcomes", label: "Outcomes", children: <Outcomes /> },
+  { key: "stream", label: "Stream", children: <Stream /> },
+  { key: "people", label: "People", children: <People /> },
+];
+export const TEACHER_CLASS_DETAIL_TABS = [
+  { key: "outcomes", label: "Outcomes", children: <TeacherOutcomes /> },
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people", label: "People", children: <People /> },
 ];
@@ -142,5 +157,5 @@ export const QUERY_KEY = {
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
-  OUTCOMES_LIST: "outcomesList"
+  OUTCOMES_LIST: "outcomesList",
 };
