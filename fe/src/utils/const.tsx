@@ -142,5 +142,11 @@ export const QUERY_KEY = {
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
-  OUTCOMES_LIST: "outcomesList"
+  OUTCOMES_LIST: "outcomesList",
+};
+export const colorMap = {
+  SE: "cyan",
+  MKT: "gold",
+  IB: "blue",
+  GD: "green",
 };
