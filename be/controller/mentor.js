@@ -1,5 +1,18 @@
-import mongoose from 'mongoose';
+
 import { MentorRepository } from "../repository/index.js";
+import mongoose from 'mongoose';
+
+
+export const viewAllMentors = async (req, res) => {
+    try {
+      const mentors = await MentorRepository.getAllMentors();
+      return res.status(200).json({ data: mentors });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  };
+
+
 const getMentor = async (req,res) => {
     try {
         const mentors = await MentorRepository.getMentor()
@@ -25,5 +38,6 @@ const assignMentor = async (req,res) => {
 }
 export default {
     getMentor,
-    assignMentor
+    assignMentor,
+    viewAllMentors
 };

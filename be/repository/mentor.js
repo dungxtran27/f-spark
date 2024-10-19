@@ -1,7 +1,23 @@
+
 import mongoose from 'mongoose';
 import Mentor from "../model/Mentor.js";
 import TagMajor from '../model/TagMajor.js';
 import Group from '../model/Group.js';
+
+const getAllMentors = async () => {
+  try {
+    const mentors = await Mentor.find()
+      .populate({
+        path: "assignedClasses.id",
+        select: "classCode backgroundImage", 
+      })
+    return mentors;
+  } catch (error) {
+    throw new Error("Error fetching mentors: " + error.message);
+  }
+};
+
+
 const getMentor = async() => {
     try { 
       const result = await Mentor.aggregate([
@@ -56,5 +72,6 @@ const assignMentor = async({groupId,mentorId}) => {
 }
 export default {
     getMentor,
-    assignMentor
+    assignMentor,
+    getAllMentors
 };
