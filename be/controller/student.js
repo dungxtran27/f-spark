@@ -43,18 +43,7 @@ const findAllStudentByGroupId = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
-// const getAllStudentUnGroupByClassId = async (req, res) => {
-//     try {
-//         const decodedToken = req.decodedToken;
-//         // const student = await StudentRepository
-//         // .findStudentByAccountId(decodedToken.account);
-//         const students = await StudentRepository
-//         .getAllStudentUngroupByClassId(student.classId);
-//         return res.status(200).json({ data: students });
-//     } catch (error) {
-//         return res.status(500).json({ message: error.message });
-//     }
-// };
+
 const getAllStudentUnGroupByClassId = async (req, res) => {
     try {
         const { classId } = req.params; 
