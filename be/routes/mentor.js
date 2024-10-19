@@ -4,4 +4,6 @@ import { MentorController } from "../controller/index.js";
 const mentorRouter = express.Router();
 
 mentorRouter.get("/",verifyToken,MentorController.viewAllMentors);
+mentorRouter.get('/getMentor',MentorController.getMentor);
+mentorRouter.put('/assignMentor',MentorController.assignMentor)
 export default mentorRouter;
