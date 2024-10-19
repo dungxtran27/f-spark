@@ -31,7 +31,28 @@ const getSubmissionsOfGroup = async (outcomeIds, groupId) => {
     return new Error(error.message);
   }
 };
+
+const addGrade = async ({ submissionId, grade, criteria }) => {
+  try {
+    const updatedSubmission = await Submission.findByIdAndUpdate(
+      submissionId,
+      {
+        $set: 
+        { 
+          grade: grade,
+          passedCriteria: criteria
+        }
+      },
+      { new: true } 
+    ).populate("student");    
+    return updatedSubmission;
+  } catch (error) {
+    return new Error(error.message); 
+  }
+};
+
 export default {
   createSubmission,
   getSubmissionsOfGroup,
+  addGrade
 };

@@ -35,7 +35,7 @@ const ClassworkSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['assignment', 'outcome'],
+      enum: ['assignment', 'outcome', 'announce'],
       required: true,
     },
     class: {
@@ -47,7 +47,7 @@ const ClassworkSchema = new Schema(
       {
         type: GradingCriteriaSchema,
       },
-    ],
+    ]
   },
   { timestamps: true, collection: 'Classworks' }
 );

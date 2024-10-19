@@ -8,5 +8,5 @@ submissionRouter.post("/createSubmission",
     verifyToken,
     authorization.checkGroupAccess,
     SubmissionController.createSubmission)
-
+submissionRouter.put("/addGrade",SubmissionController.addGrade); //chấm điểm màn outcome của teacher
 export default submissionRouter;
