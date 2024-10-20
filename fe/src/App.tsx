@@ -7,6 +7,8 @@ import DashBoard from "./pages/Student/DashBoard";
 import Class from "./pages/Student/Class";
 import Timeline from "./pages/Student/Timeline";
 import TaskDetail from "./pages/Student/TaskDetail";
+import MentorList from "./pages/Teacher/MentorList";
+import ClassGroupList from "./pages/Teacher/ClassGroupList";
 import Classes from "./pages/Teacher/Classess";
 import ClassDetail from "./pages/Teacher/ClassDetail";
 import TeacherDashboard from "./pages/Teacher/Dashboard";
@@ -22,6 +24,11 @@ function App() {
         <Route path="/class" element={<Class />} />
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/taskDetail/:taskKey" element={<TaskDetail />} />
+        {/* teacher */}
+        <Route path="/mentorlist" element={<MentorList />} />
+        {/* cái này phải truyền id clas vào mới sang đc */}
+        <Route path="/teacher-dashboard" element={<ClassGroupList />} />
+
         <Route path="/classes" element={<Classes />} />
         <Route path="/class/:classId" element={<ClassDetail />} />
         <Route path="/dashboard" element={<TeacherDashboard />} />

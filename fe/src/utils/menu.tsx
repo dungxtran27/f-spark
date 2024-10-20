@@ -1,6 +1,6 @@
 import { FaChartPie } from "react-icons/fa6";
 import { FaTasks, FaRegCalendarAlt } from "react-icons/fa";
-import { FaBookJournalWhills } from "react-icons/fa6";
+import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 // import { GoQuestion } from "react-icons/go";
 import { SlBell } from "react-icons/sl";
@@ -25,6 +25,16 @@ export const DefaultRoutes = [
     route: "/timeline",
     page: "Timeline",
     icon: <FaRegCalendarAlt size={20} />,
+  },
+  {
+    route: "/mentorlist",
+    page: "Mentors",
+    icon: <FaPeopleGroup size={20} />,
+  },
+  {
+    route: "/teacher-dashboard",
+    page: "Teacher Dashboard",
+    icon: <FaSchool size={20} />,
   },
 ];
 export const SecondaryMenu = [
