@@ -8,10 +8,10 @@ import classNames from "classnames";
 import MentorCard from "./mentorCard";
 const MentorListWrapper = () => {
   const tagData = [
-    { label: "CNTT", value: "1", className: "tag_cntt" },
-    { label: "Marketing", value: "2", className: "tag_mkt" },
-    { label: "Bussiness", value: "3", className: "tag_ib" },
-    { label: "Food", value: "4", className: "tag_food" },
+    { label: "CNTT", value: "1" },
+    { label: "Marketing", value: "2" },
+    { label: "Bussiness", value: "3" },
+    { label: "Food", value: "4" },
   ];
   interface MentorData {
     name: string;
@@ -116,7 +116,6 @@ const MentorListWrapper = () => {
   const options: SelectProps["options"] = tagData.map((i) => ({
     label: i.label,
     value: i.value,
-    className: i.className,
   }));
   type SearchProps = GetProps<typeof Input.Search>;
   const onSearch: SearchProps["onSearch"] = (value, _e, info) =>
@@ -147,10 +146,7 @@ const MentorListWrapper = () => {
         />
       </Space>
 
-      <div
-        className="mentor_wrapper mt-3 ml-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3   
- gap-4"
-      >
+      <div className="mentor_wrapper mt-3 ml-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-1 gap-1">
         {typedMentorData.map((md) => (
           <MentorCard key={md.name} {...md} />
         ))}
