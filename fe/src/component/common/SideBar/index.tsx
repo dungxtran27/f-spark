@@ -41,12 +41,12 @@ const SideBar: React.FC<HeaderProps> = () => {
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
   return (
-    <div className="h-screen w-[260px] flex flex-col justify-between">
+    <div className="h-screen w-[260px] flex flex-col justify-between border-r-[1px] border-backgroundSecondary">
       <div>
       <div
         className={classNames(
           styles.logoWrapper,
-          "border-r-[1px] z-10 border-b-[1px] border-backgroundSecondary flex items-center px-3 gap-3 font-medium text-lg"
+          "z-10 border-b-[1px] flex items-center px-3 gap-3 font-medium text-lg"
         )}
       >
         <Image width={60} preview={false} src={logo_header} />
