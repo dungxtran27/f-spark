@@ -6,6 +6,7 @@ export interface UserInfo {
   major: string;
   account: Account;
   group: string;
+  role?: string
 };
 export interface Account {
     id: string,

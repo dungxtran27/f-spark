@@ -2,10 +2,10 @@ import { FaChartPie } from "react-icons/fa6";
 import { FaTasks, FaRegCalendarAlt } from "react-icons/fa";
 import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
-// import { GoQuestion } from "react-icons/go";
+import { SiGoogleclassroom } from "react-icons/si";
 import { SlBell } from "react-icons/sl";
 import { Badge } from "antd";
-export const DefaultRoutes = [
+export const StudentRoutes = [
   {
     route: "/projectOverview",
     page: "Project Overview",
@@ -25,6 +25,13 @@ export const DefaultRoutes = [
     route: "/timeline",
     page: "Timeline",
     icon: <FaRegCalendarAlt size={20} />,
+  },
+];
+export const TeacherRoutes = [
+  {
+    route: "/classes",
+    page: "Classes",
+    icon: <SiGoogleclassroom />,
   },
   {
     route: "/mentorlist",
