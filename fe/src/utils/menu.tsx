@@ -29,6 +29,11 @@ export const StudentRoutes = [
 ];
 export const TeacherRoutes = [
   {
+    route: "/teacher-dashboard",
+    page: "Teacher Dashboard",
+    icon: <FaSchool size={20} />,
+  },
+  {
     route: "/classes",
     page: "Classes",
     icon: <SiGoogleclassroom />,
@@ -37,11 +42,6 @@ export const TeacherRoutes = [
     route: "/mentorlist",
     page: "Mentors",
     icon: <FaPeopleGroup size={20} />,
-  },
-  {
-    route: "/teacher-dashboard",
-    page: "Teacher Dashboard",
-    icon: <FaSchool size={20} />,
   },
 ];
 export const SecondaryMenu = [

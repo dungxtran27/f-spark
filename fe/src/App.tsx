@@ -9,7 +9,7 @@ import Timeline from "./pages/Student/Timeline";
 import TaskDetail from "./pages/Student/TaskDetail";
 import MentorList from "./pages/Teacher/MentorList";
 import ClassGroupList from "./pages/Teacher/ClassGroupList";
-import Classes from "./pages/Teacher/Classess";
+import Classes from "./pages/Teacher/Classes";
 import ClassDetail from "./pages/Teacher/ClassDetail";
 import TeacherDashboard from "./pages/Teacher/Dashboard";
 function App() {

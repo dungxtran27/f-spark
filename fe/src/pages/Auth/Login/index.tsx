@@ -23,7 +23,7 @@ const Login = () => {
   const password = Form.useWatch(LOGIN_DATA.password, form);
   const navigate = useNavigate();
   const loginMutation = useMutation({
-    mutationFn: () => authApi.login({ email, password, role: role }),
+    mutationFn: () => authApi.login({ email, password, role: role?.toUpperCase() }),
     onSuccess: (data) => {
       dispatch(login(data.data.data));
       switch (data.data.data?.role) {
