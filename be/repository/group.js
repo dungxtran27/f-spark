@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import Group from "../model/Group.js";
+import Student from "../model/Student.js";
+import student from "./student.js";
 
 const createJourneyRow = async ({ groupId, name }) => {
   try {
@@ -288,6 +290,60 @@ const deleteCustomerPersona = async ({ groupId, personaId }) => {
   }
 };
 
+const findAllStudentByGroupId = async (classId) => {
+  try {
+    const data = await Group.find({
+      class: classId
+    }).select('GroupName GroupDescription isSponsorship mentor teamMembers tag').populate({
+      path: 'teamMembers',
+      select: '_id name gen major'
+    }).populate({
+      path: 'tag',
+      select: 'name '
+    }).populate({
+      path: 'mentor',
+      select: 'name '
+    });
+    return data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+const addStundentInGroup = async (groupId, studentId) => {
+  try {
+    const group = await Group.findOne({
+      _id: groupId,
+      teamMembers: studentId
+    });
+
+    const student = await Student.findById(studentId);
+    if (!student) {
+      throw new Error("Student not found")
+    }
+
+    if (group) {
+      throw new Error("Student already exists in the group")
+    }
+
+    const updatedGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $push: { teamMembers: studentId } },
+      { new: true }
+    );
+
+    const updatedStudent = await Student.findByIdAndUpdate(
+      studentId,
+      { group: groupId },
+      { new: true }
+    );
+
+    return updatedGroup;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
 
 export default {
   createCellsOnUpdate,
@@ -303,4 +359,6 @@ export default {
   addCustomerPersona,
   updateCustomerPersona,
   deleteCustomerPersona,
+  findAllStudentByGroupId,
+  addStundentInGroup
 };

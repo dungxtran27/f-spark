@@ -68,41 +68,11 @@ const getAllStudentByClassId = async (classId) => {
   }
 };
 
-const findAllStudentByGroupId = async (classId) => {
-  try {
-    const students = await Student.find({ classId: classId }).select('_id name studentId gen major group').populate({
-      path: 'group',
-      select: 'GroupName isSponsorship GroupDescription',
-      populate: {
-        path: 'mentor',
-        select: 'name'
-      }
-    });
-    const groupedStudents = students.reduce((acc, student) => {
-      const groupName = student.group.GroupName;
-      if (!acc[groupName]) {
-        acc[groupName] = {
-          isSponsorship: student.group.isSponsorship,
-          mentor: student.group.mentor ? student.group.mentor.name : "",
-          groupDescription: student.group.GroupDescription,
-          student: []
-        };
-      }
-      const { group, ...studentWithoutGroup } = student._doc;
-      acc[groupName].student.push(studentWithoutGroup);
-      return acc;
-    }, {});
-    return groupedStudents;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
-
 const getAllStudentUngroupByClassId = async (classId) => {
   try {
     const students = await Student.find({
-       classId: classId, group:null 
-      }).select('_id name studentId ');
+      classId: classId, group: null
+    }).select('_id name gen major ');
     return students;
   } catch (error) {
     throw new Error(error.message);
@@ -113,7 +83,6 @@ export default {
   getStudentsByGroup,
   getTeacherByStudentId,
   getStudentsByGroup,
-  findAllStudentByGroupId,
   getAllStudentByClassId,
   getAllStudentUngroupByClassId
 };
