@@ -57,14 +57,31 @@ const getMentor = async() => {
 }
 const assignMentor = async({groupId,mentorId}) => {
   try {
-    const updateMentor = await Group.findByIdAndUpdate(
+
+    const group = await Group.findById(groupId);
+    if(group.mentor){  
+      await Mentor.findByIdAndUpdate(
+        group.mentor,
+        {
+          $pull: { assignedGroup: { id: groupId } }, 
+        },
+        { new: true }
+      );
+    }
+    await Group.findByIdAndUpdate(
       groupId,
       {
         mentor: mentorId
       }
     );
-    console.log(updateMentor);
-    
+    const updateMentor = await Mentor.findByIdAndUpdate(
+      mentorId,
+      {
+        $addToSet: { assignedGroup: { id: groupId } }, 
+      },
+      { new: true }
+    );
+
     return updateMentor;
   } catch (error) {
     throw new Error(error.message);

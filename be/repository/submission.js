@@ -23,7 +23,25 @@ const getSubmissionsOfGroup = async (outcomeIds, groupId) => {
     const submissions = await Submission.find({
       classworkId: { $in: outcomeIds },
       group: groupId,
-    }).populate({
+    })
+    .populate({
+      path: "student",
+    });
+
+    console.log(submissions);
+    
+    return submissions;
+  } catch (error) {
+    return new Error(error.message);
+  }
+};
+
+const getSubmissionsOfClass = async (outcomeIds) => {
+  try {
+    const submissions = await Submission.find({
+      classworkId: { $in: outcomeIds },
+    })
+    .populate({
       path: "student",
     });
     return submissions;
@@ -54,5 +72,6 @@ const addGrade = async ({ submissionId, grade, criteria }) => {
 export default {
   createSubmission,
   getSubmissionsOfGroup,
-  addGrade
+  addGrade,
+  getSubmissionsOfClass
 };

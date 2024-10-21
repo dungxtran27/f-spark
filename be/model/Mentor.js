@@ -35,6 +35,16 @@ const MentorSchema = new Schema(
         },
       },
     ],
+    assignedGroup: [
+      {
+        id: {
+          type: Schema.Types.ObjectId,
+          ref: 'Group', 
+          required: false,
+        },
+        _id: false
+      },
+    ],
     tag:[
       {
         id: {

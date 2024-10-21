@@ -77,9 +77,34 @@ const getOutcomesByTeacher = async (req,res) => {
     return res.status(500).json({ error: error.message });
   }
 }
+
+const viewOutcomeOfClass = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+    const outcomesList = await ClassworkRepository.getOutcomes(classId);
+    const outcomeIds = outcomesList.map((outcome) => outcome._id);
+    const submissions = await SubmissionRepository.getSubmissionsOfClass(
+      outcomeIds,
+    );
+    
+    const modifiedOutcome = outcomesList.map((oc) => {
+      const submissionsForOutcome = submissions.filter(
+        (s) => s.classworkId.toString() === oc._id.toString()
+      );
+      return {
+        ...oc._doc, // Spread the properties of oc
+        submissions: submissionsForOutcome , // Add groupSubmission attribute
+      };
+    });
+    return res.status(200).json({ outcomesList: modifiedOutcome });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getClassWorkByStudent,
   getClassWorkByTeacher,
   viewOutcomes,
-  getOutcomesByTeacher
+  getOutcomesByTeacher,
+  viewOutcomeOfClass
 };
