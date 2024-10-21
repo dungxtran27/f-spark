@@ -6,6 +6,7 @@ import Outcomes from "../component/student/Class/Outcomes";
 import People from "../component/student/Class/People";
 import Stream from "../component/student/Class/Stream";
 import TeacherOutcomes from "../component/teacher/ClassDetail/Outcomes";
+import ClassGroupList from "../pages/Teacher/ClassGroupList";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -38,7 +39,8 @@ export const CLASS_TABS = [
 export const TEACHER_CLASS_DETAIL_TABS = [
   { key: "outcomes", label: "Outcomes", children: <TeacherOutcomes /> },
   { key: "stream", label: "Stream", children: <Stream /> },
-  { key: "people", label: "People", children: <People /> },
+  // { key: "people", label: "People", children: <People /> },
+  { key: "people2", label: "Groups", children: <ClassGroupList /> },
 ];
 export const TASK_STATUS_FILTER = [
   {

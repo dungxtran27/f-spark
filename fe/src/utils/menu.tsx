@@ -32,7 +32,7 @@ export const DefaultRoutes = [
     icon: <FaPeopleGroup size={20} />,
   },
   {
-    route: "/teacher-dashboard",
+    route: "/classes",
     page: "Teacher Dashboard",
     icon: <FaSchool size={20} />,
   },
