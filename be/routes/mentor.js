@@ -3,7 +3,7 @@ import verifyToken from "../middleware/verifyToken.js";
 import { MentorController } from "../controller/index.js";
 const mentorRouter = express.Router();
 
-mentorRouter.get("/",MentorController.viewAllMentors);
-mentorRouter.get('/getMentor',MentorController.getMentor);
-mentorRouter.put('/assignMentor',MentorController.assignMentor)
+mentorRouter.post("/", MentorController.viewAllMentors);
+mentorRouter.get("/getMentor", MentorController.getMentor);
+mentorRouter.put("/assignMentor", MentorController.assignMentor);
 export default mentorRouter;

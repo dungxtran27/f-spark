@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Select, Space, Input } from "antd";
 import type { SelectProps } from "antd";
 const { Search } = Input;
@@ -6,6 +6,9 @@ import type { GetProps } from "antd";
 import style from "./style.module.scss";
 import classNames from "classnames";
 import MentorCard from "./mentorCard";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY } from "../../../utils/const";
+import { mentorList } from "../../../api/mentor/mentor";
 const MentorListWrapper = () => {
   const tagData = [
     { label: "CNTT", value: "1" },
@@ -19,100 +22,118 @@ const MentorListWrapper = () => {
     major: string[];
     avatar: string;
   }
-  const mentorData = [
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  // const mentorData = [
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  //   {
+  //     name: "dungmuahaha",
+  //     groupNumber: 4,
+  //     major: ["Marketing", "cntt", "Food"],
+  //     avatar:
+  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
+  //   },
+  // ];
+  const [tagSearch, setTagSearch] = useState([]);
+  const [nameSeacrh, setNameSeacrh] = useState("");
+  const { data: mentorData, isLoading } = useQuery({
+    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
+    queryFn: async () => {
+      console.log("ok");
+
+      return await mentorList.getMentorListPagination({
+        limit: 4,
+        page: 1,
+        tag: tagSearch,
+        name: nameSeacrh,
+      });
     },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: ["Marketing", "cntt", "Food"],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-  ];
-  const typedMentorData: MentorData[] = mentorData;
+  });
+  console.log("kkk");
+  console.log(mentorData);
+
+  // const typedMentorData: MentorData[] = mentorData;
   const options: SelectProps["options"] = tagData.map((i) => ({
     label: i.label,
     value: i.value,
@@ -147,7 +168,7 @@ const MentorListWrapper = () => {
       </Space>
 
       <div className="mentor_wrapper mt-3 ml-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-1 gap-1">
-        {typedMentorData.map((md) => (
+        {mentorData?.data.data.map((md: any) => (
           <MentorCard key={md.name} {...md} />
         ))}
       </div>

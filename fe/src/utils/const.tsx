@@ -160,6 +160,7 @@ export const QUERY_KEY = {
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
   OUTCOMES_LIST: "outcomesList",
+  MENTORLIST: "mentorlist",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
