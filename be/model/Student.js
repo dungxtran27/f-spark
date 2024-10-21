@@ -17,7 +17,8 @@ const StudentSchema = new Schema(
     },
     major: {
       type: String,
-      required: true,
+      enum: ["SE", "HS", "GD", "IB"],
+      required: true
     },
     account: {
       type: Schema.Types.ObjectId,
@@ -26,12 +27,12 @@ const StudentSchema = new Schema(
     },
     group: {
       type: Schema.Types.ObjectId,
-      ref: 'Group', 
-      required: true,
+      ref: 'Group',
+      required: false,
     },
     classId: {
       type: Schema.Types.ObjectId,
-      ref: 'Class', 
+      ref: 'Class',
     },
   },
   { timestamps: true, collection: 'Students' }

@@ -79,5 +79,9 @@ groupRouter.delete(
   authorization.checkGroupAccess,
   GroupController.deleteCustomerPersona
 )
+
+groupRouter.get('/getAllStudentByGroupId/:classId', verifyToken, GroupController.findAllStudentByGroupId)
+
+groupRouter.post('/addStudentInGroup/:groupId', GroupController.addStundentInGroup);
 export default groupRouter;
 

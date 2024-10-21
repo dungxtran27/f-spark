@@ -1,4 +1,5 @@
 import Student from "../model/Student.js"
+import Teacher from "../model/Teacher.js";
 const getTeacherByClassId = async (classId) => {
   try {
     const classDoc = await Class.findById(classId);
@@ -33,6 +34,19 @@ const getTeacherByClassId = async (classId) => {
   throw new Error(error.message);
 }
 }
+
+const findTeacherByAccountId = async (accountId) => {
+  try {
+    const student = await Teacher.findOne({
+      account: accountId,
+    }).populate('account', '-password');
+    return student;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
-  getTeacherByClassId
+  getTeacherByClassId,
+  findTeacherByAccountId
 }

@@ -1,4 +1,5 @@
-import { GroupRepository } from "../repository/index.js";
+import Student from "../model/Student.js";
+import { GroupRepository, StudentRepository } from "../repository/index.js";
 const createJourneyRow = async (req, res) => {
   try {
     const { rowName } = req.body;
@@ -201,6 +202,34 @@ const deleteCustomerPersona = async (req, res) => {
   }
 }
 
+const findAllStudentByGroupId = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+    const countStudent = await StudentRepository.getAllStudentByClassId(classId);
+    const groupStundent = await GroupRepository.findAllStudentByGroupId(classId);
+    const unGroupStudents = await StudentRepository.getAllStudentUngroupByClassId(classId);
+    const studentData = {
+      groupStundent,
+      unGroupStudents,
+      totalStundent: countStudent.length,
+    }
+    return res.status(200).json({ data: studentData });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const addStundentInGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { studentId } = req.body;
+    const data = await GroupRepository.addStundentInGroup(groupId, studentId);
+    return res.status(200).json({ data: data });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
 export default {
   createJourneyRow,
   createJourneyCol,
@@ -213,5 +242,7 @@ export default {
   updateCanvasCell,
   addCustomerPersona,
   updateCustomerPersona,
-  deleteCustomerPersona
+  deleteCustomerPersona,
+  findAllStudentByGroupId,
+  addStundentInGroup
 };
