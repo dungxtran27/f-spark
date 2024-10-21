@@ -10,7 +10,7 @@ const getAllMentors = async (tagIds, name, page, limit) => {
     const searchConditions = [];
     if (tagIdArray.length > 0) {
       searchConditions.push({
-        'tag._id': { $in: tagIdArray.map(id => new mongoose.Types.ObjectId(id)) }
+        'tag.id': { $in: tagIdArray.map(id => new mongoose.Types.ObjectId(id)) }
       });
     }
 
