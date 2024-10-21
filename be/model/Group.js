@@ -166,6 +166,20 @@ const GroupSchema = new Schema(
       default: false,
       require: true,
     },
+    teamMembers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Student",
+        required: false,
+      }
+    ],
+    tag: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'TagMajor',
+        required: true,
+      }
+    ],
   },
   { timestamps: true, collection: "Groups" }
 );

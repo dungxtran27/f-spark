@@ -6,5 +6,5 @@ classWorkRouter.get("/getClassWorkByStudent/:type", verifyToken,ClassworkControl
 classWorkRouter.get("/getClassWorkByTeacher/:classId/:type", verifyToken, ClassworkController.getClassWorkByTeacher)
 classWorkRouter.get("/viewOutcomes", verifyToken, ClassworkController.viewOutcomes)
 classWorkRouter.get("/getOutcomesByTeacher/:classId",ClassworkController.getOutcomesByTeacher) //get all outcome theo lớp màn outcome-teacher
-classWorkRouter.get("/viewOutcomeOfClass/:classId", ClassworkController.viewOutcomeOfClass)
+classWorkRouter.get("/viewOutcomeOfClass/:classId", ClassworkController.viewOutcomeOfClass) 
 export default classWorkRouter;

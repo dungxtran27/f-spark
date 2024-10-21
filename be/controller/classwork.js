@@ -32,6 +32,7 @@ const getClassWorkByTeacher = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 const viewOutcomes = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -47,9 +48,6 @@ const viewOutcomes = async (req, res) => {
       outcomeIds,
       student.group
     );
-    console.log(student.group);
-    console.log(outcomeIds);
-    
     const modifiedOutcome = outcomesList.map((oc) => {
       const submission = submissions.find(
         (s) => s.classworkId.toString() === oc._id.toString()

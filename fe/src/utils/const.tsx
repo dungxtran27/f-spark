@@ -159,3 +159,14 @@ export const QUERY_KEY = {
   STUDENT_OF_GROUP: "studentOfGroup",
   OUTCOMES_LIST: "outcomesList",
 };
+export const colorMap: Record<string, string> = {
+  SE: "cyan",
+  MKT: "gold",
+  IB: "blue",
+  GD: "green",
+};
+export const colorMajorGroup: Record<string, string> = {
+  Food: "orange",
+  Agriculture: "green",
+  Enviroment: "blue",
+};
