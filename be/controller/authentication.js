@@ -316,7 +316,7 @@ const refreshToken1 = async (req, res) => {
         userDetail.role = ROLE_NAME.student;
         break;
       case ROLE_NAME.teacher:
-        const teacher = await TeacherRepository.findTeacherByAccountId(
+        const teacher = await TeacherRepository.findByAccountId(
           existingAccount._id
         );
         if (!teacher) {
