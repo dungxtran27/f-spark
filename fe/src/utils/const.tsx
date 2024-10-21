@@ -169,7 +169,8 @@ export const colorMap: Record<string, string> = {
   GD: "green",
 };
 export const colorMajorGroup: Record<string, string> = {
-  Food: "orange",
-  Agriculture: "green",
-  Enviroment: "blue",
+  "Ky Thuat": "orange",
+  "Kinh Te": "green",
+  "Khoa Hoc": "blue",
+  "Khoi Nghiep": "red",
 };

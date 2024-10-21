@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Select, Space, Input } from "antd";
+import { Select, Space, Input, Pagination } from "antd";
 import type { SelectProps } from "antd";
 const { Search } = Input;
 import type { GetProps } from "antd";
@@ -9,6 +9,8 @@ import MentorCard from "./mentorCard";
 import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../utils/const";
 import { mentorList } from "../../../api/mentor/mentor";
+import type { PaginationProps } from "antd";
+
 const MentorListWrapper = () => {
   const tagData = [
     { label: "CNTT", value: "1" },
@@ -16,122 +18,24 @@ const MentorListWrapper = () => {
     { label: "Bussiness", value: "3" },
     { label: "Food", value: "4" },
   ];
-  interface MentorData {
-    name: string;
-    groupNumber: number;
-    major: string[];
-    avatar: string;
-  }
-  // const mentorData = [
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  //   {
-  //     name: "dungmuahaha",
-  //     groupNumber: 4,
-  //     major: ["Marketing", "cntt", "Food"],
-  //     avatar:
-  //       "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-  //   },
-  // ];
+
   const [tagSearch, setTagSearch] = useState([]);
   const [nameSeacrh, setNameSeacrh] = useState("");
+  const [page, setPage] = useState(1);
+  const onChangePage: PaginationProps["onChange"] = (page) => {
+    setPage(page);
+  };
   const { data: mentorData, isLoading } = useQuery({
-    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
+    queryKey: [QUERY_KEY.MENTORLIST, page, tagSearch, nameSeacrh],
     queryFn: async () => {
-      console.log("ok");
-
       return await mentorList.getMentorListPagination({
-        limit: 4,
-        page: 1,
+        limit: 9,
+        page: page,
         tag: tagSearch,
         name: nameSeacrh,
       });
     },
   });
-  console.log("kkk");
-  console.log(mentorData);
 
   // const typedMentorData: MentorData[] = mentorData;
   const options: SelectProps["options"] = tagData.map((i) => ({
@@ -143,11 +47,7 @@ const MentorListWrapper = () => {
     console.log(info?.source, value);
   return (
     <>
-      <Space
-        className={classNames(style.filter_bar)}
-        style={{ width: "100%" }}
-        direction="horizontal"
-      >
+      <div className={classNames(style.filter_bar)}>
         <p>Major</p>
         <Select
           mode="multiple"
@@ -158,19 +58,33 @@ const MentorListWrapper = () => {
           // onChange={handleChange}
           options={options}
         />{" "}
-        <p>Search</p>
+        <p className="pl-5">Search</p>
         <Search
           className={classNames(style.search_name_bar)}
           placeholder="input search text"
           onSearch={onSearch}
           enterButton
         />
-      </Space>
+      </div>
 
       <div className="mentor_wrapper mt-3 ml-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-1 gap-1">
         {mentorData?.data.data.map((md: any) => (
-          <MentorCard key={md.name} {...md} />
+          <MentorCard
+            key={md._id}
+            groupNumber={md.assignedClasses.length}
+            {...md}
+          />
         ))}
+      </div>
+      <div className="justify-items-center py-4 max-w-full">
+        <Pagination
+          defaultCurrent={page}
+          onChange={onChangePage}
+          total={mentorData?.data.totalItems}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} mentors`
+          }
+        />
       </div>
     </>
   );

@@ -200,19 +200,22 @@ const deleteCustomerPersona = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
-}
+};
 
 const findAllStudentByGroupId = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const countStudent = await StudentRepository.getAllStudentByClassId(classId);
-    const groupStundent = await GroupRepository.findAllStudentByGroupId(classId);
-    const unGroupStudents = await StudentRepository.getAllStudentUngroupByClassId(classId);
+    const countStudent = await StudentRepository.getAllStudentByClassId(
+      classId
+    );
+    const groupStudent = await GroupRepository.findAllStudentByGroupId(classId);
+    const unGroupStudents =
+      await StudentRepository.getAllStudentUngroupByClassId(classId);
     const studentData = {
-      groupStundent,
+      groupStudent,
       unGroupStudents,
-      totalStundent: countStudent.length,
-    }
+      totalStudent: countStudent.length,
+    };
     return res.status(200).json({ data: studentData });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -228,7 +231,7 @@ const addStundentInGroup = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
-}
+};
 
 export default {
   createJourneyRow,
@@ -244,5 +247,5 @@ export default {
   updateCustomerPersona,
   deleteCustomerPersona,
   findAllStudentByGroupId,
-  addStundentInGroup
+  addStundentInGroup,
 };

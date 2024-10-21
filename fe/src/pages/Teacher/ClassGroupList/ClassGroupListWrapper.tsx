@@ -20,8 +20,20 @@ import { colorMap, colorMajorGroup } from "../../../utils/const";
 import classNames from "classnames";
 import style from "../MentorList/style.module.scss";
 import type { GetProps, SelectProps, TableProps } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import { classApi } from "../../../api/Class/class";
+import { useParams } from "react-router-dom";
 
 const ClassGroupListWrapper = () => {
+  const classID = "670bb40cd6dcc64ee8cf7c90";
+  const { data: classPeople, isLoading } = useQuery({
+    queryKey: [classID],
+    queryFn: async () => {
+      return await classApi.getclassDetailPeople(classID);
+    },
+  });
+  console.log(classPeople);
+
   const columns = [
     {
       title: "Name",
@@ -560,7 +572,7 @@ const ClassGroupListWrapper = () => {
 
   return (
     <>
-      <div className=" mt-3 ml-2 mr-3">
+      <div className=" py-3 px-3">
         <div className="text-[16px] font-semibold flex justify-between ">
           <span className=" text-lg">Student</span>{" "}
           <Button onClick={handleOpenRandomAddModal}>Add random</Button>
