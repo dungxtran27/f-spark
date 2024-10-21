@@ -2,7 +2,7 @@ import classNames from "classnames";
 import styles from "./style.module.scss";
 import logo from "../../../../public/logo.png";
 import { Button, Checkbox, Form, Input, Skeleton } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { BiLogoGmail } from "react-icons/bi";
 import { FaUnlockAlt } from "react-icons/fa";
 import FormItem from "antd/es/form/FormItem";
@@ -17,15 +17,26 @@ import { LOGIN_DATA, ROLE } from "../../../utils/const";
 // }
 const Login = () => {
   const [form] = Form.useForm();
+  const { role } = useParams();
   const dispatch = useDispatch();
   const email = Form.useWatch(LOGIN_DATA.email, form);
   const password = Form.useWatch(LOGIN_DATA.password, form);
   const navigate = useNavigate();
   const loginMutation = useMutation({
-    mutationFn: () => authApi.login({ email, password, role: ROLE.student }),
+    mutationFn: () => authApi.login({ email, password, role: role?.toUpperCase() }),
     onSuccess: (data) => {
       dispatch(login(data.data.data));
-      navigate("/projectOverview");
+      switch (data.data.data?.role) {
+        case ROLE.student:
+          navigate("/projectOverview");
+          break;
+        case ROLE.teacher:
+          navigate("/classes");
+          break;
+        default:
+          navigate("/");
+          break;
+      }
     },
   });
 
@@ -46,6 +57,9 @@ const Login = () => {
           className="w-[400px] flex flex-col items-center"
           form={form}
           initialValues={{ email: "", password: "" }}
+          onFinish={() => {
+            loginMutation.mutate();
+          }}
         >
           <div
             className={classNames(
@@ -100,11 +114,9 @@ const Login = () => {
           </div>
           <Button
             type="primary"
+            htmlType="submit"
             className="bg-primary w-full py-5 mt-5"
             loading={loginMutation.isPending}
-            onClick={() => {
-              loginMutation.mutate();
-            }}
             disabled={email?.length === 0 || password?.length === 0}
           >
             Login

@@ -1,5 +1,5 @@
-import ClassListWrapper from "../../component/teacher/ClassList";
-import DefaultLayout from "../../layout/DefaultLayout";
+import ClassListWrapper from "../../../component/teacher/ClassList";
+import DefaultLayout from "../../../layout/DefaultLayout";
 
 const Classes = () => {
   return (
