@@ -123,23 +123,22 @@ const login = async (req, res) => {
             error: "No such student found matched with provided credential",
           });
         }
-        userDetail = student;
+        userDetail = student.toObject();
         userDetail.role = ROLE_NAME.student;
         break;
 
       case ROLE_NAME.teacher:
-        const teacher = await TeacherRepository.findTeacherByAccountId(
-          existingAccount._id
+        const teacher = await TeacherRepository.findByAccountId(
+          existingAccount?._id
         );
         if (!teacher) {
           return res.status(404).json({
             error: "No such teacher found matched with provided credential",
           });
         }
-        userDetail = teacher;
+        userDetail = teacher.toObject();
         userDetail.role = ROLE_NAME.teacher;
         break;
-
       case ROLE_NAME.startUpDepartment:
         return res.status(404).json({ error: "Unimplemented" });
       case ROLE_NAME.admin:
@@ -186,6 +185,8 @@ const login = async (req, res) => {
       sameSite: "lax",
       secure: false,
     });
+    console.log(userDetail);
+
     return res
       .status(200)
       .json({ message: "Login successfully! Welcome back", data: userDetail });
