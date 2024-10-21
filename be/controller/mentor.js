@@ -33,7 +33,7 @@ const assignMentor = async (req, res) => {
     try {
         const { mentorId, groupId } = req.body;
         if (!groupId || !mentorId) {
-            return res.status(500).json({ error: 'Thiếu groupId hoặc mentorId' });
+            return res.status(500).json({ error: 'Missing groupId or mentorId' });
         }
         const updateMentor = await MentorRepository.assignMentor({
             mentorId: new mongoose.Types.ObjectId(mentorId),

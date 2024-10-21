@@ -83,5 +83,7 @@ groupRouter.delete(
 groupRouter.get('/getAllStudentByGroupId/:classId', verifyToken, GroupController.findAllStudentByGroupId)
 
 groupRouter.post('/addStudentInGroup/:groupId', GroupController.addStundentInGroup);
+
+groupRouter.post('/addManyStudentInGroup', GroupController.addManyStudentInGroup);
 export default groupRouter;
 

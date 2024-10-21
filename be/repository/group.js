@@ -344,6 +344,43 @@ const addStundentInGroup = async (groupId, studentId) => {
   }
 }
 
+const addManyStudentInGroup = async (groups) => {
+  try {
+    for (const groupData of groups) {
+      const { groupId, studentIds } = groupData;
+      for (const studentId of studentIds) {
+        const student = await Student.findById(studentId);
+        if (!student) {
+          throw new Error(`Student with ID ${studentId} not found`);
+        }
+
+        const group = await Group.findOne({
+          _id: groupId,
+          teamMembers: studentId
+        });
+
+        if (!group) {
+          const updatedGroup = await Group.findByIdAndUpdate(
+            groupId,
+            { $push: { teamMembers: studentId } },
+            { new: true }
+          );
+
+          const updatedStudent = await Student.findByIdAndUpdate(
+            studentId,
+            { group: groupId },
+            { new: true }
+          );
+        } else {
+          throw new Error(`Student with ID ${studentId} is already in group ${groupId}`);
+        }
+      }
+    }
+    
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 export default {
   createCellsOnUpdate,
@@ -360,5 +397,6 @@ export default {
   updateCustomerPersona,
   deleteCustomerPersona,
   findAllStudentByGroupId,
-  addStundentInGroup
+  addStundentInGroup,
+  addManyStudentInGroup
 };

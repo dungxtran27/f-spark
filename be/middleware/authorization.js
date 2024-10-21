@@ -1,10 +1,10 @@
 import { GroupRepository, StudentRepository } from "../repository/index.js";
 import { ROLE_NAME } from "../utils/const.js";
 
-const checkRole = (role) => (req, res, next) => {
+const checkRole = (roles) => (req, res, next) => {
   try {
-    const roles = req.decodedToken.role;
-    if (roles !== role) {
+    const { role } = req.decodedToken;
+    if (roles !== role.role) {
       return res.status(403).json({ error: "Unauthorized !" });
     }
     next();
@@ -12,9 +12,10 @@ const checkRole = (role) => (req, res, next) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 const checkGroupAccess = async (req, res, next) => {
   try {
-    const { account, role } = req.decodedToken;    
+    const { account, role } = req.decodedToken;
     switch (role.role) {
       case ROLE_NAME.student:
         const student = await StudentRepository.findStudentByAccountId(account);
@@ -24,7 +25,7 @@ const checkGroupAccess = async (req, res, next) => {
         const groupOfStudent = await GroupRepository.findGroupById({
           groupId: student.group,
         });
-        
+
         if (!groupOfStudent) {
           return res.status(403).json({
             error:

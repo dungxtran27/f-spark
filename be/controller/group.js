@@ -230,6 +230,16 @@ const addStundentInGroup = async (req, res) => {
   }
 }
 
+const addManyStudentInGroup = async (req, res) => {
+  try {
+    const { groups } = req.body;
+    const data = await GroupRepository.addManyStudentInGroup(groups);
+    return res.status(200).json({ data: data });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
 export default {
   createJourneyRow,
   createJourneyCol,
@@ -244,5 +254,6 @@ export default {
   updateCustomerPersona,
   deleteCustomerPersona,
   findAllStudentByGroupId,
-  addStundentInGroup
+  addStundentInGroup,
+  addManyStudentInGroup
 };

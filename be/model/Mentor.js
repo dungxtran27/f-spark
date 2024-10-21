@@ -16,13 +16,13 @@ const MentorSchema = new Schema(
     },
     profile: {
       type: String,
-      required: false, 
+      required: false,
     },
     assignedClasses: [
       {
         id: {
           type: Schema.Types.ObjectId,
-          ref: 'Class', 
+          ref: 'Class',
           required: true,
         },
         classCode: {
@@ -31,36 +31,38 @@ const MentorSchema = new Schema(
         },
         backgroundImage: {
           type: String,
-          required: false, 
+          required: false,
         },
+        _id: false
       },
     ],
     assignedGroup: [
       {
         id: {
           type: Schema.Types.ObjectId,
-          ref: 'Group', 
+          ref: 'Group',
           required: false,
         },
         _id: false
       },
     ],
-    tag:[
+    tag: [
       {
         id: {
           type: Schema.Types.ObjectId,
-          ref: 'TagMajor', 
+          ref: 'TagMajor',
           required: true,
         },
         name: {
           type: String,
           required: true,
         },
+        _id: false
       }
     ],
     profilePicture: {
       type: String,
-      required: false, 
+      required: false,
     },
     isActive: {
       type: Boolean,
