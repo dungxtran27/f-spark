@@ -27,7 +27,7 @@ function App() {
         {/* teacher */}
         <Route path="/mentorlist" element={<MentorList />} />
         {/* cái này phải truyền id clas vào mới sang đc */}
-        <Route path="/teacher-dashboard" element={<ClassGroupList />} />
+        <Route path="/class-grouplist" element={<ClassGroupList />} />
 
         <Route path="/classes" element={<Classes />} />
         <Route path="/class/:classId" element={<ClassDetail />} />

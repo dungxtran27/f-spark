@@ -99,6 +99,7 @@ const getOutcomes = async (classId) => {
     throw new Error(error.message);
   }
 };
+
 export default {
   getClassWorkByStudent,
   getClassWorkByTeacher,

@@ -29,7 +29,7 @@ export const StudentRoutes = [
 ];
 export const TeacherRoutes = [
   {
-    route: "/teacher-dashboard",
+    route: "/teacher_dashboard",
     page: "Teacher Dashboard",
     icon: <FaSchool size={20} />,
   },

@@ -369,11 +369,11 @@ const ClassGroupListWrapper = () => {
       uniqueMajors.add(student.major);
 
       if (uniqueMajors.size >= 2) {
-        return "green";
+        return "#22c55e";
       }
     }
 
-    return "red";
+    return "#ef4444";
   };
   const renderGroupInfo = (id: any) => {
     return (
@@ -560,7 +560,7 @@ const ClassGroupListWrapper = () => {
 
   return (
     <>
-      <div className=" mt-3 ml-4 mr-3">
+      <div className=" mt-3 ml-2 mr-3">
         <div className="text-[16px] font-semibold flex justify-between ">
           <span className=" text-lg">Student</span>{" "}
           <Button onClick={handleOpenRandomAddModal}>Add random</Button>

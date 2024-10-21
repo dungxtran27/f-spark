@@ -145,23 +145,41 @@ const GroupSchema = new Schema(
     customerPersonas: [
       {
         detail: {
-          age: { type: Number, default: null }, 
-          name: { type: String, default: null }, 
-          jobTitle: { type: String, default: null }, 
+          age: { type: Number, default: null },
+          name: { type: String, default: null },
+          jobTitle: { type: String, default: null },
           relationshipStatus: {
             type: String,
             enum: ['Độc thân', 'Đã kết hôn', 'Đã ly hôn', 'Góa phụ'],
-            default: "Độc thân", 
+            default: "Độc thân",
           },
-          address: { type: String, default: null }, 
-          income: { type: Number, default: null }, 
-          image: { type: String, default: null }, 
+          address: { type: String, default: null },
+          income: { type: Number, default: null },
+          image: { type: String, default: null },
         },
-        bio: { type: String, default: null }, 
-        needs: [{ type: String, default: null }], 
+        bio: { type: String, default: null },
+        needs: [{ type: String, default: null }],
       }
     ],
-
+    isSponsorship: {
+      type: Boolean,
+      default: false,
+      require: true,
+    },
+    teamMembers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Student",
+        required: false,
+      }
+    ],
+    tag: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'TagMajor',
+        required: true,
+      }
+    ],
   },
   { timestamps: true, collection: "Groups" }
 );

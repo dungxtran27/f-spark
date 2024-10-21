@@ -1,10 +1,11 @@
+import Class from "../model/Class.js";
+import Mentor from "../model/Mentor.js";
 import Student from "../model/Student.js";
 import Teacher from "../model/Teacher.js";
 const getTeacherByClassId = async (classId) => {
   try {
     const classDoc = await Class.findById(classId);
     const classCode = classDoc.classCode;
-    console.log("Class Code:", classCode);
 
     const teachers = await Teacher.find({
       "assignedClasses.classCode": classCode,
@@ -34,11 +35,12 @@ const getTeacherByClassId = async (classId) => {
     throw new Error(error.message);
   }
 };
+
 const findByAccountId = async (accountId) => {
   try {
     const teacher = await Teacher.findOne({
       account: accountId,
-    }).populate({ path: "account" });
+    }).populate("account", "-password");
     return teacher;
   } catch (error) {
     throw new Error(error.message);

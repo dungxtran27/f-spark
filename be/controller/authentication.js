@@ -126,6 +126,7 @@ const login = async (req, res) => {
         userDetail = student.toObject();
         userDetail.role = ROLE_NAME.student;
         break;
+
       case ROLE_NAME.teacher:
         const teacher = await TeacherRepository.findByAccountId(
           existingAccount?._id
@@ -152,7 +153,7 @@ const login = async (req, res) => {
     if (socket) {
       socket.accountId = existingAccount._id.toString();
     } else {
-      console.log("No socket");
+      // console.log("No socket");
     }
     // io.sockets.sockets.forEach((sk) => {
     //   console.log(`socket ${sk.id} account ${sk?.accountId}`);
@@ -185,7 +186,7 @@ const login = async (req, res) => {
       secure: false,
     });
     console.log(userDetail);
-    
+
     return res
       .status(200)
       .json({ message: "Login successfully! Welcome back", data: userDetail });
@@ -315,7 +316,17 @@ const refreshToken1 = async (req, res) => {
         userDetail.role = ROLE_NAME.student;
         break;
       case ROLE_NAME.teacher:
-        return res.status(404).json({ error: "Unimplemented" });
+        const teacher = await TeacherRepository.findByAccountId(
+          existingAccount._id
+        );
+        if (!teacher) {
+          return res.status(404).json({
+            error: "No such teacher found matched with provided credential",
+          });
+        }
+        userDetail = teacher;
+        userDetail.role = ROLE_NAME.teacher;
+        break;
       case ROLE_NAME.startUpDepartment:
         return res.status(404).json({ error: "Unimplemented" });
       case ROLE_NAME.admin:

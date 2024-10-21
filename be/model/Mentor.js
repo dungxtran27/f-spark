@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-
 const MentorSchema = new Schema(
   {
     name: {
@@ -36,9 +35,26 @@ const MentorSchema = new Schema(
         },
       },
     ],
+    tag:[
+      {
+        id: {
+          type: Schema.Types.ObjectId,
+          ref: 'TagMajor', 
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+      }
+    ],
     profilePicture: {
       type: String,
       required: false, 
+    },
+    isActive: {
+      type: Boolean,
+      default: true
     }
   },
   { timestamps: true, collection: 'Mentors' }
