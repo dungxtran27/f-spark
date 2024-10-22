@@ -12,20 +12,13 @@ import { mentorList } from "../../../api/mentor/mentor";
 import type { PaginationProps } from "antd";
 
 const MentorListWrapper = () => {
-  const tagData = [
-    { label: "Kinh Te", value: "6710ef5a641a0706497283ec" },
-    { label: "Ky Thuat", value: "6710ef80641a0706497283ed" },
-    { label: "Khoa Hoc", value: "6710ef8a641a0706497283ee" },
-    { label: "Khoi Nghiep", value: "6710ef9b641a0706497283ef" },
-  ];
-
   const [tagSearch, setTagSearch] = useState([]);
   const [nameSeacrh, setNameSeacrh] = useState("");
   const [page, setPage] = useState(1);
   const onChangePage: PaginationProps["onChange"] = (page) => {
     setPage(page);
   };
-  const { data: mentorData, isLoading } = useQuery({
+  const { data: mentorData } = useQuery({
     queryKey: [QUERY_KEY.MENTORLIST, page, tagSearch, nameSeacrh],
     queryFn: async () => {
       return await mentorList.getMentorListPagination({
@@ -36,30 +29,23 @@ const MentorListWrapper = () => {
       });
     },
   });
+  const { data: tagData } = useQuery({
+    queryKey: [QUERY_KEY.TAGDATA],
+    queryFn: async () => {
+      return mentorList.getTag();
+    },
+  });
 
-  // const typedMentorData: MentorData[] = mentorData;
-  const options: SelectProps["options"] = tagData.map((i) => ({
-    label: i.label,
-    value: i.value,
+  const options: SelectProps["options"] = tagData?.data.data.map((i: any) => ({
+    label: i.name,
+    value: i._id,
   }));
   type SearchProps = GetProps<typeof Input.Search>;
   const onSearch: SearchProps["onSearch"] = (value) => setNameSeacrh(value);
-  // const prevTagSearch: any = [];
-  // const onSelect = (value: string) => {
-  //   setTagSearch((prevTagSearch: any) => {
-  //     // Check if the value already exists in the array
-  //     if (!prevTagSearch.includes(value)) {
-  //       return [...prevTagSearch, value];
-  //     }
-  //     console.log(prevTagSearch);
 
-  //     return prevTagSearch;
-  //   });
-  // };
-  const handleChange = (value: string[]) => {
+  const handleChange = (value: any) => {
     setTagSearch(value);
   };
-  console.log(tagSearch);
 
   return (
     <>

@@ -20,8 +20,6 @@ const getTeacherByStudentId = async (userId) => {
     const classId = user.classId;
     const classDoc = await Class.findById(classId);
     const classCode = classDoc.classCode;
-    console.log("Class Code:", classCode);
-
     const teachers = await Teacher.find({
       'assignedClasses.classCode': classCode,
     }).populate({
