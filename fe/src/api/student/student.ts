@@ -5,6 +5,6 @@ export const student = {
     return await axios.get(`/api/student/viewStudentByGroup`);
   },
   addStudentToGroup: async (requestBody: any) => {
-    return await axios.get(`/api/group/addStudentInGroup`, requestBody);
+    return await axios.post(`/api/group/addStudentInGroup`, requestBody);
   },
 };

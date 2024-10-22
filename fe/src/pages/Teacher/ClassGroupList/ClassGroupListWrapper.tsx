@@ -20,90 +20,24 @@ import { colorMap, colorMajorGroup, QUERY_KEY } from "../../../utils/const";
 import classNames from "classnames";
 import style from "../MentorList/style.module.scss";
 import type { GetProps, SelectProps, TableProps } from "antd";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { classApi } from "../../../api/Class/class";
 import { mentorList } from "../../../api/mentor/mentor";
+import { student } from "../../../api/student/student";
 
 const ClassGroupListWrapper = () => {
   const classID = "670bb40cd6dcc64ee8cf7c90";
-  const { data: classPeople, isLoading } = useQuery({
+  //handle classData
+  const {
+    data: classPeople,
+    isLoading: loadingClass,
+    refetch: refetchClass,
+  } = useQuery({
     queryKey: [classID],
     queryFn: async () => {
       return await classApi.getclassDetailPeople(classID);
     },
   });
-
-  const columns = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      render: (text: string) => <a>{text}</a>,
-    },
-    {
-      title: "Major",
-      dataIndex: "major",
-    },
-  ];
-  const columnsMentor = [
-    {
-      title: "image",
-      dataIndex: "avatar",
-      render: (avatar: string) => (
-        <img className="w-1/2 aspect-auto" src={avatar} alt="" />
-      ),
-      width: 200,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-    },
-    {
-      title: "Major",
-      dataIndex: "major",
-      render: (major: { name: string }[]) =>
-        major.map((m) => (
-          <Tag key={m.name} color={colorMajorGroup[m.name]}>
-            {m.name}
-          </Tag>
-        )),
-      width: 300,
-    },
-    {
-      title: "Group supporting",
-      dataIndex: "groupNumber",
-    },
-  ];
-  const [tagSearch, setTagSearch] = useState([]);
-  const [nameSeacrh, setNameSeacrh] = useState("");
-
-  type SearchProps = GetProps<typeof Input.Search>;
-  const onSearch: SearchProps["onSearch"] = (value) => setNameSeacrh(value);
-
-  const handleChange = (value: any) => {
-    setTagSearch(value);
-  };
-  const { data: mentorData } = useQuery({
-    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
-    queryFn: async () => {
-      return await mentorList.getMentorListPagination({
-        limit: 27,
-        page: 1,
-        tagIds: tagSearch,
-        name: nameSeacrh,
-      });
-    },
-  });
-  const { data: tagData } = useQuery({
-    queryKey: [QUERY_KEY.TAGDATA],
-    queryFn: async () => {
-      return mentorList.getTag();
-    },
-  });
-
-  const options: SelectProps["options"] = tagData?.data.data.map((i: any) => ({
-    label: i.name,
-    value: i._id,
-  }));
 
   const hasAtLeastTwoMajors = (students: any) => {
     const uniqueMajors = new Set();
@@ -165,6 +99,175 @@ const ClassGroupListWrapper = () => {
       </div>
     );
   };
+
+  const collapseData: CollapseProps["items"] =
+    classPeople?.data.data.groupStudent.map((c: any) => ({
+      key: c._id,
+      label: (
+        <div className=" flex justify-between">
+          <div>
+            <span className="text-lg">{c.GroupName}</span>
+            {c.mentor ? (
+              " - Mentor: " + c.mentor.name
+            ) : (
+              <>
+                <span className="text-red-500 font-semibold text-[1rem]">
+                  {" - No Mentor "}
+                </span>
+              </>
+            )}
+          </div>
+          <Popover
+            // content={PopoverGroupDetail}
+            trigger={"hover"}
+            placement="left"
+          >
+            <Button>
+              <FaEdit size={18} />
+            </Button>
+          </Popover>
+        </div>
+      ),
+      student: c.teamMembers,
+      children: renderGroupInfo(c),
+    }));
+
+  //handle mentorData
+  const [tagSearch, setTagSearch] = useState([]);
+  const [nameSeacrh, setNameSeacrh] = useState("");
+
+  const { data: mentorData } = useQuery({
+    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
+    queryFn: async () => {
+      return mentorList.getMentorListPagination({
+        limit: 27,
+        page: 1,
+        tagIds: tagSearch,
+        name: nameSeacrh,
+      });
+    },
+  });
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      render: (text: string) => <a>{text}</a>,
+    },
+    {
+      title: "Major",
+      dataIndex: "major",
+    },
+  ];
+  const columnsMentor = [
+    {
+      title: "image",
+      dataIndex: "avatar",
+      render: (avatar: string) => (
+        <img className="w-1/2 aspect-auto" src={avatar} alt="" />
+      ),
+      width: 200,
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+    },
+    {
+      title: "Major",
+      dataIndex: "major",
+      render: (major: { name: string }[]) =>
+        major.map((m) => (
+          <Tag key={m.name} color={colorMajorGroup[m.name]}>
+            {m.name}
+          </Tag>
+        )),
+      width: 300,
+    },
+    {
+      title: "Group supporting",
+      dataIndex: "groupNumber",
+    },
+  ];
+
+  type SearchProps = GetProps<typeof Input.Search>;
+  const onSearch: SearchProps["onSearch"] = (value) => setNameSeacrh(value);
+
+  const handleChange = (value: any) => {
+    setTagSearch(value);
+  };
+  //add student to group
+  const [studentIDSelected, setStudentIDSelected] = useState("");
+  const [groupIDSelected, setGroupIDSelected] = useState("");
+  interface reqBodyAddStudentToGroup {
+    studentId: string;
+    groupId: string;
+  }
+  const queryClient = useQueryClient();
+  const addStudentToGroupSelected = useMutation({
+    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
+      student.addStudentToGroup({
+        studentId: studentId,
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classID] });
+    },
+  });
+  const PopoverAddStudentMannualContent = (studentID: any) => {
+    return (
+      <>
+        <Select
+          style={{ width: 250 }}
+          options={classPeople?.data.data.groupStudent.map((g: any) => ({
+            value: g._id,
+            label: `${g.GroupName} - ${g.teamMembers.length} students`,
+          }))}
+          onChange={onChangeGroup}
+        ></Select>
+        <Button
+          onClick={() => {
+            console.log(" add student: " + studentID + " to" + groupIDSelected);
+            addStudentToGroupSelected.mutate({
+              studentId: studentID,
+              groupId: groupIDSelected,
+            });
+          }}
+        >
+          Add
+        </Button>
+      </>
+    );
+  };
+  const onChangeGroup = (value: string) => {
+    console.log(value);
+
+    setGroupIDSelected(value);
+  };
+  const PopoverWithProp = (studentID: any) => {
+    return (
+      <Popover
+        placement="right"
+        trigger="click"
+        content={PopoverAddStudentMannualContent(studentID.studentID)}
+      >
+        <Button>
+          <FaPlus />
+        </Button>
+      </Popover>
+    );
+  };
+  //handle mentor assign mentor
+  const { data: tagData } = useQuery({
+    queryKey: [QUERY_KEY.TAGDATA],
+    queryFn: async () => {
+      return mentorList.getTag();
+    },
+  });
+
+  const options: SelectProps["options"] = tagData?.data.data.map((i: any) => ({
+    label: i.name,
+    value: i._id,
+  }));
 
   //random add modal
   const [randomAddModal, setRandomAddModal] = useState(false);
@@ -235,37 +338,7 @@ const ClassGroupListWrapper = () => {
   //     </div>
   //   </>
   // );
-  const collapseData: CollapseProps["items"] =
-    classPeople?.data.data.groupStudent.map((c: any) => ({
-      key: c._id,
-      label: (
-        <div className=" flex justify-between">
-          <div>
-            <span className="text-lg">{c.GroupName}</span>
-            {c.mentor ? (
-              " - Mentor: " + c.mentor.name
-            ) : (
-              <>
-                <span className="text-red-500 font-semibold text-[1rem]">
-                  {" - No Mentor "}
-                </span>
-              </>
-            )}
-          </div>
-          <Popover
-            // content={PopoverGroupDetail}
-            trigger={"hover"}
-            placement="left"
-          >
-            <Button>
-              <FaEdit size={18} />
-            </Button>
-          </Popover>
-        </div>
-      ),
-      student: c.teamMembers,
-      children: renderGroupInfo(c),
-    }));
+
   //random group for modal
   // const randomGroups = classPeople?.data.data.groupStudent
   //   .slice(
@@ -286,24 +359,6 @@ const ClassGroupListWrapper = () => {
   //     // Process or transform each group element here
   //     return std; // You can modify or return a specific property from 'group'
   //   });
-  const PopoverAddStudentMannualContent = (
-    <>
-      <Select
-        style={{ width: 250 }}
-        options={classPeople?.data.data.groupStudent.map((g: any) => ({
-          value: g._id, // Set the value to the group ID
-          label: `${g.GroupName} - ${g.teamMembers.length} students`,
-        }))}
-      ></Select>
-      <Button
-        onClick={() => {
-          alert("hahah");
-        }}
-      >
-        Add
-      </Button>
-    </>
-  );
 
   return (
     <>
@@ -328,15 +383,7 @@ const ClassGroupListWrapper = () => {
                 </Tag>
               </span>
             </div>
-            <Popover
-              placement="right"
-              content={PopoverAddStudentMannualContent}
-              trigger={"click"}
-            >
-              <Button>
-                <FaPlus />
-              </Button>
-            </Popover>
+            <PopoverWithProp studentID={s._id} />
           </div>
         ))}
         <div className="text-lg font-semibold mt-3 ">Groups</div>
@@ -346,7 +393,7 @@ const ClassGroupListWrapper = () => {
           expandIcon={(item) => (
             <FaCircle
               className="self-center"
-              // color={hasAtLeastTwoMajors(item.student)}
+              color={hasAtLeastTwoMajors(item.student)}
               size={20}
             />
           )}
