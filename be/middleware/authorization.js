@@ -3,7 +3,7 @@ import { ROLE_NAME } from "../utils/const.js";
 
 const checkRole = (role) => (req, res, next) => {
   try {
-    const roles = req.decodedToken.role;
+    const { roles } = req.decodedToken.role;
     if (roles !== role) {
       return res.status(403).json({ error: "Unauthorized !" });
     }
@@ -14,7 +14,7 @@ const checkRole = (role) => (req, res, next) => {
 };
 const checkGroupAccess = async (req, res, next) => {
   try {
-    const { account, role } = req.decodedToken;    
+    const { account, role } = req.decodedToken;
     switch (role.role) {
       case ROLE_NAME.student:
         const student = await StudentRepository.findStudentByAccountId(account);
@@ -24,7 +24,7 @@ const checkGroupAccess = async (req, res, next) => {
         const groupOfStudent = await GroupRepository.findGroupById({
           groupId: student.group,
         });
-        
+
         if (!groupOfStudent) {
           return res.status(403).json({
             error:

@@ -3,9 +3,9 @@ import mongoose, { Schema } from "mongoose";
 const GradingCriteriaSchema = new Schema({
   description: {
     type: String,
-    required: false, 
+    required: false,
   }
-},{ _id: true });
+}, { _id: true });
 
 const ClassworkSchema = new Schema(
   {
@@ -23,7 +23,7 @@ const ClassworkSchema = new Schema(
     },
     attachment: {
       type: String,
-      required: false, 
+      required: false,
     },
     startDate: {
       type: Date,
@@ -35,7 +35,7 @@ const ClassworkSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['assignment', 'outcome'],
+      enum: ['assignment', 'outcome', 'announce'],
       required: true,
     },
     class: {
@@ -48,6 +48,11 @@ const ClassworkSchema = new Schema(
         type: GradingCriteriaSchema,
       },
     ],
+    UpVote: [{
+      type: Schema.Types.ObjectId,
+      ref: "Student",
+      required: false,
+    }]
   },
   { timestamps: true, collection: 'Classworks' }
 );
