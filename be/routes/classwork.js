@@ -3,11 +3,10 @@ import { ClassworkController } from "../controller/index.js";
 import verifyToken from "../middleware/verifyToken.js";
 const classWorkRouter = express.Router();
 classWorkRouter.get("/getClassWorkByStudent/:type", verifyToken, ClassworkController.getClassWorkByStudent)
-classWorkRouter.get("/getClassWorkByTeacher/:classId/:type", verifyToken, ClassworkController.getClassWorkByTeacher)
 classWorkRouter.get("/viewOutcomes", verifyToken, ClassworkController.viewOutcomes)
 classWorkRouter.get("/getOutcomesByTeacher/:classId", ClassworkController.getOutcomesByTeacher)
-classWorkRouter.get("/getClassWorkForStreamByTeacher/:classId", ClassworkController.getClassWorkForStreamByTeacher)
-classWorkRouter.patch("/editClassWorkForStreamByTeacher", ClassworkController.editClassWorkForStreamByTeacher)
+classWorkRouter.get("/getClassWorkForStreamByTeacher/:classId", ClassworkController.getClassWorkByTeacher)
+classWorkRouter.patch("/editClassWorkForStreamByTeacher", ClassworkController.editClassWorkByTeacher)
 classWorkRouter.delete("/deleteClasswork", ClassworkController.deleteClasswork)
 classWorkRouter.post("/createClasswork", ClassworkController.createClassWork)
 

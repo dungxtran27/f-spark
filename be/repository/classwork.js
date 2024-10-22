@@ -10,7 +10,7 @@ const getClassWorkByStudent = async ({ userId, type }) => {
       throw new Error("Student or class not found");
     }
     const classWorks = await ClassWork.find({
-      class: classId,
+      classId: classId,
       type: type,
     });
     const submissions = await Submission.find({
@@ -60,56 +60,26 @@ const getClassWorkByStudent = async ({ userId, type }) => {
   }
 };
 
-const getClassWorkByTeacher = async ({ classId, type }) => {
-  try {
-    const classWorks = await ClassWork.find({
-      class: classId,
-      type: type,
-    });
-    const currentDate = new Date();
-
-    const classWorkWithGrades = classWorks.map((classwork) => {
-      const isActive =
-        currentDate >= classwork.startDate && currentDate <= classwork.dueDate;
-      return {
-        _id: classwork._id,
-        title: classwork.title,
-        classworkName: classwork.name,
-        description: classwork.description,
-        type: classwork.type,
-        gradingCriteria: classwork.GradingCriteria,
-        startDate: classwork.startDate,
-        dueDate: classwork.dueDate,
-        attachment: classwork.attachment,
-        isActive: isActive,
-      };
-    });
-    return classWorkWithGrades;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
 const getOutcomes = async (classId) => {
   try {
     const outcomeList = await ClassWork.find({
       type: "outcome",
-      class: classId,
+      classId: classId,
     });
+    console.log(classId);
+    
     return outcomeList;
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
-
-const getClassWorkForStreamByTeacher = async (classId) => {
+const getClassWorkByTeacher = async (classId) => {
   try {
     const classworkList = await ClassWork.find({
       type: { $in: ["announce", "assignment"] },
-      class: classId,
-    }).select("_id name title description type class upVote");
-
+      classId: classId,
+    }).select("_id name title description type classId upVote");    
     const assignmentIds = classworkList
       .filter(classWork => classWork.type === "assignment")
       .map(classWork => classWork._id);
@@ -126,7 +96,7 @@ const getClassWorkForStreamByTeacher = async (classId) => {
   }
 };
 
-const editClassWorkForStreamByTeacher = async (classWorkId, name, description) => {
+const editClassWorkByTeacher = async (classWorkId, name, description) => {
   try {
     const updatedData = await ClassWork.findByIdAndUpdate(
       classWorkId,
@@ -177,8 +147,8 @@ export default {
   getClassWorkByStudent,
   getClassWorkByTeacher,
   getOutcomes,
-  getClassWorkForStreamByTeacher,
-  editClassWorkForStreamByTeacher,
+  getClassWorkByTeacher,
+  editClassWorkByTeacher,
   deleteClasswork,
   createClassWork
 };

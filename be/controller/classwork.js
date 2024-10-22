@@ -19,20 +19,6 @@ const getClassWorkByStudent = async (req, res) => {
   }
 };
 
-const getClassWorkByTeacher = async (req, res) => {
-  try {
-    const classId = req.params.classId;
-    const type = req.params.type;
-    const classWork = await ClassworkRepository.getClassWorkByTeacher({
-      classId,
-      type,
-    });
-    return res.status(201).json({ data: classWork });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-};
-
 const viewOutcomes = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -53,8 +39,8 @@ const viewOutcomes = async (req, res) => {
         (s) => s.classworkId.toString() === oc._id.toString()
       );
       return {
-        ...oc._doc, // Spread the properties of oc
-        groupSubmission: submission, // Add groupSubmission attribute
+        ...oc._doc,
+        groupSubmission: submission,
       };
     });
     return res.status(200).json({ outcomesList: modifiedOutcome });
@@ -76,10 +62,10 @@ const getOutcomesByTeacher = async (req, res) => {
   }
 }
 
-const getClassWorkForStreamByTeacher = async (req, res) => {
+const getClassWorkByTeacher = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const classworkList = await ClassworkRepository.getClassWorkForStreamByTeacher(
+    const classworkList = await ClassworkRepository.getClassWorkByTeacher(
       classId
     )
     return res.status(200).json({ data: classworkList });
@@ -88,10 +74,10 @@ const getClassWorkForStreamByTeacher = async (req, res) => {
   }
 }
 
-const editClassWorkForStreamByTeacher = async (req, res) => {
+const editClassWorkByTeacher = async (req, res) => {
   try {
     const { classWorkId, name, description } = req.body;
-    const classworkList = await ClassworkRepository.editClassWorkForStreamByTeacher(classWorkId, name, description);
+    const classworkList = await ClassworkRepository.editClassWorkByTeacher(classWorkId, name, description);
     return res.status(200).json({ data: classworkList });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -144,8 +130,8 @@ export default {
   getClassWorkByTeacher,
   viewOutcomes,
   getOutcomesByTeacher,
-  getClassWorkForStreamByTeacher,
-  editClassWorkForStreamByTeacher,
+  getClassWorkByTeacher,
+  editClassWorkByTeacher,
   deleteClasswork,
   createClassWork
 };
