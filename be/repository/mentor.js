@@ -6,6 +6,8 @@ import Group from "../model/Group.js";
 const getAllMentors = async (tagIds, name, page, limit) => {
   try {
     const tagIdArray = Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : [];
+    console.log(tagIdArray);
+    
     const searchConditions = [];
     if (tagIdArray.length > 0) {
       searchConditions.push({

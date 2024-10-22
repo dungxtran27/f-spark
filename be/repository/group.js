@@ -294,7 +294,7 @@ const findAllGroupsOfClass = async (classId) => {
   try {
     const data = await Group.find({
       class: classId
-    }).select('GroupName GroupDescription isSponsorship mentor teamMembers tag').populate({
+    }).select('GroupName GroupDescription isSponsorship mentor teamMembers tag leader').populate({
       path: 'teamMembers',
       select: '_id name gen major'
     }).populate({
@@ -344,6 +344,32 @@ const addStundentInGroup = async (groupId, studentId) => {
   }
 }
 
+const assignLeader = async (groupId, studentId) => {
+  try {
+    const student = await Student.findById(studentId);
+    if (!student) {
+      throw new Error("Student not found")
+    }
+
+    const group = await Group.findOne({
+      _id: groupId,
+      teamMembers: studentId
+    });
+
+    if (!group) {
+      throw new Error("Student is not exists in the group")
+    }
+
+    const updatedGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $set: { leader: studentId } },
+      { new: true }
+    );
+    return updatedGroup;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 
 export default {
   createCellsOnUpdate,
@@ -360,5 +386,8 @@ export default {
   updateCustomerPersona,
   deleteCustomerPersona,
   findAllGroupsOfClass,
-  addStundentInGroup
+  addStundentInGroup,
+  findAllStudentByGroupId,
+  addStundentInGroup,
+  assignLeader
 };

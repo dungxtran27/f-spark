@@ -26,8 +26,7 @@ function App() {
         <Route path="/taskDetail/:taskKey" element={<TaskDetail />} />
         {/* teacher */}
         <Route path="/mentorlist" element={<MentorList />} />
-        {/* cái này phải truyền id clas vào mới sang đc */}
-        <Route path="/class-grouplist" element={<ClassGroupList />} />
+        <Route path="/class-grouplist/:classID" element={<ClassGroupList />} />
 
         <Route path="/classes" element={<Classes />} />
         <Route path="/class/:classId" element={<ClassDetail />} />

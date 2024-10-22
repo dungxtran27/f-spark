@@ -32,6 +32,11 @@ const ClassSchema = new Schema(
     classInfo: {
       type: ClassInfo,
     },
+    pin: {
+      type: Schema.Types.ObjectId,
+      ref: "Classwork",
+      require: false
+    }
   },
   { timestamps: true, collection: "Classes" }
 );

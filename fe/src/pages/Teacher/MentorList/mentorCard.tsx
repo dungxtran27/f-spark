@@ -1,6 +1,22 @@
 import { Button, Tag } from "antd";
-
-const MentorCard = ({ name, groupNumber, major, avatar }) => {
+import { colorMajorGroup } from "../../../utils/const";
+interface Tag {
+  _id: string;
+  name: string;
+}
+interface MentorData {
+  name: string;
+  groupSupported: number;
+  groupNumber: number;
+  tags: Tag[];
+  profilePicture: string;
+}
+const MentorCard = ({
+  name,
+  groupNumber,
+  tags,
+  profilePicture,
+}: MentorData) => {
   return (
     <div className="mentor_card bg-white rounded-sm w-5/6 shadow ">
       <div className="mentor_card_header  rounded-t-sm p-2 pb-4 flex justify-between bg-blue-400">
@@ -16,9 +32,9 @@ const MentorCard = ({ name, groupNumber, major, avatar }) => {
       <div className="mentor_card_body pl-2 mb-2 flex justify-between">
         <div className="mentor_card_text   pt-5">
           <div className="mb-3">
-            {major.map((m: string) => (
-              <Tag className="" color="cyan">
-                {m}
+            {tags.map((m) => (
+              <Tag className="" color={colorMajorGroup[m.name]}>
+                {m.name}
               </Tag>
             ))}
           </div>
@@ -26,7 +42,7 @@ const MentorCard = ({ name, groupNumber, major, avatar }) => {
         </div>
         <div className="mentor_card_avatar  w-1/5 pr-3 relative">
           <img
-            src={avatar}
+            src={profilePicture}
             className="h-14  absolute top-[-1.5rem] right-5 rounded-full aspect-square object-cover  "
             alt="avt"
           />
