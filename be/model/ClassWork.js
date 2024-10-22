@@ -15,11 +15,11 @@ const ClassworkSchema = new Schema(
     },
     title: {
       type: String,
-      required: true,
+      required: false,
     },
     description: {
       type: String,
-      required: true,
+      required: false,
     },
     attachment: {
       type: String,
@@ -27,18 +27,18 @@ const ClassworkSchema = new Schema(
     },
     startDate: {
       type: Date,
-      required: true,
+      required: false,
     },
     dueDate: {
       type: Date,
-      required: true,
+      required: false,
     },
     type: {
       type: String,
       enum: ['assignment', 'outcome', 'announce'],
       required: true,
     },
-    class: {
+    classId: {
       type: Schema.Types.ObjectId,
       ref: 'Class',
       required: true,
