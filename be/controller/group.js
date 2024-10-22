@@ -221,8 +221,7 @@ const findAllStudentByGroupId = async (req, res) => {
 
 const addStundentInGroup = async (req, res) => {
   try {
-    const { groupId } = req.params;
-    const { studentId } = req.body;
+    const { groupId, studentId } = req.body;
     const data = await GroupRepository.addStundentInGroup(groupId, studentId);
     return res.status(200).json({ data: data });
   } catch (error) {
@@ -232,8 +231,7 @@ const addStundentInGroup = async (req, res) => {
 
 const assignLeader = async (req, res) => {
   try {
-    const { groupId } = req.params;
-    const { studentId } = req.body;
+    const { groupId, studentId } = req.body;
     const data = await GroupRepository.assignLeader(groupId, studentId);
     return res.status(200).json({ data: data });
   } catch (error) {
