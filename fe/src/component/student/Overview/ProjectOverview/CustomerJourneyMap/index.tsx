@@ -1,4 +1,4 @@
-import React, {useState } from "react";
+import React, { useState } from "react";
 import {
   Card,
   Typography,
@@ -107,9 +107,7 @@ const CustomerJourneyMap: React.FC = () => {
   const [newColColor, setNewColColor] = useState("");
   const [cellContent, setCellContent] = useState("");
   const queryClient = useQueryClient();
-  const {
-    data: customerJourneyMapData,
-  } = useQuery({
+  const { data: customerJourneyMapData } = useQuery({
     queryKey: [QUERY_KEY.GROUP_CUSTOMER_JOURNEY_MAP, groupId],
     queryFn: async () => {
       return await customerJourneyMapApi.getGroupData(groupId);
@@ -130,6 +128,9 @@ const CustomerJourneyMap: React.FC = () => {
     onSuccess: () => {
       message.success("Column updated successfully");
       setIsColModalVisible(false);
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.GROUP_CUSTOMER_JOURNEY_MAP],
+      });
     },
     onError: () => {
       message.error("Failed to update column.");
@@ -232,9 +233,10 @@ const CustomerJourneyMap: React.FC = () => {
   });
 
   const getContentForCell = (rowId: string, colId: string) => {
-    const cell = customerJourneyMapData?.data?.data?.customerJourneyMap?.cells.find(
-      (cell: any) => cell.row === rowId && cell.col === colId
-    );
+    const cell =
+      customerJourneyMapData?.data?.data?.customerJourneyMap?.cells.find(
+        (cell: any) => cell.row === rowId && cell.col === colId
+      );
     return cell ? cell.content : "No content available";
   };
 

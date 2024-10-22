@@ -3,6 +3,7 @@ import {
   StudentRepository,
   SubmissionRepository,
 } from "../repository/index.js";
+import mongoose from "mongoose";
 const getClassWorkByStudent = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -31,6 +32,7 @@ const getClassWorkByTeacher = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 const viewOutcomes = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -60,8 +62,22 @@ const viewOutcomes = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const getOutcomesByTeacher = async (req,res) => {
+  try {
+    const classId = req.params.classId;
+    const id  = new mongoose.Types.ObjectId(classId)
+    const outcomes = await ClassworkRepository.getOutcomes(
+      id
+    )
+    return res.status(200).json({ data: outcomes });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
 export default {
   getClassWorkByStudent,
   getClassWorkByTeacher,
   viewOutcomes,
+  getOutcomesByTeacher
 };

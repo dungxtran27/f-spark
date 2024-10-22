@@ -3,7 +3,7 @@ import axios from "../utils/axiosUtil";
 interface loginProps {
   email: string;
   password: string;
-  role: string;
+  role: string|undefined;
 }
 export const authApi = {
   login: async (credential: loginProps) => {
@@ -11,5 +11,8 @@ export const authApi = {
   },
   refreshToken: async () => {
     return await axios.get("api/auth/refreshToken");
+  },
+  logOut: async () => {
+    return await axios.get("api/auth/logOut");
   },
 };
