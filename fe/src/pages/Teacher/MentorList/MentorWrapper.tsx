@@ -13,10 +13,10 @@ import type { PaginationProps } from "antd";
 
 const MentorListWrapper = () => {
   const tagData = [
-    { label: "CNTT", value: "1" },
-    { label: "Marketing", value: "2" },
-    { label: "Bussiness", value: "3" },
-    { label: "Food", value: "4" },
+    { label: "Kinh Te", value: "6710ef5a641a0706497283ec" },
+    { label: "Ky Thuat", value: "6710ef80641a0706497283ed" },
+    { label: "Khoa Hoc", value: "6710ef8a641a0706497283ee" },
+    { label: "Khoi Nghiep", value: "6710ef9b641a0706497283ef" },
   ];
 
   const [tagSearch, setTagSearch] = useState([]);
@@ -31,7 +31,7 @@ const MentorListWrapper = () => {
       return await mentorList.getMentorListPagination({
         limit: 9,
         page: page,
-        tag: tagSearch,
+        tagIds: tagSearch,
         name: nameSeacrh,
       });
     },
@@ -43,8 +43,24 @@ const MentorListWrapper = () => {
     value: i.value,
   }));
   type SearchProps = GetProps<typeof Input.Search>;
-  const onSearch: SearchProps["onSearch"] = (value, _e, info) =>
-    console.log(info?.source, value);
+  const onSearch: SearchProps["onSearch"] = (value) => setNameSeacrh(value);
+  // const prevTagSearch: any = [];
+  // const onSelect = (value: string) => {
+  //   setTagSearch((prevTagSearch: any) => {
+  //     // Check if the value already exists in the array
+  //     if (!prevTagSearch.includes(value)) {
+  //       return [...prevTagSearch, value];
+  //     }
+  //     console.log(prevTagSearch);
+
+  //     return prevTagSearch;
+  //   });
+  // };
+  const handleChange = (value: string[]) => {
+    setTagSearch(value);
+  };
+  console.log(tagSearch);
+
   return (
     <>
       <div className={classNames(style.filter_bar)}>
@@ -55,7 +71,7 @@ const MentorListWrapper = () => {
           className={classNames(style.search_tag_bar)}
           placeholder="Please select"
           maxTagCount={3}
-          // onChange={handleChange}
+          onChange={handleChange}
           options={options}
         />{" "}
         <p className="pl-5">Search</p>
