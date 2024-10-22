@@ -180,6 +180,11 @@ const GroupSchema = new Schema(
         required: true,
       }
     ],
+    leader: {
+      type: Schema.Types.ObjectId,
+      ref: 'Student',
+      required: true
+    }
   },
   { timestamps: true, collection: "Groups" }
 );
