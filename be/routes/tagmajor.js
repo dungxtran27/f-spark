@@ -4,4 +4,4 @@ import { TagMajorController } from "../controller/index.js";
 const tagMajorRouter = express.Router();
 tagMajorRouter.get('/getAllTagMajor', TagMajorController.getAllMajor);
 
-export default classRouter;
+export default tagMajorRouter;
