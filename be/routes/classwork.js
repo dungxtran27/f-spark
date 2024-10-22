@@ -6,4 +6,7 @@ classWorkRouter.get("/getClassWorkByStudent/:type", verifyToken,ClassworkControl
 classWorkRouter.get("/getClassWorkByTeacher/:classId/:type", verifyToken, ClassworkController.getClassWorkByTeacher)
 classWorkRouter.get("/viewOutcomes", verifyToken, ClassworkController.viewOutcomes)
 classWorkRouter.get("/getOutcomesByTeacher/:classId",ClassworkController.getOutcomesByTeacher) 
+classWorkRouter.delete("/deleteClasswork",ClassworkController.deleteClasswork) 
+classWorkRouter.post("/createClasswork",ClassworkController.createClassWork) 
+
 export default classWorkRouter;

@@ -1,3 +1,4 @@
+import Class from "../model/Class.js";
 import ClassWork from "../model/ClassWork.js";
 import Student from "../model/Student.js";
 import Submission from "../model/Submisson.js";
@@ -48,7 +49,7 @@ const getClassWorkByStudent = async ({ userId, type }) => {
             : null,
         gradingCriteriaSubmission:
           submissionData.grade &&
-          submissionData.grade.gradingCriteria !== undefined
+            submissionData.grade.gradingCriteria !== undefined
             ? submissionData.grade.gradingCriteria
             : [],
       };
@@ -100,8 +101,41 @@ const getOutcomes = async (classId) => {
   }
 };
 
+const deleteClasswork = async (classworkId, classId) => {
+  try {
+    const classToUpdate = await Class.findById(classId);
+    if (!classToUpdate) {
+      throw new Error("Class not found");
+    }
+    if (classToUpdate.pin && classToUpdate.pin.toString() === classworkId) {
+      const updatePinClasswork = await Class.findByIdAndUpdate(classId, { pin: null });
+    }
+    const deletedClasswork = await ClassWork.findByIdAndDelete(classworkId);
+    if (!deletedClasswork) {
+      throw new Error("Classwork not found");
+    }
+    return deleteClasswork;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const createClassWork = async ({
+  name, description, type,classId
+}) => {
+  try {
+    const result = await ClassWork.create({
+      name, description, type,classId
+    });
+    return result._doc;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   getClassWorkByStudent,
   getClassWorkByTeacher,
   getOutcomes,
+  deleteClasswork,
+  createClassWork
 };
