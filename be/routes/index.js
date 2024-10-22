@@ -10,6 +10,7 @@ import MentorRouter from "./mentor.js";
 import SubmissionRouter from "./submission.js";
 import TaskRouter from "./task.js";
 import TimeBlockRouter from "./timeblock.js";
+import TagMajorRouter from "./tagmajor.js";
 export {
   AuthenticationRouter,
   UserRouter,
@@ -23,4 +24,5 @@ export {
   SubmissionRouter,
   TaskRouter,
   TimeBlockRouter,
+  TagMajorRouter
 };
