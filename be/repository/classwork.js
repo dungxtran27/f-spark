@@ -65,9 +65,7 @@ const getOutcomes = async (classId) => {
     const outcomeList = await ClassWork.find({
       type: "outcome",
       classId: classId,
-    });
-    console.log(classId);
-    
+    });    
     return outcomeList;
   } catch (error) {
     throw new Error(error.message);
