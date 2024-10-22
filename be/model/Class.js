@@ -8,18 +8,23 @@ const ClassSchema = new Schema(
     },
     teacher: {
       type: Schema.Types.ObjectId,
-      ref: 'Teacher', 
+      ref: 'Teacher',
       required: true,
     },
     backgroundImage: {
       type: String,
-      required: false, 
+      required: false,
     },
     isActive: {
       type: Boolean,
       default: true,
       required: true,
     },
+    pin: {
+      type: Schema.Types.ObjectId,
+      ref: "Classwork",
+      require: false
+    }
   },
   { timestamps: true, collection: 'Classes' }
 );

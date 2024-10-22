@@ -85,8 +85,7 @@ groupRouter.get(
   GroupController.findAllStudentByGroupId
 );
 
-groupRouter.post(
-  "/addStudentInGroup/:groupId",
-  GroupController.addStundentInGroup
-);
+groupRouter.post("/addStudentInGroup", GroupController.addStundentInGroup);
+
+groupRouter.post("/assignLeader", GroupController.assignLeader);
 export default groupRouter;
