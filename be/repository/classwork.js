@@ -48,7 +48,7 @@ const getClassWorkByStudent = async ({ userId, type }) => {
             : null,
         gradingCriteriaSubmission:
           submissionData.grade &&
-          submissionData.grade.gradingCriteria !== undefined
+            submissionData.grade.gradingCriteria !== undefined
             ? submissionData.grade.gradingCriteria
             : [],
       };
@@ -100,8 +100,51 @@ const getOutcomes = async (classId) => {
   }
 };
 
+
+const getClassWorkForStreamByTeacher = async (classId) => {
+  try {
+    const classworkList = await ClassWork.find({
+      type: { $in: ["announce", "assignment"] },
+      class: classId,
+    }).select("_id name title description type class upVote");
+
+    const assignmentIds = classworkList
+      .filter(classWork => classWork.type === "assignment")
+      .map(classWork => classWork._id);
+
+    let submissions = [];
+    if (assignmentIds.length > 0) {
+      submissions = await Submission.find({
+        classworkId: { $in: assignmentIds }
+      });
+    }
+
+    return { classworkList, submissions };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const editClassWorkForStreamByTeacher = async (classWorkId, name, description) => {
+  try {
+    const updatedData = await ClassWork.findByIdAndUpdate(
+      classWorkId,
+      { name, description },
+      { new: true },
+    )
+    if (!updatedData) {
+      return new Error("ClassWork not found");
+    }
+    return updatedData;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   getClassWorkByStudent,
   getClassWorkByTeacher,
   getOutcomes,
+  getClassWorkForStreamByTeacher,
+  editClassWorkForStreamByTeacher
 };

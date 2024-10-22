@@ -63,10 +63,10 @@ const viewOutcomes = async (req, res) => {
   }
 };
 
-const getOutcomesByTeacher = async (req,res) => {
+const getOutcomesByTeacher = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const id  = new mongoose.Types.ObjectId(classId)
+    const id = new mongoose.Types.ObjectId(classId)
     const outcomes = await ClassworkRepository.getOutcomes(
       id
     )
@@ -75,9 +75,34 @@ const getOutcomesByTeacher = async (req,res) => {
     return res.status(500).json({ error: error.message });
   }
 }
+
+const getClassWorkForStreamByTeacher = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+    const classworkList = await ClassworkRepository.getClassWorkForStreamByTeacher(
+      classId
+    )
+    return res.status(200).json({ data: classworkList });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+const editClassWorkForStreamByTeacher = async (req, res) => {
+  try {
+    const { classWorkId, name, description } = req.body;
+    const classworkList = await ClassworkRepository.editClassWorkForStreamByTeacher(classWorkId, name, description);
+    return res.status(200).json({ data: classworkList });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
 export default {
   getClassWorkByStudent,
   getClassWorkByTeacher,
   viewOutcomes,
-  getOutcomesByTeacher
+  getOutcomesByTeacher,
+  getClassWorkForStreamByTeacher,
+  editClassWorkForStreamByTeacher,
 };

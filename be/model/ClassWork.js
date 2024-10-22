@@ -48,7 +48,7 @@ const ClassworkSchema = new Schema(
         type: GradingCriteriaSchema,
       },
     ],
-    UpVote: [{
+    upVote: [{
       type: Schema.Types.ObjectId,
       ref: "Student",
       required: false,
