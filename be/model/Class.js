@@ -1,5 +1,14 @@
 import mongoose, { Schema } from "mongoose";
-
+const ClassInfo = new Schema({
+  schedule: {
+    type: [String],
+    default: [],
+  },
+  location: {
+    type: String,
+  },
+  _id: false,
+});
 const ClassSchema = new Schema(
   {
     classCode: {
@@ -8,21 +17,24 @@ const ClassSchema = new Schema(
     },
     teacher: {
       type: Schema.Types.ObjectId,
-      ref: 'Teacher', 
+      ref: "Teacher",
       required: true,
     },
     backgroundImage: {
       type: String,
-      required: false, 
+      required: false,
     },
     isActive: {
       type: Boolean,
       default: true,
       required: true,
     },
+    classInfo: {
+      type: ClassInfo,
+    },
   },
-  { timestamps: true, collection: 'Classes' }
+  { timestamps: true, collection: "Classes" }
 );
 
-const Class = mongoose.model('Class', ClassSchema);
+const Class = mongoose.model("Class", ClassSchema);
 export default Class;

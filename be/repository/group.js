@@ -290,7 +290,7 @@ const deleteCustomerPersona = async ({ groupId, personaId }) => {
   }
 };
 
-const findAllStudentByGroupId = async (classId) => {
+const findAllGroupsOfClass = async (classId) => {
   try {
     const data = await Group.find({
       class: classId
@@ -359,6 +359,6 @@ export default {
   addCustomerPersona,
   updateCustomerPersona,
   deleteCustomerPersona,
-  findAllStudentByGroupId,
+  findAllGroupsOfClass,
   addStundentInGroup
 };
