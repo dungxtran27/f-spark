@@ -97,6 +97,47 @@ const editClassWorkForStreamByTeacher = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 }
+const deleteClasswork = async (req, res) => {
+  try {
+    const { classId, classworkId } = req.body;
+    if (!classId || !classworkId) {
+      return res.status(400).json({ message: "Id is required" });
+    }
+    const deleteClasswork = await ClassworkRepository.deleteClasswork(classworkId, classId);
+    return res.status(200).json({ data: deleteClasswork });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const createClassWork = async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      type,
+      classId
+    } = req.body;
+    if (!name || !type) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+    const classworkData = {
+      name,
+      description,
+      type,
+      classId
+    };
+    const newClasswork = await ClassworkRepository.createClassWork(classworkData);
+    return res.status(201).json({
+      data: newClasswork,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
 
 export default {
   getClassWorkByStudent,
@@ -105,4 +146,6 @@ export default {
   getOutcomesByTeacher,
   getClassWorkForStreamByTeacher,
   editClassWorkForStreamByTeacher,
+  deleteClasswork,
+  createClassWork
 };

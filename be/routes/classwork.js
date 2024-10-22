@@ -8,4 +8,7 @@ classWorkRouter.get("/viewOutcomes", verifyToken, ClassworkController.viewOutcom
 classWorkRouter.get("/getOutcomesByTeacher/:classId", ClassworkController.getOutcomesByTeacher)
 classWorkRouter.get("/getClassWorkForStreamByTeacher/:classId", ClassworkController.getClassWorkForStreamByTeacher)
 classWorkRouter.patch("/editClassWorkForStreamByTeacher", ClassworkController.editClassWorkForStreamByTeacher)
+classWorkRouter.delete("/deleteClasswork", ClassworkController.deleteClasswork)
+classWorkRouter.post("/createClasswork", ClassworkController.createClassWork)
+
 export default classWorkRouter;
