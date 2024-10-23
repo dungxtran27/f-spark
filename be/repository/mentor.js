@@ -7,7 +7,7 @@ const getAllMentors = async (tagIds, name, page, limit) => {
   try {
     const tagIdArray = Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : [];
     console.log(tagIdArray);
-    
+
     const searchConditions = [];
     if (tagIdArray.length > 0) {
       searchConditions.push({
@@ -114,11 +114,23 @@ const getMentor = async () => {
 };
 const assignMentor = async ({ groupId, mentorId }) => {
   try {
+    const mentor = await Mentor.findById(mentorId);
+    if (!mentor) {
+      throw new Error("Mentor not found ");
+
+    }
+    const group = await Group.findOne({
+      _id: groupId,
+      mentorId: mentorId
+    });
+
+    if (!group) {
+      throw new Error("Mentor already exists in the group ");
+
+    }
     const updateMentor = await Group.findByIdAndUpdate(groupId, {
       mentor: mentorId,
     });
-    console.log(updateMentor);
-
     return updateMentor;
   } catch (error) {
     throw new Error(error.message);
