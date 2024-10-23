@@ -202,15 +202,14 @@ const deleteCustomerPersona = async (req, res) => {
   }
 };
 
-const findAllStudentByGroupId = async (req, res) => {
+const findAllStudentByGroup = async (req, res) => {
   try {
     const classId = req.params.classId;
     const countStudent = await StudentRepository.getAllStudentByClassId(
       classId
     );
     const groupStudent = await GroupRepository.findAllStudentByGroupId(classId);
-    const unGroupStudents =
-      await StudentRepository.getAllStudentUngroupByClassId(classId);
+    const unGroupStudents = await StudentRepository.getAllStudentUngroupByClassId(classId);
     const studentData = {
       groupStudent,
       unGroupStudents,
@@ -255,7 +254,7 @@ export default {
   addCustomerPersona,
   updateCustomerPersona,
   deleteCustomerPersona,
-  findAllStudentByGroupId,
+  findAllStudentByGroup,
   addStundentInGroup,
   assignLeader,
 };

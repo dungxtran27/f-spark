@@ -112,6 +112,7 @@ const getMentor = async () => {
     throw new Error(error.message);
   }
 };
+
 const assignMentor = async ({ groupId, mentorId }) => {
   try {
     const mentor = await Mentor.findById(mentorId);
@@ -136,10 +137,10 @@ const assignMentor = async ({ groupId, mentorId }) => {
       { new: true }
     );
 
-    const updateGroup = await Group.findByIdAndUpdate(groupId,
-      { mentor: mentorId, },
-      { new: true }
-    );
+    // const updateGroup = await Group.findByIdAndUpdate(groupId,
+    //   { mentor: mentorId, },
+    //   { new: true }
+    // );
 
     return {
       message: "Mentor assigned successfully",
