@@ -184,6 +184,10 @@ const GroupSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Student',
       required: true
+    },
+    groupImage: {
+      type: String,
+      required: false
     }
   },
   { timestamps: true, collection: "Groups" }

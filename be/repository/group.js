@@ -294,16 +294,20 @@ const findAllStudentByGroupId = async (classId) => {
   try {
     const data = await Group.find({
       class: classId
-    }).select('GroupName GroupDescription isSponsorship mentor teamMembers tag leader').populate({
+    }).select('GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage').populate({
       path: 'teamMembers',
-      select: '_id name gen major'
+      select: '_id name gen major studentId account',
+      populate: {
+        path: 'account',
+        select: 'profilePicture'
+      }
     }).populate({
       path: 'tag',
       select: 'name '
     }).populate({
       path: 'mentor',
-      select: 'name '
-    });
+      select: 'name profilePicture'
+    })
     return data;
   } catch (error) {
     throw new Error(error.message);

@@ -112,6 +112,7 @@ const getMentor = async () => {
     throw new Error(error.message);
   }
 };
+
 const assignMentor = async ({ groupId, mentorId }) => {
   try {
     const mentor = await Mentor.findById(mentorId);
@@ -121,20 +122,29 @@ const assignMentor = async ({ groupId, mentorId }) => {
     }
     const group = await Group.findOne({
       _id: groupId,
-      mentorId: mentorId
+      mentor: mentorId
     });
 
-    if (!group) {
+    if (group) {
       throw new Error("Mentor already exists in the group ");
 
     }
-    const updateMentor = await Group.findByIdAndUpdate(groupId, {
-      mentor: mentorId,
-    });
+    const updateMentor = await Mentor.findByIdAndUpdate(
+      mentorId,
+      {
+        $addToSet: { assignedGroup: groupId },
+      },
+      { new: true }
+    );
+
+    // const updateGroup = await Group.findByIdAndUpdate(groupId,
+    //   { mentor: mentorId, },
+    //   { new: true }
+    // );
 
     return {
       message: "Mentor assigned successfully",
-      group: updatedGroup
+      group: updateMentor
     };
 
   } catch (error) {
