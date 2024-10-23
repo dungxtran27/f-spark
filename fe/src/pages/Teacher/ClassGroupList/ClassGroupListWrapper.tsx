@@ -433,6 +433,7 @@ const ClassGroupListWrapper = () => {
       </Modal> */}
       <Modal
         visible={AddMemberModal}
+        title={groupName}
         onCancel={handleCloseAddMemberModal}
         footer={[
           <Button key="back" onClick={handleCloseAddMemberModal}>
@@ -447,28 +448,8 @@ const ClassGroupListWrapper = () => {
           </Button>,
         ]}
       >
-        {classPeople?.data.data.unGroupStudents.map((s: any) => (
-          <div className="flex justify-between w-3/4 bg-white mt-1 p-1 shadow rounded-sm">
-            <div className="flex ">
-              <img
-                src={
-                  s.profilePicture ||
-                  "https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
-                }
-                className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                alt=""
-              />
-              <p className="ml-3"> {s.name}</p>
-              <span>
-                <Tag color={colorMap[s.major]} className="ml-3 h-auto w-auto">
-                  {s.major}
-                </Tag>
-              </span>
-            </div>
-          </div>
-        ))}
         <Divider />
-        <div>Add student to group {groupName}</div>
+        <div>Select student</div>
 
         <Table<DataType>
           rowSelection={{ type: "checkbox", ...rowSelection }}
