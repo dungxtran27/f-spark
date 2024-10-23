@@ -75,14 +75,16 @@ const ClassGroupListWrapper = () => {
               <div className="flex justify-between w-3/4 bg-white mt-1 p-1 shadow rounded-sm">
                 <div className="flex  justify-center items-center">
                   <img
-                    // src={s.avatar}
-                    src="https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
+                    src={
+                      s.profilePicture ||
+                      "https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
+                    }
                     className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
                     alt=""
                   />
                   <p className="ml-3">
                     {" "}
-                    {s.name} - {s.gen}
+                    {s.name} - {s.studentId}
                   </p>
 
                   <Tag color={colorMap[s.major]} className="ml-3 h-auto w-auto">
@@ -99,14 +101,39 @@ const ClassGroupListWrapper = () => {
       </div>
     );
   };
+  const PopoverGroupDetail = (groupName, groupID) => (
+    <>
+      <div
+        onClick={(e) => {
+          handleOpenAddMentorModal();
+          e.stopPropagation();
+        }}
+      >
+        Edit mentor
+      </div>
+      <hr />
+      <div
+        onClick={(e) => {
+          setGroupName(groupName);
+          setGroupIDSelected(groupID);
 
+          handleOpenAddMemberModal();
+          e.stopPropagation();
+        }}
+      >
+        Edit Member
+      </div>
+    </>
+  );
   const collapseData: CollapseProps["items"] =
     classPeople?.data.data.groupStudent.map((c: any) => ({
       key: c._id,
       label: (
         <div className=" flex justify-between">
           <div>
-            <span className="text-lg">{c.GroupName}</span>
+            <span className="text-lg">
+              {c.GroupName}({c.teamMembers.length} students)
+            </span>
             {c.mentor ? (
               " - Mentor: " + c.mentor.name
             ) : (
@@ -118,8 +145,8 @@ const ClassGroupListWrapper = () => {
             )}
           </div>
           <Popover
-            // content={PopoverGroupDetail}
-            trigger={"hover"}
+            content={PopoverGroupDetail(c.GroupName, c._id)}
+            trigger={"click"}
             placement="left"
           >
             <Button>
@@ -197,6 +224,8 @@ const ClassGroupListWrapper = () => {
   //add student to group
   const [studentIDSelected, setStudentIDSelected] = useState("");
   const [groupIDSelected, setGroupIDSelected] = useState("");
+  const [groupName, setGroupName] = useState("kk");
+
   interface reqBodyAddStudentToGroup {
     studentId: string;
     groupId: string;
@@ -243,7 +272,7 @@ const ClassGroupListWrapper = () => {
 
     setGroupIDSelected(value);
   };
-  const PopoverWithProp = (studentID: any) => {
+  const PopoverAddStudentWithProp = (studentID: any) => {
     return (
       <Popover
         placement="right"
@@ -256,18 +285,13 @@ const ClassGroupListWrapper = () => {
       </Popover>
     );
   };
-  //handle mentor assign mentor
+  //handle assign mentor
   const { data: tagData } = useQuery({
     queryKey: [QUERY_KEY.TAGDATA],
     queryFn: async () => {
       return mentorList.getTag();
     },
   });
-
-  const options: SelectProps["options"] = tagData?.data.data.map((i: any) => ({
-    label: i.name,
-    value: i._id,
-  }));
 
   //random add modal
   const [randomAddModal, setRandomAddModal] = useState(false);
@@ -300,44 +324,19 @@ const ClassGroupListWrapper = () => {
     setAddMemberModal(false);
   };
   interface DataType {
-    key: 1;
+    key: string;
     name: string;
     major: string;
   }
-  // const rowSelection: TableProps<DataType>["rowSelection"] = {
-  //   onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-  //     console.log(
-  //       `selectedRowKeys: ${selectedRowKeys}`,
-  //       "selectedRows: ",
-  //       selectedRows
-  //     );
-  //   },
-  //   getCheckboxProps: (record: DataType) => ({
-  //     disabled: record.name === "Disabled User",
-  //     name: record.name,
-  //   }),
-  // };
-  // const PopoverGroupDetail = (
-  //   <>
-  //     <div
-  //       onClick={(e) => {
-  //         handleOpenAddMentorModal();
-  //         e.stopPropagation();
-  //       }}
-  //     >
-  //       Edit mentor
-  //     </div>
-  //     <hr />{" "}
-  //     <div
-  //       onClick={(e) => {
-  //         handleOpenAddMemberModal();
-  //         e.stopPropagation();
-  //       }}
-  //     >
-  //       Edit Member
-  //     </div>
-  //   </>
-  // );
+  const rowSelection: TableProps<DataType>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {},
+    getCheckboxProps: (record: DataType) => ({
+      disabled: record.name === "Disabled User",
+      name: record.name,
+    }),
+  };
+
+  /* modal add member to group */
 
   //random group for modal
   // const randomGroups = classPeople?.data.data.groupStudent
@@ -364,7 +363,7 @@ const ClassGroupListWrapper = () => {
     <>
       <div className=" py-3 px-3">
         <div className="text-[16px] font-semibold flex justify-between ">
-          <span className=" text-lg">Student</span>{" "}
+          <span className=" text-lg">Student not grouped</span>{" "}
           <Button onClick={handleOpenRandomAddModal}>Add random</Button>
         </div>
         {classPeople?.data.data.unGroupStudents.map((s: any) => (
@@ -383,7 +382,7 @@ const ClassGroupListWrapper = () => {
                 </Tag>
               </span>
             </div>
-            <PopoverWithProp studentID={s._id} />
+            <PopoverAddStudentWithProp studentID={s._id} />
           </div>
         ))}
         <div className="text-lg font-semibold mt-3 ">Groups</div>
@@ -399,6 +398,7 @@ const ClassGroupListWrapper = () => {
           )}
         />
       </div>
+
       {/* modal add random std to group */}
       {/* <Modal
         title="Result"
@@ -431,6 +431,51 @@ const ClassGroupListWrapper = () => {
           </>
         ))}
       </Modal> */}
+      <Modal
+        visible={AddMemberModal}
+        onCancel={handleCloseAddMemberModal}
+        footer={[
+          <Button key="back" onClick={handleCloseAddMemberModal}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleCloseAddMemberModal}
+          >
+            Add
+          </Button>,
+        ]}
+      >
+        {classPeople?.data.data.unGroupStudents.map((s: any) => (
+          <div className="flex justify-between w-3/4 bg-white mt-1 p-1 shadow rounded-sm">
+            <div className="flex ">
+              <img
+                src={
+                  s.profilePicture ||
+                  "https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
+                }
+                className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                alt=""
+              />
+              <p className="ml-3"> {s.name}</p>
+              <span>
+                <Tag color={colorMap[s.major]} className="ml-3 h-auto w-auto">
+                  {s.major}
+                </Tag>
+              </span>
+            </div>
+          </div>
+        ))}
+        <Divider />
+        <div>Add student to group {groupName}</div>
+
+        <Table<DataType>
+          rowSelection={{ type: "checkbox", ...rowSelection }}
+          dataSource={classPeople?.data.data.unGroupStudents}
+          columns={columns}
+        />
+      </Modal>
       {/* modal add mentor */}
       {/* <Modal
         visible={AddMentorModal}
@@ -479,67 +524,6 @@ const ClassGroupListWrapper = () => {
             pageSize: 4,
             total: mentorData?.data.data.length, // Set the total number of rows
           }}
-        />
-      </Modal> */}
-      {/* modal add member to group */}
-      {/* <Modal
-        visible={AddMemberModal}
-        onCancel={handleCloseAddMemberModal}
-        footer={[
-          <Button key="back" onClick={handleCloseAddMemberModal}>
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleCloseAddMemberModal}
-          >
-            Add
-          </Button>,
-        ]}
-      >
-        {classPeople?.data.data.unGroupStudents.map((s: any) => (
-          <div className="flex justify-between w-3/4 bg-white mt-1 p-1 shadow rounded-sm">
-            <div className="flex ">
-              <img
-                // src={s.avatar}
-                src="https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
-                className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                alt=""
-              />
-              <p className="ml-3"> {s.name}</p>
-              <span>
-                <Tag color={colorMap[s.major]} className="ml-3 h-auto w-auto">
-                  {s.major}
-                </Tag>
-              </span>
-            </div>
-          </div>
-        ))}
-        <Divider />
-        <div>Add student</div>
-        <Select
-          className="w-full"
-          mode="multiple"
-          options={classPeople?.data.data.unGroupStudents.map((s: any) => ({
-            value: s._id, // Set the value to the group ID
-            label: (
-              <>
-                {s.name}
-                <Tag
-                  color={colorMap[s.major] ?? "gray"}
-                  className="ml-3 h-auto w-auto"
-                >
-                  {s.major}
-                </Tag>
-              </>
-            ),
-          }))}
-        ></Select>
-        <Table<DataType>
-          rowSelection={{ type: "checkbox", ...rowSelection }}
-          dataSource={classPeople?.data.data.unGroupStudents}
-          columns={columns}
         />
       </Modal> */}
     </>
