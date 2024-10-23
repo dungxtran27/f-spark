@@ -306,7 +306,7 @@ const findAllStudentByGroupId = async (classId) => {
       select: 'name '
     }).populate({
       path: 'mentor',
-      select: 'name '
+      select: 'name profilePicture'
     })
     return data;
   } catch (error) {
