@@ -338,7 +338,11 @@ const addStundentInGroup = async (groupId, studentId) => {
       { new: true }
     );
 
-    return updatedGroup;
+    return {
+      message: "Student add successfully",
+      group: updatedGroup
+    };
+
   } catch (error) {
     throw new Error(error.message);
   }
@@ -365,7 +369,10 @@ const assignLeader = async (groupId, studentId) => {
       { $set: { leader: studentId } },
       { new: true }
     );
-    return updatedGroup;
+    return {
+      message: "Student assign successfully",
+      group: updatedGroup
+    };
   } catch (error) {
     throw new Error(error.message);
   }
