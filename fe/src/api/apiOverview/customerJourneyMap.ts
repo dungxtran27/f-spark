@@ -9,7 +9,7 @@ export const customerJourneyMapApi = {
     return await axios.post(`api/group/createRow?groupId=${groupId}`);
   },
   getGroupData: async (groupId: string) => {
-    return await axios.get(`api/group/${groupId}`);
+    return await axios.get(`api/group?groupId=${groupId}`);
   },
   updateColumnCustomerJourneyMap: async (
     groupId: string,
