@@ -4,7 +4,7 @@ export const classApi = {
     return await axios.get(`api/classwork/viewOutcomes`);
   },
   getclassDetailPeople: async (classid: string) => {
-    return await axios.get(`api/group/getAllStudentByGroupId/${classid}`);
+    return await axios.get(`api/group/getAllStudentByGroup/${classid}`);
   },
   createSubmission: async (
     classworkId: string,

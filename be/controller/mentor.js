@@ -42,7 +42,9 @@ const assignMentor = async (req, res) => {
       mentorId: new mongoose.Types.ObjectId(mentorId),
       groupId: new mongoose.Types.ObjectId(groupId),
     });
-    return res.status(200).json({ data: updateMentor });
+    return res
+      .status(200)
+      .json({ data: updateMentor, message: "Assign success" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

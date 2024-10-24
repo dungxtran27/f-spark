@@ -57,8 +57,10 @@ const ClassGroupListWrapper = () => {
       <div className="flex pl-">
         <div className=" w-full">
           <img
-            // src={c.GroupImage}
-            src="https://mba-mci.edu.vn/wp-content/uploads/2018/03/muon-khoi-nghiep-hay-danh-5-phut-doc-bai-viet-nay.jpg"
+            src={
+              c.GroupImage ||
+              "https://mba-mci.edu.vn/wp-content/uploads/2018/03/muon-khoi-nghiep-hay-danh-5-phut-doc-bai-viet-nay.jpg"
+            }
             className="w-full h-3/4 object-cover"
             alt=""
           />
@@ -76,7 +78,7 @@ const ClassGroupListWrapper = () => {
                 <div className="flex  justify-center items-center">
                   <img
                     src={
-                      s.profilePicture ||
+                      s.account?.profilePicture ||
                       "https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
                     }
                     className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
@@ -135,6 +137,9 @@ const ClassGroupListWrapper = () => {
             // console.log("clicked");
 
             // setAddMentorModal(true);
+            setGroupName(groupName);
+            setGroupIDSelected(groupID);
+            queryClient.invalidateQueries({ queryKey: [tagSearch] });
             handleOpenAddMentorModal();
             setTagSearch(tag.map((t) => t._id));
 
@@ -289,7 +294,6 @@ const ClassGroupListWrapper = () => {
         ></Select>
         <Button
           onClick={() => {
-            console.log(" add student: " + studentID + " to" + groupIDSelected);
             addStudentToGroupSelected.mutate({
               studentId: studentID,
               groupId: groupIDSelected,
@@ -326,7 +330,22 @@ const ClassGroupListWrapper = () => {
       return mentorList.getTag();
     },
   });
+  interface reqBodyAssignMentorToGroup {
+    mentorId: string;
+    groupId: string;
+  }
+  const assignMentorToGroup = useMutation({
+    mutationFn: ({ mentorId, groupId }: reqBodyAssignMentorToGroup) =>
+      student.assignmentorToGroup({
+        mentorId: mentorId,
+        groupId: groupId,
+      }),
 
+    onSuccess: () => {
+      handleCloseAddMentorModal();
+      queryClient.invalidateQueries({ queryKey: [classID] });
+    },
+  });
   const options: SelectProps["options"] = tagData?.data.data.map((i: any) => ({
     label: i.name,
     value: i._id,
@@ -542,6 +561,16 @@ const ClassGroupListWrapper = () => {
         <Table
           dataSource={mentorData?.data.data}
           columns={columnsMentor}
+          onRow={(record, rowIndex) => {
+            return {
+              onClick: (e) => {
+                assignMentorToGroup.mutate({
+                  mentorId: record._id,
+                  groupId: groupIDSelected,
+                });
+              },
+            };
+          }}
           pagination={{
             pageSize: 4,
             total: mentorData?.data.data.length, // Set the total number of rows

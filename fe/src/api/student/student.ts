@@ -7,4 +7,7 @@ export const student = {
   addStudentToGroup: async (requestBody: any) => {
     return await axios.post(`/api/group/addStudentInGroup`, requestBody);
   },
+  assignmentorToGroup: async (requestBody: any) => {
+    return await axios.put(`/api/mentor/assignMentor`, requestBody);
+  },
 };
