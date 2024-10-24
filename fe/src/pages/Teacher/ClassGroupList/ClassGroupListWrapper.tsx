@@ -101,30 +101,63 @@ const ClassGroupListWrapper = () => {
       </div>
     );
   };
-  const PopoverGroupDetail = (groupName, groupID) => (
-    <>
-      <div
-        onClick={(e) => {
-          handleOpenAddMentorModal();
-          e.stopPropagation();
-        }}
-      >
-        Edit mentor
-      </div>
-      <hr />
-      <div
-        onClick={(e) => {
-          setGroupName(groupName);
-          setGroupIDSelected(groupID);
+  const [test, setTest] = useState(false);
+  const handleCLoseTest = () => {
+    setTest(false);
+  };
+  //  const testModal = (groupID) => {
+  //    console.log("deo on");
 
-          handleOpenAddMemberModal();
-          e.stopPropagation();
-        }}
-      >
-        Edit Member
-      </div>
-    </>
-  );
+  //    return (
+  //      <Modal
+  //        // visible={true}
+  //        onCancel={handleCLoseTest}
+  //        width={1000}
+  //        footer={[
+  //          <Button key="back" onClick={handleCLoseTest}>
+  //            Cancel
+  //          </Button>,
+  //          <Button key="submit" type="primary" onClick={handleCLoseTest}>
+  //            Save
+  //          </Button>,
+  //        ]}
+  //      >
+  //        {groupID}
+  //      </Modal>
+  //    );
+  //  };
+  const PopoverGroupDetail = (groupName, groupID, tag) => {
+    return (
+      <>
+        <div
+          onClick={(e) => {
+            // setTest(true);
+            // console.log("clicked");
+
+            // setAddMentorModal(true);
+            handleOpenAddMentorModal();
+            setTagSearch(tag.map((t) => t._id));
+
+            e.stopPropagation();
+          }}
+        >
+          Edit mentor
+        </div>
+        <hr />
+        <div
+          onClick={(e) => {
+            setGroupName(groupName);
+            setGroupIDSelected(groupID);
+
+            handleOpenAddMemberModal();
+            e.stopPropagation();
+          }}
+        >
+          Edit Member
+        </div>
+      </>
+    );
+  };
   const collapseData: CollapseProps["items"] =
     classPeople?.data.data.groupStudent.map((c: any) => ({
       key: c._id,
@@ -145,8 +178,8 @@ const ClassGroupListWrapper = () => {
             )}
           </div>
           <Popover
-            content={PopoverGroupDetail(c.GroupName, c._id)}
-            trigger={"click"}
+            content={PopoverGroupDetail(c.GroupName, c._id, c.tag)}
+            trigger={"hover"}
             placement="left"
           >
             <Button>
@@ -164,7 +197,7 @@ const ClassGroupListWrapper = () => {
   const [nameSeacrh, setNameSeacrh] = useState("");
 
   const { data: mentorData } = useQuery({
-    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
+    queryKey: [tagSearch, nameSeacrh],
     queryFn: async () => {
       return mentorList.getMentorListPagination({
         limit: 27,
@@ -174,6 +207,7 @@ const ClassGroupListWrapper = () => {
       });
     },
   });
+
   const columns = [
     {
       title: "Name",
@@ -188,9 +222,9 @@ const ClassGroupListWrapper = () => {
   const columnsMentor = [
     {
       title: "image",
-      dataIndex: "avatar",
-      render: (avatar: string) => (
-        <img className="w-1/2 aspect-auto" src={avatar} alt="" />
+      dataIndex: "profilePicture",
+      render: (profilePicture: string) => (
+        <img className="w-1/2 aspect-auto" src={profilePicture || ""} alt="" />
       ),
       width: 200,
     },
@@ -200,10 +234,10 @@ const ClassGroupListWrapper = () => {
     },
     {
       title: "Major",
-      dataIndex: "major",
-      render: (major: { name: string }[]) =>
+      dataIndex: "tags",
+      render: (major: { name: string; _id: string }[]) =>
         major.map((m) => (
-          <Tag key={m.name} color={colorMajorGroup[m.name]}>
+          <Tag key={m._id} color={colorMajorGroup[m.name]}>
             {m.name}
           </Tag>
         )),
@@ -293,6 +327,10 @@ const ClassGroupListWrapper = () => {
     },
   });
 
+  const options: SelectProps["options"] = tagData?.data.data.map((i: any) => ({
+    label: i.name,
+    value: i._id,
+  }));
   //random add modal
   const [randomAddModal, setRandomAddModal] = useState(false);
 
@@ -458,7 +496,7 @@ const ClassGroupListWrapper = () => {
         />
       </Modal>
       {/* modal add mentor */}
-      {/* <Modal
+      <Modal
         visible={AddMentorModal}
         onCancel={handleCloseAddMentorModal}
         width={1000}
@@ -475,6 +513,9 @@ const ClassGroupListWrapper = () => {
           </Button>,
         ]}
       >
+        {tagSearch.map((t) => (
+          <p>{t.name}</p>
+        ))}
         <Space
           className={classNames(style.filter_bar)}
           style={{ width: "100%" }}
@@ -487,7 +528,7 @@ const ClassGroupListWrapper = () => {
             className={classNames(style.search_tag_bar)}
             placeholder="Please select"
             maxTagCount={3}
-            // onChange={handleChange}
+            onChange={handleChange}
             options={options}
           />{" "}
           <p>Search</p>
@@ -506,7 +547,7 @@ const ClassGroupListWrapper = () => {
             total: mentorData?.data.data.length, // Set the total number of rows
           }}
         />
-      </Modal> */}
+      </Modal>
     </>
   );
 };
