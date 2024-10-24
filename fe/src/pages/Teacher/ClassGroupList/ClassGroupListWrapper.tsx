@@ -128,7 +128,7 @@ const ClassGroupListWrapper = () => {
   //      </Modal>
   //    );
   //  };
-  const PopoverGroupDetail = (groupName, groupID, tag) => {
+  const PopoverGroupDetail = (groupName, groupID, tag, students) => {
     return (
       <>
         <div
@@ -158,7 +158,19 @@ const ClassGroupListWrapper = () => {
             e.stopPropagation();
           }}
         >
-          Edit Member
+          Add Member
+        </div>
+        <hr />
+        <div
+          onClick={(e) => {
+            setGroupName(groupName);
+            setGroupIDSelected(groupID);
+            setGroupStudentSelected(students);
+            handleOpenAssignLeaderModal();
+            e.stopPropagation();
+          }}
+        >
+          Assign Leader
         </div>
       </>
     );
@@ -183,7 +195,12 @@ const ClassGroupListWrapper = () => {
             )}
           </div>
           <Popover
-            content={PopoverGroupDetail(c.GroupName, c._id, c.tag)}
+            content={PopoverGroupDetail(
+              c.GroupName,
+              c._id,
+              c.tag,
+              c.teamMembers
+            )}
             trigger={"hover"}
             placement="left"
           >
@@ -263,7 +280,8 @@ const ClassGroupListWrapper = () => {
   //add student to group
   const [studentIDSelected, setStudentIDSelected] = useState("");
   const [groupIDSelected, setGroupIDSelected] = useState("");
-  const [groupName, setGroupName] = useState("kk");
+  const [groupName, setGroupName] = useState("");
+  const [groupStudentSelected, setGroupStudentSelected] = useState([]);
 
   interface reqBodyAddStudentToGroup {
     studentId: string;
@@ -415,6 +433,63 @@ const ClassGroupListWrapper = () => {
   //     // Process or transform each group element here
   //     return std; // You can modify or return a specific property from 'group'
   //   });
+  // assign leader to group
+  const assignLeaderToGroup = useMutation({
+    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
+      student.assignLeaderToGroup({
+        studentId: studentId,
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classID] });
+      handleCloseAssignLeaderModal();
+    },
+  });
+
+  const [assignLeaderModal, setAssignLeaderModal] = useState(false);
+
+  const handleOpenAssignLeaderModal = () => {
+    setAssignLeaderModal(true);
+  };
+
+  const handleCloseAssignLeaderModal = () => {
+    setAssignLeaderModal(false);
+  };
+  const columnsStudent = [
+    {
+      title: "image",
+      dataIndex: "account",
+      render: (account: any) => (
+        <img
+          className="h-[70px] w-[55px] aspect-auto object-cover"
+          src={
+            account?.profilePicture ||
+            "https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
+          }
+          alt=""
+        />
+      ),
+      width: 100,
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+    },
+    {
+      title: "Major",
+      dataIndex: "major",
+      render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
+    },
+    {
+      title: "Gen",
+      dataIndex: "gen",
+    },
+    {
+      title: "MSSV",
+      dataIndex: "studentId",
+    },
+  ];
 
   return (
     <>
@@ -523,13 +598,6 @@ const ClassGroupListWrapper = () => {
           <Button key="back" onClick={handleCloseAddMentorModal}>
             Cancel
           </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleCloseAddMentorModal}
-          >
-            Save
-          </Button>,
         ]}
       >
         {tagSearch.map((t) => (
@@ -574,6 +642,40 @@ const ClassGroupListWrapper = () => {
           pagination={{
             pageSize: 4,
             total: mentorData?.data.data.length, // Set the total number of rows
+          }}
+        />
+      </Modal>
+      {/* modal assign leader */}
+      <Modal
+        style={{ height: "80vh" }}
+        visible={assignLeaderModal}
+        title={groupName}
+        onCancel={handleCloseAssignLeaderModal}
+        width={1000}
+        footer={[
+          <Button key="back" onClick={handleCloseAssignLeaderModal}>
+            Cancel
+          </Button>,
+        ]}
+      >
+        {" "}
+        Select leader for this group
+        <Table
+          dataSource={groupStudentSelected}
+          columns={columnsStudent}
+          pagination={{
+            pageSize: 5,
+            total: groupStudentSelected.length, // Set the total number of rows
+          }}
+          onRow={(record, rowIndex) => {
+            return {
+              onClick: (e) => {
+                assignLeaderToGroup.mutate({
+                  studentId: record._id,
+                  groupId: groupIDSelected,
+                });
+              },
+            };
           }}
         />
       </Modal>
