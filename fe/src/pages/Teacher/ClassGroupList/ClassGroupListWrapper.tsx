@@ -370,7 +370,8 @@ const ClassGroupListWrapper = () => {
   }));
   //random add modal
   const [randomAddModal, setRandomAddModal] = useState(false);
-
+  console.log('adada');
+  
   const handleOpenRandomAddModal = () => {
     setRandomAddModal(true);
   };
