@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-
 const MentorSchema = new Schema(
   {
     name: {
@@ -17,13 +16,13 @@ const MentorSchema = new Schema(
     },
     profile: {
       type: String,
-      required: false, 
+      required: false,
     },
     assignedClasses: [
       {
         id: {
           type: Schema.Types.ObjectId,
-          ref: 'Class', 
+          ref: 'Class',
           required: true,
         },
         classCode: {
@@ -32,13 +31,37 @@ const MentorSchema = new Schema(
         },
         backgroundImage: {
           type: String,
-          required: false, 
+          required: false,
         },
       },
     ],
+    assignedGroup: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Group',
+        required: false,
+      },
+    ],
+    tag: [
+      {
+        id: {
+          type: Schema.Types.ObjectId,
+          ref: 'TagMajor',
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+      }
+    ],
     profilePicture: {
       type: String,
-      required: false, 
+      required: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: true
     }
   },
   { timestamps: true, collection: 'Mentors' }

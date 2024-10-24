@@ -8,5 +8,5 @@ submissionRouter.post("/createSubmission",
     verifyToken,
     authorization.checkGroupAccess,
     SubmissionController.createSubmission)
-
+submissionRouter.patch("/addGrade",SubmissionController.addGrade);
 export default submissionRouter;

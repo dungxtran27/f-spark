@@ -1,4 +1,5 @@
-import { GroupRepository } from "../repository/index.js";
+import Student from "../model/Student.js";
+import { GroupRepository, StudentRepository } from "../repository/index.js";
 const createJourneyRow = async (req, res) => {
   try {
     const { rowName } = req.body;
@@ -60,7 +61,7 @@ const createJourneyCol = async (req, res) => {
 };
 const findGroupById = async (req, res) => {
   try {
-    const groupId = req.params.groupId;
+    const groupId = req.groupId;
     if (!groupId) {
       return res.status(400).json({ error: "Bad request" });
     }
@@ -199,7 +200,46 @@ const deleteCustomerPersona = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
-}
+};
+
+const findAllStudentByGroup = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+    const [countStudent, groupStudent, unGroupStudents] = await Promise.all([
+      StudentRepository.getAllStudentByClassId(classId),
+      GroupRepository.findAllGroupsOfClass(classId),
+      StudentRepository.getAllStudentUngroupByClassId(classId),
+    ]);
+    const studentData = {
+      groupStudent,
+      unGroupStudents,
+      totalStudent: countStudent.length,
+    };
+    return res.status(200).json({ data: studentData });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const addStundentInGroup = async (req, res) => {
+  try {
+    const { groupId, studentId } = req.body;
+    const data = await GroupRepository.addStundentInGroup(groupId, studentId);
+    return res.status(200).json({ data: data });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const assignLeader = async (req, res) => {
+  try {
+    const { groupId, studentId } = req.body;
+    const data = await GroupRepository.assignLeader(groupId, studentId);
+    return res.status(200).json({ data: data });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 export default {
   createJourneyRow,
@@ -213,5 +253,8 @@ export default {
   updateCanvasCell,
   addCustomerPersona,
   updateCustomerPersona,
-  deleteCustomerPersona
+  deleteCustomerPersona,
+  findAllStudentByGroup,
+  addStundentInGroup,
+  assignLeader,
 };

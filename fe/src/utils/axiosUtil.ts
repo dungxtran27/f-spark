@@ -32,12 +32,17 @@ instance.interceptors.response.use(
           message.error("Token expired, please login");
 
           const persistRoot = localStorage.getItem("persist:root");
+
           if (persistRoot) {
             const updatedPersistRoot = JSON.parse(persistRoot);
+            let role = null;
+            if (updatedPersistRoot.auth) {
+              role = JSON.parse(updatedPersistRoot?.auth).userInfo?.role;
+            }
             delete updatedPersistRoot.auth;
             localStorage.setItem("persist:root", updatedPersistRoot);
             setInterval(() => {
-              window.location.href = "/login";
+              window.location.href = `/${role}/login`;
             }, 1000);
           }
         }

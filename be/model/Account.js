@@ -13,11 +13,11 @@ const AccountSchema = new Schema(
     },
     profilePicture: {
       type: String,
-      required: false, 
+      required: false,
     },
   },
-  { timestamps: true, collection: 'Account' }
+  { timestamps: true, collection: "Account" }
 );
 
-const Account = mongoose.model('Account', AccountSchema);
+const Account = mongoose.model("Account", AccountSchema);
 export default Account;

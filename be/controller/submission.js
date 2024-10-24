@@ -1,5 +1,5 @@
 import { SubmissionRepository } from "../repository/index.js";
-
+import mongoose from "mongoose";
 const createSubmission = async (req, res) => {
   try {
     const { attachment } = req.body;
@@ -22,6 +22,25 @@ const createSubmission = async (req, res) => {
   }
 };
 
+const addGrade = async (req,res) => {
+  try {
+    const { submissionId, grade, criteria } = req.body;
+    const criteriaObjectIds = criteria.map((id) => new mongoose.Types.ObjectId(id));
+
+    const updateGrade = await SubmissionRepository.addGrade({
+      submissionId: new mongoose.Types.ObjectId(submissionId),
+      grade,
+      criteria: criteriaObjectIds,
+    })
+    return res
+      .status(200)
+      .json({ data: updateGrade, message: "Graded successfully !" });
+  } catch (error) {
+    
+  }
+}
+
 export default {
   createSubmission,
+  addGrade
 };

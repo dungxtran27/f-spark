@@ -53,9 +53,9 @@ groupRouter.patch(
 );
 
 groupRouter.get(
-  "/:groupId",
+  "/",
   verifyToken,
-  // authorization.checkGroupAccess,
+  authorization.checkGroupAccess,
   GroupController.findGroupById
 );
 
@@ -64,20 +64,28 @@ groupRouter.post(
   verifyToken,
   authorization.checkGroupAccess,
   GroupController.addCustomerPersona
-)
+);
 
 groupRouter.patch(
   "/updateCustomerPersona",
   verifyToken,
   authorization.checkGroupAccess,
   GroupController.updateCustomerPersona
-)
+);
 
 groupRouter.delete(
   "/deleteCustomerPersona",
   verifyToken,
   authorization.checkGroupAccess,
   GroupController.deleteCustomerPersona
-)
-export default groupRouter;
+);
 
+groupRouter.get(
+  "/getAllStudentByGroup/:classId",
+  GroupController.findAllStudentByGroup
+);
+
+groupRouter.post("/addStudentInGroup", GroupController.addStundentInGroup);
+
+groupRouter.post("/assignLeader", GroupController.assignLeader);
+export default groupRouter;

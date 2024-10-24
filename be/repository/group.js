@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import Group from "../model/Group.js";
+import Student from "../model/Student.js";
+import student from "./student.js";
 
 const createJourneyRow = async ({ groupId, name }) => {
   try {
@@ -72,16 +74,36 @@ const createCellsOnUpdate = async ({ newCells, groupId }) => {
 
 const findGroupById = async ({ groupId }) => {
   try {
-    const existingGroup = await Group.findById(groupId);
+    const existingGroup = await Group.findById(groupId).populate({
+      path: 'teamMembers',
+      select: '_id name gen major studentId account',
+      populate: {
+        path: 'account',
+        select: 'profilePicture'
+      },
+    }).populate({
+      path: 'class',
+      select: 'teacher',
+      populate: {
+        path: 'teacher',
+        select: '_id name salutation phoneNumber account',
+        populate: {
+          path: 'account',
+          select: 'profilePicture'
+        }
+      }
+    }).populate({
+      path: 'mentor',
+      select: '_id name email phoneNumber profile profilePicture'
+    });
     return existingGroup;
   } catch (error) {
     return new Error(error.message);
   }
 };
+
 const deleteRow = async ({ rowId, groupId }) => {
   try {
-    // const convertedRowId = new mongoose.Types.ObjectId(rowId);
-
     const updatedGroup = await Group.findOneAndUpdate(
       {
         _id: groupId,
@@ -104,8 +126,6 @@ const deleteRow = async ({ rowId, groupId }) => {
 };
 const deleteCol = async ({ colId, groupId }) => {
   try {
-    // const convertedRowId = new mongoose.Types.ObjectId(rowId);
-
     const updatedGroup = await Group.findOneAndUpdate(
       {
         _id: groupId,
@@ -134,7 +154,7 @@ const updateCellContent = async ({ cellId, content, groupId }) => {
       },
       {
         $set: {
-          "customerJourneyMap.cells.$.content": content, // Update the content of the matched cell
+          "customerJourneyMap.cells.$.content": content,
         },
       },
       {
@@ -288,6 +308,97 @@ const deleteCustomerPersona = async ({ groupId, personaId }) => {
   }
 };
 
+const findAllGroupsOfClass = async (classId) => {
+  try {
+    const data = await Group.find({
+      class: classId
+    }).select('GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage').populate({
+      path: 'teamMembers',
+      select: '_id name gen major studentId account',
+      populate: {
+        path: 'account',
+        select: 'profilePicture'
+      }
+    }).populate({
+      path: 'tag',
+      select: 'name '
+    }).populate({
+      path: 'mentor',
+      select: 'name profilePicture'
+    })
+    return data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+const addStundentInGroup = async (groupId, studentId) => {
+  try {
+    const group = await Group.findOne({
+      _id: groupId,
+      teamMembers: studentId
+    });
+
+    const student = await Student.findById(studentId);
+    if (!student) {
+      throw new Error("Student not found")
+    }
+
+    if (group) {
+      throw new Error("Student already exists in the group")
+    }
+
+    const updatedGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $push: { teamMembers: studentId } },
+      { new: true }
+    );
+
+    const updatedStudent = await Student.findByIdAndUpdate(
+      studentId,
+      { group: groupId },
+      { new: true }
+    );
+
+    return {
+      message: "Student add successfully",
+      group: updatedGroup
+    };
+
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+const assignLeader = async (groupId, studentId) => {
+  try {
+    const student = await Student.findById(studentId);
+    if (!student) {
+      throw new Error("Student not found")
+    }
+
+    const group = await Group.findOne({
+      _id: groupId,
+      teamMembers: studentId
+    });
+
+    if (!group) {
+      throw new Error("Student is not exists in the group")
+    }
+
+    const updatedGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $set: { leader: studentId } },
+      { new: true }
+    );
+    return {
+      message: "Student assign successfully",
+      group: updatedGroup
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 
 export default {
   createCellsOnUpdate,
@@ -303,4 +414,9 @@ export default {
   addCustomerPersona,
   updateCustomerPersona,
   deleteCustomerPersona,
+  findAllGroupsOfClass,
+  addStundentInGroup,
+  findAllStudentByGroupId,
+  addStundentInGroup,
+  assignLeader
 };

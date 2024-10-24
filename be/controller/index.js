@@ -10,6 +10,7 @@ import MentorController from "./mentor.js";
 import SubmissionController from "./submission.js";
 import TaskController from "./task.js";
 import TimeBlockController from "./timeblock.js";
+import TagMajorController from "./tagmajor.js";
 
 export {
   AuthenticationController,
@@ -24,4 +25,5 @@ export {
   SubmissionController,
   TaskController,
   TimeBlockController,
+  TagMajorController
 };

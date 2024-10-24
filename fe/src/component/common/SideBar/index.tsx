@@ -1,15 +1,22 @@
 import classNames from "classnames";
 import styles from "./styles.module.scss";
-import { DefaultRoutes, SecondaryMenu } from "../../../utils/menu";
+import {
+  StudentRoutes,
+  SecondaryMenu,
+  TeacherRoutes,
+} from "../../../utils/menu";
 import SideBarItem from "./SideBarItem";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
 import { IoMdExit } from "react-icons/io";
-import { Tooltip } from "antd";
+import { message, Tooltip } from "antd";
 import React from "react";
 import { Image } from "antd";
 import logo_header from "../../../../public/logo_header.png";
+import { ROLE } from "../../../utils/const";
+import { useMutation } from "@tanstack/react-query";
+import { authApi } from "../../../api/auth";
 interface RouteProps {
   route: string;
   page: string;
@@ -40,20 +47,49 @@ const SideBar: React.FC<HeaderProps> = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
+  const getRoutes = (role: any) => {
+    switch (role) {
+      case ROLE.student:
+        return StudentRoutes;
+      case ROLE.teacher:
+        return TeacherRoutes;
+      default:
+        message.error("invalid role!");
+        break;
+    }
+  };
+  const logOutMutation = useMutation({
+    mutationFn: () => authApi.logOut(),
+    onSuccess: () => {
+      const persistRoot = localStorage.getItem("persist:root");
+      if (persistRoot) {
+        const updatedPersistRoot = JSON.parse(persistRoot);
+        let role = null;
+        if (updatedPersistRoot.auth) {
+          role = JSON.parse(updatedPersistRoot?.auth).userInfo?.role;
+        }
+        delete updatedPersistRoot.auth;
+        localStorage.setItem("persist:root", updatedPersistRoot);
+        setInterval(() => {
+          window.location.href = `/${role}/login`;
+        }, 1000);
+      }
+    },
+  });
   return (
-    <div className="h-screen w-[260px] flex flex-col justify-between">
+    <div className="h-screen w-[260px] flex flex-col justify-between border-r-[1px] border-backgroundSecondary">
       <div>
-      <div
-        className={classNames(
-          styles.logoWrapper,
-          "border-r-[1px] z-10 border-b-[1px] border-backgroundSecondary flex items-center px-3 gap-3 font-medium text-lg"
-        )}
-      >
-        <Image width={60} preview={false} src={logo_header} />
-        FSpark
-      </div>
+        <div
+          className={classNames(
+            styles.logoWrapper,
+            "z-10 border-b-[1px] flex items-center px-3 gap-3 font-medium text-lg"
+          )}
+        >
+          <Image width={60} preview={false} src={logo_header} />
+          FSpark
+        </div>
         <div className="pt-5">
-          <MenuContent routes={DefaultRoutes} />
+          <MenuContent routes={getRoutes(userInfo?.role) || []} />
         </div>
       </div>
       <div className="py-3">
@@ -72,11 +108,16 @@ const SideBar: React.FC<HeaderProps> = () => {
                 <span className="text-[14px] font-semibold">
                   {userInfo?.name}
                 </span>
-                  <span className="text-[12px] truncate">Student</span>
+                <span className="text-[12px] truncate">Student</span>
               </div>
             </div>
             <Tooltip title={"log out"} className="cursor-pointer w-1/6">
-              <IoMdExit size={25} />
+              <IoMdExit
+                size={25}
+                onClick={() => {
+                  logOutMutation.mutate();
+                }}
+              />
             </Tooltip>
           </div>
         </div>
