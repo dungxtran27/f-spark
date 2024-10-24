@@ -410,6 +410,7 @@ const ClassGroupListWrapper = () => {
       name: record.name,
     }),
   };
+  console.log(tagData);
 
   /* modal add member to group */
 
