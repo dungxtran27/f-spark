@@ -81,8 +81,8 @@ groupRouter.delete(
 );
 
 groupRouter.get(
-  "/getAllStudentByGroupId/:classId",
-  GroupController.findAllStudentByGroupId
+  "/getAllStudentByGroup/:classId",
+  GroupController.findAllStudentByGroup
 );
 
 groupRouter.post("/addStudentInGroup", GroupController.addStundentInGroup);

@@ -202,7 +202,7 @@ const deleteCustomerPersona = async (req, res) => {
   }
 };
 
-const findAllStudentByGroupId = async (req, res) => {
+const findAllStudentByGroup = async (req, res) => {
   try {
     const classId = req.params.classId;
     const [countStudent, groupStudent, unGroupStudents] = await Promise.all([
@@ -254,7 +254,7 @@ export default {
   addCustomerPersona,
   updateCustomerPersona,
   deleteCustomerPersona,
-  findAllStudentByGroupId,
+  findAllStudentByGroup,
   addStundentInGroup,
   assignLeader,
 };

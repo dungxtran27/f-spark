@@ -70,7 +70,10 @@ const getAllStudentUngroupByClassId = async (classId) => {
   try {
     const students = await Student.find({
       classId: classId, group: null
-    }).select('_id name gen major ');
+    }).select('_id name gen major studentId account').populate({
+      path: 'account',
+      select: 'profilePicture'
+    });
     return students;
   } catch (error) {
     throw new Error(error.message);

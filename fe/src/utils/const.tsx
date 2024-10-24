@@ -163,7 +163,9 @@ export const QUERY_KEY = {
   MENTORLIST: "mentorlist",
   TEACHER_OUTCOMES_LIST: "teacherOutcomeList",
   GROUPS_OF_CLASS: "groupsOfClass",
-  CLASSES: "classes"
+  CLASSES: "classes",
+  TAGDATA: "tagData",
+  ADDSTUDENTTOGROUP: "addStudentToGroup",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
