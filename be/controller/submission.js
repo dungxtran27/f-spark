@@ -33,8 +33,8 @@ const addGrade = async (req,res) => {
       criteria: criteriaObjectIds,
     })
     return res
-      .status(201)
-      .json({ data: updateGrade, message: "Add grade successfully" });
+      .status(200)
+      .json({ data: updateGrade, message: "Graded successfully !" });
   } catch (error) {
     
   }

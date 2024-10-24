@@ -3,14 +3,18 @@ import dayjs from "dayjs";
 import { TiAttachment } from "react-icons/ti";
 import {
   DATE_FORMAT,
+  QUERY_KEY,
   TEACHER_OUTCOMES_MODAL_TYPES,
 } from "../../../../../utils/const";
 import { CiEdit } from "react-icons/ci";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { classApi } from "../../../../../api/Class/class";
 
 interface Props {
   _id: string;
   group: any;
-  score: number;
+  grade: number;
   attachment?: string | undefined;
   passedCriteria?: string[];
   createdAt: string;
@@ -22,29 +26,29 @@ const Submissions = ({
 }: {
   submissions: Props[] | undefined;
   gradingCriteria: any[];
-  setOpenModal: (value: any) => void;
+  setOpenModal: (open: any, submission: any, gradingCriterias: any) => void;
 }) => {
-  const groupsOfClass = [
-    {
-      _id: "1",
-      name: "Trà thảo mộc T+",
+  const { classId } = useParams();
+  const { data: groups, isLoading } = useQuery({
+    queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
+    queryFn: () => {
+      return classApi.getGroupOfClass(classId);
     },
-    {
-      _id: "2",
-      name: "Ăn vặt kiểu Nhật - Maneki chan",
-    },
-  ];
-  const items: CollapseProps["items"] = groupsOfClass?.map((g) => {
+    enabled: !!classId,
+  });
+
+  const groupsOfClass = groups?.data?.data?.groupStudent;
+  const items: CollapseProps["items"] = groupsOfClass?.map((g: any) => {
     const s = submissions?.find((gs) => gs?.group?._id === g?._id);
     return {
       key: g?._id,
       label: (
         <div className="flex items-center justify-between font-medium">
-          <span className="font-medium">{g?.name}</span>
+          <span className="font-medium">{g?.GroupName}</span>
           <span>
             {s ? (
-              s?.score ? (
-                <span className="text-green-500">{s?.score}</span>
+              s?.grade ? (
+                <span className="text-green-500">{s?.grade}</span>
               ) : (
                 <span className="text-yellow-500">Submitted</span>
               )
@@ -91,10 +95,14 @@ const Submissions = ({
               className="text-primaryBlue cursor-pointer"
               size={23}
               onClick={() => {
-                setOpenModal({
-                  isOpen: true,
-                  modalType: TEACHER_OUTCOMES_MODAL_TYPES.grading,
-                });
+                setOpenModal(
+                  {
+                    isOpen: true,
+                    modalType: TEACHER_OUTCOMES_MODAL_TYPES.grading,
+                  },
+                  s,
+                  gradingCriteria
+                );
               }}
             />
           </div>

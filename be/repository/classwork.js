@@ -64,9 +64,18 @@ const getOutcomes = async (classId) => {
   try {
     const outcomeList = await ClassWork.find({
       type: "outcome",
-      classId: classId,
+      class: classId,
     });
-    return outcomeList;
+    const outcomeWithSubmissions = await Promise.all(
+      outcomeList.map(async (o) => {
+        const submissions = await Submission.find({ classworkId: o._id }).populate({path: "group", select: "GroupName"});
+        return {
+          ...o._doc,
+          submissions,
+        };
+      })
+    );
+    return outcomeWithSubmissions;
   } catch (error) {
     throw new Error(error.message);
   }
