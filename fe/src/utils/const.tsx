@@ -161,6 +161,7 @@ export const QUERY_KEY = {
   STUDENT_OF_GROUP: "studentOfGroup",
   OUTCOMES_LIST: "outcomesList",
   MENTORLIST: "mentorlist",
+  MENTORPROFILE: "mentorprofile",
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
 };

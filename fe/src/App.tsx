@@ -12,6 +12,9 @@ import ClassGroupList from "./pages/Teacher/ClassGroupList";
 import Classes from "./pages/Teacher/Classes";
 import ClassDetail from "./pages/Teacher/ClassDetail";
 import TeacherDashboard from "./pages/Teacher/Dashboard";
+import MentorProfile from "./pages/Teacher/MentorProfile/mentorProfile";
+import AccountManagement from "./pages/PDT/MangeAccount/AccountManagement";
+
 function App() {
   return (
     <BrowserRouter>
@@ -27,10 +30,13 @@ function App() {
         {/* teacher */}
         <Route path="/mentorlist" element={<MentorList />} />
         <Route path="/class-grouplist/:classID" element={<ClassGroupList />} />
-
+        <Route path="/mentorProfile" element={<MentorProfile />} />
         <Route path="/classes" element={<Classes />} />
         <Route path="/class/:classId" element={<ClassDetail />} />
         <Route path="/dashboard" element={<TeacherDashboard />} />
+
+        <Route path="/manageaccount" element={<AccountManagement />} />
+
       </Routes>
     </BrowserRouter>
   );
