@@ -15,6 +15,7 @@ import TeacherDashboard from "./pages/Teacher/Dashboard";
 import MentorProfile from "./pages/Teacher/MentorProfile/mentorProfile";
 import AccountManagement from "./pages/PDT/MangeAccount/AccountManagement";
 
+import ManageClass from "./pages/PDT/ManageClass";
 function App() {
   return (
     <BrowserRouter>
@@ -35,8 +36,9 @@ function App() {
         <Route path="/class/:classId" element={<ClassDetail />} />
         <Route path="/dashboard" element={<TeacherDashboard />} />
 
+        {/* PDT */}
+        <Route path="/manageClass" element={<ManageClass />} />
         <Route path="/manageaccount" element={<AccountManagement />} />
-
       </Routes>
     </BrowserRouter>
   );
