@@ -1,7 +1,11 @@
-import { Form, Input, InputNumber } from "antd";
+import { Checkbox, Form, Input, InputNumber } from "antd";
 import FormItem from "antd/es/form/FormItem";
-
-const GradingSubmission = ({ form }: { form: any }) => {
+interface Props {
+  gradingCriteria: any;
+  submission: any;
+  form: any;
+}
+const GradingSubmission = ({ form, gradingCriteria, submission }: Props) => {
   return (
     <div>
       <Form form={form} layout="vertical">
@@ -12,19 +16,25 @@ const GradingSubmission = ({ form }: { form: any }) => {
         >
           <Input disabled size="large" readOnly />
         </FormItem>
-        <FormItem
-          label="Grade"
-          name="Grade"
-          initialValue={9}
-        >
+        <FormItem label="Grade" name="grade" initialValue={submission?.grade || 0}>
           <InputNumber size="large" className="w-full" />
         </FormItem>
         <FormItem
           label="Passed Criterias"
           name="passedCriterias"
-          initialValue={"Ăn vặt kiểu Nhật Bản - Maneki chan"}
+          initialValue={submission?.passedCriteria}
+          key={submission}
         >
-          <Input disabled size="large" readOnly />
+          <Checkbox.Group
+            className="flex flex-col"
+            key={gradingCriteria}
+            options={gradingCriteria.map((gc: any) => {
+              return {
+                label: gc?.description,
+                value: gc?._id,
+              };
+            })}
+          />
         </FormItem>
       </Form>
     </div>

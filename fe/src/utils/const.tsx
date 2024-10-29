@@ -162,6 +162,9 @@ export const QUERY_KEY = {
   OUTCOMES_LIST: "outcomesList",
   MENTORLIST: "mentorlist",
   MENTORPROFILE: "mentorprofile",
+  TEACHER_OUTCOMES_LIST: "teacherOutcomeList",
+  GROUPS_OF_CLASS: "groupsOfClass",
+  CLASSES: "classes",
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
 };

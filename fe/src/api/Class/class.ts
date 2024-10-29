@@ -4,7 +4,7 @@ export const classApi = {
     return await axios.get(`api/classwork/viewOutcomes`);
   },
   getclassDetailPeople: async (classid: string) => {
-    return await axios.get(`api/group/getAllStudentByGroupId/${classid}`);
+    return await axios.get(`api/group/getAllStudentByGroup/${classid}`);
   },
   createSubmission: async (
     classworkId: string,
@@ -15,5 +15,17 @@ export const classApi = {
       `api/submission/createSubmission?classworkId=${classworkId}&groupId=${groupId}`,
       requestBody
     );
+  },
+  teacherViewOutcomes: async (classId: string | undefined) => {
+    return await axios.get(`api/classwork/getOutcomesByTeacher/${classId}`);
+  },
+  getGroupOfClass: async (classId: string | undefined) => {
+    return await axios.get(`api/group/getAllStudentByGroupId/${classId}`);
+  },
+  getTeacherClasses: async () => {
+    return await axios.get(`api/class/getTeacherClasses`);
+  },
+  gradeOutcome: async (requestBody: any) => {
+    return await axios.patch(`api/submission/addGrade`, requestBody);
   },
 };

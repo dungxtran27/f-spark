@@ -61,7 +61,7 @@ const createJourneyCol = async (req, res) => {
 };
 const findGroupById = async (req, res) => {
   try {
-    const groupId = req.params.groupId;
+    const groupId = req.groupId;
     if (!groupId) {
       return res.status(400).json({ error: "Bad request" });
     }
@@ -205,11 +205,11 @@ const deleteCustomerPersona = async (req, res) => {
 const findAllStudentByGroup = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const countStudent = await StudentRepository.getAllStudentByClassId(
-      classId
-    );
-    const groupStudent = await GroupRepository.findAllStudentByGroupId(classId);
-    const unGroupStudents = await StudentRepository.getAllStudentUngroupByClassId(classId);
+    const [countStudent, groupStudent, unGroupStudents] = await Promise.all([
+      StudentRepository.getAllStudentByClassId(classId),
+      GroupRepository.findAllGroupsOfClass(classId),
+      StudentRepository.getAllStudentUngroupByClassId(classId),
+    ]);
     const studentData = {
       groupStudent,
       unGroupStudents,

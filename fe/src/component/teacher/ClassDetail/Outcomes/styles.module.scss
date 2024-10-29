@@ -1,15 +1,21 @@
-
 .outcomes {
-    :global {
-      .ant-tabs {
-        .ant-tabs-nav {
-          padding: 0 !important;
-          background-color: transparent !important;
+  :global {
+    .ant-tabs {
+      .ant-tabs-nav {
+        padding: 0 !important;
+        background-color: transparent !important;
+        width: 200px !important;
+        .ant-tabs-tab-btn {
+          width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: left;
         }
-        .ant-tabs-content-holder {
-          padding: 0 !important;
-        }
+      }
+      .ant-tabs-content-holder {
+        padding: 0 !important;
       }
     }
   }
-  
+}

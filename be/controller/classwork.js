@@ -130,7 +130,6 @@ export default {
   getClassWorkByTeacher,
   viewOutcomes,
   getOutcomesByTeacher,
-  getClassWorkByTeacher,
   editClassWorkByTeacher,
   deleteClasswork,
   createClassWork

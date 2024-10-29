@@ -74,16 +74,36 @@ const createCellsOnUpdate = async ({ newCells, groupId }) => {
 
 const findGroupById = async ({ groupId }) => {
   try {
-    const existingGroup = await Group.findById(groupId);
+    const existingGroup = await Group.findById(groupId).populate({
+      path: 'teamMembers',
+      select: '_id name gen major studentId account',
+      populate: {
+        path: 'account',
+        select: 'profilePicture'
+      },
+    }).populate({
+      path: 'class',
+      select: 'teacher',
+      populate: {
+        path: 'teacher',
+        select: '_id name salutation phoneNumber account',
+        populate: {
+          path: 'account',
+          select: 'profilePicture'
+        }
+      }
+    }).populate({
+      path: 'mentor',
+      select: '_id name email phoneNumber profile profilePicture'
+    });
     return existingGroup;
   } catch (error) {
     return new Error(error.message);
   }
 };
+
 const deleteRow = async ({ rowId, groupId }) => {
   try {
-    // const convertedRowId = new mongoose.Types.ObjectId(rowId);
-
     const updatedGroup = await Group.findOneAndUpdate(
       {
         _id: groupId,
@@ -106,8 +126,6 @@ const deleteRow = async ({ rowId, groupId }) => {
 };
 const deleteCol = async ({ colId, groupId }) => {
   try {
-    // const convertedRowId = new mongoose.Types.ObjectId(rowId);
-
     const updatedGroup = await Group.findOneAndUpdate(
       {
         _id: groupId,
@@ -136,7 +154,7 @@ const updateCellContent = async ({ cellId, content, groupId }) => {
       },
       {
         $set: {
-          "customerJourneyMap.cells.$.content": content, // Update the content of the matched cell
+          "customerJourneyMap.cells.$.content": content,
         },
       },
       {
@@ -290,7 +308,7 @@ const deleteCustomerPersona = async ({ groupId, personaId }) => {
   }
 };
 
-const findAllStudentByGroupId = async (classId) => {
+const findAllGroupsOfClass = async (classId) => {
   try {
     const data = await Group.find({
       class: classId
@@ -396,6 +414,8 @@ export default {
   addCustomerPersona,
   updateCustomerPersona,
   deleteCustomerPersona,
+  findAllGroupsOfClass,
+  addStundentInGroup,
   findAllStudentByGroupId,
   addStundentInGroup,
   assignLeader

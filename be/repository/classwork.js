@@ -64,9 +64,18 @@ const getOutcomes = async (classId) => {
   try {
     const outcomeList = await ClassWork.find({
       type: "outcome",
-      classId: classId,
-    });    
-    return outcomeList;
+      class: classId,
+    });
+    const outcomeWithSubmissions = await Promise.all(
+      outcomeList.map(async (o) => {
+        const submissions = await Submission.find({ classworkId: o._id }).populate({path: "group", select: "GroupName"});
+        return {
+          ...o._doc,
+          submissions,
+        };
+      })
+    );
+    return outcomeWithSubmissions;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -74,21 +83,29 @@ const getOutcomes = async (classId) => {
 
 const getClassWorkByTeacher = async (classId) => {
   try {
-    const classworkList = await ClassWork.find({
+    const data = await ClassWork.find({
       type: { $in: ["announce", "assignment"] },
       classId: classId,
-    }).select("_id name title description type classId upVote");    
-    const assignmentIds = classworkList
-      .filter(classWork => classWork.type === "assignment")
-      .map(classWork => classWork._id);
+    }).select("_id name title description type classId upVote");
 
-    let submissions = [];
-    if (assignmentIds.length > 0) {
-      submissions = await Submission.find({
-        classworkId: { $in: assignmentIds }
-      });
-    }
-    return { classworkList, submissions };
+    const classworkList = await Promise.all(data.map(async (classWork) => {
+      if (classWork.type === "assignment") {
+        const submissions = await Submission.find({
+          classworkId: classWork._id
+        }).populate({
+          path: 'student',
+          select: '_id name gen major studentId account',
+          populate: {
+            path: 'account',
+            select: 'profilePicture'
+          }
+        });
+        return { ...classWork._doc, submissions: submissions };
+      }
+      return { ...classWork._doc, submissions: [] };
+    }));
+
+    return classworkList;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -143,7 +160,6 @@ const deleteClasswork = async (classworkId, classId) => {
 };
 export default {
   getClassWorkByStudent,
-  getClassWorkByTeacher,
   getOutcomes,
   getClassWorkByTeacher,
   editClassWorkByTeacher,

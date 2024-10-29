@@ -6,8 +6,6 @@ import Group from "../model/Group.js";
 const getAllMentors = async (tagIds, name, page, limit) => {
   try {
     const tagIdArray = Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : [];
-    console.log(tagIdArray);
-
     const searchConditions = [];
     if (tagIdArray.length > 0) {
       searchConditions.push({
@@ -118,16 +116,14 @@ const assignMentor = async ({ groupId, mentorId }) => {
     const mentor = await Mentor.findById(mentorId);
     if (!mentor) {
       throw new Error("Mentor not found ");
-
     }
     const group = await Group.findOne({
       _id: groupId,
-      mentor: mentorId
+      mentor: mentorId,
     });
 
     if (group) {
       throw new Error("Mentor already exists in the group ");
-
     }
     const updateMentor = await Mentor.findByIdAndUpdate(
       mentorId,
@@ -137,16 +133,16 @@ const assignMentor = async ({ groupId, mentorId }) => {
       { new: true }
     );
 
-    // const updateGroup = await Group.findByIdAndUpdate(groupId,
-    //   { mentor: mentorId, },
-    //   { new: true }
-    // );
+    const updateGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { mentor: mentorId },
+      { new: true }
+    );
 
     return {
       message: "Mentor assigned successfully",
-      group: updateMentor
+      group: updateMentor,
     };
-
   } catch (error) {
     throw new Error(error.message);
   }

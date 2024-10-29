@@ -185,8 +185,6 @@ const login = async (req, res) => {
       sameSite: "lax",
       secure: false,
     });
-    console.log(userDetail);
-
     return res
       .status(200)
       .json({ message: "Login successfully! Welcome back", data: userDetail });
@@ -410,6 +408,7 @@ const oauth2GoogleAuthentication = async (req, res) => {
 const googleLogin = async (req, res) => {
   try {
     const token = req.body.token;
+    const role = req.body.role;
     if (!token) {
       return res
         .status(400)
@@ -425,31 +424,59 @@ const googleLogin = async (req, res) => {
         }
 
         try {
-          const existingUser = await AuthenticateRepository.getUserByEmail(
+          const existingAccount = await AccountRepository.findAccountByEmail(
             decodedToken.email
           );
-          if (!existingUser) {
+          if (!existingAccount) {
             return res.status(400).json({ error: "Email not found" });
           }
-          const accessToken = jwt.sign(
-            { userId: existingUser._id },
-            process.env.JWT_SECRET_KEY,
-            {
-              expiresIn: "1hr",
-            }
-          );
+          let userDetail = {};
+          switch (role) {
+            case ROLE_NAME.student:
+              const student = await StudentRepository.findStudentByAccountId(
+                existingAccount._id
+              );
+              if (!student) {
+                return res.status(404).json({
+                  error: "No such student found matched with provided credential",
+                });
+              }
+              userDetail = student.toObject();
+              userDetail.role = ROLE_NAME.student;
+              break;
 
-          const refreshToken = jwt.sign(
-            { userId: existingUser._id },
-            process.env.JWT_SECRET_KEY,
-            {
-              expiresIn: "1w",
-            }
-          );
-
-          const { createdAt, updatedAt, password, ...filteredUser } =
-            existingUser._doc;
-
+            case ROLE_NAME.teacher:
+              const teacher = await TeacherRepository.findByAccountId(
+                existingAccount?._id
+              );
+              if (!teacher) {
+                return res.status(404).json({
+                  error: "No such teacher found matched with provided credential",
+                });
+              }
+              userDetail = teacher.toObject();
+              userDetail.role = ROLE_NAME.teacher;
+              break;
+            case ROLE_NAME.startUpDepartment:
+              return res.status(404).json({ error: "Unimplemented" });
+            case ROLE_NAME.admin:
+              return res.status(404).json({ error: "Unimplemented" });
+            default:
+              return res.status(500).json({ error: "Bad request" });
+          }
+          const payload = {
+            account: existingAccount._id,
+            role: {
+              id: userDetail._id,
+              role: userDetail.role,
+            },
+          };
+          const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+            expiresIn: "1hr",
+          });
+          const refreshToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+            expiresIn: "1w",
+          });
           res.cookie("accessToken", accessToken, {
             httpOnly: true,
             path: "/",
@@ -468,7 +495,7 @@ const googleLogin = async (req, res) => {
 
           return res.status(200).json({
             message: "Login successfully! Welcome back",
-            data: filteredUser,
+            data: userDetail,
           });
         } catch (error) {
           return res.status(500).json({ error: error.message });
@@ -479,10 +506,11 @@ const googleLogin = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 const sendResetLink = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await AuthenticateRepository.findByEmail(email);
+    const user = await AccountRepository.findAccountByEmail(email);
     if (!user) {
       return res.status(400).json({ error: "Email not found" });
     }
