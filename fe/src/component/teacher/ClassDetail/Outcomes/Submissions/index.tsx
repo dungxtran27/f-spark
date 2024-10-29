@@ -29,7 +29,7 @@ const Submissions = ({
   setOpenModal: (open: any, submission: any, gradingCriterias: any) => void;
 }) => {
   const { classId } = useParams();
-  const { data: groups, isLoading } = useQuery({
+  const { data: groups } = useQuery({
     queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
     queryFn: () => {
       return classApi.getGroupOfClass(classId);
