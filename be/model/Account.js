@@ -16,7 +16,7 @@ const AccountSchema = new Schema(
       required: false,
     },
   },
-  { timestamps: true, collection: "Account" }
+  { timestamps: true, collection: "Accounts" }
 );
 
 const Account = mongoose.model("Account", AccountSchema);

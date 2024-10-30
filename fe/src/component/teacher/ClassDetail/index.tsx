@@ -37,7 +37,7 @@ const ClassDetailWrapper = () => {
     <DefaultLayout>
       <Banner name={classDetail?.name} background={classDetail?.background} />
       <div className={classNames(styles.customTabs)}>
-        <Tabs items={items} defaultActiveKey="outcomes" />
+        <Tabs items={items} defaultActiveKey="stream" />
       </div>
     </DefaultLayout>
   );

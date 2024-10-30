@@ -55,10 +55,10 @@ export const SecondaryMenu = [
   //   page: "Help",
   //   icon: <GoQuestion size={20} />,
   // },
-  {
-    route: "/notification",
-    page: "Notification",
-    icon: <SlBell size={20} />,
-    badge: <Badge count={10} />,
-  },
+  // {
+  //   route: "/notification",
+  //   page: "Notification",
+  //   icon: <SlBell size={20} />,
+  //   badge: <Badge count={10} />,
+  // },
 ];

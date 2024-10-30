@@ -20,7 +20,7 @@ export const classApi = {
     return await axios.get(`api/classwork/getOutcomesByTeacher/${classId}`);
   },
   getGroupOfClass: async (classId: string | undefined) => {
-    return await axios.get(`api/group/getAllStudentByGroupId/${classId}`);
+    return await axios.get(`api/group/getAllStudentByGroup/${classId}`);
   },
   getTeacherClasses: async () => {
     return await axios.get(`api/class/getTeacherClasses`);

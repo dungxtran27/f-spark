@@ -10,7 +10,9 @@ export default {
         textSecondary: "#8e8e8e",
         primaryBlue: "#007BF7",
         textHeaders: "#10004B",
-        inputBackground: "#F8F8FF"
+        inputBackground: "#F8F8FF",
+        pendingStatus: "#F08E1D",
+        okStatus: "#15CB49",
       },
     },
   },
