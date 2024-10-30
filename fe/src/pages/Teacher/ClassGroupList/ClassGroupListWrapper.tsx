@@ -1,40 +1,72 @@
-import {
-  Button,
-  Modal,
-  Collapse,
-  // Badge,
-  CollapseProps,
-  Tag,
-  Popover,
-  Select,
-  Divider,
-  Space,
-  Input,
-  Table,
-  Badge,
-} from "antd";
+import { Button, Modal, Tag, Select, Space, Input, Table } from "antd";
 const { Search } = Input;
 
 import { useState } from "react";
-import { FaEdit, FaCircle } from "react-icons/fa";
-import { FaPeopleGroup } from "react-icons/fa6";
 
-import { FaPlus } from "react-icons/fa";
 import { colorMap, colorMajorGroup, QUERY_KEY } from "../../../utils/const";
 import classNames from "classnames";
 import style from "../MentorList/style.module.scss";
-import type { GetProps, SelectProps, TableProps } from "antd";
+import type { GetProps, SelectProps } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { classApi } from "../../../api/Class/class";
 import { mentorList } from "../../../api/mentor/mentor";
 import { student } from "../../../api/student/student";
 import GroupCard from "./GroupCard";
-import { TeamOutlined } from "@ant-design/icons";
+import { FaEdit, FaStar } from "react-icons/fa";
 
+interface reqBodyAssignMentorToGroup {
+  mentorId: string;
+  groupId: string;
+}
+
+interface MentorData {
+  _id: string;
+  name: string;
+  groupNumber: number;
+  major: majortype[];
+  avatar: string;
+}
+interface majortype {
+  _id: string;
+  name: string;
+}
+
+interface reqBodyAddStudentToGroup {
+  studentId: string;
+  groupId: string;
+}
+interface Account {
+  profilePicture?: string; // Optional, as not all accounts might have a profile picture
+  _id: string;
+  gen: number;
+  major: string;
+  name: string;
+  studentId?: string; // Optional, as studentId might not be present for all accounts
+}
+interface Group {
+  ProjectImage: string;
+  GroupDescription: string;
+  GroupName: string;
+  isSponsorship: boolean;
+  leader: string;
+  mentor: MentorData | null;
+  tag: majortype[];
+  teamMembers: Account[];
+  _id: string;
+}
 const ClassGroupListWrapper = () => {
-  const [group, setGroup] = useState({});
+  const [group, setGroup] = useState<Group>({
+    ProjectImage: "",
+    GroupDescription: "",
+    GroupName: "",
+    isSponsorship: false,
+    leader: "",
+    mentor: null,
+    tag: [],
+    teamMembers: [],
+    _id: "",
+  });
   //random add modal
-  const [randomAddModal, setRandomAddModal] = useState(false);
 
   //add mentor modal
   const [AddMentorModal, setAddMentorModal] = useState(false);
@@ -46,16 +78,41 @@ const ClassGroupListWrapper = () => {
   const handleCloseAddMentorModal = () => {
     setAddMentorModal(false);
   };
-  //add member modal
-  const [AddMemberModal, setAddMemberModal] = useState(false);
-
-  const handleOpenAddMemberModal = () => {
-    setAddMemberModal(true);
+  const [confirm, setConfirm] = useState(false);
+  const [confirmContent, setConfirmContent] = useState("");
+  const [studentSelected, setCstudentSelected] = useState({});
+  const [mentorSelected, setmentorSelected] = useState<MentorData>({
+    _id: "",
+    name: "",
+    groupNumber: 0,
+    major: [],
+    avatar: "",
+  });
+  const handleOpenconfirm = () => {
+    setConfirm(true);
   };
 
-  const handleCloseAddMemberModal = () => {
-    setAddMemberModal(false);
+  const handleCloseconfirm = () => {
+    setConfirm(false);
   };
+  // //add member modal
+
+  const [tagSearch, setTagSearch] = useState([]);
+  const [nameSeacrh, setNameSeacrh] = useState("");
+  const handleChange = (value: any) => {
+    setTagSearch(value);
+  };
+
+  const [groupDetailModal, setgroupDetailModal] = useState(false);
+
+  const handleOpengroupDetailModal = () => {
+    setgroupDetailModal(true);
+  };
+
+  const handleClosegroupDetailModal = () => {
+    setgroupDetailModal(false);
+  };
+
   const classID = "670bb40cd6dcc64ee8cf7c90";
   //handle classData
   const { data: classPeople } = useQuery({
@@ -65,143 +122,19 @@ const ClassGroupListWrapper = () => {
     },
   });
 
-  // const renderGroupInfo = (c: any) => {
-  //   return (
-  //     <div className="flex pl-">
-  //       <div className=" w-full">
-  //         <img
-  //           src={
-  //             c.GroupImage ||
-  //             "https://mba-mci.edu.vn/wp-content/uploads/2018/03/muon-khoi-nghiep-hay-danh-5-phut-doc-bai-viet-nay.jpg"
-  //           }
-  //           className="w-full h-3/4 object-cover"
-  //           alt=""
-  //         />
-  //         <div className="mt-3">
-  //           Tags:{" "}
-  //           {c.tag?.map((t: any) => (
-  //             <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
-  //           ))}
-  //         </div>
-  //       </div>
-  //       <div className="  w-full pl-5">
-  //         {c.teamMembers.map((s: any) => (
-  //           <>
-  //             <div className="flex justify-between w-3/4 bg-white mt-1 p-1 shadow rounded-sm">
-  //               <div className="flex  justify-center items-center">
-  //                 <img
-  //                   src={
-  //                     s.account?.profilePicture ||
-  //                     "https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
-  //                   }
-  //                   className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-  //                   alt=""
-  //                 />
-  //                 <p className="ml-3">
-  //                   {" "}
-  //                   {s.name} - {s.studentId}
-  //                 </p>
+  const { data: tagData } = useQuery({
+    queryKey: [QUERY_KEY.TAGDATA],
+    queryFn: async () => {
+      return mentorList.getTag();
+    },
+  });
 
-  //                 <Tag color={colorMap[s.major]} className="ml-3 h-auto w-auto">
-  //                   {s.major}
-  //                 </Tag>
-  //                 {c.leader == s._id && (
-  //                   <span className="text-red-500 text-lg">*</span>
-  //                 )}
-  //               </div>
-  //             </div>
-  //           </>
-  //         ))}
-  //       </div>
-  //     </div>
-  //   );
-  // };
-  const [tagSearch, setTagSearch] = useState([]);
-  const [nameSeacrh, setNameSeacrh] = useState("");
-
-  // const PopoverGroupDetail = ({ groupName, groupID, tag, students }: any) => {
-  //   return (
-  //     <>
-  //       <div
-  //         onClick={(e) => {
-  //           setGroupName(groupName);
-  //           setGroupIDSelected(groupID);
-  //           handleOpenAddMentorModal();
-  //           setTagSearch(tag.map((t: any) => t._id));
-
-  //           e.stopPropagation();
-  //         }}
-  //       >
-  //         Edit mentor
-  //       </div>
-  //       <hr />
-  //       <div
-  //         onClick={(e) => {
-  //           setGroupName(groupName);
-  //           setGroupIDSelected(groupID);
-
-  //           handleOpenAddMemberModal();
-  //           e.stopPropagation();
-  //         }}
-  //       >
-  //         Add Member
-  //       </div>
-  //       <hr />
-  //       <div
-  //         onClick={(e) => {
-  //           setGroupName(groupName);
-  //           setGroupIDSelected(groupID);
-  //           setGroupStudentSelected(students);
-  //           handleOpenAssignLeaderModal();
-  //           e.stopPropagation();
-  //         }}
-  //       >
-  //         Assign Leader
-  //       </div>
-  //     </>
-  //   );
-  // };
-  // const collapseData: CollapseProps["items"] =
-  //   classPeople?.data.data.groupStudent.map((c: any) => ({
-  //     key: c._id,
-  //     label: (
-  //       <div className=" flex justify-between">
-  //         <div>
-  //           <span className="text-lg">
-  //             {c.GroupName}({c.teamMembers.length} students)
-  //           </span>
-  //           {c.mentor ? (
-  //             " - Mentor: " + c.mentor.name
-  //           ) : (
-  //             <>
-  //               <span className="text-red-500 font-semibold text-[1rem]">
-  //                 {" - No Mentor "}
-  //               </span>
-  //             </>
-  //           )}
-  //         </div>
-  //         <Popover
-  //           content={PopoverGroupDetail(
-  //             c.GroupName,
-  //             c._id,
-  //             c.tag,
-  //             c.teamMembers
-  //           )}
-  //           trigger={"hover"}
-  //           placement="left"
-  //         >
-  //           <Button>
-  //             <FaEdit size={18} />
-  //           </Button>
-  //         </Popover>
-  //       </div>
-  //     ),
-  //     student: c.teamMembers,
-  //     children: renderGroupInfo(c),
-  //   }));
-
-  //handle mentorData
-
+  const options: SelectProps["options"] = tagData?.data.data.map(
+    (i: majortype) => ({
+      label: i.name,
+      value: i._id,
+    })
+  );
   const { data: mentorData } = useQuery({
     queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
     queryFn: async () => {
@@ -212,26 +145,50 @@ const ClassGroupListWrapper = () => {
         name: nameSeacrh,
       });
     },
-    enabled: AddMentorModal,
+  });
+  const queryClient = useQueryClient();
+  const addStudentToGroupSelected = useMutation({
+    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
+      student.addStudentToGroup({
+        studentId: studentId,
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classID] });
+    },
+  });
+  // assign leader to group
+  const assignLeaderToGroup = useMutation({
+    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
+      student.assignLeaderToGroup({
+        studentId: studentId,
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classID] });
+    },
+  });
+  // assign mentor to group
+  const assignMentorToGroup = useMutation({
+    mutationFn: ({ mentorId, groupId }: reqBodyAssignMentorToGroup) =>
+      student.assignmentorToGroup({
+        mentorId: mentorId,
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classID] });
+    },
   });
 
-  // const columns = [
-  //   {
-  //     title: "Name",
-  //     dataIndex: "name",
-  //     render: (text: string) => <a>{text}</a>,
-  //   },
-  //   {
-  //     title: "Major",
-  //     dataIndex: "major",
-  //   },
-  // ];
   const columnsMentor = [
     {
       title: "image",
       dataIndex: "profilePicture",
       render: (profilePicture: string) => (
-        <img className="w-1/2 aspect-auto" src={profilePicture || ""} alt="" />
+        <img className="w-1/2 aspect-auto" src={profilePicture} alt="" />
       ),
       width: 200,
     },
@@ -242,9 +199,9 @@ const ClassGroupListWrapper = () => {
     {
       title: "Major",
       dataIndex: "tags",
-      render: (major: { name: string; _id: string }[]) =>
-        major.map((m) => (
-          <Tag key={m._id} color={colorMajorGroup[m.name]}>
+      render: (tags: any) =>
+        tags.map((m: majortype) => (
+          <Tag key={m.name} color={colorMajorGroup[m.name]}>
             {m.name}
           </Tag>
         )),
@@ -259,194 +216,6 @@ const ClassGroupListWrapper = () => {
   type SearchProps = GetProps<typeof Input.Search>;
   const onSearch: SearchProps["onSearch"] = (value) => setNameSeacrh(value);
 
-  const handleChange = (value: any) => {
-    setTagSearch(value);
-  };
-  //add student to group
-  // const [studentIDSelected, setStudentIDSelected] = useState("");
-  const [groupIDSelected, setGroupIDSelected] = useState("");
-  const [groupName, setGroupName] = useState("");
-  const [groupStudentSelected, setGroupStudentSelected] = useState([]);
-
-  interface reqBodyAddStudentToGroup {
-    studentId: string;
-    groupId: string;
-  }
-  const queryClient = useQueryClient();
-  const addStudentToGroupSelected = useMutation({
-    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
-      student.addStudentToGroup({
-        studentId: studentId,
-        groupId: groupId,
-      }),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [classID] });
-    },
-  });
-  // const PopoverAddStudentMannualContent = (studentID: any) => {
-  //   return (
-  //     <>
-  //       <Select
-  //         style={{ width: 250 }}
-  //         options={classPeople?.data.data.groupStudent.map((g: any) => ({
-  //           value: g._id,
-  //           label: `${g.GroupName} - ${g.teamMembers.length} students`,
-  //         }))}
-  //         onChange={onChangeGroup}
-  //       ></Select>
-  //       <Button
-  //         onClick={() => {
-  //           addStudentToGroupSelected.mutate({
-  //             studentId: studentID,
-  //             groupId: groupIDSelected,
-  //           });
-  //         }}
-  //       >
-  //         Add
-  //       </Button>
-  //     </>
-  //   );
-  // };
-  // const onChangeGroup = (value: string) => {
-  //   setGroupIDSelected(value);
-  // };
-  // const PopoverAddStudentWithProp = ({ studentID }: any) => {
-  //   return (
-  //     <Popover
-  //       placement="right"
-  //       trigger="click"
-  //       content={PopoverAddStudentMannualContent(studentID)}
-  //     >
-  //       <Button>
-  //         <FaPlus />
-  //       </Button>
-  //     </Popover>
-  //   );
-  // };
-  //handle assign mentor
-  const { data: tagData } = useQuery({
-    queryKey: [QUERY_KEY.TAGDATA],
-    queryFn: async () => {
-      return mentorList.getTag();
-    },
-  });
-  interface reqBodyAssignMentorToGroup {
-    mentorId: string;
-    groupId: string;
-  }
-  const assignMentorToGroup = useMutation({
-    mutationFn: ({ mentorId, groupId }: reqBodyAssignMentorToGroup) =>
-      student.assignmentorToGroup({
-        mentorId: mentorId,
-        groupId: groupId,
-      }),
-
-    onSuccess: () => {
-      handleCloseAddMentorModal();
-      queryClient.invalidateQueries({ queryKey: [classID] });
-    },
-  });
-  const options: SelectProps["options"] = tagData?.data.data.map((i: any) => ({
-    label: i.name,
-    value: i._id,
-  }));
-
-  // interface DataType {
-  //   key: string;
-  //   name: string;
-  //   major: string;
-  // }
-
-  /* modal add member to group */
-
-  //random group for modal
-  // const randomGroups = classPeople?.data.data.groupStudent
-  //   .slice(
-  //     Math.floor(Math.random() * classData.groups.length), // Random starting index
-  //     Math.floor(Math.random() * classData.groups.length + 2) // Ensure 2 elements
-  //   )
-  //   .map((group: any) => {
-  //     // Process or transform each group element here
-  //     return group; // You can modify or return a specific property from 'group'
-  //   });
-  //random group for modal
-  // const randomStudent = classPeople?.data.data.unGroupStudents
-  //   .slice(
-  //     Math.floor(Math.random() * classData.studentEven.length), // Random starting index
-  //     Math.floor(Math.random() * classData.studentEven.length + 2) // Ensure 2 elements
-  //   )
-  //   .map((std: any) => {
-  //     // Process or transform each group element here
-  //     return std; // You can modify or return a specific property from 'group'
-  //   });
-  // assign leader to group
-  const assignLeaderToGroup = useMutation({
-    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
-      student.assignLeaderToGroup({
-        studentId: studentId,
-        groupId: groupId,
-      }),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [classID] });
-      handleCloseAssignLeaderModal();
-    },
-  });
-
-  const [assignLeaderModal, setAssignLeaderModal] = useState(false);
-
-  const handleOpenAssignLeaderModal = () => {
-    setAssignLeaderModal(true);
-  };
-
-  const handleCloseAssignLeaderModal = () => {
-    setAssignLeaderModal(false);
-  };
-  const [groupDetailModal, setgroupDetailModal] = useState(false);
-
-  const handleOpengroupDetailModal = () => {
-    setgroupDetailModal(true);
-  };
-
-  const handleClosegroupDetailModal = () => {
-    setgroupDetailModal(false);
-  };
-
-  const columnsStudent = [
-    {
-      title: "image",
-      dataIndex: "account",
-      render: (account: any) => (
-        <img
-          className="h-[70px] w-[55px] aspect-auto object-cover"
-          src={
-            account?.profilePicture ||
-            "https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
-          }
-          alt=""
-        />
-      ),
-      width: 100,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-    },
-    {
-      title: "Major",
-      dataIndex: "major",
-      render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
-    },
-    {
-      title: "Gen",
-      dataIndex: "gen",
-    },
-    {
-      title: "MSSV",
-      dataIndex: "studentId",
-    },
-  ];
   const columnsStudentUngroup = [
     {
       title: "Name",
@@ -459,34 +228,10 @@ const ClassGroupListWrapper = () => {
       render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
     },
   ];
-  const ungroupstudentContent = {};
-  console.log(group);
 
   return (
     <>
       <div className=" px-3">
-        {/* <div className="text-[16px] font-semibold flex justify-between ">
-          <Button onClick={handleOpenRandomAddModal}>Add random</Button>
-        </div> */}
-        {/* {classPeople?.data.data.unGroupStudents.map((s: any) => (
-          <div className="flex justify-between bg-white mt-1 p-1 shadow rounded-sm">
-            <div className="flex ">
-              <img
-                // src={s.avatar}
-                src="https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
-                className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                alt=""
-              />
-              <p className="ml-3"> {s.name}</p>
-              <span>
-                <Tag color={colorMap[s.major]} className="ml-3 h-auto w-auto">
-                  {s.major}
-                </Tag>
-              </span>
-            </div>
-            <PopoverAddStudentWithProp studentID={s._id} />
-          </div>
-        ))} */}
         <div className="text-lg font-semibold ">Groups</div>
 
         <div className=" flex  justify-between">
@@ -500,89 +245,25 @@ const ClassGroupListWrapper = () => {
               />
             ))}
           </div>
-          {/* <Badge count={3} offset={[-45, 0]}>
-            <Button>
-              <FaPeopleGroup size={16} />
-            </Button>
-          </Badge> */}
+
           <Table
             dataSource={classPeople?.data.data.unGroupStudents}
             columns={columnsStudentUngroup}
           />
         </div>
       </div>
-      {/* modal add random std to group */}
-      {/* <Modal
-        title="Result"
-        visible={randomAddModal}
-        onCancel={handleCloseRandomAddModal}
-        footer={[
-          <Button key="back" onClick={handleCloseRandomAddModal}>
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleCloseRandomAddModal}
-          >
-            Save
-          </Button>,
-        ]}
-      >
-        {randomGroups.map((rg: any) => (
-          <>
-            <div className=" text-lg">{rg.groupName}:</div>
-            {randomStudent.map((rg: any) => (
-              <div className=" text-lg ml-4">
-                {rg.name}
-                <span>
-                  <Tag color={colorMap[rg.major]}> {rg.major}</Tag>
-                </span>
-              </div>
-            ))}
-          </>
-        ))}
-      </Modal> */}
-      {/* <Modal
-        visible={AddMemberModal}
-        title={groupName}
-        onCancel={handleCloseAddMemberModal}
-        footer={[
-          <Button key="back" onClick={handleCloseAddMemberModal}>
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleCloseAddMemberModal}
-          >
-            Add
-          </Button>,
-        ]}
-      >
-        <Divider />
-        <div>Select student</div>
 
-        <Table<DataType>
-          rowSelection={{ type: "checkbox", ...rowSelection }}
-          dataSource={classPeople?.data.data.unGroupStudents}
-          columns={columns}
-        />
-      </Modal> */}
       {/* modal add mentor */}
       <Modal
-        visible={AddMentorModal}
+        open={AddMentorModal}
         onCancel={handleCloseAddMentorModal}
         width={1000}
         footer={[
           <Button key="back" onClick={handleCloseAddMentorModal}>
-            Cancel
+            Close
           </Button>,
         ]}
       >
-        {tagSearch.map((t) => (
-          <p>{t.name}</p>
-        ))}
         <Space
           className={classNames(style.filter_bar)}
           style={{ width: "100%" }}
@@ -609,13 +290,12 @@ const ClassGroupListWrapper = () => {
         <Table
           dataSource={mentorData?.data.data}
           columns={columnsMentor}
-          onRow={(record, rowIndex) => {
+          onRow={(record: MentorData) => {
             return {
-              onClick: (e) => {
-                assignMentorToGroup.mutate({
-                  mentorId: record._id,
-                  groupId: groupIDSelected,
-                });
+              onClick: () => {
+                setmentorSelected(record);
+                setConfirmContent("mentor");
+                handleOpenconfirm();
               },
             };
           }}
@@ -625,118 +305,239 @@ const ClassGroupListWrapper = () => {
           }}
         />
       </Modal>
-      {/* modal assign leader */}
-      <Modal
-        style={{ height: "80vh" }}
-        visible={assignLeaderModal}
-        title={groupName}
-        onCancel={handleCloseAssignLeaderModal}
-        width={1000}
-        footer={[
-          <Button key="back" onClick={handleCloseAssignLeaderModal}>
-            Cancel
-          </Button>,
-        ]}
-      >
-        {" "}
-        Select leader for this group
-        <Table
-          dataSource={groupStudentSelected}
-          columns={columnsStudent}
-          pagination={{
-            pageSize: 5,
-            total: groupStudentSelected.length, // Set the total number of rows
-          }}
-          onRow={(record) => {
-            return {
-              onClick: (e: any) => {
-                assignLeaderToGroup.mutate({
-                  studentId: record._id,
-                  groupId: groupIDSelected,
-                });
-              },
-            };
-          }}
-        />
-      </Modal>
+      {/* modal group detail */}
       <Modal
         open={groupDetailModal}
-        style={{ height: "80vh" }}
-        title={group?.GroupName}
         onCancel={handleClosegroupDetailModal}
         width={1000}
         footer={[
           <Button key="back" onClick={handleClosegroupDetailModal}>
             Close
           </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleClosegroupDetailModal}
+          >
+            Save
+          </Button>,
         ]}
       >
-        {Object.keys(group).length > 0 ? (
-          <>
-            <div className="flex pl-">
-              <div className=" w-full">
-                <img
-                  src={
-                    group?.GroupImage ||
-                    "https://mba-mci.edu.vn/wp-content/uploads/2018/03/muon-khoi-nghiep-hay-danh-5-phut-doc-bai-viet-nay.jpg"
-                  }
-                  className="w-full h-3/4 object-cover"
-                  alt=""
-                />
-                <div className="mt-3">
-                  Tags:{" "}
-                  {group.tag.length !== 0 ? (
-                    <>
-                      {group?.tag?.map((t: any) => (
-                        <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
-                      ))}
-                    </>
-                  ) : (
-                    <>no tag</>
-                  )}
-                </div>
-              </div>
-              <div className="  w-full pl-5">
-                {group?.teamMembers.length !== 0 ? (
-                  <>
-                    {group?.teamMembers.map((s: any) => (
-                      <div className="flex justify-between w-3/4 bg-white mt-1 p-1 shadow rounded-sm">
-                        <div className="flex  justify-center items-center">
-                          <img
-                            src={
-                              s.account?.profilePicture ||
-                              "https://static2.bigstockphoto.com/8/4/2/large2/248083924.jpg"
-                            }
-                            className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                            alt=""
-                          />
-                          <p className="ml-3">
-                            {s.name} - {s.studentId}
-                          </p>
-
-                          <Tag
-                            color={colorMap[s.major]}
-                            className="ml-3 h-auto w-auto"
-                          >
-                            {s.major}
-                          </Tag>
-                          {group?.leader == s._id && (
-                            <span className="text-red-500 text-lg">*</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </>
+        {Object.keys(group).length === 0 ? (
+          <>none</>
+        ) : (
+          <div className="flex">
+            <div className="max-w-[50%] min-w-[50%]">
+              <div className="flex pb-1">
+                <span className="font-semibold text-[16px] pb-1 ">
+                  {group.GroupName} {" - "}
+                </span>
+                {group.mentor == null ? (
+                  <p>
+                    <Button
+                      onClick={() => {
+                        handleOpenAddMentorModal();
+                      }}
+                      className="bg-red-500 text-white px-2 ml-2 rounded"
+                    >
+                      assign mentor
+                    </Button>
+                  </p>
                 ) : (
-                  <>no stuemt</>
+                  <p className="flex self-center items-center">
+                    <p>{group.mentor.name} </p>{" "}
+                    <FaEdit
+                      size={20}
+                      className="pl-2"
+                      onClick={handleOpenAddMentorModal}
+                    />
+                  </p>
                 )}
               </div>
+
+              <img
+                src={
+                  group.ProjectImage ||
+                  "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                }
+                className="h-[200px] w-full object-cover"
+                alt=""
+              />
+              <div className="mt-3">
+                Tags:{" "}
+                {group.tag?.map((t) => (
+                  <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
+                ))}
+              </div>
+              <div className="line-clamp-[3] mt-2">
+                Description: {group.GroupDescription}
+              </div>
             </div>
-          </>
-        ) : (
-          <>no data</>
+            <div className=" min-w-[50%]  pt-5 pl-5">
+              {group?.teamMembers.map((s: any) => (
+                <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
+                  <div className="flex items- justify-between">
+                    <div className="flex items-center">
+                      {s.account === null ? (
+                        <img
+                          src={
+                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                          }
+                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                          alt=""
+                        />
+                      ) : (
+                        <img
+                          src={
+                            s?.account.profilePicture ||
+                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                          }
+                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                          alt=""
+                        />
+                      )}
+                      <p className="ml-3"> {s?.name}</p>
+                      <Tag
+                        color={colorMap[s?.major]}
+                        className="ml-3 h-auto w-auto"
+                      >
+                        {s.major}
+                      </Tag>
+                      {group?.leader == s._id && (
+                        <FaStar color="red" size={20} className="pl-2" />
+                      )}
+                    </div>
+                    <FaStar
+                      size={20}
+                      // color="gray"
+                      onClick={() => {
+                        setCstudentSelected(s);
+                        setConfirmContent("leader");
+                        handleOpenconfirm();
+                      }}
+                      className="hover:text-red-500 hover:scale-110  "
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </Modal>
+      {/* modal confirm */}
+      <Modal
+        title={"Confirm"}
+        open={confirm}
+        onCancel={handleCloseconfirm}
+        footer={[
+          <Button key="back" onClick={handleCloseconfirm}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={() => {
+              switch (confirmContent) {
+                case "leader":
+                  assignLeaderToGroup.mutate({
+                    groupId: group._id,
+                    studentId: studentSelected._id,
+                  });
+                  console.log("chya vafo roi");
+
+                  handleCloseconfirm();
+                  break;
+                case "mentor":
+                  assignMentorToGroup.mutate({
+                    mentorId: mentorSelected._id,
+                    groupId: group._id,
+                  });
+                  handleCloseconfirm();
+                  break;
+
+                default:
+                  break;
+              }
+            }}
+          >
+            Save
+          </Button>,
+        ]}
+      >
+        {confirmContent == "mentor" && (
+          <>
+            you want to add {mentorSelected.name} as mentor for group :{" "}
+            {group.GroupName}
+          </>
+        )}
+        {confirmContent == "leader" && (
+          <>
+            you want to add {studentSelected.name} as leader for group :{" "}
+            {group.GroupName}
+          </>
+        )}
+      </Modal>
+
+      {/* modal add member to group */}
+      {/* <Modal
+        open={AddMemberModal}
+        onCancel={handleCloseAddMemberModal}
+        footer={[
+          <Button key="back" onClick={handleCloseAddMemberModal}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleCloseAddMemberModal}
+          >
+            Add
+          </Button>,
+        ]}
+      >
+        {classData.studentEven.map((s) => (
+          <div className="flex justify-between w-3/4 bg-white mt-1 p-1 shadow rounded-sm">
+            <div className="flex ">
+              <img
+                src={s.avatar}
+                className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                alt=""
+              />
+              <p className="ml-3"> {s.name}</p>
+              <span>
+                <Tag color={colorMap[s.major]} className="ml-3 h-auto w-auto">
+                  {s.major}
+                </Tag>
+              </span>
+            </div>
+          </div>
+        ))}
+        <Divider />
+        <div>Add student</div>
+        <Select
+          className="w-full"
+          mode="multiple"
+          options={classData.studentEven.map((g) => ({
+            value: g.name, // Set the value to the group ID
+            label: (
+              <>
+                {g.name}
+                <Tag
+                  color={colorMap[g.major] ?? "gray"}
+                  className="ml-3 h-auto w-auto"
+                >
+                  {g.major}
+                </Tag>
+              </>
+            ),
+          }))}
+        ></Select>
+        <Table<DataType>
+          rowSelection={{ type: "checkbox", ...rowSelection }}
+          dataSource={classData.studentEven}
+          columns={columns}
+        />
+      </Modal> */}
     </>
   );
 };

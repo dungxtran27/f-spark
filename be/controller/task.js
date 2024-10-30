@@ -16,7 +16,6 @@ const createTask = async (req, res) => {
       parentTask,
       childTasks,
     } = req.body;
-    console.log(decodedToken);
 
     if (!taskName || !assignee || taskName === "" || !taskType) {
       return res.status(400).json({ message: "Missing required fields" });

@@ -68,7 +68,10 @@ const GroupCard = ({
           </span>
         ) : (
           <Button
-            onClick={handleOpenAddMentorModal}
+            onClick={() => {
+              handleOpenAddMentorModal();
+              setGroup(info);
+            }}
             className="bg-red-500 text-white px-2 ml-2 rounded"
           >
             assign
