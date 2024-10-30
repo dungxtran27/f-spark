@@ -4,10 +4,14 @@ import { FaUserGroup, FaUserCheck } from "react-icons/fa6";
 import { ImNotification } from "react-icons/im";
 interface TotalClassCardProps {
   toggleStudentTable: () => void;
+  toggleGroupTable: () => void;
+  toggleClass: () => void;
 }
 
 const TotalClassCard: React.FC<TotalClassCardProps> = ({
   toggleStudentTable,
+  toggleGroupTable,
+  toggleClass,
 }) => {
   return (
     <>
@@ -22,7 +26,10 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
         </div>
 
         {/* Class miss student */}
-        <div className="p-2 mb-2 border-red-500 rounded-md border-2 border-transparent hover:border-red-500 hover:bg-red-100 hover:shadow-md">
+        <div
+          className="p-2 mb-2 rounded-md border-2 border-transparent hover:border-red-500 hover:bg-red-100 hover:shadow-md"
+          onClick={toggleClass}
+        >
           <div className="flex justify-between items-baseline">
             <span className="text-red-500 font-bold text-2xl">3</span>
             <span className="text-sm font-semibold">Class miss student</span>
@@ -38,7 +45,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
         </div>
 
         {/* Class available */}
-        <div className="p-2 mb-2 border-yellow-500 rounded-md border-2 border-transparent hover:border-yellow-500 hover:bg-yellow-100 hover:shadow-md">
+        <div className="p-2 mb-2 rounded-md border-2 border-transparent hover:border-yellow-500 hover:bg-yellow-100 hover:shadow-md">
           <div className="flex justify-between items-baseline">
             <span className="text-yellow-500 font-bold text-2xl">3</span>
             <span className="text-sm font-semibold">Class available</span>
@@ -54,7 +61,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
         </div>
 
         {/* Class full student */}
-        <div className="p-2 border-green-500 rounded-md border-2 border-transparent hover:border-green-500 hover:bg-green-100 hover:shadow-md">
+        <div className="p-2 rounded-md border-2 border-transparent hover:border-green-500 hover:bg-green-100 hover:shadow-md">
           <div className="flex justify-between items-baseline">
             <span className="text-green-500 font-bold text-2xl">5</span>
             <span className="text-sm font-semibold">Class full student</span>
@@ -84,7 +91,10 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
           <span>Pending request 10</span>
           <MdOutlineMessage className="text-xl text-yellow-500" />
         </div>
-        <div className="flex justify-between items-center rounded-md p-2 border-2 border-transparent hover:border-yellow-500 hover:bg-yellow-100 hover:shadow-md">
+        <div
+          className="flex justify-between items-center rounded-md p-2 border-2 border-transparent hover:border-yellow-500 hover:bg-yellow-100 hover:shadow-md"
+          onClick={toggleGroupTable}
+        >
           <span>Group missing members: 20</span>
           <MdGroupAdd className="text-xl text-yellow-500" />
         </div>
@@ -92,9 +102,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
       {/* Total group */}
       <div className="bg-white p-4 shadow-md rounded-md border-2 border-transparent hover:border-orange-400">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-lg font-bold" onClick={toggleStudentTable}>
-            Total: 271 Students
-          </div>
+          <div className="text-lg font-bold">Total: 271 Students</div>
           <Tooltip title="Group Information">
             <span className="text-orange-500 text-xl cursor-pointer">
               <ImNotification />

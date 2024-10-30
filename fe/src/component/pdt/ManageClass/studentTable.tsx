@@ -4,14 +4,47 @@ import { useState } from "react";
 import ClassCard from "./classCard";
 
 const StudentTable = () => {
-  const [isModal, setIsModal] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const showModal = () => {
-    setIsModal(true);
+    setIsModalVisible(true);
   };
 
-  const cancel = () => {
-    setIsModal(false);
+  const handleCancel = () => {
+    setIsModalVisible(false);
   };
+
+  const data = [
+    {
+      mssv: "HE170019",
+      name: "Trần Văn Anh Vũ",
+      mail: "hieunthe163894@fpt.edu.vn",
+      major: "Công nghệ",
+      color: "green",
+    },
+    {
+      mssv: "HE170020",
+      name: "Trần Văn Anh Vũ",
+      mail: "hieunthe163894@fpt.edu.vn",
+      major: "Nông sản",
+      color: "yellow",
+    },
+    {
+      mssv: "HE170021",
+      name: "Trần Văn Anh Vũ",
+      mail: "hieunthe163894@fpt.edu.vn",
+      major: "F&B",
+      color: "red",
+    },
+    {
+      mssv: "HE170022",
+      name: "Trần Văn Anh Vũ",
+      mail: "hieunthe163894@fpt.edu.vn",
+      major: "Kinh tế",
+      color: "blue",
+    },
+  ];
+
   return (
     <div className="bg-white shadow-md rounded-md p-4">
       <table className="w-full table-auto">
@@ -28,97 +61,42 @@ const StudentTable = () => {
           </tr>
         </thead>
         <tbody>
-          <tr className="border-b">
-            <td className="p-2">
-              <Checkbox />
-            </td>
-            <td className="p-2">HE170019</td>
-            <td className="p-2">
-              <span className="bg-green-200 text-green-700 px-2 py-1 rounded-lg">
-                Công nghệ
-              </span>
-            </td>
-            <td className="p-2">Trần Văn Anh Vũ</td>
-            <td className="p-2">hieunthe163894@fpt.edu.vn</td>
-            <td className="p-2">
-              <MdGroupAdd
-                className="text-black text-2xl cursor-pointer"
-                onClick={showModal}
-              />
-            </td>
-          </tr>
-
-          <tr className="border-b">
-            <td className="p-2">
-              <Checkbox />
-            </td>
-            <td className="p-2">HE170019</td>
-            <td className="p-2">
-              <span className="bg-yellow-200 text-yellow-700 px-2 py-1 rounded-lg">
-                Nông sản
-              </span>
-            </td>
-            <td className="p-2">Trần Văn Anh Vũ</td>
-            <td className="p-2">hieunthe163894@fpt.edu.vn</td>
-            <td className="p-2">
-              <MdGroupAdd
-                className="text-black text-2xl cursor-pointer"
-                onClick={showModal}
-              />
-            </td>
-          </tr>
-
-          <tr className="border-b">
-            <td className="p-2">
-              <Checkbox />
-            </td>
-            <td className="p-2">HE170019</td>
-            <td className="p-2">
-              <span className="bg-red-200 text-red-700 px-2 py-1 rounded-lg">
-                F&B
-              </span>
-            </td>
-            <td className="p-2">Trần Văn Anh Vũ</td>
-            <td className="p-2">hieunthe163894@fpt.edu.vn</td>
-            <td className="p-2">
-              <MdGroupAdd
-                className="text-black text-2xl cursor-pointer"
-                onClick={showModal}
-              />
-            </td>
-          </tr>
-
-          <tr className="border-b">
-            <td className="p-2">
-              <Checkbox />
-            </td>
-            <td className="p-2">HE170019</td>
-            <td className="p-2">
-              <span className="bg-blue-200 text-blue-700 px-2 py-1 rounded-lg">
-                Kinh tế
-              </span>
-            </td>
-            <td className="p-2">Trần Văn Anh Vũ</td>
-            <td className="p-2">hieunthe163894@fpt.edu.vn</td>
-            <td className="p-2">
-              <MdGroupAdd
-                className="text-black text-2xl cursor-pointer "
-                onClick={showModal}
-              />
-            </td>
-          </tr>
+          {data.map((student, index) => (
+            <tr className="border-b" key={index}>
+              <td className="p-2">
+                <Checkbox />
+              </td>
+              <td className="p-2">{student.mssv}</td>
+              <td className="p-2">
+                <span
+                  className={`bg-${student.color}-200 text-${student.color}-700 px-2 py-1 rounded-lg`}
+                >
+                  {student.major}
+                </span>
+              </td>
+              <td className="p-2">{student.name}</td>
+              <td className="p-2">{student.mail}</td>
+              <td className="p-2">
+                <MdGroupAdd
+                  className="text-black text-2xl cursor-pointer"
+                  onClick={showModal}
+                />
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
+
       <Modal
         title="Class Group"
-        open={isModal}
-        onCancel={cancel}
+        open={isModalVisible}
+        onCancel={handleCancel}
         closable={false}
         footer={[
-          <Button key="cancel" onClick={cancel}>
+          <Button key="cancel" onClick={handleCancel}>
             Cancel
           </Button>,
-          <Button key="save" type="primary" onClick={cancel}>
+          <Button key="save" type="primary" onClick={handleCancel}>
             Save
           </Button>,
         ]}

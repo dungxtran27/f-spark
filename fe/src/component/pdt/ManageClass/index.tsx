@@ -5,16 +5,32 @@ import TotalClassCard from "./totalClassCard";
 import StudentTable from "./studentTable";
 import { useState } from "react";
 import ClassDetail from "./classDetail";
+import GroupTable from "./groupTable";
 
 const { Option } = Select;
 
 const ManageClassWrapper = () => {
   const [showStudentTable, setShowStudentTable] = useState(false);
+  const [showGroupTable, setShowGroupTable] = useState(false);
+  const [showClass, setShowClass] = useState(true);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const toggleStudentTable = () => {
-    setShowStudentTable(!showStudentTable);
+    setShowStudentTable(true);
+    setShowGroupTable(false);
+  };
+  const toggleGroupTable = () => {
+    setShowGroupTable(true);
+    setShowStudentTable(false);
+  };
+  const toggleClass = () => {
+    setShowClass(true);
+    setShowGroupTable(false);
+    setShowStudentTable(false);
   };
   const handleClassClick = (classId: string) => {
+    setShowClass(false);
+    setShowGroupTable(false);
+    setShowStudentTable(false);
     setSelectedClass(classId);
   };
   return (
@@ -49,7 +65,11 @@ const ManageClassWrapper = () => {
         {/* Total Cards */}
         <div className="w-1/4 pr-6">
           <div className="mb-6 space-y-4">
-            <TotalClassCard toggleStudentTable={toggleStudentTable} />
+            <TotalClassCard
+              toggleStudentTable={toggleStudentTable}
+              toggleGroupTable={toggleGroupTable}
+              toggleClass={toggleClass}
+            />
           </div>
           <button className="w-full p-2 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black">
             Auto create class
@@ -58,18 +78,21 @@ const ManageClassWrapper = () => {
 
         <div className="w-3/4 flex flex-col justify-between">
           {/* Bấm bấm*/}
-          {!showStudentTable && selectedClass && (
+          {!showStudentTable &&
+            !showGroupTable &&
+            showClass && (
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <ClassCard onClick={() => handleClassClick("SE1708_NJ")} />
+              </div>
+            )}
+          {!showStudentTable && !showGroupTable && !showClass  && selectedClass && (
             <ClassDetail
               classId={selectedClass}
-              onCancel={() => setSelectedClass(null)}
+              onCancel={() => setShowClass(true)}
             />
           )}
-          {!showStudentTable && !selectedClass && (
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <ClassCard onClick={() => handleClassClick("SE1708_NJ")} />
-            </div>
-          )}
-          {showStudentTable && <StudentTable />}
+          {showStudentTable && !showGroupTable && <StudentTable />}
+          {!showStudentTable && showGroupTable && <GroupTable />}
           <div className="flex justify-center">
             <Pagination
               defaultCurrent={1}

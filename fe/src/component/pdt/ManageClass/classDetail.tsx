@@ -8,10 +8,15 @@ import StudentTableNoAction from "./studentTableNoAction";
 
 interface ClassDetailProps {
   classId: string;
+  // classColor: string | null;
   onCancel: () => void;
 }
 
-const ClassDetailPDT = ({ classId, onCancel }: ClassDetailProps) => {
+const ClassDetailPDT = ({
+  classId,
+  // classColor,
+  onCancel,
+}: ClassDetailProps) => {
   const [isModal, setIsModal] = useState(false);
   const showModal = () => {
     setIsModal(true);
@@ -22,7 +27,7 @@ const ClassDetailPDT = ({ classId, onCancel }: ClassDetailProps) => {
 
   return (
     <div className="rounded-lg overflow-hidden shadow-md mb-4">
-      <div className="bg-red-500 p-4 text-white">
+      <div className={`bg-red-500 p-4 text-white`}>
         <div className="flex text-2xl font-semibold">
           {classId}
           <div className="ml-auto">
@@ -132,8 +137,7 @@ const ClassDetailPDT = ({ classId, onCancel }: ClassDetailProps) => {
             <div className="text-xl font-semibold bg-white p-2 rounded-md">
               Group 3
             </div>
-            <div className="ml-auto">
-            </div>
+            <div className="ml-auto"></div>
           </div>
           <div className="flex justify-between items-center">
             <div>
@@ -168,12 +172,11 @@ const ClassDetailPDT = ({ classId, onCancel }: ClassDetailProps) => {
         </div>
         {/* Group 4 */}
         <div className="bg-gray-100 p-4 rounded-lg shadow-md border-2 border-transparent hover:border-blue-300">
-        <div className="flex text-lg font-semibold">
+          <div className="flex text-lg font-semibold">
             <div className="text-xl font-semibold bg-white p-2 rounded-md">
               Group 4
             </div>
-            <div className="ml-auto">
-            </div>
+            <div className="ml-auto"></div>
           </div>
           <div className="flex justify-between items-center">
             <div>
@@ -208,12 +211,11 @@ const ClassDetailPDT = ({ classId, onCancel }: ClassDetailProps) => {
         </div>
         {/* Group 5 */}
         <div className="bg-gray-100 p-4 rounded-lg shadow-md border-2 border-transparent hover:border-blue-300">
-        <div className="flex text-lg font-semibold">
+          <div className="flex text-lg font-semibold">
             <div className="text-xl font-semibold bg-white p-2 rounded-md">
               Group 5
             </div>
-            <div className="ml-auto">
-            </div>
+            <div className="ml-auto"></div>
           </div>
           <div className="flex justify-between items-center">
             <div>
