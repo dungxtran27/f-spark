@@ -13,7 +13,7 @@ const Header = () => {
     >
       <Tooltip className="max-w-[70%]" title={"GD1715_AD / Ăn vặt kiểu Nhật - Maneki chan"}>
         <span className="text-[16px] font-semibold truncate">
-          GD1715_AD / Ăn vặt kiểu Nhật - Maneki chan
+          GD1715_AD / Ăn vặt kiểu Nhật - Maneki chan hehe
         </span>
       </Tooltip>
     </div>
