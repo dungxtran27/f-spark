@@ -3,7 +3,6 @@ import { AutoComplete, Button, Select, Row, Col, Table, Tag, Divider } from "ant
 import { SearchOutlined, UserDeleteOutlined, CloseCircleOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
-import style from "../styles.module.scss";
 
 const { Option } = Select;
 
@@ -86,14 +85,9 @@ const AccountManagement: React.FC = () => {
       id: index + 1,
     }));
 
-
   return (
-    <div className={style.account_management_container}>
-      <Row
-        gutter={[16, 16]}
-        style={{ marginBottom: "15px", padding: "4px", borderRadius: "8px" }}
-        justify="space-between"
-      >
+    <div className="max-w-full mx-auto p-4 bg-white rounded-lg shadow-md">
+      <Row gutter={[16, 16]} className="mb-4" justify="space-between">
         <Col flex="auto">
           <Row gutter={[16, 16]}>
             <Col span={5}>
@@ -103,7 +97,7 @@ const AccountManagement: React.FC = () => {
                 onChange={setSearchText}
                 onSearch={handleAutoCompleteSearch}
                 options={autoCompleteOptions}
-                style={{ width: "100%" }}
+                className="w-full"
               />
             </Col>
             <Col span={3}>
@@ -111,7 +105,7 @@ const AccountManagement: React.FC = () => {
                 placeholder="Class"
                 value={classFilter}
                 onChange={setClassFilter}
-                style={{ width: "100%" }}
+                className="w-full"
               >
                 <Option value="SE1704">SE1704</Option>
                 <Option value="SE1604">SE1604</Option>
@@ -122,7 +116,7 @@ const AccountManagement: React.FC = () => {
                 placeholder="Term"
                 value={termFilter}
                 onChange={setTermFilter}
-                style={{ width: "100%" }}
+                className="w-full"
               >
                 <Option value="Fall 2024">Fall 2024</Option>
                 <Option value="Spring 2024">Spring 2024</Option>
@@ -133,19 +127,28 @@ const AccountManagement: React.FC = () => {
                 placeholder="Status"
                 value={statusFilter}
                 onChange={setStatusFilter}
-                style={{ width: "100%" }}
+                className="w-full"
               >
                 <Option value="Active">Active</Option>
                 <Option value="Deactive">Deactive</Option>
               </Select>
             </Col>
             <Col span={3}>
-              <Button icon={<CloseCircleOutlined />} onClick={handleClearFilters}>
+              <Button
+                icon={<CloseCircleOutlined />}
+                onClick={handleClearFilters}
+                className="w-full"
+              >
                 Clear
               </Button>
             </Col>
             <Col span={4}>
-              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+                className="w-full"
+              >
                 Search
               </Button>
             </Col>
@@ -154,11 +157,11 @@ const AccountManagement: React.FC = () => {
 
         <Divider type="vertical" style={{ height: 'auto', alignSelf: 'stretch' }} />
 
-        <Col flex="none" style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Col flex="none" className="flex justify-end">
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            style={{ marginRight: "8px" }}
+            className="mr-2"
           >
             Add Student
           </Button>

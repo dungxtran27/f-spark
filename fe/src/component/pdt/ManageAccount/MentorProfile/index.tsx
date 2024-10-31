@@ -1,103 +1,105 @@
-import React from "react";
-import { Card, Typography, Space, Divider, Tooltip } from "antd";
+import { Card, Typography, Space, Divider, Tag } from "antd";
 import {
-  TeamOutlined,
-  ProjectOutlined,
-  UsergroupAddOutlined,
+    ProjectOutlined,
+    UsergroupAddOutlined,
+    HomeOutlined,
+    GroupOutlined,
 } from "@ant-design/icons";
-
-import classNames from "classnames";
-import style from "../styles.module.scss";
 
 const { Title, Text } = Typography;
 
-const MentorProfileWrapper: React.FC = () => {
-  const groups = [
-    {
-      groupName: "Nhóm 1: Phát triển Ứng dụng Web",
-      className: "EXE101",
-      projectTitle: "Dự án Phát triển Ứng dụng Web",
-      members: ["Nguyễn Văn B", "Trần Thị C", "Lê Văn D"],
-     
-    },
-    {
-      groupName: "Nhóm 2: Quản lý Thư viện",
-      className: "Lớp 10B",
-      projectTitle: "Hệ thống Quản lý Thư viện",
-      members: ["Nguyễn Thị E", "Nguyễn Văn F"],
-      
-    },
+const MentorProfileWrapper = () => {
+    const groups = [
+        {
+            groupName: "Nhóm 1: Phát triển Ứng dụng",
+            className: "EXE101",
+            projectTitle: "Dự án Phát triển Ứng dụng Web",
+            members: ["Nguyễn Văn B", "Trần Thị C", "Lê Văn D"],
+        },
+        {
+            groupName: "Nhóm 2: Quản lý Thư viện",
+            className: "Lớp 10B",
+            projectTitle: "Hệ thống Quản lý Thư viện",
+            members: ["Nguyễn Thị E", "Nguyễn Văn F"],
+        },
+        {
+            groupName: "Nhóm 3: Phát triển Ứng dụng",
+            className: "EXE102",
+            projectTitle: "Dự án Phát triển Ứng dụng Mobile",
+            members: ["Nguyễn Văn G", "Trần Thị H"],
+        },
+        {
+            groupName: "Nhóm 3: Phát triển Ứng dụng",
+            className: "EXE102",
+            projectTitle: "Dự án Phát triển Ứng dụng Mobile",
+            members: ["Nguyễn Văn G", "Trần Thị H"],
+        },
+    ];
 
-  ];
+    return (
+        <div className="p-4">
+            <Divider orientation="left">Mentor information</Divider>
+            <div className="flex items-start space-x-4 mb-4">
+                <img
+                    src="https://via.placeholder.com/150"
+                    alt="Mentor Avatar"
+                    className="rounded-full w-32 h-32"
+                />
+                <div>
+                    <Title level={2}>Nguyễn Văn ssss</Title>
+                    <Text type="secondary" className="block mb-2">
+                        Mentor chuyên ngành Phát triển phần mềm với hơn 10 năm kinh nghiệm, hướng dẫn và đào tạo hàng trăm lập trình viên thành công.
+                    </Text>
+                    <Space className="mb-2">
+                        <Text>Email: nguyen.van.a@example.com</Text>
+                        <Text>SĐT: 0123 456 789</Text>
+                        <Text>
+                            LinkedIn:{" "}
+                            <a href="" target="_blank" rel="noopener noreferrer">
+                                Nguyễn Văn BS
+                            </a>
+                        </Text>
+                    </Space>
+                    <Space className="flex mt-2">
+                        Specific:
+                        <Tag color="blue">SE</Tag>
+                        <Tag color="green">KS</Tag>
+                        <Tag color="orange">FS</Tag>
+                    </Space>
+                </div>
+            </div>
 
-  return (
-
-      <div className={classNames(style.mentor_profile_container)}>
-        <div className={classNames(style.breadcrumb)}>
-          <Divider orientation="left">Mentor information</Divider>
+            <Divider orientation="left">Support Group - {groups.length} groups</Divider>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {groups.map((group, index) => (
+                    <Card key={index} className="rounded-md overflow-hidden shadow-md cursor-pointer mb-4" hoverable bodyStyle={{ padding: 0 }}>
+                        <div className="bg-red-500 p-4 text-white">
+                            <div className="flex items-center">
+                                <GroupOutlined className="text-white mr-2" />
+                                <div className="text-lg font-semibold">{group.groupName}</div>
+                            </div>
+                        </div>
+                        <div className="bg-white p-4">
+                            <div className="flex flex-col">
+                                <div className="flex items-center mb-2">
+                                    <ProjectOutlined className="text-red-500 mr-2" />
+                                    <span className="text-sm font-medium">{group.projectTitle}</span>
+                                </div>
+                                <div className="flex items-center mb-2">
+                                    <HomeOutlined className="text-red-500 mr-2" />
+                                    <span className="text-sm">{group.className}</span>
+                                </div>
+                                <div className="flex items-center">
+                                    <UsergroupAddOutlined className="text-red-500 mr-2" />
+                                    <span className="text-sm font-medium">{group.members.length} Members</span>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                ))}
+            </div>
         </div>
-        <div className={classNames(style.mentor_header)}>
-          <img
-            src="https://via.placeholder.com/150"
-            alt="Mentor Avatar"
-            className={classNames(style.avatar)}
-          />
-          <div>
-            <Title level={2} className={classNames(style.mentor_name)}>
-              Nguyễn Văn A
-            </Title>
-            <Text type="secondary" className={classNames(style.mentor_desc)}>
-              Mentor chuyên ngành Phát triển phần mềm với hơn 10 năm kinh nghiệm, hướng dẫn và đào tạo hàng trăm lập trình viên thành công.
-            </Text>
-            <Space className={classNames(style.mentor_contact)}>
-              <Text>Email: nguyen.van.a@example.com</Text>
-              <Text>SĐT: 0123 456 789</Text>
-              <Text>
-                LinkedIn:{" "}
-                <a
-                  href="https://linkedin.com/in/nguyenvana"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Nguyễn Văn A
-                </a>
-              </Text>
-            </Space>
-          </div>
-        </div>
-        <Divider orientation="left">Support Group - {groups.length} groups</Divider>
-        <div className={classNames(style.group_grid)}>
-          {groups.map((group, index) => (
-            <Card
-              key={index}
-              bordered={false}
-              className={classNames(style.group_card)}
-              hoverable
-            >
-              <div className={classNames(style.group_card_header)}>{group.groupName}</div>
-              <p>
-                <Tooltip title="Lớp">
-                  <TeamOutlined className={classNames(style.icon, style["icon-classroom"])} />
-                </Tooltip>
-                <strong>{group.className}</strong>
-              </p>
-              <p>
-                <Tooltip title="Group name">
-                  <ProjectOutlined className={classNames(style.icon, style["icon-project"])} />
-                </Tooltip>
-                <strong>{group.projectTitle}</strong>
-              </p>
-              <p>
-                <Tooltip title="Members">
-                  <UsergroupAddOutlined className={classNames(style.icon, style["icon-member"])} />
-                </Tooltip>
-                <strong>{group.members.length} members</strong>
-              </p>
-            </Card>
-          ))}
-        </div>
-      </div>
-  );
+    );
 };
 
 export default MentorProfileWrapper;

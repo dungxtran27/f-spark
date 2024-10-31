@@ -3,7 +3,6 @@ import { AutoComplete, Button, Select, Row, Col, Table, Tag } from "antd";
 import { SearchOutlined, UserDeleteOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
-import style from "../styles.module.scss";
 
 const { Option } = Select;
 
@@ -42,12 +41,12 @@ const Teacher: React.FC = () => {
         const filteredOptions = data
             .filter(teacher =>
                 teacher.name.toLowerCase().includes(normalizedInput) ||
-                teacher.email.toLowerCase().includes(normalizedInput)||
+                teacher.email.toLowerCase().includes(normalizedInput) ||
                 teacher.salutation.toLowerCase().includes(normalizedInput)
             )
             .map(teacher => ({
-                value: teacher.email.toLowerCase().includes(normalizedInput) ? teacher.email : teacher.name, 
-                label: teacher.email.toLowerCase().includes(normalizedInput) ? teacher.email : `${teacher.salutation}. ${teacher.name}` 
+                value: teacher.email.toLowerCase().includes(normalizedInput) ? teacher.email : teacher.name,
+                label: teacher.email.toLowerCase().includes(normalizedInput) ? teacher.email : `${teacher.salutation}. ${teacher.name}`
             }));
         setAutoCompleteOptions(filteredOptions);
     };
@@ -85,17 +84,16 @@ const Teacher: React.FC = () => {
 
 
     return (
-        <div className={style.account_management_container}>
-            <h2></h2>
-            <Row gutter={[16, 16]} style={{ marginBottom: "15px", padding: "4px", borderRadius: "8px" }}>
-                <Col span={5}>
+        <div className="p-4 bg-white rounded-lg shadow-md">
+            <Row gutter={[16, 16]} className="mb-4">
+                <Col span={6}>
                     <AutoComplete
                         placeholder="Search name, email..."
                         value={searchText}
                         onChange={setSearchText}
                         onSearch={handleAutoCompleteSearch}
                         options={autoCompleteOptions}
-                        style={{ width: "100%" }}
+                        className="w-full"
                     />
                 </Col>
                 <Col span={4}>
@@ -103,7 +101,8 @@ const Teacher: React.FC = () => {
                         placeholder="Term"
                         value={termFilter}
                         onChange={setTermFilter}
-                        style={{ width: "100%" }}>
+                        className="w-full"
+                    >
                         <Option value="Fall 2024">Fall 2024</Option>
                         <Option value="Spring 2024">Spring 2024</Option>
                     </Select>
@@ -113,22 +112,33 @@ const Teacher: React.FC = () => {
                         placeholder="Status"
                         value={statusFilter}
                         onChange={setStatusFilter}
-                        style={{ width: "100%" }}>
+                        className="w-full"
+                    >
                         <Option value="Active">Active</Option>
                         <Option value="Deactive">Deactive</Option>
                     </Select>
                 </Col>
                 <Col span={4}>
-                    <Button icon={<CloseCircleOutlined />} onClick={handleClearFilters}>
+                    <Button
+                        icon={<CloseCircleOutlined />}
+                        onClick={handleClearFilters}
+                        className="w-full"
+                    >
                         Clear
                     </Button>
                 </Col>
                 <Col span={4}>
-                    <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+                    <Button
+                        type="primary"
+                        icon={<SearchOutlined />}
+                        onClick={handleSearch}
+                        className="w-full"
+                    >
                         Search
                     </Button>
                 </Col>
             </Row>
+
             <Table
                 columns={columns}
                 dataSource={sortedData}
@@ -136,7 +146,6 @@ const Teacher: React.FC = () => {
                 rowKey="id"
             />
         </div>
-
     );
 };
 

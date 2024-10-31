@@ -3,7 +3,6 @@ import { AutoComplete, Button, Select, Row, Col, Table, Tag, Divider } from "ant
 import { SearchOutlined, UserDeleteOutlined, CloseCircleOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
-import style from "../styles.module.scss";
 import { Link } from "react-router-dom";
 
 const { Option } = Select;
@@ -64,7 +63,7 @@ const Teacher: React.FC = () => {
             dataIndex: "name",
             key: "name",
             render: (text: string) => (
-                <Link to={"/mentorProfile"}>{text}</Link> 
+                <Link to={"/mentorProfile"}>{text}</Link>
             ),
         },
         { title: "Tag", dataIndex: "tag", key: "tag" },
@@ -86,10 +85,10 @@ const Teacher: React.FC = () => {
 
 
     return (
-        <div className={style.account_management_container}>
+        <div className="p-4 bg-white rounded-lg shadow-md">
             <Row
                 gutter={[16, 16]}
-                style={{ marginBottom: "15px", padding: "4px", borderRadius: "8px" }}
+                className="mb-4"
                 justify="space-between"
             >
                 <Col flex="auto">
@@ -101,7 +100,7 @@ const Teacher: React.FC = () => {
                                 onChange={setSearchText}
                                 onSearch={handleAutoCompleteSearch}
                                 options={autoCompleteOptions}
-                                style={{ width: "100%" }}
+                                className="w-full"
                             />
                         </Col>
                         <Col span={3}>
@@ -109,7 +108,8 @@ const Teacher: React.FC = () => {
                                 placeholder="Tag"
                                 value={tagFilter}
                                 onChange={setTagFitler}
-                                style={{ width: "100%" }}>
+                                className="w-full"
+                            >
                                 <Option value="Fall 2024">SE</Option>
                                 <Option value="Spring 2024">KS</Option>
                             </Select>
@@ -119,29 +119,39 @@ const Teacher: React.FC = () => {
                                 placeholder="Status"
                                 value={statusFilter}
                                 onChange={setStatusFilter}
-                                style={{ width: "100%" }}>
+                                className="w-full"
+                            >
                                 <Option value="Active">Active</Option>
                                 <Option value="Deactive">Deactive</Option>
                             </Select>
                         </Col>
                         <Col span={4}>
-                            <Button icon={<CloseCircleOutlined />} onClick={handleClearFilters}>
+                            <Button
+                                icon={<CloseCircleOutlined />}
+                                onClick={handleClearFilters}
+                                className="w-full"
+                            >
                                 Clear
                             </Button>
                         </Col>
                         <Col span={4}>
-                            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+                            <Button
+                                type="primary"
+                                icon={<SearchOutlined />}
+                                onClick={handleSearch}
+                                className="w-full"
+                            >
                                 Search
                             </Button>
                         </Col>
                     </Row>
                 </Col>
-                <Divider type="vertical" style={{ height: 'auto', alignSelf: 'stretch' }} />
-                <Col flex="none" style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Divider type="vertical" className="h-full" />
+                <Col flex="none" className="flex justify-end">
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
-                        style={{ marginRight: "8px" }}
+                        className="mr-2"
                     >
                         Create Mentor
                     </Button>
@@ -155,9 +165,9 @@ const Teacher: React.FC = () => {
                 dataSource={sortedData}
                 pagination={{ pageSize: itemsPerPage }}
                 rowKey="id"
+                className="rounded-md"
             />
-        </div >
-
+        </div>
     );
 };
 
