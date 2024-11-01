@@ -1,8 +1,9 @@
-import { MdGroupAdd } from "react-icons/md";
-import { Button, Checkbox, Modal } from "antd";
+import { Button, Checkbox, Modal, Pagination } from "antd";
 import { useState } from "react";
-import StudentTableNoAction from "./studentTableNoAction";
 import { ImNotification } from "react-icons/im";
+import ClassCard from "./classCard";
+import { FiPlus } from "react-icons/fi";
+import { TbDeviceDesktopSearch } from "react-icons/tb";
 
 const GroupTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -47,7 +48,7 @@ const GroupTable = () => {
             <th className="p-2">Group</th>
             <th className="p-2">Major</th>
             <th className="p-2">TeamMembers</th>
-            <th className="p-2">Action</th>
+            <th className="p-2">Add Class</th>
             <th className="p-2">Request</th>
           </tr>
         </thead>
@@ -59,30 +60,24 @@ const GroupTable = () => {
               </td>
               <td className="p-2">{group.groupName}</td>
               <td className="p-2">
-                {group.major.map((maj, idx) => (
+                {group.major.map((major, idx) => (
                   <span
                     key={idx}
                     className={`bg-${
-                      maj === "Nông sản"
+                      major === "Nông sản"
                         ? "yellow"
-                        : maj === "Công nghệ"
-                        ? "green"
-                        : "red"
-                    }-200 text-${
-                      maj === "Nông sản"
-                        ? "yellow"
-                        : maj === "Công nghệ"
-                        ? "green"
-                        : "red"
-                    }-700 px-2 py-1 m-1 rounded-lg mt-1`}
+                        : major === "Công nghệ"
+                        ? "blue"
+                        : "green"
+                    }-200 px-2 py-1 m-1 rounded-lg mt-1`}
                   >
-                    {maj}
+                    {major}
                   </span>
                 ))}
               </td>
               <td className="p-2 font-semibold text-lg">{group.teamMembers}</td>
               <td className="p-2">
-                <MdGroupAdd
+                <TbDeviceDesktopSearch
                   className="text-black text-2xl cursor-pointer"
                   onClick={showModal}
                 />
@@ -105,9 +100,17 @@ const GroupTable = () => {
           ))}
         </tbody>
       </table>
-
+      <div className="mt-5 flex justify-center">
+        <Pagination
+          defaultCurrent={1}
+          total={5}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} groups`
+          }
+        />
+      </div>
       <Modal
-        title="Student UnGroup"
+        title="Class Group"
         open={isModalVisible}
         onCancel={handleCancel}
         closable={false}
@@ -121,12 +124,16 @@ const GroupTable = () => {
         ]}
         width={900}
         bodyStyle={{
-          maxHeight: 400,
+          maxHeight: 500,
           overflowY: "auto",
         }}
       >
-        <div className="w-full">
-          <StudentTableNoAction />
+        <div className="grid grid-cols-3 gap-4">
+          <ClassCard />
+          <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-purple-400">
+            <FiPlus className="text-3xl" />
+            <span className="mt-1 text-lg">Create new class</span>
+          </button>
         </div>
       </Modal>
     </div>

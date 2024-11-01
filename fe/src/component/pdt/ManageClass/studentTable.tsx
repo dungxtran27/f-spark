@@ -1,7 +1,8 @@
-import { MdGroupAdd } from "react-icons/md";
-import { Button, Checkbox, Modal } from "antd";
+import { Button, Checkbox, Modal, Pagination } from "antd";
 import { useState } from "react";
 import ClassCard from "./classCard";
+import { FiPlus } from "react-icons/fi";
+import { TbDeviceDesktopSearch } from "react-icons/tb";
 
 const StudentTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -19,28 +20,28 @@ const StudentTable = () => {
       mssv: "HE170019",
       name: "Trần Văn Anh Vũ",
       mail: "hieunthe163894@fpt.edu.vn",
-      major: "Công nghệ",
-      color: "green",
+      major: "GD",
+      color: "red",
     },
     {
       mssv: "HE170020",
       name: "Trần Văn Anh Vũ",
       mail: "hieunthe163894@fpt.edu.vn",
-      major: "Nông sản",
-      color: "yellow",
+      major: "HS",
+      color: "green",
     },
     {
       mssv: "HE170021",
       name: "Trần Văn Anh Vũ",
       mail: "hieunthe163894@fpt.edu.vn",
-      major: "F&B",
-      color: "red",
+      major: "SE",
+      color: "blue",
     },
     {
       mssv: "HE170022",
       name: "Trần Văn Anh Vũ",
       mail: "hieunthe163894@fpt.edu.vn",
-      major: "Kinh tế",
+      major: "SE",
       color: "blue",
     },
   ];
@@ -57,7 +58,7 @@ const StudentTable = () => {
             <th className="p-2">Major</th>
             <th className="p-2">Name</th>
             <th className="p-2">Email</th>
-            <th className="p-2">Action</th>
+            <th className="p-2">Add Class</th>
           </tr>
         </thead>
         <tbody>
@@ -69,7 +70,7 @@ const StudentTable = () => {
               <td className="p-2">{student.mssv}</td>
               <td className="p-2">
                 <span
-                  className={`bg-${student.color}-200 text-${student.color}-700 px-2 py-1 rounded-lg`}
+                  className={`bg-${student.color}-400 px-2 py-1 rounded-lg`}
                 >
                   {student.major}
                 </span>
@@ -77,7 +78,7 @@ const StudentTable = () => {
               <td className="p-2">{student.name}</td>
               <td className="p-2">{student.mail}</td>
               <td className="p-2">
-                <MdGroupAdd
+                <TbDeviceDesktopSearch
                   className="text-black text-2xl cursor-pointer"
                   onClick={showModal}
                 />
@@ -86,6 +87,15 @@ const StudentTable = () => {
           ))}
         </tbody>
       </table>
+      <div className="mt-5 flex justify-center">
+        <Pagination
+          defaultCurrent={1}
+          total={5}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} students`
+          }
+        />
+      </div>
 
       <Modal
         title="Class Group"
@@ -102,12 +112,16 @@ const StudentTable = () => {
         ]}
         width={900}
         bodyStyle={{
-          maxHeight: 400,
+          maxHeight: 500,
           overflowY: "auto",
         }}
       >
         <div className="grid grid-cols-3 gap-4">
           <ClassCard />
+          <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-purple-400">
+            <FiPlus className="text-3xl" />
+            <span className="mt-1 text-lg">Create new class</span>
+          </button>
         </div>
       </Modal>
     </div>

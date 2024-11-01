@@ -8,43 +8,55 @@ import { ImNotification } from "react-icons/im";
 const classData = [
   {
     id: 1,
-    className: "SE1708_NJ",
+    className: "SE1705_NJ",
     teacher: "Nguyễn Trung Hiếu",
     students: 36,
     groups: 6,
     messages: 1,
     money: 1,
-    color: "red",
+    color: "#ef4444",
     opacity: 100,
     hasNotification: true,
   },
   {
     id: 2,
-    className: "SE1708_NJ",
+    className: "SE1704_NJ",
     teacher: "Nguyễn Trung Hiếu",
     students: 36,
     groups: 6,
     messages: 1,
     money: 1,
-    color: "green",
+    color: "#22c55e",
     opacity: 100,
     hasNotification: true,
   },
   {
     id: 3,
-    className: "SE1708_NJ",
+    className: "SE1709_NJ",
     teacher: "Nguyễn Trung Hiếu",
     students: 36,
     groups: 6,
     messages: 0,
     money: 1,
-    color: "yellow",
+    color: "#eab308",
+    opacity: 80,
+    hasNotification: false,
+  },
+  {
+    id: 4,
+    className: "SE1709_NJ",
+    teacher: "Nguyễn Trung Hiếu",
+    students: 36,
+    groups: 6,
+    messages: 0,
+    money: 1,
+    color: "#22c55e",
     opacity: 80,
     hasNotification: false,
   },
 ];
 
-const ClassCard = ({ onClick }: { onClick?: (classColor: string) => void }) => {
+const ClassCard = ({ onClick }: { onClick?: (classId: string) => void }) => {
   return (
     <>
       {classData.map((classInfo) => (
@@ -54,7 +66,8 @@ const ClassCard = ({ onClick }: { onClick?: (classColor: string) => void }) => {
           onClick={() => onClick && onClick(classInfo.color)}
         >
           <div
-            className={`bg-${classInfo.color}-500 opacity-${classInfo.opacity} p-4 text-white`}
+            className={`opacity-${classInfo.opacity} p-4 text-white`}
+            style={{ backgroundColor: classInfo.color }}
           >
             <div className="flex text-lg font-semibold">
               {classInfo.className}
@@ -76,14 +89,12 @@ const ClassCard = ({ onClick }: { onClick?: (classColor: string) => void }) => {
                 <span className="text-sm font-medium">
                   {classInfo.students} Students
                 </span>
-                <FaUser
-                  className={`text-${classInfo.color}-500 ml-2`}
-                />
+                <FaUser className={`text-${classInfo.color}-500 ml-2`} />
               </div>
               {classInfo.messages > 0 ? (
                 <div className="flex items-center justify-end">
                   <span className="text-sm font-medium">
-                    {classInfo.messages} Message
+                    {classInfo.messages} Request
                   </span>
                   <MdOutlineMessage
                     className={`text-${classInfo.color}-500 text-xl ml-2`}
@@ -98,17 +109,13 @@ const ClassCard = ({ onClick }: { onClick?: (classColor: string) => void }) => {
                 <span className="text-sm font-medium">
                   {classInfo.groups} Group
                 </span>
-                <FaUserGroup
-                  className={`text-${classInfo.color}-500 ml-2`}
-                />
+                <FaUserGroup className={`text-${classInfo.color}-500 ml-2`} />
               </div>
               <div className="flex items-center justify-end">
                 <span className="text-sm font-medium">
                   {classInfo.money} Sponsorship
                 </span>
-                <RiMoneyDollarCircleLine
-                  className="text-yellow-500 text-xl ml-2"
-                />
+                <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
               </div>
             </div>
           </div>
