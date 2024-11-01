@@ -416,7 +416,5 @@ export default {
   deleteCustomerPersona,
   findAllGroupsOfClass,
   addStundentInGroup,
-  // findAllStudentByGroupId,
-  addStundentInGroup,
   assignLeader
 };

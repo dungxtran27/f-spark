@@ -4,257 +4,123 @@ import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { MdOutlineMessage } from "react-icons/md";
 import { Tooltip } from "antd";
 import { ImNotification } from "react-icons/im";
-const ClassCard = ({ onClick }: { onClick?: () => void }) => {
+
+const classData = [
+  {
+    id: 1,
+    className: "SE1705_NJ",
+    teacher: "Nguyễn Trung Hiếu",
+    students: 36,
+    groups: 6,
+    messages: 1,
+    money: 1,
+    color: "#ef4444",
+    opacity: 100,
+    hasNotification: true,
+  },
+  {
+    id: 2,
+    className: "SE1704_NJ",
+    teacher: "Nguyễn Trung Hiếu",
+    students: 36,
+    groups: 6,
+    messages: 1,
+    money: 1,
+    color: "#22c55e",
+    opacity: 100,
+    hasNotification: true,
+  },
+  {
+    id: 3,
+    className: "SE1709_NJ",
+    teacher: "Nguyễn Trung Hiếu",
+    students: 36,
+    groups: 6,
+    messages: 0,
+    money: 1,
+    color: "#eab308",
+    opacity: 80,
+    hasNotification: false,
+  },
+  {
+    id: 4,
+    className: "SE1709_NJ",
+    teacher: "Nguyễn Trung Hiếu",
+    students: 36,
+    groups: 6,
+    messages: 0,
+    money: 1,
+    color: "#22c55e",
+    opacity: 80,
+    hasNotification: false,
+  },
+];
+
+const ClassCard = ({ onClick }: { onClick?: (classId: string) => void }) => {
   return (
     <>
-      <div className="rounded-md overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className="bg-red-500 p-4 text-white">
-          <div className="text-lg font-semibold">SE1708_NJ</div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-red-500 ml-2" />
+      {classData.map((classInfo) => (
+        <div
+          key={classInfo.id}
+          className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer`}
+          onClick={() => onClick && onClick(classInfo.color)}
+        >
+          <div
+            className={`opacity-${classInfo.opacity} p-4 text-white`}
+            style={{ backgroundColor: classInfo.color }}
+          >
+            <div className="flex text-lg font-semibold">
+              {classInfo.className}
+              {classInfo.hasNotification && (
+                <div className="ml-auto">
+                  <Tooltip title="Class Information">
+                    <span className="text-white text-xl cursor-pointer">
+                      <ImNotification />
+                    </span>
+                  </Tooltip>
+                </div>
+              )}
             </div>
-            {/* No money */}
-            <div className="flex items-center justify-end">
-              <span></span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-red-500 ml-2" />
-            </div>
+            <div className="text-sm">Teacher: {classInfo.teacher}</div>
           </div>
-        </div>
-      </div>
-
-      <div
-        className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer"
-        onClick={onClick}
-      >
-        <div className="bg-red-500 p-4 text-white">
-          <div className="flex text-lg font-semibold">
-            SE1708_NJ
-            <div className="ml-auto">
-              <Tooltip>
-                <span className="text-white text-xl cursor-pointer">
-                  <ImNotification />
+          <div className="bg-white p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center">
+                <span className="text-sm font-medium">
+                  {classInfo.students} Students
                 </span>
-              </Tooltip>
-            </div>
-          </div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-red-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Message</span>
-              <MdOutlineMessage className="text-red-500 text-xl ml-2" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-red-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Money</span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className="bg-red-500 p-4 text-white">
-          <div className="text-lg font-semibold">SE1708_NJ</div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-red-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Money</span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-red-500 ml-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className="bg-green-500 p-4 text-white">
-          <div className="text-lg font-semibold">SE1708_NJ</div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-green-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Money</span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-green-500 ml-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className="bg-green-500 p-4 text-white">
-          <div className="flex text-lg font-semibold">
-            SE1708_NJ
-            <div className="ml-auto">
-              <Tooltip title="Class Information">
-                <span className="text-white text-xl cursor-pointer">
-                  <ImNotification />
+                <FaUser className={`text-${classInfo.color}-500 ml-2`} />
+              </div>
+              {classInfo.messages > 0 ? (
+                <div className="flex items-center justify-end">
+                  <span className="text-sm font-medium">
+                    {classInfo.messages} Request
+                  </span>
+                  <MdOutlineMessage
+                    className={`text-${classInfo.color}-500 text-xl ml-2`}
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-end">
+                  <span></span>
+                </div>
+              )}
+              <div className="flex items-center">
+                <span className="text-sm font-medium">
+                  {classInfo.groups} Group
                 </span>
-              </Tooltip>
-            </div>
-          </div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-green-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Message</span>
-              <MdOutlineMessage className="text-green-500 text-xl ml-2" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-green-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Money</span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className="bg-green-500 p-4 text-white">
-          <div className="text-lg font-semibold">SE1708_NJ</div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-green-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Money</span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-green-500 ml-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className="bg-yellow-500 opacity-80 p-4 text-white">
-          <div className="text-lg font-semibold">SE1708_NJ</div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-yellow-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Money</span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-yellow-500 ml-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className="bg-yellow-500 opacity-80 p-4 text-white">
-          <div className="text-lg font-semibold">SE1708_NJ</div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-yellow-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Money</span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-yellow-500 ml-2" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className="bg-yellow-500 opacity-80 p-4 text-white">
-          <div className="flex text-lg font-semibold">
-            SE1708_NJ
-            <div className="ml-auto">
-              <Tooltip>
-                <span className="text-white text-xl cursor-pointer">
-                  <ImNotification />
+                <FaUserGroup className={`text-${classInfo.color}-500 ml-2`} />
+              </div>
+              <div className="flex items-center justify-end">
+                <span className="text-sm font-medium">
+                  {classInfo.money} Sponsorship
                 </span>
-              </Tooltip>
-            </div>
-          </div>
-          <div className="text-sm">Teacher: Nguyễn Trung Hiếu</div>
-        </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">36 Students</span>
-              <FaUser className="text-yellow-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Message</span>
-              <MdOutlineMessage className="text-yellow-500 text-xl ml-2" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium">6 Group</span>
-              <FaUserGroup className="text-yellow-500 ml-2" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium">1 Money</span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
+                <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ))}
     </>
   );
 };

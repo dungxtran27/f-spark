@@ -1,16 +1,17 @@
 import { useSelector } from "react-redux";
-import { RootState } from "../../../../redux/store";
-import { UserInfo } from "../../../../model/auth";
+import { RootState } from "../../../redux/store";
+import { UserInfo } from "../../../model/auth";
 import { Divider, Empty, Input, Popover, Typography } from "antd";
 import { useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { IoEllipsisHorizontal, IoSend } from "react-icons/io5";
 import { GrAnnounce, GrAttachment } from "react-icons/gr";
 import dayjs from "dayjs";
-import { DATE_FORMAT } from "../../../../utils/const";
+import { DATE_FORMAT } from "../../../utils/const";
 import { AiFillLike } from "react-icons/ai";
 import { CiEdit } from "react-icons/ci";
 import { FaRegTrashCan } from "react-icons/fa6";
+import DeadlineAndOutcome from "./DeadlineAndOutcome";
 
 const AnnouncementItem = (post: any) => {
   return (
@@ -184,62 +185,74 @@ const Stream = () => {
       createdAt: "2024-09-01T12:34:56.789Z",
     },
   ];
+
   const pinnedPost = post.find((p) => p?._id === 1);
   const [postType, setPostType] = useState<string>("announcement");
   return (
-    <div className="w-full py-3">
-      <div className="w-full flex h-[110px] rounded bg-white flex-col border border-textSecondary/30">
-        <div className="w-full h-3/5 border-b border-textSecondary/50 flex items-center px-5 gap-5">
-          <img
-            src={userInfo?.account?.profilePicture}
-            className="aspect-square w-[40px] object-cover object-center rounded-full border-2 border-primary"
-          />
-          <Input placeholder="Announce something to your class" size="large" />
+    <div className="w-full py-3 flex gap-3">
+      <div className="w-9/12">
+        <div className="w-full flex h-[110px] rounded bg-white flex-col border border-textSecondary/30">
+          <div className="w-full h-3/5 border-b border-textSecondary/50 flex items-center px-5 gap-5">
+            <img
+              src={userInfo?.account?.profilePicture}
+              className="aspect-square w-[40px] object-cover object-center rounded-full border-2 border-primary"
+            />
+            <Input
+              placeholder="Announce something to your class"
+              size="large"
+            />
+          </div>
+          <div className="flex items-center flex-grow">
+            <div
+              className={`w-1/2 h-full text-center border-r cursor-pointer rounded-bl border-textSecondary/50 flex justify-center items-center ${
+                postType === "announcement" && "bg-primary bg-opacity-15"
+              }`}
+              onClick={() => {
+                setPostType("announcement");
+              }}
+            >
+              Announcement
+            </div>
+            <div
+              className={`w-1/2 h-full justify-center cursor-pointer flex items-center ${
+                postType === "assignment" && "bg-primary bg-opacity-15"
+              }`}
+              onClick={() => {
+                setPostType("assignment");
+              }}
+            >
+              Assignment
+            </div>
+          </div>
         </div>
-        <div className="flex items-center flex-grow">
-          <div
-            className={`w-1/2 h-full text-center border-r cursor-pointer rounded-bl border-textSecondary/50 flex justify-center items-center ${
-              postType === "announcement" && "bg-primary bg-opacity-15"
-            }`}
-            onClick={() => {
-              setPostType("announcement");
-            }}
-          >
-            Announcement
+        {pinnedPost && (
+          <div className="py-5 w-full">
+            <div className="flex items-center gap-3">
+              <FaStar size={25} className="text-orange-400" /> Pinned Message
+            </div>
+            <div className="mt-3">
+              {pinnedPost?.type === "announcement" ? (
+                AnnouncementItem(pinnedPost)
+              ) : (
+                <></>
+              )}
+            </div>
+            <Divider className="border-textSecondary" />
           </div>
-          <div
-            className={`w-1/2 h-full justify-center cursor-pointer flex items-center ${
-              postType === "assignment" && "bg-primary bg-opacity-15"
-            }`}
-            onClick={() => {
-              setPostType("assignment");
-            }}
-          >
-            Assignment
-          </div>
+        )}
+        <div className=" flex flex-col gap-5 w-full">
+          {post
+            ?.filter((p) => p?._id !== pinnedPost?._id)
+            ?.map((p) =>
+              p?.type === "announcement"
+                ? AnnouncementItem(p)
+                : assignmentItem(p)
+            )}
         </div>
       </div>
-      {pinnedPost && (
-        <div className="py-5">
-          <div className="flex items-center gap-3">
-            <FaStar size={25} className="text-orange-400" /> Pinned Message
-          </div>
-          <div className="mt-3">
-            {pinnedPost?.type === "announcement" ? (
-              AnnouncementItem(pinnedPost)
-            ) : (
-              <></>
-            )}
-          </div>
-          <Divider className="border-textSecondary" />
-        </div>
-      )}
-      <div className=" flex flex-col gap-5">
-        {post
-          ?.filter((p) => p?._id !== pinnedPost?._id)
-          ?.map((p) =>
-            p?.type === "announcement" ? AnnouncementItem(p) : assignmentItem(p)
-          )}
+      <div className="flex-grow flex flex-col sticky top-0 self-start">
+        <span className="h-5"></span>
+        <DeadlineAndOutcome />
       </div>
     </div>
   );

@@ -22,8 +22,8 @@ const StudentTableNoAction = () => {
             </td>
             <td className="p-2">HE170019</td>
             <td className="p-2">
-              <span className="bg-green-200 text-green-700 px-2 py-1 rounded-lg">
-                Công nghệ
+              <span className="mr-2 px-2 py-1 text-white bg-purple-500 rounded-lg text-sm">
+                HS
               </span>
             </td>
             <td className="p-2">Trần Văn Anh Vũ</td>
@@ -36,8 +36,8 @@ const StudentTableNoAction = () => {
             </td>
             <td className="p-2">HE170019</td>
             <td className="p-2">
-              <span className="bg-yellow-200 text-yellow-700 px-2 py-1 rounded-lg">
-                Nông sản
+              <span className="mr-2 px-2 py-1 text-white bg-purple-500 rounded-lg text-sm">
+                HS
               </span>
             </td>
             <td className="p-2">Trần Văn Anh Vũ</td>
@@ -50,8 +50,8 @@ const StudentTableNoAction = () => {
             </td>
             <td className="p-2">HE170019</td>
             <td className="p-2">
-              <span className="bg-red-200 text-red-700 px-2 py-1 rounded-lg">
-                F&B
+              <span className="mr-2 px-2 py-1 text-white bg-blue-400 rounded-lg text-sm">
+                SE
               </span>
             </td>
             <td className="p-2">Trần Văn Anh Vũ</td>
@@ -64,8 +64,8 @@ const StudentTableNoAction = () => {
             </td>
             <td className="p-2">HE170019</td>
             <td className="p-2">
-              <span className="bg-blue-200 text-blue-700 px-2 py-1 rounded-lg">
-                Kinh tế
+              <span className="mr-2 px-2 py-1 text-white bg-red-400 rounded-lg text-sm">
+                GD
               </span>
             </td>
             <td className="p-2">Trần Văn Anh Vũ</td>

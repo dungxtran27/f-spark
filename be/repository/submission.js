@@ -44,7 +44,7 @@ const addGrade = async ({ submissionId, grade, criteria }) => {
         }
       },
       { new: true } 
-    ).populate("student");    
+    ).populate("student").populate("group");    
     return updatedSubmission;
   } catch (error) {
     return new Error(error.message); 

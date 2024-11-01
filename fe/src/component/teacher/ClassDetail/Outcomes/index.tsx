@@ -1,34 +1,18 @@
-import { Checkbox, Divider, Form, Modal, Tabs, TabsProps, Tooltip } from "antd";
+import { Checkbox, Divider, Tabs, TabsProps, Tooltip } from "antd";
 import dayjs from "dayjs";
 import styles from "./styles.module.scss";
 import { CiEdit } from "react-icons/ci";
 import {
   DATE_FORMAT,
   QUERY_KEY,
-  TEACHER_OUTCOMES_MODAL_TYPES,
 } from "../../../../utils/const";
 import Submissions from "./Submissions";
-import { useState } from "react";
-import GradingSubmission from "./GradingSubmission";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { classApi } from "../../../../api/Class/class";
 import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 const TeacherOutcomes = () => {
-  const [openModal, setOpenModal] = useState({
-    isOpen: false,
-    modalType: "",
-  });
 
-  const [submission, setSubmission] = useState<any>(null);
-  const [gradingCriterias, setGradingCriterias] = useState([]);
-  const editGrading = (value: any, s: any, gc: any) => {
-    setOpenModal(value);
-    setSubmission(s);
-    setGradingCriterias(gc);
-  };
-  const [form] = Form.useForm();
-  const grade = Form.useWatch("grade", form);
-  const criteria = Form.useWatch("passedCriterias", form);
   const { classId } = useParams();
   const { data: outcomeListData } = useQuery({
     queryKey: [QUERY_KEY?.TEACHER_OUTCOMES_LIST, classId],
@@ -37,29 +21,7 @@ const TeacherOutcomes = () => {
     },
     enabled: !!classId,
   });
-  const queryClient = useQueryClient();
-  const gradeSubmission = useMutation({
-    mutationFn: ({
-      grade,
-      submissionId,
-      criteria,
-    }: {
-      grade: any;
-      submissionId: any;
-      criteria: any;
-    }) => {
-      return classApi.gradeOutcome({
-        submissionId: submissionId,
-        grade: grade,
-        criteria: criteria,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.TEACHER_OUTCOMES_LIST],
-      });
-    },
-  });
+
   const outcomesTabs: TabsProps["items"] = outcomeListData?.data?.data.map(
     (o: any) => {
       return {
@@ -131,7 +93,7 @@ const TeacherOutcomes = () => {
           )?.id
         }
       />
-      <Modal
+      {/* <Modal
         open={openModal.isOpen}
         title={
           openModal.modalType === TEACHER_OUTCOMES_MODAL_TYPES.grading ? (
@@ -178,7 +140,7 @@ const TeacherOutcomes = () => {
         ) : (
           <>hehe</>
         )}
-      </Modal>
+      </Modal> */}
     </div>
   );
 };

@@ -1,10 +1,11 @@
 import { Button, Checkbox, Modal, Pagination } from "antd";
 import { useState } from "react";
+import { ImNotification } from "react-icons/im";
 import ClassCard from "./classCard";
 import { FiPlus } from "react-icons/fi";
 import { TbDeviceDesktopSearch } from "react-icons/tb";
 
-const StudentTable = () => {
+const GroupTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const showModal = () => {
@@ -17,32 +18,22 @@ const StudentTable = () => {
 
   const data = [
     {
-      mssv: "HE170019",
-      name: "Trần Văn Anh Vũ",
-      mail: "hieunthe163894@fpt.edu.vn",
-      major: "GD",
-      color: "red",
+      groupName: "banh ca oreo",
+      major: ["F&B", "Nông sản"],
+      teamMembers: 5,
+      request: 1,
     },
     {
-      mssv: "HE170020",
-      name: "Trần Văn Anh Vũ",
-      mail: "hieunthe163894@fpt.edu.vn",
-      major: "HS",
-      color: "green",
+      groupName: "banh ca oreo",
+      major: ["F&B", "Nông sản"],
+      teamMembers: 5,
+      request: 0,
     },
     {
-      mssv: "HE170021",
-      name: "Trần Văn Anh Vũ",
-      mail: "hieunthe163894@fpt.edu.vn",
-      major: "SE",
-      color: "blue",
-    },
-    {
-      mssv: "HE170022",
-      name: "Trần Văn Anh Vũ",
-      mail: "hieunthe163894@fpt.edu.vn",
-      major: "SE",
-      color: "blue",
+      groupName: "banh ca oreo",
+      major: ["F&B", "Công nghệ"],
+      teamMembers: 5,
+      request: 0,
     },
   ];
 
@@ -54,34 +45,56 @@ const StudentTable = () => {
             <th className="p-2">
               <Checkbox />
             </th>
-            <th className="p-2">Mssv</th>
+            <th className="p-2">Group</th>
             <th className="p-2">Major</th>
-            <th className="p-2">Name</th>
-            <th className="p-2">Email</th>
+            <th className="p-2">TeamMembers</th>
             <th className="p-2">Add Class</th>
+            <th className="p-2">Request</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((student, index) => (
+          {data.map((group, index) => (
             <tr className="border-b" key={index}>
               <td className="p-2">
                 <Checkbox />
               </td>
-              <td className="p-2">{student.mssv}</td>
+              <td className="p-2">{group.groupName}</td>
               <td className="p-2">
-                <span
-                  className={`bg-${student.color}-400 px-2 py-1 rounded-lg`}
-                >
-                  {student.major}
-                </span>
+                {group.major.map((major, idx) => (
+                  <span
+                    key={idx}
+                    className={`bg-${
+                      major === "Nông sản"
+                        ? "yellow"
+                        : major === "Công nghệ"
+                        ? "blue"
+                        : "green"
+                    }-200 px-2 py-1 m-1 rounded-lg mt-1`}
+                  >
+                    {major}
+                  </span>
+                ))}
               </td>
-              <td className="p-2">{student.name}</td>
-              <td className="p-2">{student.mail}</td>
+              <td className="p-2 font-semibold text-lg">{group.teamMembers}</td>
               <td className="p-2">
                 <TbDeviceDesktopSearch
                   className="text-black text-2xl cursor-pointer"
                   onClick={showModal}
                 />
+              </td>
+              <td className="p-2">
+                {group.request > 0 ? (
+                  <div className="flex items-center">
+                    <span className="font-semibold text-lg ml-2 mr-4">
+                      {group.request}
+                    </span>
+                    <span className="text-orange-500 text-xl ">
+                      <ImNotification />
+                    </span>
+                  </div>
+                ) : (
+                  " "
+                )}
               </td>
             </tr>
           ))}
@@ -92,11 +105,10 @@ const StudentTable = () => {
           defaultCurrent={1}
           total={5}
           showTotal={(total, range) =>
-            `${range[0]}-${range[1]} of ${total} students`
+            `${range[0]}-${range[1]} of ${total} groups`
           }
         />
       </div>
-
       <Modal
         title="Class Group"
         open={isModalVisible}
@@ -128,4 +140,4 @@ const StudentTable = () => {
   );
 };
 
-export default StudentTable;
+export default GroupTable;

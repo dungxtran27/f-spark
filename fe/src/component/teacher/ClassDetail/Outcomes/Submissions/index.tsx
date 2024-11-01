@@ -26,7 +26,7 @@ const Submissions = ({
 }: {
   submissions: Props[] | undefined;
   gradingCriteria: any[];
-  setOpenModal: (open: any, submission: any, gradingCriterias: any) => void;
+  setOpenModal: (submission: any) => void;
 }) => {
   const { classId } = useParams();
   const { data: groups } = useQuery({
@@ -95,14 +95,7 @@ const Submissions = ({
               className="text-primaryBlue cursor-pointer"
               size={23}
               onClick={() => {
-                setOpenModal(
-                  {
-                    isOpen: true,
-                    modalType: TEACHER_OUTCOMES_MODAL_TYPES.grading,
-                  },
-                  s,
-                  gradingCriteria
-                );
+                setOpenModal(s);
               }}
             />
           </div>
