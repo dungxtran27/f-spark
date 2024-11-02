@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ImNotification } from "react-icons/im";
 import ClassCard from "./classCard";
 import { FiPlus } from "react-icons/fi";
-import { TbDeviceDesktopSearch } from "react-icons/tb";
+import { MdGroupAdd } from "react-icons/md";
 
 const GroupTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -63,13 +63,15 @@ const GroupTable = () => {
                 {group.major.map((major, idx) => (
                   <span
                     key={idx}
-                    className={`bg-${
-                      major === "Nông sản"
-                        ? "yellow"
-                        : major === "Công nghệ"
-                        ? "blue"
-                        : "green"
-                    }-200 px-2 py-1 m-1 rounded-lg mt-1`}
+                    className=" px-2 py-1 m-1 rounded-lg mt-1"
+                    style={{
+                      backgroundColor:
+                        major === "Nông sản"
+                          ? "rgba(255, 255, 0, 0.4)"
+                          : major === "Công nghệ"
+                          ? "rgba(0, 0, 255, 0.4)"
+                          : "rgba(0, 128, 0, 0.4)",
+                    }}
                   >
                     {major}
                   </span>
@@ -77,7 +79,7 @@ const GroupTable = () => {
               </td>
               <td className="p-2 font-semibold text-lg">{group.teamMembers}</td>
               <td className="p-2">
-                <TbDeviceDesktopSearch
+                <MdGroupAdd  
                   className="text-black text-2xl cursor-pointer"
                   onClick={showModal}
                 />

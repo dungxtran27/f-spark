@@ -27,12 +27,12 @@ const request: Requests[] = [
   },
   {
     mssv: "he170020",
-    major: "SE",
+    major: "HS",
     name: "Nguyễn Văn B",
     from: "SE1714",
     to: "SE1715",
     isDone: true,
-    color: "blue",
+    color: "purple",
     fromClassSize: 28,
     toClassSize: 32,
   },
@@ -75,8 +75,8 @@ const ApprovalTable: React.FC = () => {
           onClick={() => setActiveTab("pending")}
           className={`px-4 py-2 text-sm font-semibold ${
             activeTab === "pending"
-              ? "text-white bg-blue-500"
-              : "bg-gray-200 hover:bg-gray-400"
+              ? "text-white bg-primary"
+              : "bg-gray-200 hover:text-primary"
           } rounded-l-md`}
         >
           Pending
@@ -85,8 +85,8 @@ const ApprovalTable: React.FC = () => {
           onClick={() => setActiveTab("approved")}
           className={`px-4 py-2 text-sm font-semibold ${
             activeTab === "approved"
-              ? "text-white bg-blue-500"
-              : "bg-gray-200 hover:bg-gray-400"
+              ? "text-white bg-primary"
+              : "bg-gray-200 hover:text-primary"
           } rounded-r-md`}
         >
           Approved
@@ -108,7 +108,18 @@ const ApprovalTable: React.FC = () => {
               <td className="p-2">{request.mssv}</td>
               <td className="p-2">
                 <span
-                  className={`bg-${request.color}-400 px-2 py-1 rounded-lg`}
+                  className="px-2 py-1 rounded-lg"
+                  style={{
+                    backgroundColor: `${
+                      request.color === "yellow"
+                        ? "rgba(255, 255, 0, 0.4)"
+                        : request.color === "blue"
+                        ? "rgba(0, 0, 255, 0.4)"
+                        : request.color === "green"
+                        ? "rgba(0, 128, 0, 0.4)"
+                        : "rgba(255, 0, 0, 0.4)"
+                    }`,
+                  }}
                 >
                   {request.major}
                 </span>

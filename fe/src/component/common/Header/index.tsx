@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { authApi } from "../../../api/auth";
 import { BiExit } from "react-icons/bi";
 import { SlBell } from "react-icons/sl";
+import { ROLE } from "../../../utils/const";
 
 const Header = () => {
   const userInfo = useSelector(
@@ -42,9 +43,9 @@ const Header = () => {
         className="max-w-[70%]"
         title={"GD1715_AD / Ăn vặt kiểu Nhật - Maneki chan"}
       >
-        <span className="text-[16px] font-semibold truncate">
+        {/* <span className="text-[16px] font-semibold truncate">
           GD1715_AD / Ăn vặt kiểu Nhật - Maneki chan
-        </span>
+        </span> */}
       </Tooltip>
       <div className="w-[250px] px-3">
         <Popover
@@ -78,10 +79,16 @@ const Header = () => {
                 )}
               />
               <div className="flex-grow flex flex-col overflow-y-hidden">
-                <span className="text-[14px] font-semibold">
-                  {userInfo?.name}
-                </span>
-                <span className="text-[12px] truncate">{userInfo?.role}</span>
+                {userInfo?.role !== ROLE.admin && (
+                  <span className="text-[14px] font-semibold">
+                    {userInfo?.name}
+                  </span>
+                )}
+                {userInfo?.role !== ROLE.admin ? (
+                  <span className="text-[12px] truncate">{userInfo?.role}</span>
+                ) : (
+                  <span className="text-[12px] font-semibold">{userInfo?.role}</span>
+                )}
               </div>
             </div>
           </div>

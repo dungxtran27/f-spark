@@ -51,19 +51,15 @@ const GroupTableNoAction = () => {
                 {group.major.map((maj, idx) => (
                   <span
                     key={idx}
-                    className={`bg-${
-                      maj === "Nông sản"
-                        ? "yellow"
-                        : maj === "Công nghệ"
-                        ? "green"
-                        : "red"
-                    }-200 text-${
-                      maj === "Nông sản"
-                        ? "yellow"
-                        : maj === "Công nghệ"
-                        ? "green"
-                        : "red"
-                    }-700 px-2 py-1 m-1 rounded-lg mt-1`}
+                    className=" px-2 py-1 m-1 rounded-lg mt-1"
+                    style={{
+                      backgroundColor:
+                        maj === "Nông sản"
+                          ? "rgba(255, 255, 0, 0.4)"
+                          : maj === "Công nghệ"
+                          ? "rgba(0, 128, 0, 0.4)"
+                          : "rgba(255, 0, 0, 0.4)",
+                    }}
                   >
                     {maj}
                   </span>
