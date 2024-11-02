@@ -15,4 +15,7 @@ export const authApi = {
   logOut: async () => {
     return await axios.get("api/auth/logOut");
   },
+  googleLogin: async (token: string) => {
+    return await axios.post("api/auth/googleLogin", { token });
+  },
 };
