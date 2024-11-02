@@ -37,8 +37,6 @@ const AccountManagement: React.FC = () => {
   const [termFilter, setTermFilter] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<string | undefined>("Active");
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<AutoCompleteProps['options']>([]);
-  const [classSearchText, setClassSearchText] = useState("");
-
 
   const handleSearch = () => {
 
