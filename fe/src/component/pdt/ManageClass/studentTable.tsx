@@ -2,7 +2,7 @@ import { Button, Checkbox, Modal, Pagination } from "antd";
 import { useState } from "react";
 import ClassCard from "./classCard";
 import { FiPlus } from "react-icons/fi";
-import { TbDeviceDesktopSearch } from "react-icons/tb";
+import { MdGroupAdd } from "react-icons/md";
 
 const StudentTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -78,7 +78,7 @@ const StudentTable = () => {
               <td className="p-2">{student.name}</td>
               <td className="p-2">{student.mail}</td>
               <td className="p-2">
-                <TbDeviceDesktopSearch
+                <MdGroupAdd 
                   className="text-black text-2xl cursor-pointer"
                   onClick={showModal}
                 />

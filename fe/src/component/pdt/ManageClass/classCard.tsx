@@ -89,7 +89,7 @@ const ClassCard = ({ onClick }: { onClick?: (classId: string) => void }) => {
                 <span className="text-sm font-medium">
                   {classInfo.students} Students
                 </span>
-                <FaUser className={`text-${classInfo.color}-500 ml-2`} />
+                <FaUser className="ml-2" style={{ color: classInfo.color }} />
               </div>
               {classInfo.messages > 0 ? (
                 <div className="flex items-center justify-end">
@@ -97,7 +97,8 @@ const ClassCard = ({ onClick }: { onClick?: (classId: string) => void }) => {
                     {classInfo.messages} Request
                   </span>
                   <MdOutlineMessage
-                    className={`text-${classInfo.color}-500 text-xl ml-2`}
+                    className="text-xl ml-2"
+                    style={{ color: classInfo.color }}
                   />
                 </div>
               ) : (
@@ -109,7 +110,10 @@ const ClassCard = ({ onClick }: { onClick?: (classId: string) => void }) => {
                 <span className="text-sm font-medium">
                   {classInfo.groups} Group
                 </span>
-                <FaUserGroup className={`text-${classInfo.color}-500 ml-2`} />
+                <FaUserGroup
+                  className="ml-2"
+                  style={{ color: classInfo.color }}
+                />
               </div>
               <div className="flex items-center justify-end">
                 <span className="text-sm font-medium">
