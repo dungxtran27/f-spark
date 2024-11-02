@@ -19,7 +19,6 @@ interface Student {
 const data: Student[] = [
   { id: 1, name: "Nguyen Trung Hieu", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
   { id: 2, name: "Nguyen Van A", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
-  { id: 3, name: "Tran Thi B", studentId: "HE160002", class: "SE1704", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
   { id: 4, name: "Nguyen Trung Hieu A", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
   { id: 5, name: "Nguyen Van C", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
   { id: 6, name: "Tran Thi BD", studentId: "HE160002", class: "SE1704", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
