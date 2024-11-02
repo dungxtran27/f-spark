@@ -13,6 +13,7 @@ import Classes from "./pages/Teacher/Classes";
 import ClassDetail from "./pages/Teacher/ClassDetail";
 import TeacherDashboard from "./pages/Teacher/Dashboard";
 import ManageClass from "./pages/PDT/ManageClass";
+import ManageRequest from "./pages/PDT/manageRequest";
 function App() {
   return (
     <BrowserRouter>
@@ -34,6 +35,7 @@ function App() {
         <Route path="/dashboard" element={<TeacherDashboard />} />
         {/* PDT */}
         <Route path="/manageClass" element={<ManageClass />} />
+        <Route path="/manageRequest" element={<ManageRequest />} />
       </Routes>
     </BrowserRouter>
   );

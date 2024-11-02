@@ -1,10 +1,10 @@
 import DefaultLayout from "../../../layout/DefaultLayout";
 import RequestWrapper from "../../../component/pdt/ManageRequest";
-const ManageClass = () => {
+const ManageRequest = () => {
   return (
     <DefaultLayout>
       <RequestWrapper />
     </DefaultLayout>
   );
 };
-export default ManageClass;
+export default ManageRequest;
