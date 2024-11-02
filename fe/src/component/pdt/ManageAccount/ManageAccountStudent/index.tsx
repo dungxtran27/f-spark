@@ -20,10 +20,10 @@ const data: Student[] = [
   { id: 1, name: "Nguyen Trung Hieu", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
   { id: 2, name: "Nguyen Van A", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
   { id: 4, name: "Nguyen Trung Hieu A", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 5, name: "Nguyen Van C", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
-  { id: 6, name: "Tran Thi BD", studentId: "HE160002", class: "SE1704", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
+  { id: 5, name: "Nguyen Van C", studentId: "HE160001", class: "SE1705", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
+  { id: 6, name: "Tran Thi BD", studentId: "HE160002", class: "SE1707", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
   { id: 7, name: "Nguyen Trung Hieu E", studentId: "HE160023", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 8, name: "Nguyen Van F", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
+  { id: 8, name: "Nguyen Van F", studentId: "HE160001", class: "SE17010", email: "vana123@fe.com", term: "Fall 2025", status: "Deactive" },
   { id: 9, name: "Tran Thi G", studentId: "HE160002", class: "SE1704", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
   { id: 10, name: "Nguyen Trung Hieu H", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
   { id: 11, name: "Nguyen Van J", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
@@ -37,6 +37,8 @@ const AccountManagement: React.FC = () => {
   const [termFilter, setTermFilter] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<string | undefined>("Active");
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<AutoCompleteProps['options']>([]);
+  const [classSearchText, setClassSearchText] = useState("");
+
 
   const handleSearch = () => {
 
@@ -99,15 +101,43 @@ const AccountManagement: React.FC = () => {
                 className="w-full"
               />
             </Col>
-            <Col span={3}>
+
+            {/* <Col span={3}>
               <Select
                 placeholder="Class"
                 value={classFilter}
                 onChange={setClassFilter}
                 className="w-full"
               >
-                <Option value="SE1704">SE1704</Option>
-                <Option value="SE1604">SE1604</Option>
+                {[...new Set(data.map(student => student.class))].map((classItem) => (
+                  <Option key={classItem} value={classItem}>{classItem}</Option>
+                ))}
+
+              </Select>
+            </Col> */}
+
+            <Col span={5}>
+              <Select
+                placeholder="Class"
+                value={classFilter}
+                onChange={setClassFilter}
+                className="w-full"
+                // dropdownRender={(menu) => (
+                //   <>
+                //     <div style={{ padding: '8px' }}>
+                //       <input
+                //         placeholder="Search class"
+                //         className="w-full mb-2 border border-gray-300 rounded-md p-2 focus:outline-none focus:border-blue-500"
+                //       />
+                //     </div>
+                //     {menu}
+                //   </>
+                // )}
+                showSearch
+              >
+                {[...new Set(data.map(student => student.class))].map((classItem) => (
+                  <Option key={classItem} value={classItem}>{classItem}</Option>
+                ))}
               </Select>
             </Col>
             <Col span={4}>
@@ -117,8 +147,9 @@ const AccountManagement: React.FC = () => {
                 onChange={setTermFilter}
                 className="w-full"
               >
-                <Option value="Fall 2024">Fall 2024</Option>
-                <Option value="Spring 2024">Spring 2024</Option>
+                {[...new Set(data.map(student => student.term))].map((termItem) => (
+                  <Option key={termItem} value={termItem}>{termItem}</Option>
+                ))}
               </Select>
             </Col>
             <Col span={3}>
@@ -154,7 +185,7 @@ const AccountManagement: React.FC = () => {
           </Row>
         </Col>
 
-        <Divider type="vertical" style={{ height: 'auto', alignSelf: 'stretch' }} />
+        <Divider type="vertical" style={{ height: 'auto', alignSelf: 'stretch', color: "black" }} />
 
         <Col flex="none" className="flex justify-end">
           <Button

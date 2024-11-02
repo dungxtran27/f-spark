@@ -53,7 +53,7 @@ export const AdminRoutes = [
     icon: <SiGoogleclassroom  size={20} />,
   },
   {
-    route: "/mangeAccount",
+    route: "/manageAccount",
     page: "Mange Account",
     icon: <BiSolidUserAccount  />,
   },
