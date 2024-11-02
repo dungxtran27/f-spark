@@ -5,6 +5,7 @@ import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
 import { SlBell } from "react-icons/sl";
 import { Badge } from "antd";
+import { BiSolidUserAccount } from "react-icons/bi";
 export const StudentRoutes = [
   {
     route: "/projectOverview",
@@ -44,6 +45,20 @@ export const TeacherRoutes = [
     icon: <FaPeopleGroup size={20} />,
   },
 ];
+
+export const AdminRoutes = [
+  {
+    route: "/manageClass",
+    page: "Manage Class",
+    icon: <SiGoogleclassroom  size={20} />,
+  },
+  {
+    route: "/manageAccount",
+    page: "Mange Account",
+    icon: <BiSolidUserAccount  />,
+  },
+];
+
 export const SecondaryMenu = [
   {
     route: "/setting",

@@ -2,7 +2,7 @@ import axios from "../../utils/axiosUtil";
 
 export const businessModelCanvas = {
   getBusinessModelCanvas: async (groupId: string) => {
-    return await axios.get(`api/group/?groupId=${groupId}`);
+    return await axios.get(`api/group?groupId=${groupId}`);
   },
 
   updatwBusinessModelCanvas: async (
