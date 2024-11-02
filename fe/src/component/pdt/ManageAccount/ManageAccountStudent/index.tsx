@@ -99,38 +99,12 @@ const AccountManagement: React.FC = () => {
                 className="w-full"
               />
             </Col>
-
-            {/* <Col span={3}>
-              <Select
-                placeholder="Class"
-                value={classFilter}
-                onChange={setClassFilter}
-                className="w-full"
-              >
-                {[...new Set(data.map(student => student.class))].map((classItem) => (
-                  <Option key={classItem} value={classItem}>{classItem}</Option>
-                ))}
-
-              </Select>
-            </Col> */}
-
             <Col span={5}>
               <Select
                 placeholder="Class"
                 value={classFilter}
                 onChange={setClassFilter}
                 className="w-full"
-                // dropdownRender={(menu) => (
-                //   <>
-                //     <div style={{ padding: '8px' }}>
-                //       <input
-                //         placeholder="Search class"
-                //         className="w-full mb-2 border border-gray-300 rounded-md p-2 focus:outline-none focus:border-blue-500"
-                //       />
-                //     </div>
-                //     {menu}
-                //   </>
-                // )}
                 showSearch
               >
                 {[...new Set(data.map(student => student.class))].map((classItem) => (
