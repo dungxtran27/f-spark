@@ -43,12 +43,11 @@ const checkGroupAccess = async (req, res, next) => {
         console.log(req.groupId);
         
         break;
-
-      default:
-        return res.status(500).json({ error: "invalid role value" });
+      case ROLE_NAME.teacher:
         break;
+      default:
+        return res.status(403).json({ error: "Unauthorized !" });
     }
-
     next();
   } catch (error) {
     return res.status(500).json({ error: error.message });

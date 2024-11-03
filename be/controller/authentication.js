@@ -142,7 +142,9 @@ const login = async (req, res) => {
       case ROLE_NAME.startUpDepartment:
         return res.status(404).json({ error: "Unimplemented" });
       case ROLE_NAME.admin:
-        return res.status(404).json({ error: "Unimplemented" });
+        userDetail.account = existingAccount;
+        userDetail.role = ROLE_NAME.admin;
+        break
       default:
         return res.status(500).json({ error: "Bad request" });
     }

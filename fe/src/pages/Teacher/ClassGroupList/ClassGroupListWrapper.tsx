@@ -168,6 +168,7 @@ const ClassGroupListWrapper = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [classID] });
+      setGroup(group);
     },
   });
   // assign mentor to group
@@ -180,6 +181,7 @@ const ClassGroupListWrapper = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [classID] });
+      setGroup(group);
     },
   });
 
@@ -245,7 +247,6 @@ const ClassGroupListWrapper = () => {
               />
             ))}
           </div>
-
           <Table
             dataSource={classPeople?.data.data.unGroupStudents}
             columns={columnsStudentUngroup}
@@ -464,13 +465,13 @@ const ClassGroupListWrapper = () => {
       >
         {confirmContent == "mentor" && (
           <>
-            you want to add {mentorSelected.name} as mentor for group :{" "}
+            You want to add {mentorSelected.name} as mentor for group :{" "}
             {group.GroupName}
           </>
         )}
         {confirmContent == "leader" && (
           <>
-            you want to add {studentSelected.name} as leader for group :{" "}
+            You want to add {studentSelected.name} as leader for group :{" "}
             {group.GroupName}
           </>
         )}

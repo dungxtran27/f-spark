@@ -1,6 +1,33 @@
 import { Checkbox } from "antd";
 
 const StudentTableNoAction = () => {
+  const students = [
+    {
+      id: "HE170019",
+      major: "HS",
+      name: "Trần Văn Anh Vũ",
+      email: "hieunthe163894@fpt.edu.vn",
+    },
+    {
+      id: "HE170020",
+      major: "HS",
+      name: "Nguyễn Văn A",
+      email: "nguyenvana@fpt.edu.vn",
+    },
+    {
+      id: "HE170021",
+      major: "SE",
+      name: "Lê Thị B",
+      email: "lethib@fpt.edu.vn",
+    },
+    {
+      id: "HE170022",
+      major: "GD",
+      name: "Phạm Văn C",
+      email: "phamvanc@fpt.edu.vn",
+    },
+  ];
+
   return (
     <div className="bg-white shadow-md rounded-md p-4">
       <table className="w-full table-auto">
@@ -16,64 +43,37 @@ const StudentTableNoAction = () => {
           </tr>
         </thead>
         <tbody>
-          <tr className="border-b">
-            <td className="p-2">
-              <Checkbox />
-            </td>
-            <td className="p-2">HE170019</td>
-            <td className="p-2">
-              <span className="bg-green-200 text-green-700 px-2 py-1 rounded-lg">
-                Công nghệ
-              </span>
-            </td>
-            <td className="p-2">Trần Văn Anh Vũ</td>
-            <td className="p-2">hieunthe163894@fpt.edu.vn</td>
-          </tr>
-
-          <tr className="border-b">
-            <td className="p-2">
-              <Checkbox />
-            </td>
-            <td className="p-2">HE170019</td>
-            <td className="p-2">
-              <span className="bg-yellow-200 text-yellow-700 px-2 py-1 rounded-lg">
-                Nông sản
-              </span>
-            </td>
-            <td className="p-2">Trần Văn Anh Vũ</td>
-            <td className="p-2">hieunthe163894@fpt.edu.vn</td>
-          </tr>
-
-          <tr className="border-b">
-            <td className="p-2">
-              <Checkbox />
-            </td>
-            <td className="p-2">HE170019</td>
-            <td className="p-2">
-              <span className="bg-red-200 text-red-700 px-2 py-1 rounded-lg">
-                F&B
-              </span>
-            </td>
-            <td className="p-2">Trần Văn Anh Vũ</td>
-            <td className="p-2">hieunthe163894@fpt.edu.vn</td>
-          </tr>
-
-          <tr className="border-b">
-            <td className="p-2">
-              <Checkbox />
-            </td>
-            <td className="p-2">HE170019</td>
-            <td className="p-2">
-              <span className="bg-blue-200 text-blue-700 px-2 py-1 rounded-lg">
-                Kinh tế
-              </span>
-            </td>
-            <td className="p-2">Trần Văn Anh Vũ</td>
-            <td className="p-2">hieunthe163894@fpt.edu.vn</td>
-          </tr>
+          {students.map((student, index) => (
+            <tr key={index} className="border-b">
+              <td className="p-2">
+                <Checkbox />
+              </td>
+              <td className="p-2">{student.id}</td>
+              <td className="p-2">
+                <span
+                  className="mr-2 px-2 py-1 text-white rounded-lg text-sm"
+                  style={{
+                    backgroundColor:
+                      student.major === "HS"
+                        ? "#7D4AEA"
+                        : student.major === "SE"
+                        ? "#1E90FF"
+                        : student.major === "GD"
+                        ? "#FF4500"
+                        : "#B0B0B0",
+                  }}
+                >
+                  {student.major}
+                </span>
+              </td>
+              <td className="p-2">{student.name}</td>
+              <td className="p-2">{student.email}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
   );
 };
+
 export default StudentTableNoAction;
