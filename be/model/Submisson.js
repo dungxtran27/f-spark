@@ -7,9 +7,11 @@ const SubmissionSchema = new Schema(
       ref: "Student",
       required: true,
     },
-    attachment: {
+    content: {
       type: String,
-      required: true,
+    },
+    attachment: {
+      type: [String],
     },
     grade: {
       type: Number,
@@ -21,7 +23,6 @@ const SubmissionSchema = new Schema(
     group: {
       type: Schema.Types.ObjectId,
       ref: "Group",
-      required: true,
     },
     classworkId: { 
       type: Schema.Types.ObjectId,

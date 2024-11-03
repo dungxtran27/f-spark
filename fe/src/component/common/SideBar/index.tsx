@@ -2,14 +2,13 @@ import classNames from "classnames";
 import styles from "./styles.module.scss";
 import {
   StudentRoutes,
-  SecondaryMenu,
   TeacherRoutes,
 } from "../../../utils/menu";
 import SideBarItem from "./SideBarItem";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
-import { message, Tooltip } from "antd";
+import { message } from "antd";
 import React from "react";
 import { Image } from "antd";
 import logo_header from "../../../../public/logo_header.png";

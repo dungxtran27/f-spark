@@ -3,8 +3,6 @@ import { FaTasks, FaRegCalendarAlt } from "react-icons/fa";
 import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
-import { SlBell } from "react-icons/sl";
-import { Badge } from "antd";
 export const StudentRoutes = [
   {
     route: "/projectOverview",
