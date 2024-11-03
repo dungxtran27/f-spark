@@ -1,32 +1,35 @@
 import React, { useState } from "react";
-import { AutoComplete, Button, Select, Row, Col, Table, Tag, Divider } from "antd";
+import { AutoComplete, Button, Select, Row, Col, Table, Tag, Divider, Popover } from "antd";
 import { SearchOutlined, UserDeleteOutlined, CloseCircleOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
 import { Link } from "react-router-dom";
+import { colorMajorGroup } from "../../../../utils/const";
 
 const { Option } = Select;
 
+interface Tag {
+    _id: string;
+    name: string;
+}
 interface Mentor {
     id: number;
     name: string;
     email: string;
-    tag: string;
+    tags: Tag[];
     phoneNumber: string;
     status: "Active" | "Deactive";
 }
 
 const data: Mentor[] = [
-    { id: 1, name: "Nguyen Trung Hieu", tag: "SE", email: "hieuyd1234@fe.com", phoneNumber: "0123456789", status: "Active" },
-    { id: 2, name: "Nguyen Van A", tag: "KE", email: "vana1231@fe.com", phoneNumber: "0123456789", status: "Deactive" },
-    { id: 3, name: "Tran Thi B", tag: "AE", email: "btran1232@fe.com", phoneNumber: "0123456789", status: "Active" },
-    { id: 4, name: "Nguyen Trung Hieu A", tag: "SE", email: "hieuyd1233@fe.com", phoneNumber: "0123456789", status: "Active" },
-    { id: 5, name: "Nguyen Van C", tag: "SE", email: "vana1234@fe.com", phoneNumber: "0123456789", status: "Deactive" },
-    { id: 6, name: "Tran Thi BD", tag: "BE", email: "btran1236@fe.com", phoneNumber: "0123456789", status: "Active" },
-    { id: 7, name: "Nguyen Trung Hieu E", tag: "SE", email: "hieuyd1235@fe.com", phoneNumber: "0123456789", status: "Active" }
+    { id: 1, name: "Nguyen Trung Hieu", tags: [{ _id: "1", name: "Ky Thuat" }], email: "hieuyd1234@fe.com", phoneNumber: "0123456789", status: "Active" },
+    { id: 2, name: "Nguyen Van A", tags: [{ _id: "2", name: "Kinh Te" }], email: "vana1231@fe.com", phoneNumber: "0123456789", status: "Deactive" },
+    { id: 3, name: "Tran Thi B", tags: [{ _id: "3", name: "Khoa Hoc" }, { _id: "4", name: "Ky Thuat" }], email: "btran1232@fe.com", phoneNumber: "0123456789", status: "Active" },
+    { id: 4, name: "Nguyen Trung Hieu A", tags: [{ _id: "5", name: "Ky Thuat" }], email: "hieuyd1233@fe.com", phoneNumber: "0123456789", status: "Active" },
+    { id: 5, name: "Nguyen Van C", tags: [{ _id: "6", name: "Kinh Te" }, { _id: "7", name: "Khoa Hoc" }, { _id: "8", name: "Ky Thuat" }], email: "vana1234@fe.com", phoneNumber: "0123456789", status: "Deactive" },
 ];
 
-const Teacher: React.FC = () => {
+const Mentor: React.FC = () => {
     const [itemsPerPage] = useState(10);
     const [searchText, setSearchText] = useState("");
     const [tagFilter, setTagFitler] = useState<string | undefined>(undefined);
@@ -45,7 +48,7 @@ const Teacher: React.FC = () => {
             )
             .map(mentor => ({
                 value: mentor.name,
-                label: `${mentor.name} (${mentor.tag})`
+                label: `${mentor.name} (${mentor.tags})`
             }));
         setAutoCompleteOptions(filteredOptions);
     };
@@ -63,10 +66,37 @@ const Teacher: React.FC = () => {
             dataIndex: "name",
             key: "name",
             render: (text: string) => (
-                <Link to={"/mentorProfile"}>{text}</Link>
+                <Link to={`/manageAccount/mentor/profile/${text}`} style={{ fontWeight: 'bold' }}>
+                    {text}
+                </Link>
             ),
         },
-        { title: "Tag", dataIndex: "tag", key: "tag" },
+        {
+            title: "Tag",
+            dataIndex: "tags",
+            key: "tags",
+            render: (tags: Tag[]) => {
+                if (tags.length === 0) return null;
+                const firstTag = tags[0];
+                // Nội dung hiển thị trong Popover khi hover vào tag đầu tiên
+                const popoverContent = (
+                    <div>
+                        {tags.map((tag) => (
+                            <Tag key={tag._id} color={colorMajorGroup[tag.name] || "default"}>
+                                {tag.name}
+                            </Tag>
+                        ))}
+                    </div>
+                );
+                return (
+                    <Popover content={popoverContent} trigger="hover">
+                        <Tag color={colorMajorGroup[firstTag.name] || "default"}>
+                            {firstTag.name} {tags.length > 1 && `+${tags.length - 1}`}
+                        </Tag>
+                    </Popover>
+                );
+            },
+        },
         { title: "Email", dataIndex: "email", key: "email" },
         { title: "PhoneNumber", dataIndex: "phoneNumber", key: "phoneNumber" },
         { title: "Status", dataIndex: "status", key: "status", render: (status: string) => (<Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>), },
@@ -78,8 +108,8 @@ const Teacher: React.FC = () => {
         .sort((a, b) => {
             return (a.status === "Active" ? -1 : 1) - (b.status === "Active" ? -1 : 1);
         })
-        .map((teacher, index) => ({
-            ...teacher,
+        .map((Mentor, index) => ({
+            ...Mentor,
             id: index + 1,
         }));
 
@@ -109,9 +139,13 @@ const Teacher: React.FC = () => {
                                 value={tagFilter}
                                 onChange={setTagFitler}
                                 className="w-full"
+                                allowClear
                             >
-                                <Option value="Fall 2024">SE</Option>
-                                <Option value="Spring 2024">KS</Option>
+                                {Array.from(new Set(data.flatMap(mentor => mentor.tags.map(tag => tag.name)))).map(tag => (
+                                    <Option key={tag} value={tag}>
+                                        {tag}
+                                    </Option>
+                                ))}
                             </Select>
                         </Col>
                         <Col span={4}>
@@ -171,4 +205,4 @@ const Teacher: React.FC = () => {
     );
 };
 
-export default Teacher;
+export default Mentor;

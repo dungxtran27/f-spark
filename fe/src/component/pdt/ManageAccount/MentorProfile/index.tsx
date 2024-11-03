@@ -1,14 +1,17 @@
-import { Card, Typography, Space, Divider, Tag } from "antd";
+import { Card, Typography, Space, Divider, Tag, Button } from "antd";
 import {
     ProjectOutlined,
     UsergroupAddOutlined,
     HomeOutlined,
     GroupOutlined,
+
 } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
 const MentorProfileWrapper = () => {
+    const navigate = useNavigate();
     const groups = [
         {
             groupName: "Nhóm 1: Phát triển Ứng dụng",
@@ -29,7 +32,7 @@ const MentorProfileWrapper = () => {
             members: ["Nguyễn Văn G", "Trần Thị H"],
         },
         {
-            groupName: "Nhóm 3: Phát triển Ứng dụng",
+            groupName: "Nhóm 4: Phát triển Ứng dụng",
             className: "EXE102",
             projectTitle: "Dự án Phát triển Ứng dụng Mobile",
             members: ["Nguyễn Văn G", "Trần Thị H"],
@@ -38,8 +41,11 @@ const MentorProfileWrapper = () => {
 
     return (
         <div className="p-0.5 bg-white rounded-lg shadow-md">
-            <div className=" p-4 ">
-                <Divider orientation="left">Mentor information</Divider>
+            <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+                <Button onClick={() => navigate('/manageAccount')}>Back</Button>
+                <Divider orientation="left">Mentor Profile</Divider>
+            </div>
                 <div className="flex items-start space-x-4 mb-4">
                     <img
                         src="https://via.placeholder.com/150"
@@ -56,7 +62,7 @@ const MentorProfileWrapper = () => {
                             <Text>SĐT: 0123 456 789</Text>
                             <Text>
                                 LinkedIn:{" "}
-                                <a href="" target="_blank" rel="noopener noreferrer">
+                                <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">
                                     Nguyễn Văn BS
                                 </a>
                             </Text>
@@ -73,10 +79,10 @@ const MentorProfileWrapper = () => {
                 <Divider orientation="left">Support Group - {groups.length} groups</Divider>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {groups.map((group, index) => (
-                        <Card 
-                            key={index} 
-                            className="rounded-md overflow-hidden shadow-md cursor-pointer mb-4" 
-                            hoverable 
+                        <Card
+                            key={index}
+                            className="rounded-md overflow-hidden shadow-md cursor-pointer mb-4"
+                            hoverable
                             bodyStyle={{ padding: 0 }}
                         >
                             <div className="bg-red-500 p-4 text-white">

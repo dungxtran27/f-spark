@@ -3,6 +3,7 @@ import { AutoComplete, Button, Select, Row, Col, Table, Tag } from "antd";
 import { SearchOutlined, UserDeleteOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
+import { Link } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -64,8 +65,13 @@ const Teacher: React.FC = () => {
             title: "Name",
             dataIndex: "name",
             key: "name",
-            render: (_, record) => `${record.salutation}. ${record.name}`,
+            render: (_, record) => (
+                <Link to={`/teacherProfile/${record.id}`}>
+                    {`${record.salutation}. ${record.name}`}
+                </Link>
+            ),
         },
+        
         { title: "Email", dataIndex: "email", key: "email" },
         { title: "PhoneNumber", dataIndex: "phoneNumber", key: "phoneNumber" },
         { title: "Status", dataIndex: "status", key: "status", render: (status: string) => (<Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>), },
