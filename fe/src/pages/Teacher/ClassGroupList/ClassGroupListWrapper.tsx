@@ -1,54 +1,194 @@
-import {
-  Button,
-  Modal,
-  Collapse,
-  CollapseProps,
-  Tag,
-  Popover,
-  Select,
-  Divider,
-  Space,
-  Input,
-  Table,
-} from "antd";
+import { Button, Modal, Tag, Select, Space, Input, Table } from "antd";
 const { Search } = Input;
 
 import { useState } from "react";
-import { FaEdit, FaCircle } from "react-icons/fa";
-import { FaPlus } from "react-icons/fa";
-import { colorMap, colorMajorGroup } from "../../../utils/const";
+
+import { colorMap, colorMajorGroup, QUERY_KEY } from "../../../utils/const";
 import classNames from "classnames";
 import style from "../MentorList/style.module.scss";
-import type { GetProps, SelectProps, TableProps } from "antd";
-import { useQuery } from "@tanstack/react-query";
+import type { GetProps, SelectProps } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { classApi } from "../../../api/Class/class";
-import { useParams } from "react-router-dom";
+import { mentorList } from "../../../api/mentor/mentor";
+import { student } from "../../../api/student/student";
+import GroupCard from "./GroupCard";
+import { FaEdit, FaStar } from "react-icons/fa";
 
+interface reqBodyAssignMentorToGroup {
+  mentorId: string;
+  groupId: string;
+}
+
+interface MentorData {
+  _id: string;
+  name: string;
+  groupNumber: number;
+  major: majortype[];
+  avatar: string;
+}
+interface majortype {
+  _id: string;
+  name: string;
+}
+
+interface reqBodyAddStudentToGroup {
+  studentId: string;
+  groupId: string;
+}
+interface Account {
+  profilePicture?: string; // Optional, as not all accounts might have a profile picture
+  _id: string;
+  gen: number;
+  major: string;
+  name: string;
+  studentId?: string; // Optional, as studentId might not be present for all accounts
+}
+interface Group {
+  ProjectImage: string;
+  GroupDescription: string;
+  GroupName: string;
+  isSponsorship: boolean;
+  leader: string;
+  mentor: MentorData | null;
+  tag: majortype[];
+  teamMembers: Account[];
+  _id: string;
+}
 const ClassGroupListWrapper = () => {
+  const [group, setGroup] = useState<Group>({
+    ProjectImage: "",
+    GroupDescription: "",
+    GroupName: "",
+    isSponsorship: false,
+    leader: "",
+    mentor: null,
+    tag: [],
+    teamMembers: [],
+    _id: "",
+  });
+  //random add modal
+
+  //add mentor modal
+  const [AddMentorModal, setAddMentorModal] = useState(false);
+
+  const handleOpenAddMentorModal = () => {
+    setAddMentorModal(true);
+  };
+
+  const handleCloseAddMentorModal = () => {
+    setAddMentorModal(false);
+  };
+  const [confirm, setConfirm] = useState(false);
+  const [confirmContent, setConfirmContent] = useState("");
+  const [studentSelected, setCstudentSelected] = useState({});
+  const [mentorSelected, setmentorSelected] = useState<MentorData>({
+    _id: "",
+    name: "",
+    groupNumber: 0,
+    major: [],
+    avatar: "",
+  });
+  const handleOpenconfirm = () => {
+    setConfirm(true);
+  };
+
+  const handleCloseconfirm = () => {
+    setConfirm(false);
+  };
+  // //add member modal
+
+  const [tagSearch, setTagSearch] = useState([]);
+  const [nameSeacrh, setNameSeacrh] = useState("");
+  const handleChange = (value: any) => {
+    setTagSearch(value);
+  };
+
+  const [groupDetailModal, setgroupDetailModal] = useState(false);
+
+  const handleOpengroupDetailModal = () => {
+    setgroupDetailModal(true);
+  };
+
+  const handleClosegroupDetailModal = () => {
+    setgroupDetailModal(false);
+  };
+
   const classID = "670bb40cd6dcc64ee8cf7c90";
-  const { data: classPeople, isLoading } = useQuery({
+  //handle classData
+  const { data: classPeople } = useQuery({
     queryKey: [classID],
     queryFn: async () => {
       return await classApi.getclassDetailPeople(classID);
     },
   });
-  const columns = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      render: (text: string) => <a>{text}</a>,
+
+  const { data: tagData } = useQuery({
+    queryKey: [QUERY_KEY.TAGDATA],
+    queryFn: async () => {
+      return mentorList.getTag();
     },
-    {
-      title: "Major",
-      dataIndex: "major",
+  });
+
+  const options: SelectProps["options"] = tagData?.data.data.map(
+    (i: majortype) => ({
+      label: i.name,
+      value: i._id,
+    })
+  );
+  const { data: mentorData } = useQuery({
+    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
+    queryFn: async () => {
+      return mentorList.getMentorListPagination({
+        limit: 27,
+        page: 1,
+        tagIds: tagSearch,
+        name: nameSeacrh,
+      });
     },
-  ];
+  });
+  const queryClient = useQueryClient();
+  const addStudentToGroupSelected = useMutation({
+    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
+      student.addStudentToGroup({
+        studentId: studentId,
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classID] });
+    },
+  });
+  // assign leader to group
+  const assignLeaderToGroup = useMutation({
+    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
+      student.assignLeaderToGroup({
+        studentId: studentId,
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classID] });
+    },
+  });
+  // assign mentor to group
+  const assignMentorToGroup = useMutation({
+    mutationFn: ({ mentorId, groupId }: reqBodyAssignMentorToGroup) =>
+      student.assignmentorToGroup({
+        mentorId: mentorId,
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classID] });
+    },
+  });
+
   const columnsMentor = [
     {
       title: "image",
-      dataIndex: "avatar",
-      render: (avatar: string) => (
-        <img className="w-1/2 aspect-auto" src={avatar} alt="" />
+      dataIndex: "profilePicture",
+      render: (profilePicture: string) => (
+        <img className="w-1/2 aspect-auto" src={profilePicture} alt="" />
       ),
       width: 200,
     },
@@ -58,9 +198,9 @@ const ClassGroupListWrapper = () => {
     },
     {
       title: "Major",
-      dataIndex: "major",
-      render: (major: { name: string }[]) =>
-        major.map((m) => (
+      dataIndex: "tags",
+      render: (tags: any) =>
+        tags.map((m: majortype) => (
           <Tag key={m.name} color={colorMajorGroup[m.name]}>
             {m.name}
           </Tag>
@@ -72,595 +212,55 @@ const ClassGroupListWrapper = () => {
       dataIndex: "groupNumber",
     },
   ];
-  const classData = {
-    studentNumber: 26,
-    studentEven: [
-      {
-        name: "Nguyễn Thanh Tùng",
-        avatar:
-          "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-        major: "SE",
-      },
-      {
-        name: "Chính Minh Mùi",
-        major: "GD",
-        avatar:
-          "https://media.vov.vn/sites/default/files/styles/large/public/2021-03/the-weeknd-press-photo-2020-billboard-jgk-1548-1586968737-1024x677.jpg",
-      },
-      {
-        name: "Bình Quang Minh",
-        major: "IB",
 
-        avatar:
-          "https://w0.peakpx.com/wallpaper/476/987/HD-wallpaper-aurora-aksnes-aurora-aksnes-norway-norweigan-singer.jpg",
-      },
-      {
-        name: "Chu Chí Quang",
-        major: "MKT",
-
-        avatar:
-          "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-      },
-    ],
-    groups: [
-      {
-        _id: "1",
-        groupName: "basnh ca oreo",
-        tags: [
-          { name: "Food" },
-          { name: "Agriculture" },
-          { name: "Enviroment" },
-        ],
-        student: [
-          {
-            name: "Nguyễn Thanh Tùng",
-            major: "SE",
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-          {
-            name: "Chính Minh Mùi",
-            major: "IB",
-
-            avatar:
-              "https://media.vov.vn/sites/default/files/styles/large/public/2021-03/the-weeknd-press-photo-2020-billboard-jgk-1548-1586968737-1024x677.jpg",
-          },
-          {
-            name: "Bình Quang Minh",
-            major: "GD",
-
-            avatar:
-              "https://w0.peakpx.com/wallpaper/476/987/HD-wallpaper-aurora-aksnes-aurora-aksnes-norway-norweigan-singer.jpg",
-          },
-          {
-            name: "Chu Chí Quang",
-            major: "MKT",
-
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-        ],
-        leader: "id",
-        ProjectImage:
-          "https://cdn.tgdd.vn/2021/11/CookRecipe/Avatar/banh-kem-oreo-bang-lo-vi-song-thumbnail.jpeg",
-      },
-      {
-        _id: "2",
-        groupName: "tran duong nhan",
-        student: [
-          {
-            name: "Nguyễn Thanh Tùng",
-            major: "SE",
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-          {
-            name: "Chính Minh Mùi",
-            major: "SE",
-
-            avatar:
-              "https://media.vov.vn/sites/default/files/styles/large/public/2021-03/the-weeknd-press-photo-2020-billboard-jgk-1548-1586968737-1024x677.jpg",
-          },
-          {
-            name: "Bình Quang Minh",
-            major: "SE",
-
-            avatar:
-              "https://w0.peakpx.com/wallpaper/476/987/HD-wallpaper-aurora-aksnes-aurora-aksnes-norway-norweigan-singer.jpg",
-          },
-          {
-            name: "Chu Chí Quang",
-            major: "SE",
-
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-        ],
-        leader: "id",
-        ProjectImage:
-          "https://cdn.tgdd.vn/2021/11/CookRecipe/Avatar/banh-kem-oreo-bang-lo-vi-song-thumbnail.jpeg",
-      },
-      {
-        _id: "3",
-        groupName: "Balo trong luc",
-        student: [
-          {
-            name: "Nguyễn Thanh Tùng",
-            major: "GD",
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-          {
-            name: "Chính Minh Mùi",
-            major: "SE",
-
-            avatar:
-              "https://media.vov.vn/sites/default/files/styles/large/public/2021-03/the-weeknd-press-photo-2020-billboard-jgk-1548-1586968737-1024x677.jpg",
-          },
-          {
-            name: "Bình Quang Minh",
-            major: "SE",
-
-            avatar:
-              "https://w0.peakpx.com/wallpaper/476/987/HD-wallpaper-aurora-aksnes-aurora-aksnes-norway-norweigan-singer.jpg",
-          },
-          {
-            name: "Chu Chí Quang",
-            major: "SE",
-
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-        ],
-        leader: "id",
-        ProjectImage:
-          "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-      },
-      {
-        _id: "4",
-        groupName: "den hoc thong minh chong gu",
-        mentor: { name: "Tran Dung", email: "dungmuahahah@email.com" },
-        student: [
-          {
-            name: "Nguyễn Thanh Tùng",
-            major: "SE",
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-          {
-            name: "loptruongid",
-            major: "SE",
-
-            avatar:
-              "https://media.vov.vn/sites/default/files/styles/large/public/2021-03/the-weeknd-press-photo-2020-billboard-jgk-1548-1586968737-1024x677.jpg",
-          },
-          {
-            name: "Bình Quang Minh",
-            major: "IB",
-
-            avatar:
-              "https://w0.peakpx.com/wallpaper/476/987/HD-wallpaper-aurora-aksnes-aurora-aksnes-norway-norweigan-singer.jpg",
-          },
-          {
-            name: "Tran qunag dung",
-            major: "IB",
-
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-        ],
-        leader: "loptruongid",
-        ProjectImage:
-          "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-      },
-      {
-        _id: "2",
-        groupName: "tran duong nhan",
-        student: [
-          {
-            name: "Nguyễn Thanh Tùng",
-            major: "SE",
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-          {
-            name: "Chính Minh Mùi",
-            major: "SE",
-
-            avatar:
-              "https://media.vov.vn/sites/default/files/styles/large/public/2021-03/the-weeknd-press-photo-2020-billboard-jgk-1548-1586968737-1024x677.jpg",
-          },
-          {
-            name: "Bình Quang Minh",
-            major: "SE",
-
-            avatar:
-              "https://w0.peakpx.com/wallpaper/476/987/HD-wallpaper-aurora-aksnes-aurora-aksnes-norway-norweigan-singer.jpg",
-          },
-          {
-            name: "Chu Chí Quang",
-            major: "SE",
-
-            avatar:
-              "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-          },
-        ],
-        leader: "id",
-        ProjectImage:
-          "https://www.pluggedin.com/wp-content/uploads/2022/08/Billie-Eilish-The-30th-1024x587.jpg",
-      },
-    ],
-  };
-  const tagData = [
-    { label: "CNTT", value: "1" },
-    { label: "Marketing", value: "2" },
-    { label: "Bussiness", value: "3" },
-    { label: "Food", value: "4" },
-  ];
-  interface MentorData {
-    name: string;
-    groupNumber: number;
-    major: majortype[];
-    avatar: string;
-  }
-  interface majortype {
-    name: string;
-  }
-  const mentorData = [
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: [{ name: "Marketing" }, { name: "Food" }, { name: "Agriculture" }],
-      avatar:
-        "https://i.pinimg.com/736x/c0/74/9b/c0749b7cc401421662ae901ec8f9f660.jpg",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: [{ name: "Marketing" }, { name: "Food" }, { name: "Agriculture" }],
-      avatar:
-        "https://i.pinimg.com/736x/c0/74/9b/c0749b7cc401421662ae901ec8f9f660.jpg",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: [{ name: "Marketing" }, { name: "Food" }, { name: "Agriculture" }],
-      avatar:
-        "https://i.pinimg.com/736x/c0/74/9b/c0749b7cc401421662ae901ec8f9f660.jpg",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: [{ name: "Marketing" }, { name: "Food" }, { name: "Agriculture" }],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: [{ name: "Marketing" }, { name: "Food" }, { name: "Agriculture" }],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: [{ name: "Marketing" }, { name: "Food" }, { name: "Agriculture" }],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: [{ name: "Marketing" }, { name: "Food" }, { name: "Agriculture" }],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-    {
-      name: "dungmuahaha",
-      groupNumber: 4,
-      major: [{ name: "Marketing" }, { name: "Food" }, { name: "Agriculture" }],
-      avatar:
-        "https://genk.mediacdn.vn/2018/10/19/photo-1-15399266837281100315834-15399271585711710441111.png",
-    },
-  ];
-  const typedMentorData: MentorData[] = mentorData;
-  const options: SelectProps["options"] = tagData.map((i) => ({
-    label: i.label,
-    value: i.value,
-  }));
   type SearchProps = GetProps<typeof Input.Search>;
-  const onSearch: SearchProps["onSearch"] = (value, _e, info) =>
-    console.log(info?.source, value);
-  const hasAtLeastTwoMajors = (students: any) => {
-    const uniqueMajors = new Set();
+  const onSearch: SearchProps["onSearch"] = (value) => setNameSeacrh(value);
 
-    for (const student of students) {
-      uniqueMajors.add(student.major);
-
-      if (uniqueMajors.size >= 2) {
-        return "#22c55e";
-      }
-    }
-
-    return "#ef4444";
-  };
-  const renderGroupInfo = (id: any) => {
-    return (
-      <div className="flex">
-        <div className="w-full">
-          <img
-            src={classData.groups[id - 1].ProjectImage}
-            className="w-1/2"
-            alt=""
-          />
-          <div className="mt-3">
-            Tags:{" "}
-            {classData.groups[id - 1].tags?.map((t) => (
-              <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
-            ))}
-          </div>
-        </div>
-        <div className="  w-full">
-          {classData.groups[id - 1].student.map((s) => (
-            <>
-              <div className="flex justify-between w-3/4 bg-white mt-1 p-1 shadow rounded-sm">
-                <div className="flex ">
-                  <img
-                    src={s.avatar}
-                    className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                    alt=""
-                  />
-                  <p className="ml-3"> {s.name}</p>
-                  <span>
-                    <Tag
-                      color={colorMap[s.major]}
-                      className="ml-3 h-auto w-auto"
-                    >
-                      {s.major}
-                    </Tag>
-                    {classData.groups[id - 1].leader == s.name && (
-                      <span className="text-red-500 text-lg">*</span>
-                    )}
-                  </span>
-                </div>
-              </div>
-            </>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  //random add modal
-  const [randomAddModal, setRandomAddModal] = useState(false);
-
-  const handleOpenRandomAddModal = () => {
-    setRandomAddModal(true);
-  };
-
-  const handleCloseRandomAddModal = () => {
-    setRandomAddModal(false);
-  };
-  //add mentor modal
-  const [AddMentorModal, setAddMentorModal] = useState(false);
-
-  const handleOpenAddMentorModal = () => {
-    setAddMentorModal(true);
-  };
-
-  const handleCloseAddMentorModal = () => {
-    setAddMentorModal(false);
-  };
-  //add member modal
-  const [AddMemberModal, setAddMemberModal] = useState(false);
-
-  const handleOpenAddMemberModal = () => {
-    setAddMemberModal(true);
-  };
-
-  const handleCloseAddMemberModal = () => {
-    setAddMemberModal(false);
-  };
-  interface DataType {
-    key: 1;
-    name: string;
-    major: string;
-  }
-  const rowSelection: TableProps<DataType>["rowSelection"] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        "selectedRows: ",
-        selectedRows
-      );
+  const columnsStudentUngroup = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      width: 300,
     },
-    getCheckboxProps: (record: DataType) => ({
-      disabled: record.name === "Disabled User", // Column configuration not to be checked
-      name: record.name,
-    }),
-  };
-  const PopoverGroupDetail = (
-    <>
-      <div
-        onClick={(e) => {
-          handleOpenAddMentorModal();
-          e.stopPropagation();
-        }}
-      >
-        Edit mentor
-      </div>
-      <hr />{" "}
-      <div
-        onClick={(e) => {
-          handleOpenAddMemberModal();
-          e.stopPropagation();
-        }}
-      >
-        Edit Member
-      </div>
-    </>
-  );
-  const collapseData: CollapseProps["items"] = classData.groups.map((c) => ({
-    key: c._id,
-    label: (
-      <div className=" flex justify-between">
-        <div>
-          <span className="text-lg">{c.groupName}</span>
-          {c.mentor ? (
-            " - Mentor: " + c.mentor.name
-          ) : (
-            <>
-              - <span className="text-red-500 font-medium"> no Mentor</span>
-            </>
-          )}
-        </div>
-        <Popover
-          content={PopoverGroupDetail}
-          trigger={"hover"}
-          placement="left"
-        >
-          <Button>
-            <FaEdit size={18} />
-          </Button>
-        </Popover>
-      </div>
-    ),
-    student: c.student,
-    children: renderGroupInfo(c._id),
-  }));
-  //random group for modal
-  const randomGroups = classData.groups
-    .slice(
-      Math.floor(Math.random() * classData.groups.length), // Random starting index
-      Math.floor(Math.random() * classData.groups.length + 2) // Ensure 2 elements
-    )
-    .map((group) => {
-      // Process or transform each group element here
-      return group; // You can modify or return a specific property from 'group'
-    });
-  //random group for modal
-  const randomStudent = classData.studentEven
-    .slice(
-      Math.floor(Math.random() * classData.studentEven.length), // Random starting index
-      Math.floor(Math.random() * classData.studentEven.length + 2) // Ensure 2 elements
-    )
-    .map((std) => {
-      // Process or transform each group element here
-      return std; // You can modify or return a specific property from 'group'
-    });
-  const PopoverAddStudentMannualContent = (
-    <div className="flex items-center gap-3">
-      <Select
-        style={{ width: 120 }}
-        options={classData.groups.map((g) => ({
-          value: g._id, // Set the value to the group ID
-          label: `${g.groupName} - ${g.student.length} students`,
-        }))}
-      ></Select>
-      <Button
-        onClick={() => {
-          alert("hahah");
-        }}
-      >
-        Add
-      </Button>
-    </div>
-  );
+    {
+      title: "Major",
+      dataIndex: "major",
+      render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
+    },
+  ];
 
   return (
     <>
-      <div className=" py-3 px-3">
-        <div className="text-[16px] font-semibold flex justify-between ">
-          <span className=" text-lg">Student</span>{" "}
-          <Button onClick={handleOpenRandomAddModal}>Add random</Button>
-        </div>
-        {classData.studentEven.map((s) => (
-          <div className="flex justify-between bg-white mt-1 shadow rounded p-3 items-center">
-            <div className="flex items-center">
-              <img
-                src={s.avatar}
-                className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                alt=""
+      <div className=" px-3">
+        <div className="text-lg font-semibold ">Groups</div>
+
+        <div className=" flex  justify-between">
+          <div className="flex flex-wrap ">
+            {classPeople?.data.data.groupStudent.map((s: any) => (
+              <GroupCard
+                info={s}
+                handleOpenAddMentorModal={handleOpenAddMentorModal}
+                handleOpengroupDetailModal={handleOpengroupDetailModal}
+                setGroup={setGroup}
               />
-              <p className="ml-3"> {s.name}</p>
-              <span>
-                <Tag color={colorMap[s.major]} className="ml-3 h-auto w-auto">
-                  {s.major}
-                </Tag>
-              </span>
-            </div>
-            <Popover
-              placement="right"
-              content={PopoverAddStudentMannualContent}
-              trigger={"click"}
-            >
-              <Button>
-                <FaPlus />
-              </Button>
-            </Popover>
-          </div>
-        ))}
-        <div className="text-lg font-semibold mt-3 ">Groups</div>
-        <Collapse
-          items={collapseData}
-          className="self-center"
-          expandIcon={(item) => (
-            <FaCircle
-              className="self-center"
-              color={hasAtLeastTwoMajors(item.student)}
-              size={20}
-            />
-          )}
-        />
-      </div>
-      {/* modal add random std to group */}
-      <Modal
-        title="Result"
-        visible={randomAddModal}
-        onCancel={handleCloseRandomAddModal}
-        footer={[
-          <Button key="back" onClick={handleCloseRandomAddModal}>
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleCloseRandomAddModal}
-          >
-            Save
-          </Button>,
-        ]}
-      >
-        {randomGroups.map((rg) => (
-          <>
-            <div className=" text-lg">{rg.groupName}:</div>
-            {randomStudent.map((rg) => (
-              <div className=" text-lg ml-4">
-                {rg.name}
-                <span>
-                  <Tag color={colorMap[rg.major]}> {rg.major}</Tag>
-                </span>
-              </div>
             ))}
-          </>
-        ))}
-      </Modal>
+          </div>
+
+          <Table
+            dataSource={classPeople?.data.data.unGroupStudents}
+            columns={columnsStudentUngroup}
+          />
+        </div>
+      </div>
+
       {/* modal add mentor */}
       <Modal
-        visible={AddMentorModal}
+        open={AddMentorModal}
         onCancel={handleCloseAddMentorModal}
         width={1000}
         footer={[
           <Button key="back" onClick={handleCloseAddMentorModal}>
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleCloseAddMentorModal}
-          >
-            Save
+            Close
           </Button>,
         ]}
       >
@@ -676,7 +276,7 @@ const ClassGroupListWrapper = () => {
             className={classNames(style.search_tag_bar)}
             placeholder="Please select"
             maxTagCount={3}
-            // onChange={handleChange}
+            onChange={handleChange}
             options={options}
           />{" "}
           <p>Search</p>
@@ -688,17 +288,199 @@ const ClassGroupListWrapper = () => {
           />
         </Space>
         <Table
-          dataSource={mentorData}
+          dataSource={mentorData?.data.data}
           columns={columnsMentor}
+          onRow={(record: MentorData) => {
+            return {
+              onClick: () => {
+                setmentorSelected(record);
+                setConfirmContent("mentor");
+                handleOpenconfirm();
+              },
+            };
+          }}
           pagination={{
             pageSize: 4,
-            total: mentorData.length, // Set the total number of rows
+            total: mentorData?.data.data.length, // Set the total number of rows
           }}
         />
       </Modal>
-      {/* modal add member to group */}
+      {/* modal group detail */}
       <Modal
-        visible={AddMemberModal}
+        open={groupDetailModal}
+        onCancel={handleClosegroupDetailModal}
+        width={1000}
+        footer={[
+          <Button key="back" onClick={handleClosegroupDetailModal}>
+            Close
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleClosegroupDetailModal}
+          >
+            Save
+          </Button>,
+        ]}
+      >
+        {Object.keys(group).length === 0 ? (
+          <>none</>
+        ) : (
+          <div className="flex">
+            <div className="max-w-[50%] min-w-[50%]">
+              <div className="flex pb-1">
+                <span className="font-semibold text-[16px] pb-1 ">
+                  {group.GroupName} {" - "}
+                </span>
+                {group.mentor == null ? (
+                  <p>
+                    <Button
+                      onClick={() => {
+                        handleOpenAddMentorModal();
+                      }}
+                      className="bg-red-500 text-white px-2 ml-2 rounded"
+                    >
+                      assign mentor
+                    </Button>
+                  </p>
+                ) : (
+                  <p className="flex self-center items-center">
+                    <p>{group.mentor.name} </p>{" "}
+                    <FaEdit
+                      size={20}
+                      className="pl-2"
+                      onClick={handleOpenAddMentorModal}
+                    />
+                  </p>
+                )}
+              </div>
+
+              <img
+                src={
+                  group.ProjectImage ||
+                  "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                }
+                className="h-[200px] w-full object-cover"
+                alt=""
+              />
+              <div className="mt-3">
+                Tags:{" "}
+                {group.tag?.map((t) => (
+                  <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
+                ))}
+              </div>
+              <div className="line-clamp-[3] mt-2">
+                Description: {group.GroupDescription}
+              </div>
+            </div>
+            <div className=" min-w-[50%]  pt-5 pl-5">
+              {group?.teamMembers.map((s: any) => (
+                <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
+                  <div className="flex items- justify-between">
+                    <div className="flex items-center">
+                      {s.account === null ? (
+                        <img
+                          src={
+                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                          }
+                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                          alt=""
+                        />
+                      ) : (
+                        <img
+                          src={
+                            s?.account.profilePicture ||
+                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                          }
+                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                          alt=""
+                        />
+                      )}
+                      <p className="ml-3"> {s?.name}</p>
+                      <Tag
+                        color={colorMap[s?.major]}
+                        className="ml-3 h-auto w-auto"
+                      >
+                        {s.major}
+                      </Tag>
+                      {group?.leader == s._id && (
+                        <FaStar color="red" size={20} className="pl-2" />
+                      )}
+                    </div>
+                    <FaStar
+                      size={20}
+                      // color="gray"
+                      onClick={() => {
+                        setCstudentSelected(s);
+                        setConfirmContent("leader");
+                        handleOpenconfirm();
+                      }}
+                      className="hover:text-red-500 hover:scale-110  "
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Modal>
+      {/* modal confirm */}
+      <Modal
+        title={"Confirm"}
+        open={confirm}
+        onCancel={handleCloseconfirm}
+        footer={[
+          <Button key="back" onClick={handleCloseconfirm}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={() => {
+              switch (confirmContent) {
+                case "leader":
+                  assignLeaderToGroup.mutate({
+                    groupId: group._id,
+                    studentId: studentSelected._id,
+                  });
+                  console.log("chya vafo roi");
+
+                  handleCloseconfirm();
+                  break;
+                case "mentor":
+                  assignMentorToGroup.mutate({
+                    mentorId: mentorSelected._id,
+                    groupId: group._id,
+                  });
+                  handleCloseconfirm();
+                  break;
+
+                default:
+                  break;
+              }
+            }}
+          >
+            Save
+          </Button>,
+        ]}
+      >
+        {confirmContent == "mentor" && (
+          <>
+            you want to add {mentorSelected.name} as mentor for group :{" "}
+            {group.GroupName}
+          </>
+        )}
+        {confirmContent == "leader" && (
+          <>
+            you want to add {studentSelected.name} as leader for group :{" "}
+            {group.GroupName}
+          </>
+        )}
+      </Modal>
+
+      {/* modal add member to group */}
+      {/* <Modal
+        open={AddMemberModal}
         onCancel={handleCloseAddMemberModal}
         footer={[
           <Button key="back" onClick={handleCloseAddMemberModal}>
@@ -755,7 +537,7 @@ const ClassGroupListWrapper = () => {
           dataSource={classData.studentEven}
           columns={columns}
         />
-      </Modal>
+      </Modal> */}
     </>
   );
 };
