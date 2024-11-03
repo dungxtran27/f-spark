@@ -2,21 +2,18 @@ import classNames from "classnames";
 import styles from "./styles.module.scss";
 import {
   StudentRoutes,
-  SecondaryMenu,
   TeacherRoutes,
+  AdminRoutes,
 } from "../../../utils/menu";
 import SideBarItem from "./SideBarItem";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
-import { IoMdExit } from "react-icons/io";
-import { message, Tooltip } from "antd";
+import { message } from "antd";
 import React from "react";
 import { Image } from "antd";
 import logo_header from "../../../../public/logo_header.png";
 import { ROLE } from "../../../utils/const";
-import { useMutation } from "@tanstack/react-query";
-import { authApi } from "../../../api/auth";
 interface RouteProps {
   route: string;
   page: string;
@@ -53,29 +50,12 @@ const SideBar: React.FC<HeaderProps> = () => {
         return StudentRoutes;
       case ROLE.teacher:
         return TeacherRoutes;
+      case ROLE.admin:
+        return AdminRoutes;
       default:
-        message.error("invalid role!");
         break;
     }
   };
-  const logOutMutation = useMutation({
-    mutationFn: () => authApi.logOut(),
-    onSuccess: () => {
-      const persistRoot = localStorage.getItem("persist:root");
-      if (persistRoot) {
-        const updatedPersistRoot = JSON.parse(persistRoot);
-        let role = null;
-        if (updatedPersistRoot.auth) {
-          role = JSON.parse(updatedPersistRoot?.auth).userInfo?.role;
-        }
-        delete updatedPersistRoot.auth;
-        localStorage.setItem("persist:root", updatedPersistRoot);
-        setInterval(() => {
-          window.location.href = `/${role}/login`;
-        }, 1000);
-      }
-    },
-  });
   return (
     <div className="h-screen w-[260px] flex flex-col justify-between border-r-[1px] border-backgroundSecondary">
       <div>
@@ -93,8 +73,8 @@ const SideBar: React.FC<HeaderProps> = () => {
         </div>
       </div>
       <div className="py-3">
-        <MenuContent routes={SecondaryMenu} />
-        <div className="w-full px-3">
+        {/* <MenuContent routes={SecondaryMenu} /> */}
+        {/* <div className="w-full px-3">
           <div className="bg-primary/10 rounded w-full flex items-center py-2 justify-between px-3">
             <div className="flex items-center gap-3 w-5/6">
               <img
@@ -120,7 +100,7 @@ const SideBar: React.FC<HeaderProps> = () => {
               />
             </Tooltip>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

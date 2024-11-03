@@ -2,11 +2,12 @@ import Report from "../component/student/DashBoard/Report";
 import Task from "../component/student/DashBoard/Task";
 import Overview from "../component/student/Overview/ProjectOverview";
 import Outcome from "../component/student/Overview/Outcome";
-import Outcomes from "../component/student/Class/Outcomes";
 import People from "../component/student/Class/People";
-import Stream from "../component/student/Class/Stream";
-import TeacherOutcomes from "../component/teacher/ClassDetail/Outcomes";
+import Stream from "../component/common/Stream";
 import ClassGroupList from "../pages/Teacher/ClassGroupList";
+import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStudent";
+import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
+import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -31,15 +32,13 @@ export const DASHBOARD_TABS = [
   { key: "task", label: "Task", children: <Task /> },
   { key: "report", label: "Report", children: <Report /> },
 ];
+
 export const CLASS_TABS = [
-  { key: "outcomes", label: "Outcomes", children: <Outcomes /> },
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people", label: "People", children: <People /> },
 ];
 export const TEACHER_CLASS_DETAIL_TABS = [
-  { key: "outcomes", label: "Outcomes", children: <TeacherOutcomes /> },
   { key: "stream", label: "Stream", children: <Stream /> },
-  // { key: "people", label: "People", children: <People /> },
   { key: "people2", label: "Groups", children: <ClassGroupList /> },
 ];
 export const TASK_STATUS_FILTER = [
@@ -73,6 +72,22 @@ export const TASK_FILTERS = {
   taskType: "taskType",
   assignee: "assignee",
   timeBlock: "timeBlock",
+  searchKey: "searchKey",
+};
+export const MANAGESTUDENT_FILTERS = {
+  class: "class",
+  term: "term",
+  status: "status",
+  searchKey: "searchKey",
+};
+export const MANAGETEACHER_FILTERS = {
+  term: "term",
+  status: "status",
+  searchKey: "searchKey",
+};
+export const MANAGEMENTOR_FILTERS = {
+  tag: "tag",
+  status: "status",
   searchKey: "searchKey",
 };
 export const CREATE_TASK_FILTER = {
@@ -150,6 +165,11 @@ export const OVERVIEW_TABS = [
   { key: "overview", label: "Overview", children: <Overview /> },
   { key: "outcome", label: "Outcome", children: <Outcome /> },
 ];
+export const MANAGEACCOUNT_TABS = [
+  { key: "student", label: "Student", children: <AccountManagement /> },
+  { key: "teacher", label: "Teacher", children: <Teacher /> },
+  { key: "mentor", label: "Mentor", children: <Mentor /> },
+];
 export const TASK_TYPE = {
   CLASS_WORK: "Class work",
   GROUP_WORK: "Group task",
@@ -161,11 +181,14 @@ export const QUERY_KEY = {
   STUDENT_OF_GROUP: "studentOfGroup",
   OUTCOMES_LIST: "outcomesList",
   MENTORLIST: "mentorlist",
+  MENTORPROFILE: "mentorprofile",
   TEACHER_OUTCOMES_LIST: "teacherOutcomeList",
   GROUPS_OF_CLASS: "groupsOfClass",
   CLASSES: "classes",
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
+  STREAM_CONTENT: "streamContent",
+  ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -178,4 +201,9 @@ export const colorMajorGroup: Record<string, string> = {
   "Kinh Te": "green",
   "Khoa Hoc": "blue",
   "Khoi Nghiep": "red",
+};
+export const CLASS_WORK_TYPE = {
+  ANNOUNCEMENT: "announcement",
+  ASSIGNMENT: "assignment",
+  OUTCOME: "outcome",
 };

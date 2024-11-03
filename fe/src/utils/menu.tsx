@@ -3,8 +3,7 @@ import { FaTasks, FaRegCalendarAlt } from "react-icons/fa";
 import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
-import { SlBell } from "react-icons/sl";
-import { Badge } from "antd";
+import { BiSolidUserAccount } from "react-icons/bi";
 export const StudentRoutes = [
   {
     route: "/projectOverview",
@@ -44,6 +43,20 @@ export const TeacherRoutes = [
     icon: <FaPeopleGroup size={20} />,
   },
 ];
+
+export const AdminRoutes = [
+  {
+    route: "/manageClass",
+    page: "Manage Class",
+    icon: <SiGoogleclassroom  size={20} />,
+  },
+  {
+    route: "/manageAccount",
+    page: "Mange Account",
+    icon: <BiSolidUserAccount  />,
+  },
+];
+
 export const SecondaryMenu = [
   {
     route: "/setting",
@@ -55,10 +68,10 @@ export const SecondaryMenu = [
   //   page: "Help",
   //   icon: <GoQuestion size={20} />,
   // },
-  {
-    route: "/notification",
-    page: "Notification",
-    icon: <SlBell size={20} />,
-    badge: <Badge count={10} />,
-  },
+  // {
+  //   route: "/notification",
+  //   page: "Notification",
+  //   icon: <SlBell size={20} />,
+  //   badge: <Badge count={10} />,
+  // },
 ];

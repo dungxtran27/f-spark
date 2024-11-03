@@ -6,26 +6,63 @@ export const classApi = {
   getclassDetailPeople: async (classid: string) => {
     return await axios.get(`api/group/getAllStudentByGroup/${classid}`);
   },
+  createOutcomeSubmission: async (
+    classworkId: string | null,
+    groupId: string | undefined,
+    requestBody: any
+  ) => {
+    return await axios.post(`api/submission//createSubmission`, requestBody, {
+      params: {
+        classworkId,
+        groupId,
+      },
+    });
+  },
   createSubmission: async (
-    classworkId: string,
+    classworkId: string | null,
     groupId: string | undefined,
     requestBody: any
   ) => {
     return await axios.post(
-      `api/submission/createSubmission?classworkId=${classworkId}&groupId=${groupId}`,
-      requestBody
+      `api/submission/createSingleSubmission`,
+      requestBody,
+      {
+        params: {
+          classworkId,
+          groupId,
+        },
+      }
     );
   },
   teacherViewOutcomes: async (classId: string | undefined) => {
     return await axios.get(`api/classwork/getOutcomesByTeacher/${classId}`);
   },
   getGroupOfClass: async (classId: string | undefined) => {
-    return await axios.get(`api/group/getAllStudentByGroupId/${classId}`);
+    return await axios.get(`api/group/getAllStudentByGroup/${classId}`);
   },
   getTeacherClasses: async () => {
     return await axios.get(`api/class/getTeacherClasses`);
   },
   gradeOutcome: async (requestBody: any) => {
     return await axios.patch(`api/submission/addGrade`, requestBody);
+  },
+  createClassWork: async (classId: string | undefined, requestBody: any) => {
+    return await axios.post(
+      `api/classwork/createClasswork/${classId}`,
+      requestBody
+    );
+  },
+  getStreamContent: async (classId: string | undefined, isTeacher: boolean) => {
+    return await axios.get(
+      isTeacher
+        ? `api/classwork/getClassWorkByTeacher/${classId}`
+        : `api/classwork/getClassWorkByStudent`
+    );
+  },
+  getSubmissionsOfAssignment: async (classworkId: string | null) => {
+    return await axios.get(`api/submission/getSubmissions/${classworkId}`);
+  },
+  upvoteAnnouncement: async (classWorkId: string | undefined) => {
+    return await axios.patch(`api/classwork/upvoteAnnouncement/${classWorkId}`);
   },
 };

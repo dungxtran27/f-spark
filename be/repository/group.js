@@ -20,7 +20,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-      updatedGroup.customerJourneyMap.rows.length - 1
+        updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -44,7 +44,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-      updatedGroup.customerJourneyMap.cols.length - 1
+        updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -74,28 +74,31 @@ const createCellsOnUpdate = async ({ newCells, groupId }) => {
 
 const findGroupById = async ({ groupId }) => {
   try {
-    const existingGroup = await Group.findById(groupId).populate({
-      path: 'teamMembers',
-      select: '_id name gen major studentId account',
-      populate: {
-        path: 'account',
-        select: 'profilePicture'
-      },
-    }).populate({
-      path: 'class',
-      select: 'teacher',
-      populate: {
-        path: 'teacher',
-        select: '_id name salutation phoneNumber account',
+    const existingGroup = await Group.findById(groupId)
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
         populate: {
-          path: 'account',
-          select: 'profilePicture'
-        }
-      }
-    }).populate({
-      path: 'mentor',
-      select: '_id name email phoneNumber profile profilePicture'
-    });
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "class",
+        select: "teacher",
+        populate: {
+          path: "teacher",
+          select: "_id name salutation phoneNumber account",
+          populate: {
+            path: "account",
+            select: "profilePicture",
+          },
+        },
+      })
+      .populate({
+        path: "mentor",
+        select: "_id name email phoneNumber profile profilePicture",
+      });
     return existingGroup;
   } catch (error) {
     return new Error(error.message);
@@ -262,7 +265,11 @@ const addCustomerPersona = async ({ newPersona, groupId }) => {
   }
 };
 
-const updateCustomerPersona = async ({ groupId, personaId, updatedPersona }) => {
+const updateCustomerPersona = async ({
+  groupId,
+  personaId,
+  updatedPersona,
+}) => {
   try {
     const updateFields = {};
     if (updatedPersona.detail) {
@@ -311,41 +318,47 @@ const deleteCustomerPersona = async ({ groupId, personaId }) => {
 const findAllGroupsOfClass = async (classId) => {
   try {
     const data = await Group.find({
-      class: classId
-    }).select('GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage').populate({
-      path: 'teamMembers',
-      select: '_id name gen major studentId account',
-      populate: {
-        path: 'account',
-        select: 'profilePicture'
-      }
-    }).populate({
-      path: 'tag',
-      select: 'name '
-    }).populate({
-      path: 'mentor',
-      select: 'name profilePicture'
+      class: classId,
     })
+      .select(
+        "GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage"
+      )
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "tag",
+        select: "name ",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      });
     return data;
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
 const addStundentInGroup = async (groupId, studentId) => {
   try {
     const group = await Group.findOne({
       _id: groupId,
-      teamMembers: studentId
+      teamMembers: studentId,
     });
 
     const student = await Student.findById(studentId);
     if (!student) {
-      throw new Error("Student not found")
+      throw new Error("Student not found");
     }
 
     if (group) {
-      throw new Error("Student already exists in the group")
+      throw new Error("Student already exists in the group");
     }
 
     const updatedGroup = await Group.findByIdAndUpdate(
@@ -362,28 +375,27 @@ const addStundentInGroup = async (groupId, studentId) => {
 
     return {
       message: "Student add successfully",
-      group: updatedGroup
+      group: updatedGroup,
     };
-
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
 const assignLeader = async (groupId, studentId) => {
   try {
     const student = await Student.findById(studentId);
     if (!student) {
-      throw new Error("Student not found")
+      throw new Error("Student not found");
     }
 
     const group = await Group.findOne({
       _id: groupId,
-      teamMembers: studentId
+      teamMembers: studentId,
     });
 
     if (!group) {
-      throw new Error("Student is not exists in the group")
+      throw new Error("Student is not exists in the group");
     }
 
     const updatedGroup = await Group.findByIdAndUpdate(
@@ -393,12 +405,12 @@ const assignLeader = async (groupId, studentId) => {
     );
     return {
       message: "Student assign successfully",
-      group: updatedGroup
+      group: updatedGroup,
     };
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
 export default {
   createCellsOnUpdate,
@@ -416,7 +428,5 @@ export default {
   deleteCustomerPersona,
   findAllGroupsOfClass,
   addStundentInGroup,
-  findAllStudentByGroupId,
-  addStundentInGroup,
-  assignLeader
+  assignLeader,
 };
