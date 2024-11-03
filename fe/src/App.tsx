@@ -17,6 +17,7 @@ import ManageClass from "./pages/PDT/ManageClass";
 import ManageRequest from "./pages/PDT/manageRequest";
 import AccountManagementPage from "./pages/PDT/MangeAccount";
 import MentorProfile from "./pages/PDT/MentorProfile";
+import TeacherProfile from "./pages/PDT/TeacherProfile";
 function App() {
   return (
     <BrowserRouter>
@@ -40,7 +41,10 @@ function App() {
         <Route path="/manageClass" element={<ManageClass />} />
         <Route path="/manageRequest" element={<ManageRequest />} />
         <Route path="/manageAccount" element={<AccountManagementPage />} />
-        <Route path="/mentorProfile" element={<MentorProfile />} />
+        <Route path="/manageAccount/mentor/profile/:name" element={<MentorProfile />} />
+        <Route path="/teacherProfile/:id" element={<TeacherProfile />} />
+
+          <Route path="/mentorProfile" element={<MentorProfile />} />
       </Routes>
     </BrowserRouter>
   );

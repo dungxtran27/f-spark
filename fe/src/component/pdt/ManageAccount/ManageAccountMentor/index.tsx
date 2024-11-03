@@ -66,7 +66,7 @@ const Mentor: React.FC = () => {
             dataIndex: "name",
             key: "name",
             render: (text: string) => (
-                <Link to={"/mentorProfile"} style={{ fontWeight: 'bold' }}>
+                <Link to={`/manageAccount/mentor/profile/${text}`} style={{ fontWeight: 'bold' }}>
                     {text}
                 </Link>
             ),
