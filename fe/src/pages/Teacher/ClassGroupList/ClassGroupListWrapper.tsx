@@ -80,7 +80,7 @@ const ClassGroupListWrapper = () => {
   };
   const [confirm, setConfirm] = useState(false);
   const [confirmContent, setConfirmContent] = useState("");
-  const [studentSelected, setCstudentSelected] = useState({});
+  const [studentSelected, setCstudentSelected] = useState<any>({});
   const [mentorSelected, setmentorSelected] = useState<MentorData>({
     _id: "",
     name: "",

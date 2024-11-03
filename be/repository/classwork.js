@@ -1,8 +1,9 @@
+import mongoose from "mongoose";
 import Class from "../model/Class.js";
 import ClassWork from "../model/ClassWork.js";
 import Student from "../model/Student.js";
 import Submission from "../model/Submisson.js";
-const getClassWorkByStudent = async ({ userId, type }) => {
+const getClassWorkByStudent = async ({ userId }) => {
   try {
     const user = await Student.findById(userId);
     const classId = user.classId;
@@ -11,71 +12,34 @@ const getClassWorkByStudent = async ({ userId, type }) => {
     }
     const classWorks = await ClassWork.find({
       classId: classId,
-      type: type,
-    });
-    const submissions = await Submission.find({
-      student: userId,
-    }).select("classworkId grade");
-    const submissionMap = new Map();
-    submissions.forEach((submission) => {
-      submissionMap.set(submission.classworkId.toString(), {
-        grade: submission.grade,
-        gradingCriteria: submission.gradingCriteria,
-      });
-    });
-    const currentDate = new Date();
-
-    const classWorkWithGrades = classWorks.map((classwork) => {
-      const isActive =
-        currentDate >= classwork.startDate && currentDate <= classwork.dueDate;
-      const submissionData = submissionMap.get(classwork._id.toString()) || {
-        grade: null,
-        gradingCriteria: null,
-      };
-      return {
-        _id: classwork._id,
-        title: classwork.title,
-        classworkName: classwork.name,
-        description: classwork.description,
-        type: classwork.type,
-        gradingCriteria: classwork.GradingCriteria,
-        startDate: classwork.startDate,
-        dueDate: classwork.dueDate,
-        attachment: classwork.attachment,
-        isActive: isActive,
-        grade:
-          submissionData.grade && submissionData.grade.grade !== undefined
-            ? submissionData.grade.grade
-            : null,
-        gradingCriteriaSubmission:
-          submissionData.grade &&
-            submissionData.grade.gradingCriteria !== undefined
-            ? submissionData.grade.gradingCriteria
-            : [],
-      };
-    });
-    return classWorkWithGrades;
+    }).lean();
+    return classWorks;
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
-const getOutcomes = async (classId) => {
+const getOutcomes = async (classId, isTeacher) => {
   try {
     const outcomeList = await ClassWork.find({
       type: "outcome",
       class: classId,
-    });
-    const outcomeWithSubmissions = await Promise.all(
-      outcomeList.map(async (o) => {
-        const submissions = await Submission.find({ classworkId: o._id }).populate({path: "group", select: "GroupName"});
-        return {
-          ...o._doc,
-          submissions,
-        };
-      })
-    );
-    return outcomeWithSubmissions;
+    }).lean();
+    if (isTeacher) {
+      const outcomeWithSubmissions = await Promise.all(
+        outcomeList.map(async (o) => {
+          const submissions = await Submission.find({
+            classworkId: o._id,
+          }).populate({ path: "group", select: "GroupName" });
+          return {
+            ...o,
+            submissions,
+          };
+        })
+      );
+      return outcomeWithSubmissions;
+    }
+    return outcomeList;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -84,26 +48,28 @@ const getOutcomes = async (classId) => {
 const getClassWorkByTeacher = async (classId) => {
   try {
     const data = await ClassWork.find({
-      type: { $in: ["announce", "assignment"] },
+      type: { $in: ["announcement", "assignment"] },
       classId: classId,
-    }).select("_id name title description type classId upVote");
+    }).sort({ createdAt: -1 });
 
-    const classworkList = await Promise.all(data.map(async (classWork) => {
-      if (classWork.type === "assignment") {
-        const submissions = await Submission.find({
-          classworkId: classWork._id
-        }).populate({
-          path: 'student',
-          select: '_id name gen major studentId account',
-          populate: {
-            path: 'account',
-            select: 'profilePicture'
-          }
-        });
-        return { ...classWork._doc, submissions: submissions };
-      }
-      return { ...classWork._doc, submissions: [] };
-    }));
+    const classworkList = await Promise.all(
+      data.map(async (classWork) => {
+        if (classWork.type === "assignment") {
+          const submissions = await Submission.find({
+            classworkId: classWork._id,
+          }).populate({
+            path: "student",
+            select: "_id name gen major studentId account",
+            populate: {
+              path: "account",
+              select: "profilePicture",
+            },
+          });
+          return { ...classWork._doc, submissions: submissions };
+        }
+        return { ...classWork._doc, submissions: [] };
+      })
+    );
 
     return classworkList;
   } catch (error) {
@@ -116,8 +82,8 @@ const editClassWorkByTeacher = async (classWorkId, name, description) => {
     const updatedData = await ClassWork.findByIdAndUpdate(
       classWorkId,
       { name, description },
-      { new: true },
-    )
+      { new: true }
+    );
     if (!updatedData) {
       return new Error("ClassWork not found");
     }
@@ -128,11 +94,23 @@ const editClassWorkByTeacher = async (classWorkId, name, description) => {
 };
 
 const createClassWork = async ({
-  name, description, type, classId
+  title,
+  description,
+  attachment,
+  startDate,
+  dueDate,
+  type,
+  classId,
 }) => {
   try {
     const result = await ClassWork.create({
-      name, description, type, classId
+      title,
+      description,
+      attachment,
+      startDate,
+      dueDate,
+      type,
+      classId,
     });
     return result._doc;
   } catch (error) {
@@ -147,7 +125,9 @@ const deleteClasswork = async (classworkId, classId) => {
       throw new Error("Class not found");
     }
     if (classToUpdate.pin && classToUpdate.pin.toString() === classworkId) {
-      const updatePinClasswork = await Class.findByIdAndUpdate(classId, { pin: null });
+      const updatePinClasswork = await Class.findByIdAndUpdate(classId, {
+        pin: null,
+      });
     }
     const deletedClasswork = await ClassWork.findByIdAndDelete(classworkId);
     if (!deletedClasswork) {
@@ -158,11 +138,24 @@ const deleteClasswork = async (classworkId, classId) => {
     throw new Error(error.message);
   }
 };
+const upvoteAnnouncement = async ({ studentId, classWorkId }) => {
+  try {
+    const result = await ClassWork.findByIdAndUpdate(
+      classWorkId,
+      { $push: { upVote: new mongoose.Types.ObjectId(studentId) } },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error("Classwork not found");
+  }
+};
 export default {
   getClassWorkByStudent,
   getOutcomes,
   getClassWorkByTeacher,
   editClassWorkByTeacher,
   deleteClasswork,
-  createClassWork
+  createClassWork,
+  upvoteAnnouncement,
 };

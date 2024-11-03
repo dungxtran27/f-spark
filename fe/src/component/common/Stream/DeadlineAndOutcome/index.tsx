@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { DATE_FORMAT, QUERY_KEY } from "../../../../utils/const";
+import { DATE_FORMAT, QUERY_KEY, ROLE } from "../../../../utils/const";
 import { classApi } from "../../../../api/Class/class";
 import { RiCalendarScheduleFill } from "react-icons/ri";
 import { FaEye } from "react-icons/fa";
@@ -9,16 +9,24 @@ import { IoNewspaperOutline } from "react-icons/io5";
 import { useState } from "react";
 import { Modal } from "antd";
 import Outcome from "./Outcome";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/store";
+import { UserInfo } from "../../../../model/auth";
 const DeadlineAndOutcome = () => {
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
+  const isTeacher = userInfo?.role === ROLE.teacher;
   const { classId } = useParams();
   const { data: outcomeListData } = useQuery({
     queryKey: [QUERY_KEY?.TEACHER_OUTCOMES_LIST, classId],
     queryFn: () => {
-      return classApi.teacherViewOutcomes(classId);
+      if (isTeacher) {
+        return classApi.teacherViewOutcomes(classId);
+      }
+      return classApi.viewOutcomes();
     },
-    enabled: !!classId,
   });
-
   const { data: groups } = useQuery({
     queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
     queryFn: () => {
@@ -35,7 +43,7 @@ const DeadlineAndOutcome = () => {
       o?.submissions?.filter((s: any) => !!s?.grade)?.length <
       groups?.data?.data?.groupStudent?.length;
 
-    return hasFewerGrades
+    return (isTeacher && hasFewerGrades) || (!isTeacher && !o?.groupSubmission)
       ? "bg-pendingStatus/15 border-pendingStatus"
       : "bg-okStatus/15 border-okStatus";
   };
@@ -92,16 +100,26 @@ const DeadlineAndOutcome = () => {
             <div className="flex items-center gap-3">
               <IoNewspaperOutline
                 className={`${
-                  o?.submissions?.filter((s: any) => !!s?.grade)?.length <
-                  groups?.data?.data?.groupStudent?.length
+                  (isTeacher &&
+                    o?.submissions?.filter((s: any) => !!s?.grade)?.length <
+                      groups?.data?.data?.groupStudent?.length) ||
+                  (!isTeacher && !o?.groupSubmission)
                     ? "text-pendingStatus"
                     : "text-okStatus"
                 } whitespace-nowrap text-sm`}
                 size={20}
               />
               <span className="text-[16px]">
-                {o?.submissions?.filter((s: any) => !!s?.grade)?.length}/
-                {groups?.data?.data?.groupStudent?.length} graded
+              {/* code gay lu, can sua lai */}
+                {isTeacher
+                  ? `${
+                      o?.submissions?.filter((s: any) => !!s?.grade)?.length
+                    }/${groups?.data?.data?.groupStudent?.length} graded`
+                  : o?.groupSubmission
+                  ? o?.groupSubmission?.grade
+                    ? o?.groupSubmission?.grade
+                    : "Submitted"
+                  : "Not Submitted"}
               </span>
             </div>
           </div>
@@ -116,7 +134,7 @@ const DeadlineAndOutcome = () => {
         footer={<></>}
         width={1000}
       >
-        <Outcome o={outcome}  />
+        <Outcome o={outcome} />
       </Modal>
     </div>
   );
