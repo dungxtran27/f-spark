@@ -48,9 +48,9 @@ const Header = () => {
           GD1715_AD / Ăn vặt kiểu Nhật - Maneki chan
         </span> */}
       </Tooltip>
-      <div className="w-[250px] px-3">
+      <div className="mr-4 flex items-center px-3">
         <div className="rounded cursor-pointer w-full flex items-center py-1 justify-between px-3">
-          <div className="flex items-center gap-3 w-5/6">
+          <div className="flex items-center gap-3">
             <img
               src={userInfo?.account?.profilePicture}
               className={classNames(
@@ -59,63 +59,44 @@ const Header = () => {
               )}
             />
             <div className="flex-grow flex flex-col overflow-y-hidden">
-              <span className="text-[14px] font-semibold">
-                {userInfo?.name}
-              </span>
-              <span className="text-[12px] truncate">{userInfo?.role}</span>
+              {userInfo?.role !== ROLE.admin && (
+                <span className="text-[14px] font-semibold">
+                  {userInfo?.name}
+                </span>
+              )}
+              {userInfo?.role !== ROLE.admin ? (
+                <span className="text-[12px] truncate">{userInfo?.role}</span>
+              ) : (
+                <span className="text-[12px] font-semibold">
+                  {userInfo?.role}
+                </span>
+              )}
             </div>
           </div>
-          <Popover
-            content={
-              <div className="flex flex-col gap-5">
-                <div className="flex items-center gap-3">
-                  <Badge count={10}>
-                    <SlBell size={20} />
-                  </Badge>
-                  <span>Notification</span>
-                </div>
-                <div
-                  className="flex items-center gap-3 cursor-pointer"
-                  onClick={() => {
-                    logOutMutation.mutate();
-                  }}
-                >
-                  <BiExit size={25} />
-                  <span>Logout</span>
-                </div>
+        </div>
+        <Popover
+          content={
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-3">
+                <Badge count={10}>
+                  <SlBell size={20} />
+                </Badge>
+                <span>Notification</span>
               </div>
-            }
-          >
-            <div className="rounded cursor-pointer w-full flex items-center py-1 justify-between px-3">
-              <div className="flex items-center gap-3 w-5/6">
-                <img
-                  src={userInfo?.account?.profilePicture}
-                  className={classNames(
-                    styles.avatar,
-                    "rounded-full object-cover object-center border-2 border-primary"
-                  )}
-                />
-                <div className="flex-grow flex flex-col overflow-y-hidden">
-                  {userInfo?.role !== ROLE.admin && (
-                    <span className="text-[14px] font-semibold">
-                      {userInfo?.name}
-                    </span>
-                  )}
-                  {userInfo?.role !== ROLE.admin ? (
-                    <span className="text-[12px] truncate">
-                      {userInfo?.role}
-                    </span>
-                  ) : (
-                    <span className="text-[12px] font-semibold">
-                      {userInfo?.role}
-                    </span>
-                  )}
-                </div>
+              <div
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => {
+                  logOutMutation.mutate();
+                }}
+              >
+                <BiExit size={25} />
+                <span>Logout</span>
               </div>
             </div>
-            <FaChevronDown />
-          </Popover>
-        </div>
+          }
+        >
+          <FaChevronDown />
+        </Popover>
       </div>
     </div>
   );
