@@ -66,7 +66,7 @@ const Teacher: React.FC = () => {
             dataIndex: "name",
             key: "name",
             render: (_, record) => (
-                <Link to={`/teacherProfile/${record.id}`}>
+                <Link to={`/teacherProfile/${record.id}`} style={{ fontWeight: 'bold' }}>
                     {`${record.salutation}. ${record.name}`}
                 </Link>
             ),
