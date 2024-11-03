@@ -80,7 +80,7 @@ const ClassGroupListWrapper = () => {
   };
   const [confirm, setConfirm] = useState(false);
   const [confirmContent, setConfirmContent] = useState("");
-  const [studentSelected, setCstudentSelected] = useState({});
+  const [studentSelected, setCstudentSelected] = useState<any>({});
   const [mentorSelected, setmentorSelected] = useState<MentorData>({
     _id: "",
     name: "",
@@ -443,8 +443,6 @@ const ClassGroupListWrapper = () => {
                     groupId: group._id,
                     studentId: studentSelected._id,
                   });
-                  console.log("chya vafo roi");
-
                   handleCloseconfirm();
                   break;
                 case "mentor":

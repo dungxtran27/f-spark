@@ -11,7 +11,6 @@ const ClassworkSchema = new Schema(
   {
     name: {
       type: String,
-      required: true,
     },
     title: {
       type: String,
@@ -22,7 +21,7 @@ const ClassworkSchema = new Schema(
       required: false,
     },
     attachment: {
-      type: String,
+      type: [String],
       required: false,
     },
     startDate: {
@@ -35,7 +34,7 @@ const ClassworkSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['assignment', 'outcome', 'announce'],
+      enum: ['assignment', 'outcome', 'announcement'],
       required: true,
     },
     classId: {

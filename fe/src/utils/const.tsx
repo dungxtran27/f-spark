@@ -2,10 +2,8 @@ import Report from "../component/student/DashBoard/Report";
 import Task from "../component/student/DashBoard/Task";
 import Overview from "../component/student/Overview/ProjectOverview";
 import Outcome from "../component/student/Overview/Outcome";
-import Outcomes from "../component/student/Class/Outcomes";
 import People from "../component/student/Class/People";
 import Stream from "../component/common/Stream";
-import TeacherOutcomes from "../component/teacher/ClassDetail/Outcomes";
 import ClassGroupList from "../pages/Teacher/ClassGroupList";
 
 export const LOGIN_DATA = {
@@ -32,14 +30,11 @@ export const DASHBOARD_TABS = [
   { key: "report", label: "Report", children: <Report /> },
 ];
 export const CLASS_TABS = [
-  { key: "outcomes", label: "Outcomes", children: <Outcomes /> },
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people", label: "People", children: <People /> },
 ];
 export const TEACHER_CLASS_DETAIL_TABS = [
-  // { key: "outcomes", label: "Outcomes", children: <TeacherOutcomes /> },
   { key: "stream", label: "Stream", children: <Stream /> },
-  // { key: "people", label: "People", children: <People /> },
   { key: "people2", label: "Groups", children: <ClassGroupList /> },
 ];
 export const TASK_STATUS_FILTER = [
@@ -166,6 +161,8 @@ export const QUERY_KEY = {
   CLASSES: "classes",
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
+  STREAM_CONTENT: "streamContent",
+  ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -178,4 +175,9 @@ export const colorMajorGroup: Record<string, string> = {
   "Kinh Te": "green",
   "Khoa Hoc": "blue",
   "Khoi Nghiep": "red",
+};
+export const CLASS_WORK_TYPE = {
+  ANNOUNCEMENT: "announcement",
+  ASSIGNMENT: "assignment",
+  OUTCOME: "outcome",
 };

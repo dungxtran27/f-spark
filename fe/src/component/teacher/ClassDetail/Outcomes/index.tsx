@@ -74,6 +74,7 @@ const TeacherOutcomes = () => {
                 submissions={o?.submissions}
                 gradingCriteria={o?.GradingCriteria}
                 setOpenModal={editGrading}
+                outcome={o}
               />
             </div>
           </div>
