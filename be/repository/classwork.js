@@ -170,8 +170,7 @@ const getLatestAnnouncementUpvotes = async (classId) => {
       classId,
       type: 'announcement'
     }).sort({ createdAt: -1 });
-
-    return latestAnnouncement ? latestAnnouncement.upVote.length : 0;
+    return latestAnnouncement.upVote.length ;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -192,21 +191,6 @@ const getLatestAssignmentSubmissionsCount = async (classId) => {
   }
 };
 
-const getClassStatistics = async (classId) => {
-  try {
-    const ungradedSubmissionsCount = await getUngradedOutcomesCount(classId);
-    const upvotesOnLatestAnnouncement = await getLatestAnnouncementUpvotes(classId); //done
-    const submissionsOnLatestAssignment = await getLatestAssignmentSubmissionsCount(classId);// data nhu db
-
-    return {
-      ungradedOutcomeSubmisstion: ungradedSubmissionsCount,
-      upvotesOnLatestAnnouncement,
-      submissionsOnLatestAssignment
-    };
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
 export default {
   getClassWorkByStudent,
   getOutcomes,
@@ -215,5 +199,7 @@ export default {
   deleteClasswork,
   createClassWork,
   upvoteAnnouncement,
-  getClassStatistics
+  getUngradedOutcomesCount,
+  getLatestAnnouncementUpvotes,
+  getLatestAssignmentSubmissionsCount
 };

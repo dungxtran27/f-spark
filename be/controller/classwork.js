@@ -159,8 +159,18 @@ const upvoteAnnouncement = async (req, res) =>{
 }
 const getClassStatistics = async (req, res) => {
   try {
-    const {classId} = req.params;
-    const statistics = await ClassworkRepository.getClassStatistics(classId);
+    const { classId } = req.params;
+    
+    const ungradedOutcomeSubmisstion = await ClassworkRepository.getUngradedOutcomesCount(classId);
+    const upvotesOnLatestAnnouncement = await ClassworkRepository.getLatestAnnouncementUpvotes(classId);
+    const submissionsOnLatestAssignment = await ClassworkRepository.getLatestAssignmentSubmissionsCount(classId);
+
+    const statistics = {
+      ungradedOutcomeSubmisstion,
+      upvotesOnLatestAnnouncement,
+      submissionsOnLatestAssignment
+    };
+
     return res.status(200).json({ data: statistics });
   } catch (error) {
     return res.status(500).json({ error: error.message });
