@@ -41,4 +41,8 @@ classWorkRouter.patch(
   verifyToken, 
   ClassworkController.upvoteAnnouncement
 )
+
+//thang
+classWorkRouter.get('/class/:classId', ClassworkController.getClassStatistics);
+
 export default classWorkRouter;

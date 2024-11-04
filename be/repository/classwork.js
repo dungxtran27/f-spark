@@ -150,6 +150,63 @@ const upvoteAnnouncement = async ({ studentId, classWorkId }) => {
     throw new Error("Classwork not found");
   }
 };
+
+const getUngradedOutcomesCount = async (classId) => {
+  try {
+    const outcomes = await ClassWork.find({ classId, type: 'outcome' }).select('_id name');
+    const outcomeIds = outcomes.map(outcome => outcome._id);
+    const ungradedCount = await Submission.countDocuments({
+      classworkId: { $in: outcomeIds },
+      grade: null
+    });    
+    return ungradedCount; 
+  } catch (error) {
+    throw new Error(error.message); 
+  }
+};
+const getLatestAnnouncementUpvotes = async (classId) => {
+  try {
+    const latestAnnouncement = await ClassWork.findOne({
+      classId,
+      type: 'announcement'
+    }).sort({ createdAt: -1 });
+
+    return latestAnnouncement ? latestAnnouncement.upVote.length : 0;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getLatestAssignmentSubmissionsCount = async (classId) => {
+  try {
+    const latestAssignment = await ClassWork.findOne({
+      classId,
+      type: 'assignment'
+    }).sort({ createdAt: -1 });
+
+    return latestAssignment
+      ? await Submission.countDocuments({ classworkId: latestAssignment._id })
+      : 0;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getClassStatistics = async (classId) => {
+  try {
+    const ungradedSubmissionsCount = await getUngradedOutcomesCount(classId);
+    const upvotesOnLatestAnnouncement = await getLatestAnnouncementUpvotes(classId); //done
+    const submissionsOnLatestAssignment = await getLatestAssignmentSubmissionsCount(classId);// data nhu db
+
+    return {
+      ungradedOutcomeSubmisstion: ungradedSubmissionsCount,
+      upvotesOnLatestAnnouncement,
+      submissionsOnLatestAssignment
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   getClassWorkByStudent,
   getOutcomes,
@@ -158,4 +215,5 @@ export default {
   deleteClasswork,
   createClassWork,
   upvoteAnnouncement,
+  getClassStatistics
 };
