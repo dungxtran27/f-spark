@@ -36,7 +36,12 @@ const ClassSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Classwork",
       require: false
-    }
+    },
+    timeline:[{
+      type: Schema.Types.ObjectId,
+      ref: "Timeline",
+      require: false
+    }]
   },
   { timestamps: true, collection: "Classes" }
 );
