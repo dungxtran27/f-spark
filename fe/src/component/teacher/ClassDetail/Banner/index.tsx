@@ -22,39 +22,35 @@ const Banner = ({ name, classId }: Props) => {
   const fetchClassStatistics = async () => {
     try {
       const response = await classwork.getClassStatistics(classId);
-      console.log("Full API Response:", response.data); // Log the full response
-
       const statsArray: Statistic[] = [
         {
           id: '1',
-          count: response.data.ungradedOutcomeSubmisstion || 0, // Check spelling and access directly
+          count: response.data.data.ungradedOutcomeSubmisstion ?? 0,
           description: 'Ungraded Outcome Submissions',
           backgroundColor: "#FFF8F2",
         },
         {
           id: '2',
-          count: response.data.upvotesOnLatestAnnouncement || 0,
+          count: response.data.data.upvotesOnLatestAnnouncement ?? 0,
           description: 'Upvotes on Latest Announcement',
           backgroundColor: "#F0F8FF",
         },
         {
           id: '3',
-          count: response.data.submissionsOnLatestAssignment || 0,
+          count: response.data.data.submissionsOnLatestAssignment ?? 0,
           description: 'Submissions on Latest Assignment',
           backgroundColor: "#E0F7FA",
         },
       ];
-
       setStatsData(statsArray);
-      console.log("Stats Array:", statsArray); // Log the stats array after creation
-
     } catch (error) {
       console.error("Failed to fetch class statistics:", error);
-      setStatsData([]); // Reset to empty array on error
+      setStatsData([]);
     } finally {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     if (classId) {
       fetchClassStatistics();
@@ -89,9 +85,9 @@ const Banner = ({ name, classId }: Props) => {
                 )}
                 <div>
                   {stat.id === '1' ? (
-                    <h2 className="text-xl font-medium">{stat.count}</h2> // Display count only for ungraded submissions
+                    <h2 className="text-xl font-medium">{stat.count}</h2> 
                   ) : (
-                    <h2 className="text-xl font-medium">{`${stat.count || 0}/30`}</h2> // Display count/total for others
+                    <h2 className="text-xl font-medium">{`${stat.count || 0}/30`}</h2>
                   )}
                   <p className="text-sm text-gray-600">{stat.description}</p>
                 </div>
