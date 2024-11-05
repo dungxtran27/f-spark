@@ -84,6 +84,10 @@ groupRouter.get(
   "/getAllStudentByGroup/:classId",
   GroupController.findAllStudentByGroup
 );
+groupRouter.get(
+  "/getClassTeacherAndgroupInfo/:classId",
+  GroupController.getClassTeacherAndgroupInfo
+);
 
 groupRouter.post("/addStudentInGroup", GroupController.addStundentInGroup);
 

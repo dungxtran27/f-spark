@@ -6,6 +6,9 @@ export const classApi = {
   getclassDetailPeople: async (classid: string) => {
     return await axios.get(`api/group/getAllStudentByGroup/${classid}`);
   },
+  getClassTeacherAndgroupInfo: async (classid: string) => {
+    return await axios.get(`api/group/getClassTeacherAndgroupInfo/${classid}`);
+  },
   createOutcomeSubmission: async (
     classworkId: string | null,
     groupId: string | undefined,

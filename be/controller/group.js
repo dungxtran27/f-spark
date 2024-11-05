@@ -1,5 +1,9 @@
 import Student from "../model/Student.js";
-import { GroupRepository, StudentRepository } from "../repository/index.js";
+import {
+  ClassRepository,
+  GroupRepository,
+  StudentRepository,
+} from "../repository/index.js";
 const createJourneyRow = async (req, res) => {
   try {
     const { rowName } = req.body;
@@ -220,6 +224,28 @@ const findAllStudentByGroup = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getClassTeacherAndgroupInfo = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+    const [countStudent, groupStudent, unGroupStudents, classInfo] =
+      await Promise.all([
+        StudentRepository.getAllStudentByClassId(classId),
+        GroupRepository.findAllGroupsOfClass(classId),
+        StudentRepository.getAllStudentUngroupByClassId(classId),
+        ClassRepository.findClassById(classId),
+      ]);
+
+    const studentData = {
+      teacher: classInfo.teacher,
+      groupStudent,
+      unGroupStudents,
+      totalStudent: countStudent.length,
+    };
+    return res.status(200).json({ data: studentData });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 const addStundentInGroup = async (req, res) => {
   try {
@@ -257,4 +283,5 @@ export default {
   findAllStudentByGroup,
   addStundentInGroup,
   assignLeader,
+  getClassTeacherAndgroupInfo,
 };
