@@ -27,19 +27,19 @@ const Banner = ({ name, classId }: Props) => {
           id: '1',
           count: response.data.data.ungradedOutcomeSubmisstion ?? 0,
           description: 'Ungraded Outcome Submissions',
-          backgroundColor: "#FFF8F2",
+          backgroundColor: "#fde68a",
         },
         {
           id: '2',
           count: response.data.data.upvotesOnLatestAnnouncement ?? 0,
           description: 'Upvotes on Latest Announcement',
-          backgroundColor: "#F0F8FF",
+          backgroundColor: "#fde68a",
         },
         {
           id: '3',
           count: response.data.data.submissionsOnLatestAssignment ?? 0,
           description: 'Submissions on Latest Assignment',
-          backgroundColor: "#E0F7FA",
+          backgroundColor: "#fde68a",
         },
       ];
       setStatsData(statsArray);
@@ -56,8 +56,9 @@ const Banner = ({ name, classId }: Props) => {
       fetchClassStatistics();
     }
   }, [classId]);
+
   return (
-    <div className="w-full p-1 bg-white">
+    <div className="w-full p-4 bg-white">
       <Breadcrumb
         items={[
           { title: <a href="/classes">Classes</a> },
@@ -71,9 +72,8 @@ const Banner = ({ name, classId }: Props) => {
           statsData.map((stat) => (
             <Card
               key={stat.id}
-              className="flex-1 rounded-md shadow-sm"
+              className="flex-1 rounded-md shadow-sm bg-pendingStatus/25 border-[1px] border-pendingStatus"
               bordered={false}
-              style={{ backgroundColor: stat.backgroundColor || "#FFF8F2" }}
             >
               <div className="flex items-center">
                 {stat.id === '1' ? (
@@ -85,7 +85,7 @@ const Banner = ({ name, classId }: Props) => {
                 )}
                 <div>
                   {stat.id === '1' ? (
-                    <h2 className="text-xl font-medium">{stat.count}</h2> 
+                    <h2 className="text-xl font-medium">{stat.count}</h2>
                   ) : (
                     <h2 className="text-xl font-medium">{`${stat.count || 0}/30`}</h2>
                   )}
