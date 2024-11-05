@@ -128,131 +128,134 @@ const People = () => {
     </div>
   );
   return (
-    <div className=" w-full rounded-md p-3 flex">
-      <div className="flex flex-wrap ">
-        {classPeople?.data.data.groupStudent.map((s: any) => (
-          <GroupCard
-            info={s}
-            handleOpengroupDetailModal={handleOpengroupDetailModal}
-            setGroup={setGroup}
-            role={userInfo?.role}
-          />
-        ))}
-      </div>
-      <div>
-        <Button>
+    <>
+      <div>{classPeople?.data.data.groupStudent.length} groups</div>
+      <div className=" w-full rounded-md p-3 flex">
+        <div className="flex flex-wrap ">
+          {classPeople?.data.data.groupStudent.map((s: any) => (
+            <GroupCard
+              info={s}
+              handleOpengroupDetailModal={handleOpengroupDetailModal}
+              setGroup={setGroup}
+              role={userInfo?.role}
+            />
+          ))}
+        </div>
+        <div>
           <Popover
             content={TeacherPopoverContent}
             trigger="hover"
             placement="leftTop"
           >
-            <FaChalkboardTeacher size={16}/>
+            <Button>
+              <FaChalkboardTeacher size={16} />
+            </Button>
           </Popover>
-        </Button>
-        <Button className="pt-5">
-          <Popover
+          <Popover className=" mt-3"
             content={ungroupStudentPopoverContent}
             trigger="click"
             placement="leftTop"
           >
             <Badge
               count={classPeople?.data.data.unGroupStudents.length}
-              offset={[-30, -5]}
+              offset={[-40, 0]}
             >
-              <FaUserAlt />
+              <Button className="">
+                <FaUserAlt />
+              </Button>
             </Badge>
           </Popover>
-        </Button>
-      </div>
+        </div>
 
-      <Modal
-        open={groupDetailModal}
-        onCancel={handleClosegroupDetailModal}
-        width={1000}
-        footer={[
-          <Button key="back" onClick={handleClosegroupDetailModal}>
-            Close
-          </Button>,
-        ]}
-      >
-        {Object.keys(group).length === 0 ? (
-          <>none</>
-        ) : (
-          <div className="flex">
-            <div className="max-w-[50%] min-w-[50%]">
-              <div className="flex pb-1">
-                <span className="font-semibold text-[16px] pb-1 ">
-                  {group.GroupName} {" - "}
-                </span>
-                {group.mentor == null ? (
-                  <p>no mentor</p>
-                ) : (
-                  <p className="flex self-center items-center">
-                    <p>{group.mentor.name} </p>
-                  </p>
-                )}
-              </div>
+        <Modal
+          open={groupDetailModal}
+          onCancel={handleClosegroupDetailModal}
+          width={1000}
+          footer={[
+            <Button key="back" onClick={handleClosegroupDetailModal}>
+              Close
+            </Button>,
+          ]}
+        >
+          {Object.keys(group).length === 0 ? (
+            <>none</>
+          ) : (
+            <div className="flex">
+              <div className="max-w-[50%] min-w-[50%]">
+                <div className="flex pb-1">
+                  <span className="font-semibold text-[16px] pb-1 ">
+                    {group.GroupName} {" - "}
+                  </span>
+                  {group.mentor == null ? (
+                    <p>no mentor</p>
+                  ) : (
+                    <p className="flex self-center items-center">
+                      <p>{group.mentor.name} </p>
+                    </p>
+                  )}
+                </div>
 
-              <img
-                src={
-                  group.ProjectImage ||
-                  "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
-                }
-                className="h-[200px] w-full object-cover"
-                alt=""
-              />
-              <div className="mt-3">
-                Tags:{" "}
-                {group.tag?.map((t) => (
-                  <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
-                ))}
+                <img
+                  src={
+                    group.ProjectImage ||
+                    "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                  }
+                  className="h-[200px] w-full object-cover"
+                  alt=""
+                />
+                <div className="mt-3">
+                  Tags:{" "}
+                  {group.tag?.map((t) => (
+                    <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
+                  ))}
+                </div>
+                <div className="line-clamp-[3] mt-2">
+                  Description: {group.GroupDescription}
+                </div>
               </div>
-              <div className="line-clamp-[3] mt-2">
-                Description: {group.GroupDescription}
-              </div>
-            </div>
-            <div className=" min-w-[50%]  pt-5 pl-5">
-              {group?.teamMembers.map((s: any) => (
-                <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
-                  <div className="flex items- justify-between">
-                    <div className="flex items-center">
-                      {s.account === null ? (
-                        <img
-                          src={
-                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
-                          }
-                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                          alt=""
-                        />
-                      ) : (
-                        <img
-                          src={
-                            s?.account.profilePicture ||
-                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
-                          }
-                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                          alt=""
-                        />
-                      )}
-                      <p className="ml-3"> {s?.name}</p>
-                      <Tag
-                        color={colorMap[s?.major]}
-                        className="ml-3 h-auto w-auto"
-                      >
-                        {s.major}
-                      </Tag>
-                      {group?.leader == s._id && (
-                        <FaStar color="red" size={20} className="pl-2" />
-                      )}
+              <div className=" min-w-[50%]  pt-5 pl-5">
+                {group?.teamMembers.map((s: any) => (
+                  <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
+                    <div className="flex items- justify-between">
+                      <div className="flex items-center">
+                        {s.account === null ? (
+                          <img
+                            src={
+                              "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                            }
+                            className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                            alt=""
+                          />
+                        ) : (
+                          <img
+                            src={
+                              s?.account.profilePicture ||
+                              "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                            }
+                            className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                            alt=""
+                          />
+                        )}
+                        <p className="ml-3"> {s?.name}</p>
+                        <Tag
+                          color={colorMap[s?.major]}
+                          className="ml-3 h-auto w-auto"
+                        >
+                          {s.major}
+                        </Tag>
+                        {group?.leader == s._id && (
+                          <FaStar color="red" size={20} className="pl-2" />
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-      </Modal>
-    </div>
+          )}
+        </Modal>
+      </div>
+    </>
   );
 };
 export default People;
