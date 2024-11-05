@@ -1,12 +1,14 @@
-import { Button, Modal, Tag } from "antd";
-import { FaStar } from "react-icons/fa";
+import { Badge, Button, Modal, Popover, Table, Tag } from "antd";
+import { FaChalkboardTeacher, FaStar, FaUser, FaUserAlt } from "react-icons/fa";
 import { classApi } from "../../../../api/Class/class";
 import { useQuery } from "@tanstack/react-query";
 import GroupCard from "../../../../pages/Teacher/ClassGroupList/GroupCard";
 import { colorMajorGroup, colorMap } from "../../../../utils/const";
 import { useState } from "react";
-import { BiTime } from "react-icons/bi";
 import { FaPeopleArrows } from "react-icons/fa6";
+import { RootState } from "../../../../redux/store";
+import { useSelector } from "react-redux";
+import { UserInfo } from "../../../../model/auth";
 interface MentorData {
   _id: string;
   name: string;
@@ -31,14 +33,19 @@ interface Group {
   _id: string;
 }
 interface Account {
-  profilePicture?: string; // Optional, as not all accounts might have a profile picture
+  profilePicture?: string;
   _id: string;
   gen: number;
   major: string;
   name: string;
-  studentId?: string; // Optional, as studentId might not be present for all accounts
+  studentId?: string;
 }
+
 const People = () => {
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
+
   const classID = "670bb40cd6dcc64ee8cf7c90";
   const [groupDetailModal, setgroupDetailModal] = useState(false);
 
@@ -67,55 +74,97 @@ const People = () => {
       return await classApi.getClassTeacherAndgroupInfo(classID);
     },
   });
-
-  return (
-    <div className=" w-full rounded-md p-3 flex">
-      {/* <div>
-        <span className="text-[16px] font-semibold">Teachers</span>
-        <div className="flex pt-1">
-          <img
-            className="h-[12rem] w-[9rem] object-cover"
-            src={
-              classPeople?.data.data.teacher?.account.profilePicture ||
-              "https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg"
-            }
-            alt=""
-          />
-          <div className="pl-5">
-            <div className="">
-              <span className="font-bold">Name: </span>
-              <span className="text-[18px]">
-                {classPeople?.data.data.teacher.name}
-              </span>
-            </div>
-            <div className="">
-              <span className="font-bold">Name: </span>
-              <span className="text-[16px]">
-                {classPeople?.data.data.teacher?.account.email}
-              </span>
-            </div>
-            <div className="">
-              <span className="font-bold">Name: </span>
-              <span className="text-[16px]">
-                {classPeople?.data.data.teacher.phoneNumber}{" "}
-              </span>
-            </div>
+  const columnsStudentUngroup = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      width: 300,
+    },
+    {
+      title: "Major",
+      dataIndex: "major",
+      render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
+    },
+  ];
+  const ungroupStudentPopoverContent = (
+    <Table
+      dataSource={classPeople?.data.data.unGroupStudents}
+      columns={columnsStudentUngroup}
+    />
+  );
+  const TeacherPopoverContent = (
+    <div>
+      <span className="text-[16px] font-semibold">Teachers</span>
+      <div className="flex pt-1">
+        <img
+          className="h-[12rem] w-[9rem] object-cover"
+          src={
+            classPeople?.data.data.teacher?.account.profilePicture ||
+            "https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg"
+          }
+          alt=""
+        />
+        <div className="pl-5">
+          <div className="">
+            <span className="font-bold">Name: </span>
+            <span className="text-[18px]">
+              {classPeople?.data.data.teacher.name}
+            </span>
+          </div>
+          <div className="">
+            <span className="font-bold">Name: </span>
+            <span className="text-[16px]">
+              {classPeople?.data.data.teacher?.account.email}
+            </span>
+          </div>
+          <div className="">
+            <span className="font-bold">Name: </span>
+            <span className="text-[16px]">
+              {classPeople?.data.data.teacher.phoneNumber}{" "}
+            </span>
           </div>
         </div>
-      </div> */}
-
+      </div>
+    </div>
+  );
+  return (
+    <div className=" w-full rounded-md p-3 flex">
       <div className="flex flex-wrap ">
         {classPeople?.data.data.groupStudent.map((s: any) => (
           <GroupCard
             info={s}
             handleOpengroupDetailModal={handleOpengroupDetailModal}
             setGroup={setGroup}
+            role={userInfo?.role}
           />
         ))}
       </div>
-      <Button>
-        <FaPeopleArrows />
-      </Button>
+      <div>
+        <Button>
+          <Popover
+            content={TeacherPopoverContent}
+            trigger="hover"
+            placement="leftTop"
+          >
+            <FaChalkboardTeacher size={16}/>
+          </Popover>
+        </Button>
+        <Button className="pt-5">
+          <Popover
+            content={ungroupStudentPopoverContent}
+            trigger="click"
+            placement="leftTop"
+          >
+            <Badge
+              count={classPeople?.data.data.unGroupStudents.length}
+              offset={[-30, -5]}
+            >
+              <FaUserAlt />
+            </Badge>
+          </Popover>
+        </Button>
+      </div>
+
       <Modal
         open={groupDetailModal}
         onCancel={handleClosegroupDetailModal}

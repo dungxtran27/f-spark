@@ -3,7 +3,12 @@ const { Search } = Input;
 
 import { useState } from "react";
 
-import { colorMap, colorMajorGroup, QUERY_KEY } from "../../../utils/const";
+import {
+  colorMap,
+  colorMajorGroup,
+  QUERY_KEY,
+  ROLE,
+} from "../../../utils/const";
 import classNames from "classnames";
 import style from "../MentorList/style.module.scss";
 import type { GetProps, SelectProps } from "antd";
@@ -13,6 +18,9 @@ import { mentorList } from "../../../api/mentor/mentor";
 import { student } from "../../../api/student/student";
 import GroupCard from "./GroupCard";
 import { FaEdit, FaStar } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { UserInfo } from "../../../model/auth";
+import { RootState } from "../../../redux/store";
 
 interface reqBodyAssignMentorToGroup {
   mentorId: string;
@@ -55,6 +63,10 @@ interface Group {
   _id: string;
 }
 const ClassGroupListWrapper = () => {
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
+
   const [group, setGroup] = useState<Group>({
     ProjectImage: "",
     GroupDescription: "",
@@ -242,6 +254,7 @@ const ClassGroupListWrapper = () => {
                 handleOpenAddMentorModal={handleOpenAddMentorModal}
                 handleOpengroupDetailModal={handleOpengroupDetailModal}
                 setGroup={setGroup}
+                role={userInfo?.role}
               />
             ))}
           </div>
