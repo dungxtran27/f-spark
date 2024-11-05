@@ -20,7 +20,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
 import { UserInfo } from "../../../../../model/auth";
-import { taskBoard } from "../../../../../api/Task/taskBoard";
+import { taskBoard } from "../../../../../api/Task/Task";
 import { student } from "../../../../../api/student/student";
 
 interface ModalProps {
@@ -160,8 +160,8 @@ const CreateTask: React.FC<ModalProps> = ({ open, setOpen }) => {
               placeholder="Unassigned"
             />
           </FormItem>
-          <FormItem name={CREATE_TASK_FILTER.dueDate} label={"Due date"}>
-            <DatePicker style={{ width: 320 }} />
+          <FormItem name={CREATE_TASK_FILTER.priority} label={"Priority"}>
+            <Select  />
           </FormItem>
         </div>
         <FormItem name={CREATE_TASK_FILTER.attachment} label={"Attachment"}>
@@ -178,12 +178,9 @@ const CreateTask: React.FC<ModalProps> = ({ open, setOpen }) => {
             </p>
           </Dragger>
         </FormItem>
-        <div className="flex items-center justify-between">
-          <FormItem name={CREATE_TASK_FILTER.timeBlock} label={"Time block"}>
-            <Select style={{ width: 320 }} placeholder="Unassigned" />
-          </FormItem>
-          <FormItem name={CREATE_TASK_FILTER.parentTask} label={"Parent task"}>
-            <Select style={{ width: 320 }} placeholder="Unassigned" />
+        <div>
+        <FormItem name={CREATE_TASK_FILTER.dueDate} label={"Due date"}>
+            <DatePicker style={{ width: 320 }} />
           </FormItem>
         </div>
       </Form>

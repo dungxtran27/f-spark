@@ -384,8 +384,7 @@ const Stream = () => {
           )}
         </div>
       </div>
-      <div className="flex-grow flex flex-col sticky top-0 self-start">
-        <span className="h-5"></span>
+      <div className="flex-grow flex flex-col sticky top-3 self-start">
         <DeadlineAndOutcome />
       </div>
       <PostModal open={postModal} setOpen={setPostModal} postType={postType} />

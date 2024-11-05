@@ -4,3 +4,8 @@ export const ROLE_NAME = {
   startUpDepartment: "START_UP_DEPARTMENT",
   admin: "ADMIN",
 };
+export const Priority = {
+  High: 100,
+  Medium: 50,
+  Low: 0,
+};

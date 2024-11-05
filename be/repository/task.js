@@ -58,7 +58,15 @@ const viewTaskDetail = async (taskId) => {
       })
       .populate({
         path: "childTasks",
-        select: "_id taskName dueDate assignee",
+        select: "_id taskName dueDate assignee priority status taskType",
+        populate: {
+          path: "assignee",
+          select: "name",
+          populate: {
+            path: "account",
+            select: "profilePicture -_id",
+          },
+        },
       })
       .populate({
         path: "createdBy",
@@ -73,22 +81,6 @@ const viewTaskDetail = async (taskId) => {
         select: "_id GroupName",
       })
       .lean();
-
-    if (!task) {
-      throw new Error("Task not found");
-    }
-    if (
-      task.assignee &&
-      task.assignee.account &&
-      task.createdBy &&
-      task.createdBy.account
-    ) {
-      task.assignee.profilePicture = task.assignee.account.profilePicture;
-      task.createdBy.profilePicture = task.createdBy.account.profilePicture;
-      delete task.createdBy.account;
-      delete task.assignee.account;
-    }
-
     return task;
   } catch (error) {
     throw new Error("Error fetching task details: " + error.message);

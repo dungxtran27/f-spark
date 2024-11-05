@@ -48,11 +48,14 @@ const createTask = async (req, res) => {
 
 export const viewTaskDetail = async (req, res) => {
   try {
-    const { taskId } = req.params;
+    const { taskId } = req.query;
     if (!taskId) {
       return res.status(400).json({ message: "Task ID is required" });
     }
     const taskDetail = await TaskRepository.viewTaskDetail(taskId);
+    if (!taskDetail) {
+      return res.status(404).json({ error: "Task not found" });
+    }
     return res.status(200).json({ data: taskDetail });
   } catch (error) {
     return res.status(500).json({ message: error.message });
