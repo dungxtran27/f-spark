@@ -15,6 +15,7 @@ const createTask = async (req, res) => {
       dueDate,
       parentTask,
       childTasks,
+      priority
     } = req.body;
 
     if (!taskName || !assignee || taskName === "" || !taskType) {
@@ -34,8 +35,12 @@ const createTask = async (req, res) => {
       dueDate: dueDate,
       parentTask: parentTask,
       childTasks: childTasks,
+      priority: priority
     };
     const newTask = await TaskRepository.createTask(taskData);
+    if(parentTask && newTask){
+      const updatedTask = await TaskRepository.updateTaskChildren(parentTask, newTask._id)
+    }
     return res.status(201).json({
       data: newTask,
     });

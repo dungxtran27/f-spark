@@ -1,4 +1,4 @@
-import { Select, Tooltip } from "antd";
+import { message, Select, Tooltip } from "antd";
 import { QUERY_KEY, TASK_STATUS_FILTER } from "../../../../utils/const";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { taskBoard } from "../../../../api/Task/Task";
@@ -13,9 +13,11 @@ interface UpdateTaskProps {
 const StatusSelect = ({
   status,
   taskId,
+  updatable = true,
 }: {
   status: string;
   taskId: string | undefined;
+  updatable?: boolean;
 }) => {
   const queryClient = useQueryClient();
   const userInfo = useSelector(
@@ -49,6 +51,7 @@ const StatusSelect = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.TASKS_BOARD] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.TASK_DETAIL] });
     },
   });
   return (
@@ -68,7 +71,19 @@ const StatusSelect = ({
         </div>
       )}
       onChange={(value) => {
-        updateTaskStatus.mutate({ status: value, taskId, groupId: groupId });
+        if (value === "Done") {
+          if (updatable) {
+            updateTaskStatus.mutate({
+              status: value,
+              taskId,
+              groupId: groupId,
+            });
+          } else {
+            message.error("This task has uncompleted child tasks");
+          }
+        } else {
+          updateTaskStatus.mutate({ status: value, taskId, groupId: groupId });
+        }
       }}
       labelRender={() => (labelRender ? labelRender(status) : null)}
       defaultValue={status}

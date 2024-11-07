@@ -72,7 +72,7 @@ const RequestWrapper = () => {
     },
     {
       title: "Action",
-      render: (student: any) => (
+      render: () => (
         <>
           <Button type="primary"> Approve</Button>
           <Button type="default"> Approve</Button>

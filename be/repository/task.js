@@ -3,6 +3,7 @@ import Account from "../model/Account.js";
 import Classwork from "../model/ClassWork.js";
 import TimeBlock from "../model/TimeBlock.js";
 import Student from "../model/Student.js";
+import mongoose from "mongoose";
 
 const createTask = async ({
   taskType,
@@ -18,6 +19,7 @@ const createTask = async ({
   dueDate,
   parentTask,
   childTasks,
+  priority
 }) => {
   try {
     const result = await Task.create({
@@ -34,6 +36,7 @@ const createTask = async ({
       dueDate,
       parentTask,
       childTasks,
+      priority
     });
     return result._doc;
   } catch (error) {
@@ -54,14 +57,21 @@ const viewTaskDetail = async (taskId) => {
       })
       .populate({
         path: "parentTask",
-        select: "_id taskName dueDate assignee",
+        select: "_id taskName dueDate assignee status taskType",
+        populate: {
+          path: "assignee",
+          populate: {
+            path: "account",
+            select: "profilePicture -_id",
+          },
+        },
       })
       .populate({
         path: "childTasks",
         select: "_id taskName dueDate assignee priority status taskType",
         populate: {
           path: "assignee",
-          select: "name",
+          select: "name studentId",
           populate: {
             path: "account",
             select: "profilePicture -_id",
@@ -96,7 +106,7 @@ const updatedTask = async (taskId, updateData) => {
     )
       .populate({
         path: "assignee",
-        select: "name",
+        select: "name studentId",
         populate: {
           path: "account",
           select: "profilePicture -_id",
@@ -136,6 +146,7 @@ const viewListTaskInGroup = async ({
   try {
     const query = {
       group: groupId,
+      parentTask: null||undefined
     };
     if (taskType) {
       query.taskType = taskType;
@@ -154,7 +165,7 @@ const viewListTaskInGroup = async ({
     const tasks = await Task.find(query)
       .populate({
         path: "assignee",
-        select: "name",
+        select: "name studentId",
         populate: {
           path: "account",
           select: "profilePicture -_id",
@@ -163,6 +174,10 @@ const viewListTaskInGroup = async ({
       .populate({
         path: "childTasks",
         select: "_id taskType taskName dueDate assignee",
+        populate: {
+          path: "assignee",
+          select: "profilePicture studentId -_id",
+        },
       })
       .populate({
         path: "parentTask",
@@ -183,9 +198,24 @@ const viewListTaskInGroup = async ({
     throw new Error("Error fetching tasks: " + error.message);
   }
 };
+const updateTaskChildren = async (taskId, childrenTaskId) => {
+  try {
+    const updatedTask = await Task.findByIdAndUpdate(taskId, {
+      $push: {
+        childTasks: childrenTaskId,
+      },
+    });
+    console.log(updatedTask);
+    
+    return updatedTask
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   createTask,
   viewTaskDetail,
   updatedTask,
   viewListTaskInGroup,
+  updateTaskChildren
 };
