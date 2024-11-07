@@ -1,7 +1,6 @@
 import { Button, Tag, Tooltip } from "antd";
 import { FaUserGroup, FaUserGraduate } from "react-icons/fa6";
 import { colorMajorGroup, ROLE } from "../../../utils/const";
-import { BiSolidCoin } from "react-icons/bi";
 import { FaCoins } from "react-icons/fa";
 const GroupCard = ({
   info,
@@ -25,7 +24,7 @@ const GroupCard = ({
   };
 
   return (
-    <div className="flex-auto bg-white px-5 py-3 mx-2 mb-3 min-w-[30%] max-w-[25%] shadow">
+    <div className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mx-1 mb-1 w-[25%] max-w-[30%] h-36 shadow">
       <div className="flex items-center justify-between">
         <div className="flex items-center ">
           <div
@@ -37,6 +36,9 @@ const GroupCard = ({
           >
             {info.GroupName}
           </div>
+        </div>
+        <div className="flex self-start items-center">
+          {" "}
           {4 <= info.teamMembers.length && info.teamMembers.length <= 6 ? (
             <Tooltip
               placement="top"
@@ -45,7 +47,7 @@ const GroupCard = ({
               <FaUserGroup color={"gray"} />
             </Tooltip>
           ) : (
-            <Tooltip placement="top" title="Student not enough">
+            <Tooltip placement="top" title="4 < students < 6">
               <FaUserGroup color="red" />
             </Tooltip>
           )}
@@ -55,15 +57,19 @@ const GroupCard = ({
             title={
               hasAtLeastTwoMajors(info.teamMembers)
                 ? "team has 2 major above"
-                : "team doesn't have enough major"
+                : "team has < 2 major"
             }
           >
             <FaUserGraduate
               color={hasAtLeastTwoMajors(info.teamMembers) ? "gray" : "red"}
             />
           </Tooltip>
+          {info.isSponsorship && (
+            <Tooltip placement="top" title={"funded"} className="pl-1">
+              <FaCoins color="orange" size={20} />
+            </Tooltip>
+          )}
         </div>
-        {info.isSponsorship && <FaCoins color="orange" className="justify-items-end" />}
       </div>
       <div className="pt-2">
         <span className="text-gray-500">mentor: </span>
@@ -79,9 +85,9 @@ const GroupCard = ({
               handleOpenAddMentorModal();
               setGroup(info);
             }}
-            className="bg-red-500 text-white px-2 ml-2 rounded"
+            className=" text-white hover:text-red-600 border-red-600 bg-red-600 px-1 h-7 ml-1  "
           >
-            assign
+            <span> assign</span>
           </Button>
         )}
       </div>

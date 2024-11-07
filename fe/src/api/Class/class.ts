@@ -3,7 +3,7 @@ export const classApi = {
   viewOutcomes: async () => {
     return await axios.get(`api/classwork/viewOutcomes`);
   },
-  getclassDetailPeople: async (classid: string) => {
+  getclassDetailPeople: async (classid: string | undefined) => {
     return await axios.get(`api/group/getAllStudentByGroup/${classid}`);
   },
   getClassTeacherAndgroupInfo: async (classid: string) => {

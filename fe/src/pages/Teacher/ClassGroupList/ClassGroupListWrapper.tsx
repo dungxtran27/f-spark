@@ -3,12 +3,7 @@ const { Search } = Input;
 
 import { useState } from "react";
 
-import {
-  colorMap,
-  colorMajorGroup,
-  QUERY_KEY,
-  ROLE,
-} from "../../../utils/const";
+import { colorMap, colorMajorGroup, QUERY_KEY } from "../../../utils/const";
 import classNames from "classnames";
 import style from "../MentorList/style.module.scss";
 import type { GetProps, SelectProps } from "antd";
@@ -21,7 +16,24 @@ import { FaEdit, FaStar } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
+import { useParams } from "react-router-dom";
 
+//   const { antCls } = token;
+//   return {
+//     customTable: css`
+//       ${antCls}-table {
+//         ${antCls}-table-container {
+//           ${antCls}-table-body,
+//           ${antCls}-table-content {
+//             scrollbar-width: thin;
+//             scrollbar-color: #eaeaea transparent;
+//             scrollbar-gutter: stable;
+//           }
+//         }
+//       }
+//     `,
+//   };
+// });
 interface reqBodyAssignMentorToGroup {
   mentorId: string;
   groupId: string;
@@ -52,7 +64,7 @@ interface Account {
   studentId?: string; // Optional, as studentId might not be present for all accounts
 }
 interface Group {
-  ProjectImage: string;
+  groupImage: string;
   GroupDescription: string;
   GroupName: string;
   isSponsorship: boolean;
@@ -68,7 +80,7 @@ const ClassGroupListWrapper = () => {
   ) as UserInfo | null;
 
   const [group, setGroup] = useState<Group>({
-    ProjectImage: "",
+    groupImage: "",
     GroupDescription: "",
     GroupName: "",
     isSponsorship: false,
@@ -125,12 +137,13 @@ const ClassGroupListWrapper = () => {
     setgroupDetailModal(false);
   };
 
-  const classID = "670bb40cd6dcc64ee8cf7c90";
+  const { classId } = useParams();
+
   //handle classData
   const { data: classPeople } = useQuery({
-    queryKey: [classID],
+    queryKey: [classId],
     queryFn: async () => {
-      return await classApi.getclassDetailPeople(classID);
+      return await classApi.getclassDetailPeople(classId);
     },
   });
 
@@ -159,17 +172,17 @@ const ClassGroupListWrapper = () => {
     },
   });
   const queryClient = useQueryClient();
-  const addStudentToGroupSelected = useMutation({
-    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
-      student.addStudentToGroup({
-        studentId: studentId,
-        groupId: groupId,
-      }),
+  // const addStudentToGroupSelected = useMutation({
+  //   mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
+  //     student.addStudentToGroup({
+  //       studentId: studentId,
+  //       groupId: groupId,
+  //     }),
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [classID] });
-    },
-  });
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: [classId] });
+  //   },
+  // });
   // assign leader to group
   const assignLeaderToGroup = useMutation({
     mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
@@ -179,7 +192,7 @@ const ClassGroupListWrapper = () => {
       }),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [classID] });
+      queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
   // assign mentor to group
@@ -191,7 +204,7 @@ const ClassGroupListWrapper = () => {
       }),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [classID] });
+      queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
 
@@ -232,21 +245,27 @@ const ClassGroupListWrapper = () => {
     {
       title: "Name",
       dataIndex: "name",
-      width: 300,
+      width: 200,
+    },
+    {
+      title: "MSSV",
+      dataIndex: "studentId",
+      width: 100,
     },
     {
       title: "Major",
       dataIndex: "major",
+      width: 50,
       render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
     },
   ];
-
+  // const { styles } = useStyle();
   return (
     <>
       <div className=" px-3">
         <div className="text-lg font-semibold ">Groups</div>
 
-        <div className=" flex  justify-between">
+        <div className=" flex  justify-between ">
           <div className="flex flex-wrap ">
             {classPeople?.data.data.groupStudent.map((s: any) => (
               <GroupCard
@@ -258,10 +277,13 @@ const ClassGroupListWrapper = () => {
               />
             ))}
           </div>
-
           <Table
+            className="w-[35%] shadow"
+            // className={styles.customTable}
             dataSource={classPeople?.data.data.unGroupStudents}
             columns={columnsStudentUngroup}
+            pagination={{ pageSize: 10 }}
+            scroll={{ y: 55 * 5 }}
           />
         </div>
       </div>
@@ -291,7 +313,7 @@ const ClassGroupListWrapper = () => {
             maxTagCount={3}
             onChange={handleChange}
             options={options}
-          />{" "}
+          />
           <p>Search</p>
           <Search
             className={classNames(style.search_name_bar)}
@@ -343,41 +365,42 @@ const ClassGroupListWrapper = () => {
             <div className="max-w-[50%] min-w-[50%]">
               <div className="flex pb-1">
                 <span className="font-semibold text-[16px] pb-1 ">
-                  {group.GroupName} {" - "}
+                  {group.GroupName}
                 </span>
-                {group.mentor == null ? (
-                  <p>
-                    <Button
-                      onClick={() => {
-                        handleOpenAddMentorModal();
-                      }}
-                      className="bg-red-500 text-white px-2 ml-2 rounded"
-                    >
-                      assign mentor
-                    </Button>
-                  </p>
-                ) : (
-                  <p className="flex self-center items-center">
-                    <p>{group.mentor.name} </p>{" "}
-                    <FaEdit
-                      size={20}
-                      className="pl-2"
-                      onClick={handleOpenAddMentorModal}
-                    />
-                  </p>
-                )}
               </div>
-
               <img
                 src={
-                  group.ProjectImage ||
+                  group.groupImage ||
                   "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
                 }
-                className="h-[200px] w-full object-cover"
+                className="h-[200px] w-full object-cover mb-2"
                 alt=""
               />
+              {group.mentor == null ? (
+                <>
+                  <span>Mentor:</span>
+                  <Button
+                    onClick={() => {
+                      handleOpenAddMentorModal();
+                    }}
+                    className="bg-red-500 text-white px-2 ml-2 rounded"
+                  >
+                    assign
+                  </Button>
+                </>
+              ) : (
+                <div className="flex self-center items-center">
+                  <p>Mentor:</p>
+                  <p className="pl-1">{group.mentor.name} </p>
+                  <FaEdit
+                    size={23}
+                    className="pl-2"
+                    onClick={handleOpenAddMentorModal}
+                  />
+                </div>
+              )}
               <div className="mt-3">
-                Tags:{" "}
+                Tags:
                 {group.tag?.map((t) => (
                   <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
                 ))}
@@ -389,7 +412,7 @@ const ClassGroupListWrapper = () => {
             <div className=" min-w-[50%]  pt-5 pl-5">
               {group?.teamMembers.map((s: any) => (
                 <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
-                  <div className="flex items- justify-between">
+                  <div className="flex  justify-between w-full">
                     <div className="flex items-center">
                       {s.account === null ? (
                         <img
@@ -416,9 +439,7 @@ const ClassGroupListWrapper = () => {
                       >
                         {s.major}
                       </Tag>
-                      {group?.leader == s._id && (
-                        <FaStar color="red" size={20} className="pl-2" />
-                      )}
+                      {group?.leader == s._id && <p>leader</p>}
                     </div>
                     <FaStar
                       size={20}
@@ -464,6 +485,8 @@ const ClassGroupListWrapper = () => {
                     groupId: group._id,
                   });
                   handleCloseconfirm();
+                  handleCloseAddMentorModal();
+                  handleClosegroupDetailModal();
                   break;
 
                 default:
@@ -477,13 +500,13 @@ const ClassGroupListWrapper = () => {
       >
         {confirmContent == "mentor" && (
           <>
-            you want to add {mentorSelected.name} as mentor for group :{" "}
+            you want to add {mentorSelected.name} as mentor for group :
             {group.GroupName}
           </>
         )}
         {confirmContent == "leader" && (
           <>
-            you want to add {studentSelected.name} as leader for group :{" "}
+            you want to add {studentSelected.name} as leader for group :
             {group.GroupName}
           </>
         )}

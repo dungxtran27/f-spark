@@ -169,6 +169,7 @@ export const colorMap: Record<string, string> = {
   MKT: "gold",
   IB: "blue",
   GD: "green",
+  HS: "orange",
 };
 export const colorMajorGroup: Record<string, string> = {
   "Ky Thuat": "orange",
