@@ -25,6 +25,11 @@ export const StudentRoutes = [
     page: "Timeline",
     icon: <FaRegCalendarAlt size={20} />,
   },
+  {
+    route: "/dashboardnew",
+    page: "DashBoardNew",
+    icon: <FaTasks size={20} />,
+  },
 ];
 export const TeacherRoutes = [
   {
