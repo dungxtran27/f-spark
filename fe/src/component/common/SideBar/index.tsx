@@ -3,12 +3,12 @@ import styles from "./styles.module.scss";
 import {
   StudentRoutes,
   TeacherRoutes,
+  AdminRoutes,
 } from "../../../utils/menu";
 import SideBarItem from "./SideBarItem";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
-import { message } from "antd";
 import React from "react";
 import { Image } from "antd";
 import logo_header from "../../../../public/logo_header.png";
@@ -49,8 +49,9 @@ const SideBar: React.FC<HeaderProps> = () => {
         return StudentRoutes;
       case ROLE.teacher:
         return TeacherRoutes;
+      case ROLE.admin:
+        return AdminRoutes;
       default:
-        message.error("invalid role!");
         break;
     }
   };

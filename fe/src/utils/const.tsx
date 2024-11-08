@@ -1,10 +1,13 @@
-import Report from "../component/student/DashBoard/Report";
-import Task from "../component/student/DashBoard/Task";
+import Report from "../component/student/Tasks/Report";
+import Task from "../component/student/Tasks/Task";
 import Overview from "../component/student/Overview/ProjectOverview";
 import Outcome from "../component/student/Overview/Outcome";
 import People from "../component/student/Class/People";
 import Stream from "../component/common/Stream";
 import ClassGroupList from "../pages/Teacher/ClassGroupList";
+import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStudent";
+import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
+import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -17,7 +20,7 @@ export const CREATE_GROUP_DATA = {
 export const DATE_FORMAT = {
   withYear: "MMM D, YYYY",
   withoutYear: "MMM D",
-  withYearAndTime: "h:mm, MMM D, YYYY",
+  withYearAndTime: "HH:mm, MMM D, YYYY",
 };
 export const TEACHER_OUTCOMES_MODAL_TYPES = {
   grading: "GRADING",
@@ -33,6 +36,7 @@ export const DASHBOARD_TABS = [
   { key: "task", label: "Task", children: <Task /> },
   { key: "report", label: "Report", children: <Report /> },
 ];
+
 export const CLASS_TABS = [
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people", label: "People", children: <People /> },
@@ -74,6 +78,22 @@ export const TASK_FILTERS = {
   timeBlock: "timeBlock",
   searchKey: "searchKey",
 };
+export const MANAGESTUDENT_FILTERS = {
+  class: "class",
+  term: "term",
+  status: "status",
+  searchKey: "searchKey",
+};
+export const MANAGETEACHER_FILTERS = {
+  term: "term",
+  status: "status",
+  searchKey: "searchKey",
+};
+export const MANAGEMENTOR_FILTERS = {
+  tag: "tag",
+  status: "status",
+  searchKey: "searchKey",
+};
 export const CREATE_TASK_FILTER = {
   taskName: "taskName",
   description: "description",
@@ -82,7 +102,25 @@ export const CREATE_TASK_FILTER = {
   attachment: "attachment",
   timeBlock: "timeBlock",
   parentTask: "parentTask",
+  priority: "priority",
 };
+export const TASK_PRIORITY = [
+  {
+    label: "High",
+    value: "High",
+    color: "#f87171",
+  },
+  {
+    label: "Normal",
+    value: "Normal",
+    color: "#38bdf8",
+  },
+  {
+    label: "Low",
+    value: "Low",
+    color: "#4ade80",
+  },
+];
 export const CREATE_TIMELINE = {
   name: "name",
   color: "color",
@@ -149,6 +187,11 @@ export const OVERVIEW_TABS = [
   { key: "overview", label: "Overview", children: <Overview /> },
   { key: "outcome", label: "Outcome", children: <Outcome /> },
 ];
+export const MANAGEACCOUNT_TABS = [
+  { key: "student", label: "Student", children: <AccountManagement /> },
+  { key: "teacher", label: "Teacher", children: <Teacher /> },
+  { key: "mentor", label: "Mentor", children: <Mentor /> },
+];
 export const TASK_TYPE = {
   CLASS_WORK: "Class work",
   GROUP_WORK: "Group task",
@@ -160,6 +203,7 @@ export const QUERY_KEY = {
   STUDENT_OF_GROUP: "studentOfGroup",
   OUTCOMES_LIST: "outcomesList",
   MENTORLIST: "mentorlist",
+  MENTORPROFILE: "mentorprofile",
   TEACHER_OUTCOMES_LIST: "teacherOutcomeList",
   GROUPS_OF_CLASS: "groupsOfClass",
   CLASSES: "classes",
@@ -167,6 +211,7 @@ export const QUERY_KEY = {
   ADDSTUDENTTOGROUP: "addStudentToGroup",
   STREAM_CONTENT: "streamContent",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
+  TASK_DETAIL: "taskDetail",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

@@ -35,6 +35,9 @@ const Login = () => {
         case ROLE.teacher:
           navigate("/classes");
           break;
+        case ROLE.admin:
+          navigate("/manageClass");
+          break;
         default:
           navigate("/");
           break;

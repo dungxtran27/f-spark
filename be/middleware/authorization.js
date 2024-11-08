@@ -35,20 +35,17 @@ const checkGroupAccess = async (req, res, next) => {
               "Unauthorized ! The student is not assigned to any active group",
           });
         }
-        //the group id of the url and the group id of the student account don' t match
+        //the group id of the url and the group id of the student account don't match
         if (req.query.groupId !== groupOfStudent._id.toString()) {
           return res.status(403).json({ error: "Unauthorized !" });
         }
         req.groupId = groupOfStudent._id;
-        console.log(req.groupId);
-
         break;
-
+      case ROLE_NAME.teacher:
+        break;
       default:
-        return res.status(500).json({ error: "invalid role value" });
-        break;
+        return res.status(403).json({ error: "Unauthorized !" });
     }
-
     next();
   } catch (error) {
     return res.status(500).json({ error: error.message });
