@@ -4,7 +4,7 @@ import {
   TASK_FILTERS,
   TASK_STATUS_FILTER,
 } from "../../../../utils/const";
-import { Button, Form, Input, Select, Tooltip } from "antd";
+import { Button, Form, Input, message, Select, Tooltip } from "antd";
 import styles from "./styles.module.scss";
 import FormItem from "antd/es/form/FormItem";
 import { SearchOutlined } from "@ant-design/icons";
@@ -17,6 +17,7 @@ import { taskBoard } from "../../../../api/Task/Task";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
+import { student } from "../../../../api/student/student";
 // type LabelRender = SelectProps["labelRender"];
 const Task = () => {
   const userInfo = useSelector(
@@ -48,6 +49,31 @@ const Task = () => {
       });
     },
   });
+  const { data: studentOfGroup } = useQuery({
+    queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
+    queryFn: async () => {
+      return await student.getStudentOfGroup();
+    },
+  });
+  const exportTaskToExcel = async () => {
+    try {
+      const response = await taskBoard.exportToExcel(userInfo?.group);
+      if (response?.status !== 200) {
+        throw new Error("Error downloading file");
+      }
+      const blob = response?.data;
+      const link = document.createElement("a");
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      link.setAttribute("download", "Group_Task.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error : any) {
+      message.error(error)
+    }
+  };
   const statusFilter = () => {
     return (
       <div className="flex items-center text gap-5">
@@ -71,11 +97,6 @@ const Task = () => {
     );
   };
   const taskFilter = () => {
-    const members = [
-      { value: "670ab22e04859aef99b3e5c6", label: "Chu Son" },
-      { value: "66f501c8403a9f75c86092c7", label: "trandung" },
-    ];
-
     return (
       <Form
         className="flex items-center gap-4 mt-5"
@@ -97,7 +118,14 @@ const Task = () => {
           <Select
             size="middle"
             style={{ width: 280 }}
-            options={members}
+            options={
+              studentOfGroup?.data?.data?.map((s: any) => {
+                return {
+                  value: s._id,
+                  label: `${s.name}(${s.studentId})`,
+                };
+              }) || []
+            }
             showSearch
             mode="multiple"
             maxTagCount={"responsive"}
@@ -123,12 +151,13 @@ const Task = () => {
       </Form>
     );
   };
+
   return (
     <div>
       {statusFilter()}
       <div className="flex items-center justify-between">
         {taskFilter()}{" "}
-        <Button>
+        <Button onClick={exportTaskToExcel}>
           <FaFileExcel className="text-green-600 text-lg" />
           Export to excel
         </Button>
@@ -140,7 +169,11 @@ const Task = () => {
           isLoading={isLoading}
         />
       </div>
-      <CreateTask open={openCreateTask} setOpen={setOpenCreateTask} />
+      <CreateTask
+        open={openCreateTask}
+        setOpen={setOpenCreateTask}
+        task={null}
+      />
     </div>
   );
 };

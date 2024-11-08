@@ -17,7 +17,18 @@ export const taskBoard = {
       requestBody
     );
   },
-  getTaskDetail: async (groupId: string|undefined, taskId: string | undefined) => {
+  exportToExcel: async (groupId: string|undefined) => {
+    return await axios.get(`/api/task/excel`, {
+      params: {
+        groupId: groupId,
+      },
+      responseType: "blob"
+    });
+  },
+  getTaskDetail: async (
+    groupId: string | undefined,
+    taskId: string | undefined
+  ) => {
     return await axios.get(`/api/task`, {
       params: {
         taskId,
