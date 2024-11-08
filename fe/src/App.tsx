@@ -4,7 +4,7 @@ import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ProjectOverview from "./pages/Student/ProjectOverview";
 import DashBoard from "./pages/Student/DashBoard";
-import DashBoardNew from "./pages/Student/DashBoardNew";
+import Tasks from "./pages/Student/Tasks";
 import Class from "./pages/Student/Class";
 import Timeline from "./pages/Student/Timeline";
 import TaskDetail from "./pages/Student/TaskDetail";
@@ -28,10 +28,10 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/projectOverview" element={<ProjectOverview />} />
         <Route path="/dashboard" element={<DashBoard />} />
-        <Route path="/dashboardnew" element={<DashBoardNew />} />
+        <Route path="/tasks" element={<Tasks />} />
         <Route path="/class" element={<Class />} />
         <Route path="/timeline" element={<Timeline />} />
-        <Route path="/taskDetail/:taskKey" element={<TaskDetail />} />
+        <Route path="/taskDetail/:taskName/:taskId" element={<TaskDetail />} />
         {/* teacher */}
         <Route path="/mentorlist" element={<MentorList />} />
         <Route path="/class-grouplist/:classID" element={<ClassGroupList />} />

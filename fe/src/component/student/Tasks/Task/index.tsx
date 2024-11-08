@@ -13,7 +13,7 @@ import TaskBoard from "./TaskBoard";
 import classNames from "classnames";
 import CreateTask from "./CreateTask";
 import { useQuery } from "@tanstack/react-query";
-import { taskBoard } from "../../../../api/Task/taskBoard";
+import { taskBoard } from "../../../../api/Task/Task";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";

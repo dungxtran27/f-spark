@@ -11,7 +11,7 @@ taskRouter.post(
   TaskController.createTask
 );
 taskRouter.get(
-  "/:taskId",
+  "/",
   verifyToken,
   authorization.checkGroupAccess,
   TaskController.viewTaskDetail
