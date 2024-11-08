@@ -11,8 +11,8 @@ export const StudentRoutes = [
     icon: <FaChartPie size={20} />,
   },
   {
-    route: "/dashboard",
-    page: "DashBoard",
+    route: "/tasks",
+    page: "Tasks",
     icon: <FaTasks size={20} />,
   },
   {

@@ -1,7 +1,10 @@
-import { useParams } from "react-router-dom";
-
+import DefaultLayout from "../../../layout/DefaultLayout";
+import TaskDetailWrapper from "../../../component/student/TaskDetail";
 const TaskDetail = () => {
-  const { taskKey } = useParams();
-  return <span>{taskKey}</span>;
+  return (
+    <DefaultLayout>
+      <TaskDetailWrapper />
+    </DefaultLayout>
+  );
 };
-export default TaskDetail
+export default TaskDetail;

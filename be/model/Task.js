@@ -17,12 +17,17 @@ const TaskSchema = new Schema(
       required: true,
     },
     attachment: {
-      type: String,
+      type: [String],
     },
     status: {
       type: String,
       enum: ["Pending", "In Progress", "Done", "Need Review"],
       default: "Pending",
+    },
+    priority: {
+      type: String,
+      enum: ["High", "Normal", "Low"],
+      default: "Normal",
     },
     assignee: {
       type: Schema.Types.ObjectId,
