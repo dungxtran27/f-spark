@@ -1,10 +1,10 @@
 import DefaultLayout from "../../../layout/DefaultLayout";
-import DashBoardWrapper from "../../../component/student/DashBoardNew";
-const DashBoardNew = () => {
+import DashBoardWrapper from "../../../component/student/DashBoard";
+const DashBoard = () => {
   return (
     <DefaultLayout>
       <DashBoardWrapper />
     </DefaultLayout>
   );
 };
-export default DashBoardNew;
+export default DashBoard;

@@ -4,7 +4,7 @@ import Status from "./Status";
 import Classes from "./Classes";
 import Team from "./Teams";
 
-const DashBoardNew = () => {
+const DashBoard = () => {
   return (
     <div className="p-2 w-full h-[1000px]">
       <div className="space-y-2 mb-2 sticky top-2 z-10">
@@ -32,4 +32,4 @@ const DashBoardNew = () => {
     </div>
   );
 };
-export default DashBoardNew;
+export default DashBoard;
