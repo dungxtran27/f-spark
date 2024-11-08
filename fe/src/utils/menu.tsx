@@ -6,6 +6,11 @@ import { SiGoogleclassroom } from "react-icons/si";
 import { BiSolidUserAccount } from "react-icons/bi";
 export const StudentRoutes = [
   {
+    route: "/dashboard",
+    page: "DashBoard",
+    icon: <FaTasks size={20} />,
+  },
+  {
     route: "/projectOverview",
     page: "Project Overview",
     icon: <FaChartPie size={20} />,
@@ -24,11 +29,6 @@ export const StudentRoutes = [
     route: "/timeline",
     page: "Timeline",
     icon: <FaRegCalendarAlt size={20} />,
-  },
-  {
-    route: "/dashboardnew",
-    page: "DashBoardNew",
-    icon: <FaTasks size={20} />,
   },
 ];
 export const TeacherRoutes = [
@@ -53,12 +53,12 @@ export const AdminRoutes = [
   {
     route: "/manageClass",
     page: "Manage Class",
-    icon: <SiGoogleclassroom  size={20} />,
+    icon: <SiGoogleclassroom size={20} />,
   },
   {
     route: "/manageAccount",
     page: "Mange Account",
-    icon: <BiSolidUserAccount  />,
+    icon: <BiSolidUserAccount />,
   },
 ];
 
