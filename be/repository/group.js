@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Group from "../model/Group.js";
 import Student from "../model/Student.js";
 import student from "./student.js";
+import Class from "../model/Class.js";
 
 const createJourneyRow = async ({ groupId, name }) => {
   try {
@@ -411,6 +412,28 @@ const assignLeader = async (groupId, studentId) => {
     throw new Error(error.message);
   }
 };
+const createGroup = async (groupName, classID, GroupDescription) => {
+  try {
+    const classfound = await Class.findById(classID);
+    if (!classfound) {
+      throw new Error("Class not found");
+    }
+
+    const newGroup = await Group.create({
+      GroupName: groupName,
+      GroupDescription: GroupDescription,
+      class: classID,
+      leader: null,
+      mentor: null,
+    });
+    return {
+      message: "Create new group successfully",
+      group: newGroup,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 export default {
   createCellsOnUpdate,
@@ -429,4 +452,5 @@ export default {
   findAllGroupsOfClass,
   addStundentInGroup,
   assignLeader,
+  createGroup,
 };

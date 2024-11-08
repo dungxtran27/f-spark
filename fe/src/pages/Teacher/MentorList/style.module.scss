@@ -12,3 +12,19 @@
   width: 19.5rem !important;
   padding-left: 0.5rem;
 }
+.customIcon1,
+.customIcon2 {
+  color: #e5e7eb;
+}
+.customIcon1:hover {
+  color: red;
+  scale: 1.1;
+  transition: all;
+ transition: all 200ms ease-in-out
+}
+
+.customIcon2:hover {
+  color: rgb(5, 5, 5);
+  scale: 1.1;
+transition: all 200ms ease-in-out
+}

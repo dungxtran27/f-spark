@@ -24,7 +24,7 @@ const GroupCard = ({
   };
 
   return (
-    <div className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mx-1 mb-1 w-[25%] max-w-[30%] h-36 shadow">
+    <div className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[30%] h-36 shadow">
       <div className="flex items-center justify-between">
         <div className="flex items-center ">
           <div
@@ -71,7 +71,7 @@ const GroupCard = ({
           )}
         </div>
       </div>
-      <div className="pt-2">
+      <div className="py-2">
         <span className="text-gray-500">mentor: </span>
         {info?.mentor?.name ? (
           <span className="font-semibold text-[14px]">

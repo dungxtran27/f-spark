@@ -257,6 +257,24 @@ const addStundentInGroup = async (req, res) => {
   }
 };
 
+const createGroup = async (req, res) => {
+  try {
+    const { classId, groupName, groupDescription } = req.body;
+    if (!classId || !groupName || !groupDescription) {
+      return res
+        .status(400)
+        .json({ error: "Please fill in all required fields" });
+    }
+    const data = await GroupRepository.createGroup(
+      groupName,
+      classId,
+      groupDescription
+    );
+    return res.status(200).json({ data: data });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 const assignLeader = async (req, res) => {
   try {
     const { groupId, studentId } = req.body;
@@ -284,4 +302,5 @@ export default {
   addStundentInGroup,
   assignLeader,
   getClassTeacherAndgroupInfo,
+  createGroup,
 };

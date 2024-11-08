@@ -92,4 +92,5 @@ groupRouter.get(
 groupRouter.post("/addStudentInGroup", GroupController.addStundentInGroup);
 
 groupRouter.post("/assignLeader", GroupController.assignLeader);
+groupRouter.post("/createGroup", GroupController.createGroup);
 export default groupRouter;

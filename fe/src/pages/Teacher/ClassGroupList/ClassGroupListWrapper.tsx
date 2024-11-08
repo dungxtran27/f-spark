@@ -1,4 +1,4 @@
-import { Button, Modal, Tag, Select, Space, Input, Table } from "antd";
+import { Button, Modal, Tag, Select, Space, Input, Table, Tooltip } from "antd";
 const { Search } = Input;
 
 import { useState } from "react";
@@ -12,31 +12,21 @@ import { classApi } from "../../../api/Class/class";
 import { mentorList } from "../../../api/mentor/mentor";
 import { student } from "../../../api/student/student";
 import GroupCard from "./GroupCard";
-import { FaEdit, FaStar } from "react-icons/fa";
+import { FaEdit, FaPlus, FaShareSquare, FaStar } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
 import { useParams } from "react-router-dom";
+import { groupApi } from "../../../api/group/group";
 
-//   const { antCls } = token;
-//   return {
-//     customTable: css`
-//       ${antCls}-table {
-//         ${antCls}-table-container {
-//           ${antCls}-table-body,
-//           ${antCls}-table-content {
-//             scrollbar-width: thin;
-//             scrollbar-color: #eaeaea transparent;
-//             scrollbar-gutter: stable;
-//           }
-//         }
-//       }
-//     `,
-//   };
-// });
 interface reqBodyAssignMentorToGroup {
   mentorId: string;
   groupId: string;
+}
+interface reqBodyCreateGroup {
+  classId: string;
+  groupName: string;
+  groupDescription: string;
 }
 
 interface MentorData {
@@ -136,6 +126,15 @@ const ClassGroupListWrapper = () => {
   const handleClosegroupDetailModal = () => {
     setgroupDetailModal(false);
   };
+  const [createGroupModal, setcreateGroupModal] = useState(false);
+
+  const handleOpencreateGroupModal = () => {
+    setcreateGroupModal(true);
+  };
+
+  const handleClosecreateGroupModal = () => {
+    setcreateGroupModal(false);
+  };
 
   const { classId } = useParams();
 
@@ -207,6 +206,22 @@ const ClassGroupListWrapper = () => {
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
+  const createGroup = useMutation({
+    mutationFn: ({
+      groupName,
+      classId,
+      groupDescription,
+    }: reqBodyCreateGroup) =>
+      groupApi.createGroup({
+        groupName: groupName,
+        classId: classId,
+        groupDescription: groupDescription,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classId] });
+    },
+  });
 
   const columnsMentor = [
     {
@@ -262,8 +277,16 @@ const ClassGroupListWrapper = () => {
   // const { styles } = useStyle();
   return (
     <>
-      <div className=" px-3">
-        <div className="text-lg font-semibold ">Groups</div>
+      <div className=" px-1">
+        <div className="text-lg font-semibold ">
+          <span>{classPeople?.data.data.groupStudent.length}</span>
+          <span className="px-1">Groups</span>
+          <span>
+            <Button onClick={handleOpencreateGroupModal}>
+              <FaPlus />
+            </Button>
+          </span>
+        </div>
 
         <div className=" flex  justify-between ">
           <div className="flex flex-wrap ">
@@ -391,7 +414,9 @@ const ClassGroupListWrapper = () => {
               ) : (
                 <div className="flex self-center items-center">
                   <p>Mentor:</p>
-                  <p className="pl-1">{group.mentor.name} </p>
+                  <p className="pl-1 font-semibold text-[14px]">
+                    {group.mentor.name}{" "}
+                  </p>
                   <FaEdit
                     size={23}
                     className="pl-2"
@@ -439,18 +464,39 @@ const ClassGroupListWrapper = () => {
                       >
                         {s.major}
                       </Tag>
-                      {group?.leader == s._id && <p>leader</p>}
+                      {group?.leader == s._id && <FaStar color="red" />}
                     </div>
-                    <FaStar
-                      size={20}
-                      // color="gray"
-                      onClick={() => {
-                        setCstudentSelected(s);
-                        setConfirmContent("leader");
-                        handleOpenconfirm();
-                      }}
-                      className="hover:text-red-500 hover:scale-110  "
-                    />
+                    <div className="flex items-center">
+                      <Tooltip
+                        placement="top"
+                        title="Assign this student as leader"
+                      >
+                        <FaStar
+                          size={18}
+                          onClick={() => {
+                            setCstudentSelected(s);
+                            setConfirmContent("leader");
+                            handleOpenconfirm();
+                          }}
+                          className={classNames(style.customIcon1)}
+                        />
+                      </Tooltip>
+                      <Tooltip
+                        placement="top"
+                        title="Move student from group"
+                        className="ml-1"
+                      >
+                        <FaShareSquare
+                          size={18}
+                          onClick={() => {
+                            setCstudentSelected(s);
+                            setConfirmContent("remove");
+                            handleOpenconfirm();
+                          }}
+                          className={classNames(style.customIcon2)}
+                        />
+                      </Tooltip>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -511,6 +557,30 @@ const ClassGroupListWrapper = () => {
           </>
         )}
       </Modal>
+      {/* modal create group */}
+      <Modal
+        title={"Create New Group"}
+        open={createGroupModal}
+        onCancel={handleClosecreateGroupModal}
+        footer={[
+          <Button key="back" onClick={handleClosecreateGroupModal}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={() => {
+              assignLeaderToGroup.mutate({
+                groupId: group._id,
+                studentId: studentSelected._id,
+              });
+              handleClosecreateGroupModal();
+            }}
+          >
+            Save
+          </Button>,
+        ]}
+      ></Modal>
 
       {/* modal add member to group */}
       {/* <Modal
