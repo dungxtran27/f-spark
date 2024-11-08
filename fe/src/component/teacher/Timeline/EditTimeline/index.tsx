@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { DatePicker, Form, Input, Modal } from "antd";
+import { DatePicker, Form, Modal } from "antd";
 import moment from "moment";
 import QuillEditor from "../../../common/QuillEditor";
 
@@ -11,37 +11,28 @@ interface ModalProps {
 }
 
 interface EditTimelineProps {
-  title: string;
-  dateRange: [string, string];
+  endDate: string;
   description: string;
 }
 
 const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave }) => {
   const [form] = Form.useForm();
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState<string>("");
 
   useEffect(() => {
     if (timeline) {
       form.setFieldsValue({
-        title: timeline.title,
-        dateRange: [
-          timeline.dateRange[0] ? moment(timeline.dateRange[0]) : null,
-          timeline.dateRange[1] ? moment(timeline.dateRange[1]) : null,
-        ],
+        endDate: timeline.endDate ? moment(timeline.endDate) : null,
       });
-      setDescription(timeline.description); // Set initial description
+      setDescription(timeline.description || ""); // Set initial description
     }
   }, [timeline, form]);
 
   const handleEditTimeline = () => {
     form.validateFields().then((values) => {
       const updatedTimeline: EditTimelineProps = {
-        title: values.title,
-        dateRange: [
-          values.dateRange[0].format("YYYY-MM-DD"),
-          values.dateRange[1].format("YYYY-MM-DD"),
-        ],
-        description, // Use the state value from QuillEditor
+        endDate: values.endDate.format("YYYY-MM-DD"),
+        description, // Use the description from the state
       };
       onSave(updatedTimeline);
       setOpen(false);
@@ -61,25 +52,16 @@ const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave })
     >
       <Form form={form} layout="vertical" className="max-h-[500px] overflow-y-auto">
         <Form.Item
-          name="title"
-          label="Title"
-          rules={[{ required: true, message: "Title is required" }]}
-        >
-          <Input placeholder="Enter timeline title" />
-        </Form.Item>
-
-        <Form.Item
-          name="dateRange"
-          label="Date Range"
-          rules={[{ required: true, message: "Date range is required" }]}
-        >
-          <DatePicker.RangePicker style={{ width: "100%" }} />
+          name="endDate"
+          label="End Date"
+          rules={[{ required: true, message: "End date is required" }]}>
+          <DatePicker style={{ width: "100%" }} />
         </Form.Item>
 
         <Form.Item
           label="Description"
-          rules={[{ required: true, message: "Description is required" }]}
-        >
+          rules={[{ required: true, message: "Description is required" }]}>
+          {/* Pass only the onChange handler */}
           <QuillEditor onChange={setDescription} />
         </Form.Item>
       </Form>
