@@ -1,11 +1,11 @@
 import { FaCheck, FaTimes } from "react-icons/fa";
-import { IoIosNotifications } from "react-icons/io";
+import { ImNotification } from "react-icons/im";
 const Overview = () => {
   return (
     <div className="bg-white p-4 rounded shadow">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold mb-2">Overview</h3>
-        <IoIosNotifications className="text-orange-400 text-2xl" />
+        <ImNotification className="text-orange-400 text-2xl" />
       </div>
       <p className="text-md font-medium border-b-2 border-gray-300 pb-1 mb-2">
         Dự án tái chế đồ ăn cho sinh viên Bách Khoa

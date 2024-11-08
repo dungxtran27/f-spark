@@ -6,8 +6,8 @@ import Team from "./Teams";
 
 const DashBoardNew = () => {
   return (
-    <div className="p-2 w-full">
-      <div className="space-y-2 mb-2">
+    <div className="p-2 w-full h-[1000px]">
+      <div className="space-y-2 mb-2 sticky top-2 z-10">
         <div className="bg-white p-4 rounded shadow">
           <h3 className="font-bold mb-2">Time Line</h3>
           <div className="flex items-center space-x-4">
@@ -18,7 +18,7 @@ const DashBoardNew = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-row">
+      <div className="flex flex-row h-[550px]">
         <div className="space-y-2 w-7/12">
           <Classes />
           <Team />

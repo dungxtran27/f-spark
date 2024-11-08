@@ -41,15 +41,45 @@ const teamData = [
     time: "1 day ago",
     taskChild: true,
   },
+   {
+    name: "Chu Thắng",
+    action: "",
+    currentStatus: { label: "Create", color: "#F1A457" },
+    nextStatus: null,
+    task: "Cập nhật mô hình Canvas",
+    content: "- Cập nhật mô hình Canvas assign to Quang Huy",
+    time: "1 day ago",
+    taskChild: true,
+  },
+  {
+    name: "Chu Thắng",
+    action: "",
+    currentStatus: { label: "Create", color: "#F1A457" },
+    nextStatus: null,
+    task: "Cập nhật mô hình Canvas",
+    content: "- Cập nhật mô hình Canvas assign to Quang Huy",
+    time: "1 day ago",
+    taskChild: true,
+  },
+  {
+    name: "Chu Thắng",
+    action: "",
+    currentStatus: { label: "Create", color: "#F1A457" },
+    nextStatus: null,
+    task: "Cập nhật mô hình Canvas",
+    content: "- Cập nhật mô hình Canvas assign to Quang Huy",
+    time: "1 day ago",
+    taskChild: true,
+  },
 ];
 
 const Team = () => {
   return (
-    <div className="bg-white p-4 rounded shadow mr-2">
-      <div className="flex items-center justify-between border-b-4 border-gray-300 pb-2 mb-2">
+    <div className="bg-white p-4 rounded shadow mr-2 h-[500px] sticky z-10">
+      <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 mb-2">
         <h3 className="text-lg font-bold p-1">Team ({teamData.length})</h3>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-y-auto h-[412px] pr-2">
         {teamData.map((item, index) => (
           <div
             key={index}

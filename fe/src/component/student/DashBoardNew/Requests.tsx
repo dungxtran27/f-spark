@@ -1,13 +1,13 @@
 import { Avatar } from "antd";
 import { BsFillPersonCheckFill, BsPersonXFill } from "react-icons/bs";
-import { IoIosNotifications } from "react-icons/io";
+import { ImNotification } from "react-icons/im";
 
 const Requests = () => {
   return (
     <div className="bg-white p-4 rounded shadow">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold p-1">Request (3)</h3>
-        <IoIosNotifications className="text-orange-400 text-2xl" />
+        <ImNotification className="text-orange-400 text-2xl" />
       </div>
       <div className="space-y-2">
         <div className="flex justify-between items-center border-b-2 p-2 mb-2 border-gray-300">
@@ -22,7 +22,7 @@ const Requests = () => {
         </div>
         <div className="flex justify-between items-center border-b-2 p-2 mb-2 border-gray-300">
           <p className="font-medium">Rời nhóm</p>
-          <div className="flex items-center space-x-1">
+          <div className="space-x-2">
             <Avatar size="small" src="path/to/chu-thang-image.jpg" />
             <span className="text-sm text-gray-500">Chu Thắng</span>
           </div>
@@ -36,7 +36,7 @@ const Requests = () => {
         </div>
         <div className="flex justify-between items-center border-b-2 p-2 mb-2 border-gray-300">
           <p className="font-medium">Rời nhóm</p>
-          <div className="flex items-center space-x-1">
+          <div className="space-x-2">
             <Avatar size="small" src="path/to/chu-thang-image.jpg" />
             <span className="text-sm text-gray-500">Chu Sơn</span>
           </div>
