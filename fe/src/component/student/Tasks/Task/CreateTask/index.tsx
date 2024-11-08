@@ -131,6 +131,7 @@ const CreateTask: React.FC<ModalProps> = ({
       }}
       onCancel={() => setOpen(false)}
       destroyOnClose
+      centered
       width={700}
     >
       <Form

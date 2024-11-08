@@ -1,10 +1,13 @@
-import {Skeleton, Table } from "antd";
+import { Skeleton, Table } from "antd";
 import dayjs from "dayjs";
 import { CiSquarePlus } from "react-icons/ci";
 // import { TaskBoardData } from "../../../../../model/taskBoard";
 import React from "react";
 import { Link } from "react-router-dom";
 import StatusSelect from "../../../../common/Task/StatusSelect";
+import { TASK_TYPE } from "../../../../../utils/const";
+import { render } from "react-dom";
+import PriorityIcon from "../../../../common/Task/PrioritySelect/PriorityIcon";
 // import { Link } from "react-router-dom";
 interface TaskBoardProps {
   taskBoardData: any; //TaskBoardData[];
@@ -16,7 +19,6 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
   setOpenCreateTask,
   isLoading,
 }) => {
-
   const dataSource = taskBoardData.map((tb: any) => {
     return {
       key: tb?._id,
@@ -42,7 +44,8 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
           <span>{tb?.assignee?.name}</span>
         </div>
       ),
-      status: <StatusSelect status={tb?.status} taskId={tb?._id}/>,
+      priority: tb?.priority,
+      status: <StatusSelect status={tb?.status} taskId={tb?._id} />,
       dueDate: tb?.dueDate ? dayjs(tb?.dueDate).format("MMM D, YYYY") : "",
     };
   });
@@ -51,32 +54,53 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
       title: "Task type",
       dataIndex: "taskType",
       key: "taskType",
-      className: "w-1/6",
+      className: "w-2/12",
+      render: (taskType: string) => (
+        <span
+          className={`px-2 font-medium py-1 ${
+            taskType === TASK_TYPE.CLASS_WORK ? "bg-pendingStatus/40" : ""
+          } rounded`}
+        >
+          {taskType}
+        </span>
+      ),
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      className: "w-2/6",
+      className: "w-3/12",
       render: (text: string, task: { key: string }) => (
-       <Link to={`/taskDetail/${encodeURIComponent(text)}/${task?.key}`}>
-         <strong className="hover:underline hover:text-sky-500 cursor-pointer">
-          {text}
-        </strong>
-       </Link>
+        <Link to={`/taskDetail/${encodeURIComponent(text)}/${task?.key}`}>
+          <strong className="hover:underline hover:text-sky-500 cursor-pointer">
+            {text}
+          </strong>
+        </Link>
+      ),
+    },
+    {
+      title: "Priority",
+      dataIndex: "priority",
+      key: "priority",
+      className: "w-2/12",
+      render: (priority: string) => (
+        <span className="flex items-center gap-3">
+          <PriorityIcon status={priority} />
+          {priority}
+        </span>
       ),
     },
     {
       title: "Assignee",
       dataIndex: "assignee",
       key: "assignee",
-      className: "w-1/6",
+      className: "w-2/12",
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      className: "w-1/6",
+      className: "w-2/12",
     },
     {
       title: "Due date",
@@ -88,7 +112,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
   return (
     <div>
       {isLoading ? (
-        <Skeleton active className="mt-5"/>
+        <Skeleton active className="mt-5" />
       ) : (
         <Table
           dataSource={dataSource}

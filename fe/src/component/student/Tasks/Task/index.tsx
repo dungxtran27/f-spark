@@ -17,6 +17,7 @@ import { taskBoard } from "../../../../api/Task/Task";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
+import { student } from "../../../../api/student/student";
 // type LabelRender = SelectProps["labelRender"];
 const Task = () => {
   const userInfo = useSelector(
@@ -48,6 +49,12 @@ const Task = () => {
       });
     },
   });
+  const { data: studentOfGroup } = useQuery({
+    queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
+    queryFn: async () => {
+      return await student.getStudentOfGroup();
+    },
+  });
   const statusFilter = () => {
     return (
       <div className="flex items-center text gap-5">
@@ -71,11 +78,6 @@ const Task = () => {
     );
   };
   const taskFilter = () => {
-    const members = [
-      { value: "670ab22e04859aef99b3e5c6", label: "Chu Son" },
-      { value: "66f501c8403a9f75c86092c7", label: "trandung" },
-    ];
-
     return (
       <Form
         className="flex items-center gap-4 mt-5"
@@ -97,7 +99,14 @@ const Task = () => {
           <Select
             size="middle"
             style={{ width: 280 }}
-            options={members}
+            options={
+              studentOfGroup?.data?.data?.map((s: any) => {
+                return {
+                  value: s._id,
+                  label: `${s.name}(${s.studentId})`,
+                };
+              }) || []
+            }
             showSearch
             mode="multiple"
             maxTagCount={"responsive"}
@@ -140,7 +149,11 @@ const Task = () => {
           isLoading={isLoading}
         />
       </div>
-      <CreateTask open={openCreateTask} setOpen={setOpenCreateTask} />
+      <CreateTask
+        open={openCreateTask}
+        setOpen={setOpenCreateTask}
+        task={null}
+      />
     </div>
   );
 };
