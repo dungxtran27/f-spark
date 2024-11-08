@@ -1,5 +1,5 @@
-import Report from "../component/student/DashBoard/Report";
-import Task from "../component/student/DashBoard/Task";
+import Report from "../component/student/Tasks/Report";
+import Task from "../component/student/Tasks/Task";
 import Overview from "../component/student/Overview/ProjectOverview";
 import Outcome from "../component/student/Overview/Outcome";
 import People from "../component/student/Class/People";
@@ -18,7 +18,7 @@ export const LOGIN_DATA = {
 export const DATE_FORMAT = {
   withYear: "MMM D, YYYY",
   withoutYear: "MMM D",
-  withYearAndTime: "h:mm, MMM D, YYYY",
+  withYearAndTime: "HH:mm, MMM D, YYYY",
 };
 export const TEACHER_OUTCOMES_MODAL_TYPES = {
   grading: "GRADING",
@@ -101,7 +101,25 @@ export const CREATE_TASK_FILTER = {
   attachment: "attachment",
   timeBlock: "timeBlock",
   parentTask: "parentTask",
+  priority: "priority",
 };
+export const TASK_PRIORITY = [
+  {
+    label: "High",
+    value: "High",
+    color: "#f87171",
+  },
+  {
+    label: "Normal",
+    value: "Normal",
+    color: "#38bdf8",
+  },
+  {
+    label: "Low",
+    value: "Low",
+    color: "#4ade80",
+  },
+];
 export const CREATE_TIMELINE = {
   name: "name",
   color: "color",
@@ -191,7 +209,8 @@ export const QUERY_KEY = {
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
   STREAM_CONTENT: "streamContent",
-  ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions"
+  ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
+  TASK_DETAIL: "taskDetail",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

@@ -11,10 +11,16 @@ taskRouter.post(
   TaskController.createTask
 );
 taskRouter.get(
-  "/:taskId",
+  "/",
   verifyToken,
   authorization.checkGroupAccess,
   TaskController.viewTaskDetail
+);
+taskRouter.get(
+  "/excel",
+  verifyToken,
+  authorization.checkGroupAccess,
+  TaskController.exportGroupTaskToExcel
 );
 taskRouter.patch(
   "/updateTask",
