@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage/HomePage";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import ProjectOverview from "./pages/Student/ProjectOverview";
+import DashBoard from "./pages/Student/DashBoard";
 import Tasks from "./pages/Student/Tasks";
 import Class from "./pages/Student/Class";
 import Timeline from "./pages/Student/Timeline";
@@ -26,6 +27,7 @@ function App() {
         <Route path="/:role/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/projectOverview" element={<ProjectOverview />} />
+        <Route path="/dashboard" element={<DashBoard />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/class" element={<Class />} />
         <Route path="/timeline" element={<Timeline />} />
