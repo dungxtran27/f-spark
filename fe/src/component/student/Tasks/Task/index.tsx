@@ -4,7 +4,7 @@ import {
   TASK_FILTERS,
   TASK_STATUS_FILTER,
 } from "../../../../utils/const";
-import { Button, Form, Input, Select, Tooltip } from "antd";
+import { Button, Form, Input, message, Select, Tooltip } from "antd";
 import styles from "./styles.module.scss";
 import FormItem from "antd/es/form/FormItem";
 import { SearchOutlined } from "@ant-design/icons";
@@ -55,6 +55,25 @@ const Task = () => {
       return await student.getStudentOfGroup();
     },
   });
+  const exportTaskToExcel = async () => {
+    try {
+      const response = await taskBoard.exportToExcel(userInfo?.group);
+      if (response?.status !== 200) {
+        throw new Error("Error downloading file");
+      }
+      const blob = response?.data;
+      const link = document.createElement("a");
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      link.setAttribute("download", "Group_Task.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error : any) {
+      message.error(error)
+    }
+  };
   const statusFilter = () => {
     return (
       <div className="flex items-center text gap-5">
@@ -132,12 +151,13 @@ const Task = () => {
       </Form>
     );
   };
+
   return (
     <div>
       {statusFilter()}
       <div className="flex items-center justify-between">
         {taskFilter()}{" "}
-        <Button>
+        <Button onClick={exportTaskToExcel}>
           <FaFileExcel className="text-green-600 text-lg" />
           Export to excel
         </Button>
