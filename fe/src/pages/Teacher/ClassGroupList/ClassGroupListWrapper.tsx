@@ -1,9 +1,24 @@
-import { Button, Modal, Tag, Select, Space, Input, Table, Tooltip } from "antd";
+import {
+  Button,
+  Modal,
+  Tag,
+  Select,
+  Space,
+  Input,
+  Table,
+  Tooltip,
+  Form,
+} from "antd";
 const { Search } = Input;
 
 import { useState } from "react";
 
-import { colorMap, colorMajorGroup, QUERY_KEY } from "../../../utils/const";
+import {
+  colorMap,
+  colorMajorGroup,
+  QUERY_KEY,
+  CREATE_GROUP_DATA,
+} from "../../../utils/const";
 import classNames from "classnames";
 import style from "../MentorList/style.module.scss";
 import type { GetProps, SelectProps } from "antd";
@@ -24,7 +39,7 @@ interface reqBodyAssignMentorToGroup {
   groupId: string;
 }
 interface reqBodyCreateGroup {
-  classId: string;
+  classId: string | undefined;
   groupName: string;
   groupDescription: string;
 }
@@ -68,7 +83,12 @@ const ClassGroupListWrapper = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
-
+  const [form] = Form.useForm();
+  const groupName = Form.useWatch(CREATE_GROUP_DATA.groupName, form);
+  const groupDescription = Form.useWatch(
+    CREATE_GROUP_DATA.groupDescription,
+    form
+  );
   const [group, setGroup] = useState<Group>({
     groupImage: "",
     GroupDescription: "",
@@ -140,7 +160,7 @@ const ClassGroupListWrapper = () => {
 
   //handle classData
   const { data: classPeople } = useQuery({
-    queryKey: [classId],
+    queryKey: [classId, QUERY_KEY.GROUPS_OF_CLASS],
     queryFn: async () => {
       return await classApi.getclassDetailPeople(classId);
     },
@@ -190,7 +210,8 @@ const ClassGroupListWrapper = () => {
         groupId: groupId,
       }),
 
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setGroup(data.data.data.group);
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
@@ -202,7 +223,8 @@ const ClassGroupListWrapper = () => {
         groupId: groupId,
       }),
 
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setGroup(data.data.data.group);
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
@@ -222,7 +244,40 @@ const ClassGroupListWrapper = () => {
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
+  const deleteStudentFromGroup = useMutation({
+    mutationFn: ({ groupId, studentId }: reqBodyAddStudentToGroup) =>
+      groupApi.deleteStudentFromGroup({
+        groupId: groupId,
+        studentId: studentId,
+      }),
 
+    onSuccess: (data) => {
+      setGroup(data.data.data.group);
+      queryClient.invalidateQueries({ queryKey: [classId] });
+    },
+  });
+  const ungroup = useMutation({
+    mutationFn: ({ groupId }: any) =>
+      groupApi.ungroup({
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classId] });
+    },
+  });
+
+  const lockOrUnlockGroup = useMutation({
+    mutationFn: ({ groupId }: any) =>
+      groupApi.lockOrUnlockGroup({
+        groupId: groupId,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [classId],
+      });
+    },
+  });
   const columnsMentor = [
     {
       title: "image",
@@ -280,19 +335,24 @@ const ClassGroupListWrapper = () => {
       <div className=" px-1">
         <div className="text-lg font-semibold ">
           <span>{classPeople?.data.data.groupStudent.length}</span>
-          <span className="px-1">Groups</span>
+          <span className="pl-1 pr-3">Groups</span>
           <span>
-            <Button onClick={handleOpencreateGroupModal}>
-              <FaPlus />
-            </Button>
+            <Tooltip placement="top" title={"Create group"}>
+              <Button type="primary" onClick={handleOpencreateGroupModal}>
+                <FaPlus />
+              </Button>
+            </Tooltip>
           </span>
         </div>
 
-        <div className=" flex  justify-between ">
+        <div className=" flex  justify-between pt-2">
           <div className="flex flex-wrap ">
             {classPeople?.data.data.groupStudent.map((s: any) => (
               <GroupCard
                 info={s}
+                handleLock={() => {
+                  lockOrUnlockGroup.mutate({ groupId: s._id });
+                }}
                 handleOpenAddMentorModal={handleOpenAddMentorModal}
                 handleOpengroupDetailModal={handleOpengroupDetailModal}
                 setGroup={setGroup}
@@ -301,7 +361,7 @@ const ClassGroupListWrapper = () => {
             ))}
           </div>
           <Table
-            className="w-[35%] shadow"
+            className="w-[40%] shadow" size="small"
             // className={styles.customTable}
             dataSource={classPeople?.data.data.unGroupStudents}
             columns={columnsStudentUngroup}
@@ -313,6 +373,7 @@ const ClassGroupListWrapper = () => {
 
       {/* modal add mentor */}
       <Modal
+        className="z-40"
         open={AddMentorModal}
         onCancel={handleCloseAddMentorModal}
         width={1000}
@@ -331,6 +392,10 @@ const ClassGroupListWrapper = () => {
           <Select
             mode="multiple"
             allowClear
+            defaultValue={group.tag.map((tag) => ({
+              label: tag.name,
+              value: tag._id,
+            }))}
             className={classNames(style.search_tag_bar)}
             placeholder="Please select"
             maxTagCount={3}
@@ -378,6 +443,15 @@ const ClassGroupListWrapper = () => {
             onClick={handleClosegroupDetailModal}
           >
             Save
+          </Button>,
+          <Button
+            className={classNames(style.deleteBtn)}
+            onClick={() => {
+              setConfirmContent("delete");
+              handleOpenconfirm();
+            }}
+          >
+            Delete
           </Button>,
         ]}
       >
@@ -435,77 +509,84 @@ const ClassGroupListWrapper = () => {
               </div>
             </div>
             <div className=" min-w-[50%]  pt-5 pl-5">
-              {group?.teamMembers.map((s: any) => (
-                <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
-                  <div className="flex  justify-between w-full">
-                    <div className="flex items-center">
-                      {s.account === null ? (
-                        <img
-                          src={
-                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
-                          }
-                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                          alt=""
-                        />
-                      ) : (
-                        <img
-                          src={
-                            s?.account.profilePicture ||
-                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
-                          }
-                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                          alt=""
-                        />
-                      )}
-                      <p className="ml-3"> {s?.name}</p>
-                      <Tag
-                        color={colorMap[s?.major]}
-                        className="ml-3 h-auto w-auto"
-                      >
-                        {s.major}
-                      </Tag>
-                      {group?.leader == s._id && <FaStar color="red" />}
+              {group.teamMembers.length > 0 ? (
+                <>
+                  {group?.teamMembers.map((s: any) => (
+                    <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
+                      <div className="flex  justify-between w-full">
+                        <div className="flex items-center">
+                          {s.account === null ? (
+                            <img
+                              src={
+                                "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                              }
+                              className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                              alt=""
+                            />
+                          ) : (
+                            <img
+                              src={
+                                s?.account?.profilePicture ||
+                                "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                              }
+                              className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                              alt=""
+                            />
+                          )}
+                          <p className="ml-3"> {s?.name}</p>
+                          <Tag
+                            color={colorMap[s?.major]}
+                            className="ml-3 h-auto w-auto"
+                          >
+                            {s.major}
+                          </Tag>
+                          {group?.leader == s._id && <FaStar color="red" />}
+                        </div>
+                        <div className="flex items-center">
+                          <Tooltip
+                            placement="top"
+                            title="Assign this student as leader"
+                          >
+                            <FaStar
+                              size={18}
+                              onClick={() => {
+                                setCstudentSelected(s);
+                                setConfirmContent("leader");
+                                handleOpenconfirm();
+                              }}
+                              className={classNames(style.customIcon1)}
+                            />
+                          </Tooltip>
+                          <Tooltip
+                            placement="top"
+                            title="Move student from group"
+                            className="ml-1"
+                          >
+                            <FaShareSquare
+                              size={18}
+                              onClick={() => {
+                                setCstudentSelected(s);
+                                setConfirmContent("remove");
+                                handleOpenconfirm();
+                              }}
+                              className={classNames(style.customIcon2)}
+                            />
+                          </Tooltip>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                      <Tooltip
-                        placement="top"
-                        title="Assign this student as leader"
-                      >
-                        <FaStar
-                          size={18}
-                          onClick={() => {
-                            setCstudentSelected(s);
-                            setConfirmContent("leader");
-                            handleOpenconfirm();
-                          }}
-                          className={classNames(style.customIcon1)}
-                        />
-                      </Tooltip>
-                      <Tooltip
-                        placement="top"
-                        title="Move student from group"
-                        className="ml-1"
-                      >
-                        <FaShareSquare
-                          size={18}
-                          onClick={() => {
-                            setCstudentSelected(s);
-                            setConfirmContent("remove");
-                            handleOpenconfirm();
-                          }}
-                          className={classNames(style.customIcon2)}
-                        />
-                      </Tooltip>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  ))}
+                </>
+              ) : (
+                <> no data</>
+              )}
             </div>
           </div>
         )}
       </Modal>
       {/* modal confirm */}
       <Modal
+        className="z-50"
         title={"Confirm"}
         open={confirm}
         onCancel={handleCloseconfirm}
@@ -525,14 +606,27 @@ const ClassGroupListWrapper = () => {
                   });
                   handleCloseconfirm();
                   break;
+                case "remove":
+                  deleteStudentFromGroup.mutate({
+                    groupId: group._id,
+                    studentId: studentSelected._id,
+                  });
+                  handleCloseconfirm();
+                  break;
+                case "delete":
+                  ungroup.mutate({
+                    groupId: group._id,
+                  });
+                  handleCloseconfirm();
+                  handleClosegroupDetailModal();
+                  break;
                 case "mentor":
                   assignMentorToGroup.mutate({
                     mentorId: mentorSelected._id,
                     groupId: group._id,
                   });
-                  handleCloseconfirm();
                   handleCloseAddMentorModal();
-                  handleClosegroupDetailModal();
+                  handleCloseconfirm();
                   break;
 
                 default:
@@ -540,7 +634,7 @@ const ClassGroupListWrapper = () => {
               }
             }}
           >
-            Save
+            Confirm
           </Button>,
         ]}
       >
@@ -556,6 +650,15 @@ const ClassGroupListWrapper = () => {
             {group.GroupName}
           </>
         )}
+        {confirmContent == "remove" && (
+          <>
+            You want to remove {studentSelected.name}from group :
+            {group.GroupName}?
+          </>
+        )}
+        {confirmContent == "delete" && (
+          <>You want to Delete {group.GroupName}? This Action cannot be undo.</>
+        )}
       </Modal>
       {/* modal create group */}
       <Modal
@@ -570,9 +673,10 @@ const ClassGroupListWrapper = () => {
             key="submit"
             type="primary"
             onClick={() => {
-              assignLeaderToGroup.mutate({
-                groupId: group._id,
-                studentId: studentSelected._id,
+              createGroup.mutate({
+                classId: classId,
+                groupName: groupName,
+                groupDescription: groupDescription,
               });
               handleClosecreateGroupModal();
             }}
@@ -580,7 +684,35 @@ const ClassGroupListWrapper = () => {
             Save
           </Button>,
         ]}
-      ></Modal>
+      >
+        <Form form={form}>
+          <Form.Item
+            label="Group Name"
+            name="groupName"
+            rules={[
+              {
+                required: true,
+                message: "Please input group name!",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Group Description"
+            name="groupDescription"
+            rules={[
+              {
+                required: true,
+                message: "Please input group description!",
+              },
+            ]}
+          >
+            <Input.TextArea />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       {/* modal add member to group */}
       {/* <Modal

@@ -10,6 +10,10 @@ export const LOGIN_DATA = {
   email: "email",
   password: "password",
 };
+export const CREATE_GROUP_DATA = {
+  groupName: "groupName",
+  groupDescription: "groupDescription",
+};
 export const DATE_FORMAT = {
   withYear: "MMM D, YYYY",
   withoutYear: "MMM D",
@@ -162,7 +166,7 @@ export const QUERY_KEY = {
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
   STREAM_CONTENT: "streamContent",
-  ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions"
+  ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

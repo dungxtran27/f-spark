@@ -1,10 +1,14 @@
 import { Button, Tag, Tooltip } from "antd";
-import { FaUserGroup, FaUserGraduate } from "react-icons/fa6";
+import { FaUserGroup, FaUserGraduate, FaLock } from "react-icons/fa6";
 import { colorMajorGroup, ROLE } from "../../../utils/const";
-import { FaCoins } from "react-icons/fa";
+import { FaCoins, FaLockOpen } from "react-icons/fa";
+import style from "../MentorList/style.module.scss";
+import classNames from "classnames";
+
 const GroupCard = ({
   info,
   handleOpenAddMentorModal,
+  handleLock,
   handleOpengroupDetailModal,
   setGroup,
   role,
@@ -22,9 +26,21 @@ const GroupCard = ({
 
     return false;
   };
+  // const queryClient = useQueryClient();
+
+  // const lockOrUnlockGroup = useMutation({
+  //   mutationFn: ({ groupId }: any) =>
+  //     groupApi.lockOrUnlockGroup({
+  //       groupId: groupId,
+  //     }),
+  //   onSuccess: () => {
+  //     // info = data.data.data.group;
+  //     queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS_OF_CLASS] });
+  //   },
+  // });
 
   return (
-    <div className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[30%] h-36 shadow">
+    <div className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow">
       <div className="flex items-center justify-between">
         <div className="flex items-center ">
           <div
@@ -96,6 +112,13 @@ const GroupCard = ({
         {info.tag.map((t: any) => (
           <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
         ))}
+      </div>
+      <div className="w-full flex justify-end" onClick={handleLock}>
+        {info?.lock ? (
+          <FaLock className={classNames(style.customIcon1)} />
+        ) : (
+          <FaLockOpen className={classNames(style.customIcon2)} />
+        )}
       </div>
     </div>
   );

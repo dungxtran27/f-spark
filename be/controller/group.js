@@ -270,7 +270,7 @@ const createGroup = async (req, res) => {
       classId,
       groupDescription
     );
-    return res.status(200).json({ data: data });
+    return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -279,7 +279,37 @@ const assignLeader = async (req, res) => {
   try {
     const { groupId, studentId } = req.body;
     const data = await GroupRepository.assignLeader(groupId, studentId);
-    return res.status(200).json({ data: data });
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const deleteStudentFromGroup = async (req, res) => {
+  try {
+    const { groupId, studentId } = req.body;
+    const data = await GroupRepository.deleteStudentFromGroup(
+      groupId,
+      studentId
+    );
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const ungroup = async (req, res) => {
+  try {
+    const { groupId } = req.body;
+    const data = await GroupRepository.ungroup(groupId);
+    return res.status(200).json( data );
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const lockOrUnlockGroup = async (req, res) => {
+  try {
+    const { groupId } = req.body;
+    const data = await GroupRepository.lockOrUnlockGroup(groupId);
+    return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -303,4 +333,7 @@ export default {
   assignLeader,
   getClassTeacherAndgroupInfo,
   createGroup,
+  deleteStudentFromGroup,
+  ungroup,
+  lockOrUnlockGroup,
 };

@@ -20,11 +20,20 @@
   color: red;
   scale: 1.1;
   transition: all;
- transition: all 200ms ease-in-out
+  transition: all 200ms ease-in-out;
 }
 
 .customIcon2:hover {
   color: rgb(5, 5, 5);
   scale: 1.1;
-transition: all 200ms ease-in-out
+  transition: all 200ms ease-in-out;
+}
+.deleteBtn {
+  background-color: red !important;
+  color: white !important;
+}
+.deleteBtn:hover {
+  background-color: rgb(240, 93, 93) !important;
+  color: rgb(255, 255, 255) !important;
+  transition: all 200ms ease-in-out !important;
 }

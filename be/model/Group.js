@@ -189,6 +189,15 @@ const GroupSchema = new Schema(
       type: String,
       required: false,
     },
+    lock: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    oldmark: {
+      type: Number,
+      required: false,
+    },
   },
   { timestamps: true, collection: "Groups" }
 );

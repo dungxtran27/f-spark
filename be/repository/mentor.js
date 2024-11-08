@@ -137,11 +137,30 @@ const assignMentor = async ({ groupId, mentorId }) => {
       groupId,
       { mentor: mentorId },
       { new: true }
-    );
+    )
+      .select(
+        "GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage"
+      )
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "tag",
+        select: "name ",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      });
 
     return {
       message: "Mentor assigned successfully",
-      group: updateMentor,
+      group: updateGroup,
     };
   } catch (error) {
     throw new Error(error.message);
