@@ -75,7 +75,7 @@ const teamData = [
 
 const Team = () => {
   return (
-    <div className="bg-white p-4 rounded shadow mr-2 h-[500px] sticky z-10">
+    <div className="bg-white p-4 rounded shadow mr-2 h-[500px]">
       <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 mb-2">
         <h3 className="text-lg font-bold p-1">Team ({teamData.length})</h3>
       </div>
