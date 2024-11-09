@@ -532,10 +532,8 @@ const ungroup = async (groupId) => {
     if (!groupfound) {
       throw new Error("group not found");
     }
-    if ("oldMark" in groupfound || groupfound.isSponsorship) {
-      return {
-        message: `Cannot delete this group`,
-      };
+    if (groupfound.oldMark || groupfound.isSponsorship) {
+      throw new Error(`Cannot delete this group`);
     }
     const teamMembers = groupfound.teamMembers;
 

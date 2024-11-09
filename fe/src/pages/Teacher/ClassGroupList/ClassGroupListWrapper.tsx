@@ -8,6 +8,8 @@ import {
   Table,
   Tooltip,
   Form,
+  message,
+  Empty,
 } from "antd";
 const { Search } = Input;
 
@@ -34,6 +36,44 @@ import { RootState } from "../../../redux/store";
 import { useParams } from "react-router-dom";
 import { groupApi } from "../../../api/group/group";
 
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  PointerSensor,
+  useDraggable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+
+import { CSS } from "@dnd-kit/utilities";
+
+interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+  "data-row-key": string;
+}
+const Row: React.FC<Readonly<RowProps>> = (props) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: props["data-row-key"],
+    });
+
+  const style: React.CSSProperties = {
+    ...props.style,
+    transform: CSS.Translate.toString(transform),
+
+    cursor: "move",
+    ...(isDragging ? { position: "absolute", zIndex: "9999" } : {}),
+  };
+
+  return (
+    <tr
+      {...props}
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+    />
+  );
+};
 interface reqBodyAssignMentorToGroup {
   mentorId: string;
   groupId: string;
@@ -100,7 +140,7 @@ const ClassGroupListWrapper = () => {
     teamMembers: [],
     _id: "",
   });
-  //random add modal
+  //drag
 
   //add mentor modal
   const [AddMentorModal, setAddMentorModal] = useState(false);
@@ -160,11 +200,12 @@ const ClassGroupListWrapper = () => {
 
   //handle classData
   const { data: classPeople } = useQuery({
-    queryKey: [classId, QUERY_KEY.GROUPS_OF_CLASS],
+    queryKey: [classId],
     queryFn: async () => {
-      return await classApi.getclassDetailPeople(classId);
+      return classApi.getclassDetailPeople(classId);
     },
   });
+  // console.log(classPeople);
 
   const { data: tagData } = useQuery({
     queryKey: [QUERY_KEY.TAGDATA],
@@ -191,17 +232,17 @@ const ClassGroupListWrapper = () => {
     },
   });
   const queryClient = useQueryClient();
-  // const addStudentToGroupSelected = useMutation({
-  //   mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
-  //     student.addStudentToGroup({
-  //       studentId: studentId,
-  //       groupId: groupId,
-  //     }),
+  const addStudentToGroupSelected = useMutation({
+    mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
+      student.addStudentToGroup({
+        studentId: studentId,
+        groupId: groupId,
+      }),
 
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: [classId] });
-  //   },
-  // });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classId] });
+    },
+  });
   // assign leader to group
   const assignLeaderToGroup = useMutation({
     mutationFn: ({ studentId, groupId }: reqBodyAddStudentToGroup) =>
@@ -211,7 +252,7 @@ const ClassGroupListWrapper = () => {
       }),
 
     onSuccess: (data) => {
-      setGroup(data.data.data.group);
+      setGroup(data.data.group);
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
@@ -224,7 +265,7 @@ const ClassGroupListWrapper = () => {
       }),
 
     onSuccess: (data) => {
-      setGroup(data.data.data.group);
+      setGroup(data.data.group);
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
@@ -252,7 +293,7 @@ const ClassGroupListWrapper = () => {
       }),
 
     onSuccess: (data) => {
-      setGroup(data.data.data.group);
+      setGroup(data.data.group);
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
@@ -307,6 +348,23 @@ const ClassGroupListWrapper = () => {
       dataIndex: "groupNumber",
     },
   ];
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 1,
+      },
+    })
+  );
+
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (over === null) message.warning("please drag student to group you want");
+    else {
+      addStudentToGroupSelected.mutate({
+        groupId: over.id.toString(),
+        studentId: active.id.toString(),
+      });
+    }
+  };
 
   type SearchProps = GetProps<typeof Input.Search>;
   const onSearch: SearchProps["onSearch"] = (value) => setNameSeacrh(value);
@@ -329,7 +387,7 @@ const ClassGroupListWrapper = () => {
       render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
     },
   ];
-  // const { styles } = useStyle();
+
   return (
     <>
       <div className=" px-1">
@@ -344,31 +402,37 @@ const ClassGroupListWrapper = () => {
             </Tooltip>
           </span>
         </div>
+        <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+          <div className=" flex  justify-between pt-2 ">
+            <div className="flex flex-wrap ">
+              {classPeople?.data.data.groupStudent.map((s: any) => (
+                <GroupCard
+                  info={s}
+                  handleLock={() => {
+                    lockOrUnlockGroup.mutate({ groupId: s._id });
+                  }}
+                  handleOpenAddMentorModal={handleOpenAddMentorModal}
+                  handleOpengroupDetailModal={handleOpengroupDetailModal}
+                  setGroup={setGroup}
+                  role={userInfo?.role}
+                />
+              ))}
+            </div>
 
-        <div className=" flex  justify-between pt-2">
-          <div className="flex flex-wrap ">
-            {classPeople?.data.data.groupStudent.map((s: any) => (
-              <GroupCard
-                info={s}
-                handleLock={() => {
-                  lockOrUnlockGroup.mutate({ groupId: s._id });
-                }}
-                handleOpenAddMentorModal={handleOpenAddMentorModal}
-                handleOpengroupDetailModal={handleOpengroupDetailModal}
-                setGroup={setGroup}
-                role={userInfo?.role}
-              />
-            ))}
+            <Table
+              className="w-[40%] shadow"
+              size="small"
+              components={{
+                body: { row: Row },
+              }}
+              rowKey="_id"
+              dataSource={classPeople?.data.data.unGroupStudents}
+              columns={columnsStudentUngroup}
+              pagination={{ pageSize: 10 }}
+              scroll={{ y: 55 * 5 }}
+            />
           </div>
-          <Table
-            className="w-[40%] shadow" size="small"
-            // className={styles.customTable}
-            dataSource={classPeople?.data.data.unGroupStudents}
-            columns={columnsStudentUngroup}
-            pagination={{ pageSize: 10 }}
-            scroll={{ y: 55 * 5 }}
-          />
-        </div>
+        </DndContext>
       </div>
 
       {/* modal add mentor */}
@@ -578,7 +642,7 @@ const ClassGroupListWrapper = () => {
                   ))}
                 </>
               ) : (
-                <> no data</>
+                <Empty />
               )}
             </div>
           </div>

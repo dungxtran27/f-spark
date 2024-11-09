@@ -194,7 +194,7 @@ const GroupSchema = new Schema(
       required: false,
       default: false,
     },
-    oldmark: {
+    oldMark: {
       type: Number,
       required: false,
     },
