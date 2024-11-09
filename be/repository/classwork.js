@@ -23,7 +23,7 @@ const getOutcomes = async (classId, isTeacher) => {
   try {
     const outcomeList = await ClassWork.find({
       type: "outcome",
-      class: classId,
+      classId: classId,
     }).lean();
     if (isTeacher) {
       const outcomeWithSubmissions = await Promise.all(

@@ -45,7 +45,21 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
         </div>
       ),
       priority: tb?.priority,
-      status: <StatusSelect status={tb?.status} taskId={tb?._id} />,
+      status: (
+        <StatusSelect
+          status={tb?.status}
+          taskId={tb?._id}
+          updatable={
+            Math.round(
+              (tb?.childTasks?.filter(
+                (t: any) => t?.status === "Done"
+              )?.length /
+                tb?.childTasks?.length) *
+                100
+            ) === 100
+          }
+        />
+      ),
       dueDate: tb?.dueDate ? dayjs(tb?.dueDate).format("MMM D, YYYY") : "",
     };
   });

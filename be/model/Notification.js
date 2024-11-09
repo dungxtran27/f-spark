@@ -4,10 +4,13 @@ const ActionSchema = new Schema({
     type: String,
     required: true,
   },
+  alternateAction: {
+    type: String,
+  },
   target: {
     type: SchemaTypes.ObjectId,
   },
-  targetType: {
+  actionType: {
     type: String,
   },
   priorVersion: {
@@ -28,9 +31,23 @@ const NotificationSchema = new Schema(
       type: [SchemaTypes.ObjectId],
       default: null,
     },
-    sender: {
-      type: [SchemaTypes.ObjectId],
+    class: {
+      type: SchemaTypes.ObjectId,
       default: null,
+    },
+    group: {
+      type: SchemaTypes.ObjectId,
+      default: null,
+    },
+    sender: {
+      type: SchemaTypes.ObjectId,
+      refPath: 'senderType',
+      default: null,
+    },
+    senderType: { 
+      type: String, 
+      enum: ['Student', 'Teacher'],
+      required: true 
     },
     type: {
       type: String,

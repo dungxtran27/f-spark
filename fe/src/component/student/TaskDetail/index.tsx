@@ -9,12 +9,12 @@ import dayjs from "dayjs";
 import { DATE_FORMAT, QUERY_KEY, TASK_TYPE } from "../../../utils/const";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import { CiEdit, CiSquarePlus } from "react-icons/ci";
-import { GoArrowRight } from "react-icons/go";
 import { useQuery } from "@tanstack/react-query";
 import { taskBoard } from "../../../api/Task/Task";
 import CreateTask from "../Tasks/Task/CreateTask";
 import { useRef, useState } from "react";
 import PriorityIcon from "../../common/Task/PrioritySelect/PriorityIcon";
+import RecordOfChanges from "./RecordOfChanges";
 const Attachment = ({ url }: { url: string }) => {
   return (
     <div className="flex items-center gap-3">
@@ -172,56 +172,7 @@ const TaskDetailWrapper = () => {
                 Add children tasks
               </Button>
             )}
-            <div>
-              <span className="font-semibold">Record of changes</span>
-              <div className="p-3 bg-white border border-textSecondary/20 rounded shadow">
-                <div className="flex flex-col gap-3 py-3 border-b-[1px] border-textSecondary/30">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap items-center">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={userInfo?.account?.profilePicture}
-                          className="w-[30px] aspect-square rounded-full border border-primary"
-                        />
-                        <span>Chu Sơn</span>
-                      </div>
-                      &nbsp;
-                      <span>updated this task status</span>
-                    </div>
-                    <span>{dayjs().format(DATE_FORMAT.withYearAndTime)}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-[30px] aspect-square"></div>
-                    <span className="px-2 rounded bg-[#facc15]/20 text-[#facc15]">
-                      Pending
-                    </span>
-                    <GoArrowRight />
-                    <span className="px-2 rounded bg-[#3B82F6]/30 text-[#3B82F6]">
-                      In Progress
-                    </span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-3 py-3 border-b-[1px] border-textSecondary/30">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap items-center">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={userInfo?.account?.profilePicture}
-                          className="w-[30px] aspect-square rounded-full border border-primary"
-                        />
-                        <span>Chu Sơn</span>
-                      </div>
-                      &nbsp;
-                      <span>updated this task content</span>
-                    </div>
-                    <span>{dayjs().format(DATE_FORMAT.withYearAndTime)}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-primaryBlue">
-                    <div className="w-[30px] aspect-square"></div> View changes
-                  </div>
-                </div>
-              </div>
-            </div>
+           <RecordOfChanges/>
           </div>
           <div className="flex-grow bg-white border border-textSecondary/30 rounded shadow sticky top-3 self-start p-3 flex flex-col gap-10">
             <div className="border-b-[1px] border-textSecondary/30 font-semibold text-lg flex items-center justify-between">

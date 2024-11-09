@@ -23,6 +23,12 @@ taskRouter.get(
   TaskController.exportGroupTaskToExcel
 );
 taskRouter.patch(
+  "/updateTaskStatus",
+  verifyToken,
+  authorization.checkGroupAccess,
+  TaskController.updateTaskStatus
+);
+taskRouter.patch(
   "/updateTask",
   verifyToken,
   authorization.checkGroupAccess,

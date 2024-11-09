@@ -7,4 +7,11 @@ export const dashBoard = {
   getGroupData: async (groupId: string) => {
     return await axios.get(`api/group?groupId=${groupId}`);
   },
+  getGroupNotification: async (groupId: string | undefined) => {
+    return await axios.get("api/notification/getGroupNotification", {
+      params: {
+        groupId: groupId,
+      },
+    });
+  },
 };
