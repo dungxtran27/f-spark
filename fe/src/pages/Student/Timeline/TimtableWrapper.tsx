@@ -3,7 +3,7 @@ import TimeTable from "./TimeTable";
 // import { useState } from "react";
 // import type { AutoCompleteProps } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import type { MenuProps } from "antd";
+import type {  MenuProps } from "antd";
 import { Dropdown, Space } from "antd";
 import { FaPlus } from "react-icons/fa";
 import TimeLineModal from "../../../component/modal/TimeBlockModal";
@@ -24,25 +24,7 @@ const TimeLineWrapper = () => {
       key: "3",
     },
   ];
-  // const mockVal = (str: string, repeat = 1) => ({
-  //   value: str.repeat(repeat),
-  // });
 
-  // const [value, setValue] = useState("");
-  // const [options, setOptions] = useState<AutoCompleteProps["options"]>([]);
-
-  // const getPanelValue = (searchText: string) =>
-  //   !searchText
-  //     ? []
-  //     : [mockVal(searchText), mockVal(searchText, 2), mockVal(searchText, 3)];
-
-  // const onSelect = (data: string) => {
-  //   console.log("onSelect", data);
-  // };
-
-  // const onChange = (data: string) => {
-  //   setValue(data);
-  // };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => {
     setIsModalOpen(true);
