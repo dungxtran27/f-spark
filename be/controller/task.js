@@ -39,10 +39,23 @@ const createTask = async (req, res) => {
     };
     const newTask = await TaskRepository.createTask(taskData);
     if (parentTask && newTask) {
-      const updatedTask = await TaskRepository.updateTaskChildren(
+      await TaskRepository.updateTaskChildren(
         parentTask,
         newTask._id
       );
+    };
+    if(newTask){
+      const notiData = {
+        sender: decodedToken?.role?.id,
+        receiver: "",
+        type: "Group",
+        targetType: "Task",
+        action: {
+          action: "Created new Task",
+          target: newTask?._id
+        },
+        extraUrl: ""
+      }
     }
     return res.status(201).json({
       data: newTask,
