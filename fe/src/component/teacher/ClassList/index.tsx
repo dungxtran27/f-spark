@@ -18,11 +18,11 @@ const ClassListWrapper = () => {
   return (
     <div className="w-full min-h-full flex-col flex p-5 gap-5">
       <h1 className="text-[28px] font-medium">FAll24</h1>
-      <div className="flex flex-wrap gap-8">
+      <div className="flex flex-wrap gap-3">
         {classes?.data?.map((c: any) => (
           <div
             key={c?._id}
-            className="w-[22%] min-h-[300px] rounded-md border border-textSecondary/40 flex flex-col bg-white"
+            className="w-[25%] min-h-[300px] rounded-md border border-textSecondary/40 flex flex-col bg-white"
           >
             <div className="w-full rounded-t-md bg-cover bg-center p-3 flex items-center justify-between">
               <a
@@ -38,46 +38,40 @@ const ClassListWrapper = () => {
                 <div className="flex items-center p-2 hover:bg-pendingStatus/10 border border-transparent hover:border-pendingStatus rounded group hover:shadow-md">
                   <IoNewspaperOutline
                     className="text-pendingStatus mr-3 whitespace-nowrap text-sm"
-                    size={25}
+                    size={20}
                   />
-                  <span className="text-lg text-pendingStatus font-medium">
-                    5
-                  </span>
-                  &nbsp;
-                  <span className="text-sm">ungraded outcome submissions</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl text-pendingStatus font-medium">
+                      5
+                    </span>
+                    <span className="text-sm">
+                      ungraded outcome submissions
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center p-2 hover:bg-okStatus/10 border border-transparent hover:border-okStatus rounded group hover:shadow-md">
-                  <GrAnnounce className="text-okStatus mr-3" size={25} />
-                  <span className="text-lg text-okStatus font-medium">
-                    30/30
-                  </span>
-                  &nbsp;
-                  <span className="text-sm">
-                    upvotes on latest announcement
-                  </span>
+                  <GrAnnounce className="mr-3" size={20} />
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg">30/30</span>
+                    <span className="text-sm ">
+                      upvotes on latest announcement
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center p-2 hover:bg-okStatus/10 border border-transparent hover:border-okStatus rounded group hover:shadow-md">
-                  <IoNewspaperOutline
-                    className="text-okStatus mr-3"
-                    size={25}
-                  />
-                  <span className="text-lg  text-okStatus font-medium">
-                    30/30
-                  </span>
-                  &nbsp;
-                  <span className="text-sm">ungraded assignment</span>
+                  <IoNewspaperOutline className="mr-3" size={20} />
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg">30/30</span>
+                    <span className="text-sm">submissions on latest assignment</span>
+                  </div>
                 </div>
               </div>
               <div className="flex flex-grow items-center justify-between px-5">
-                <div
-                  className={`flex items-center gap-2`}
-                >
+                <div className={`flex items-center gap-2`}>
                   <PiStudentDuotone size={25} />
                   <span>{c?.totalStudents}</span>
                 </div>
-                <div
-                  className={`flex items-center gap-2 `}
-                >
+                <div className={`flex items-center gap-2 `}>
                   <LuUsers size={25} />
                   <span>{c?.groupsCount}</span>
                 </div>

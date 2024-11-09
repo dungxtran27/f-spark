@@ -1,4 +1,8 @@
-import { TaskRepository, StudentRepository } from "../repository/index.js";
+import {
+  TaskRepository,
+  StudentRepository,
+  NotificationRepository,
+} from "../repository/index.js";
 import XLSX from "xlsx";
 const createTask = async (req, res) => {
   try {
@@ -43,6 +47,42 @@ const createTask = async (req, res) => {
         parentTask,
         newTask._id
       );
+      const notiData = {
+        sender: decodedToken?.role?.id,
+        receivers: decodedToken?.role?.id === assignee ? [] : [assignee],
+        type: "Group",
+        group: req.groupId,
+        senderType: "Student",
+        action: {
+          action: "Created a child task in",
+          alternateAction: "Created a child task in this Task",
+          target: updatedTask?._id,
+          actionType: "ChildTaskCreation",
+          extraUrl: `taskDetail/${encodeURIComponent(
+            newTask?.taskName
+          )}/${newTask?._id.toString()}`,
+        },
+      };
+      await NotificationRepository.createNotification({ data: notiData });
+    }
+    if (!parentTask && newTask) {
+      const notiData = {
+        sender: decodedToken?.role?.id,
+        receivers: decodedToken?.role?.id === assignee ? [] : [assignee],
+        type: "Group",
+        group: req.groupId,
+        senderType: "Student",
+        action: {
+          action: "Created new Task",
+          alternateAction: "Created this task",
+          target: newTask?._id,
+          actionType: "TaskCreation",
+        },
+        extraUrl: `taskDetail/${encodeURIComponent(
+          newTask?.taskName
+        )}/${newTask?._id.toString()}`,
+      };
+      await NotificationRepository.createNotification({ data: notiData });
     }
     return res.status(201).json({
       data: newTask,
@@ -67,6 +107,43 @@ export const viewTaskDetail = async (req, res) => {
     return res.status(200).json({ data: taskDetail });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateTaskStatus = async (req, res) => {
+  try {
+    console.log(req.groupId);
+
+    const taskId = req.query.taskId;
+    const updateData = req.body;
+    const decodedToken = req.decodedToken;
+    const priorVersion = await TaskRepository.findById(taskId);
+    if (!priorVersion) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+    const task = await TaskRepository.updatedTask(taskId, updateData);
+    const notiData = {
+      sender: decodedToken?.role?.id,
+      receivers: [],
+      type: "Group",
+      group: req.groupId,
+      senderType: "Student",
+      action: {
+        action: "Updated status of task",
+        alternateAction: "Update status of this task",
+        target: task?._id,
+        actionType: "UpdateTaskStatus",
+        priorVersion: priorVersion.status,
+        newVersion: task.status,
+        extraUrl: `taskDetail/${encodeURIComponent(
+          task?.taskName
+        )}/${task?._id.toString()}`,
+      },
+    };
+    await NotificationRepository.createNotification({ data: notiData });
+    res.status(200).json({ message: "Task updated", data: task });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -167,6 +244,7 @@ export default {
   createTask,
   viewTaskDetail,
   updateTask,
+  updateTaskStatus,
   getTasksByGroup,
   exportGroupTaskToExcel,
 };

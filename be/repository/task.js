@@ -173,7 +173,7 @@ const viewListTaskInGroup = async ({
       })
       .populate({
         path: "childTasks",
-        select: "_id taskType taskName dueDate assignee",
+        select: "_id taskType taskName status dueDate assignee",
         populate: {
           path: "assignee",
           select: "profilePicture studentId -_id",
@@ -212,10 +212,19 @@ const updateTaskChildren = async (taskId, childrenTaskId) => {
     throw new Error(error.message);
   }
 };
+const findById = async (taskId) =>{
+  try {
+    const result = await Task.findById(taskId);
+    return result;
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 export default {
   createTask,
   viewTaskDetail,
   updatedTask,
   viewListTaskInGroup,
-  updateTaskChildren
+  updateTaskChildren,
+  findById
 };
