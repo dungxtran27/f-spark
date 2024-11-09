@@ -17,6 +17,7 @@ export const DATE_FORMAT = {
   withYear: "MMM D, YYYY",
   withoutYear: "MMM D",
   withYearAndTime: "HH:mm, MMM D, YYYY",
+  withoutTime: "MMM D, YYYY",
 };
 export const TEACHER_OUTCOMES_MODAL_TYPES = {
   grading: "GRADING",

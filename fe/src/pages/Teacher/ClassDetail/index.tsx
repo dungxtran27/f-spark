@@ -1,4 +1,4 @@
-import ClassDetailWrapper from "../../component/teacher/ClassDetail";
+import ClassDetailWrapper from "../../../component/teacher/ClassDetail";
 
 const ClassDetail = () => {
   return <ClassDetailWrapper />;

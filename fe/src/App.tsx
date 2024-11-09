@@ -11,7 +11,7 @@ import MentorList from "./pages/Teacher/MentorList";
 import ClassGroupList from "./pages/Teacher/ClassGroupList";
 import Classes from "./pages/Teacher/Classes";
 import ClassDetail from "./pages/Teacher/ClassDetail";
-import TeacherDashboard from "./pages/Teacher/Dashboard";
+import TeacherDashboard from "./pages/Teacher/DashBoard";
 
 import ManageClass from "./pages/PDT/ManageClass";
 import ManageRequest from "./pages/PDT/manageRequest";
@@ -35,7 +35,7 @@ function App() {
         <Route path="/class-grouplist/:classID" element={<ClassGroupList />} />
         <Route path="/classes" element={<Classes />} />
         <Route path="/class/:classId" element={<ClassDetail />} />
-        <Route path="/dashboard" element={<TeacherDashboard />} />
+        <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
 
         {/* PDT */}
         <Route path="/manageClass" element={<ManageClass />} />

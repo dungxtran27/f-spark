@@ -34,22 +34,22 @@ const TaskCard = ({ taskInfo }: { taskInfo: any }) => {
             taskInfo?.taskType === TASK_TYPE.CLASS_WORK
               ? "bg-pendingStatus/40"
               : "bg-primaryBlue/40"
-          } rounded`}
+          } rounded whitespace-nowrap`}
         >
           {taskInfo?.taskType}
         </span>
         <Link
           to={`/taskDetail/${encodeURI(taskInfo?.taskName)}/${taskInfo._id}`}
-          className={`font-medium cursor-pointer hover:text-primaryBlue hover:underline`}
+          className={`font-medium cursor-pointer hover:text-primaryBlue hover:underline whitespace-nowrap truncate`}
         >
           {taskInfo?.taskName}
         </Link>
       </div>
-      <div className="w-1/12 gap-3 flex items-center">
+      <div className="w-2/12 gap-2 flex items-center justify-center">
         {taskInfo?.priority && <PriorityIcon status={taskInfo?.priority} />}
         <span className="px-2">{taskInfo?.priority}</span>
       </div>
-      <div className="w-3/12 justify-center flex items-center gap-1">
+      <div className="w-2/12 justify-center flex items-center gap-1">
         {taskInfo?.dueDate && (
           <div className="gap-3 flex items-center">
             <span className="text-pendingStatus font-medium">
@@ -57,7 +57,7 @@ const TaskCard = ({ taskInfo }: { taskInfo: any }) => {
                 <RiCalendarScheduleLine size={18} />
               </Tooltip>
             </span>{" "}
-            {dayjs(taskInfo?.dueDate).format(DATE_FORMAT.withYearAndTime)}
+            {dayjs(taskInfo?.dueDate).format(DATE_FORMAT.withoutTime)}
           </div>
         )}
       </div>
