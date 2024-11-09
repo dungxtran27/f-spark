@@ -359,8 +359,8 @@ const ClassGroupListWrapper = () => {
     if (over === null) message.warning("please drag student to group you want");
     else {
       addStudentToGroupSelected.mutate({
-        groupId: over.id,
-        studentId: active.id,
+        groupId: over.id.toString(),
+        studentId: active.id.toString(),
       });
     }
   };
