@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
 import { Server } from "socket.io";
 import {
   UserRouter,
@@ -62,6 +63,7 @@ app.use(
 app.get("/hello", (req, res) => {
   return res.status(200).json("hello");
 });
+app.use(morgan("dev"));
 
 app.use("/api/auth", AuthenticationRouter);
 app.use("/api/user", UserRouter);

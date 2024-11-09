@@ -4,6 +4,7 @@ import { colorMajorGroup, ROLE } from "../../../utils/const";
 import { FaCoins, FaLockOpen } from "react-icons/fa";
 import style from "../MentorList/style.module.scss";
 import classNames from "classnames";
+import { useDroppable } from "@dnd-kit/core";
 
 const GroupCard = ({
   info,
@@ -13,6 +14,21 @@ const GroupCard = ({
   setGroup,
   role,
 }: any | string) => {
+  // const { setNodeRef } = useDroppable({
+  //   id: info.id,
+  //   accept: { type: "row" },
+  //   onDrop: (event) => {
+  //     const { activeId } = event;
+  //     onDrop(activeId);
+  //   },
+  // });
+  const { isOver, setNodeRef } = useDroppable({
+    id: info._id,
+  });
+  const style1 = {
+    border: isOver ? "1px solid #22c55e" : undefined,
+    boxShadow: isOver ? "0px 5px 15px ##4ade80" : undefined,
+  };
   const hasAtLeastTwoMajors = (students: any) => {
     const uniqueMajors = new Set();
 
@@ -26,21 +42,12 @@ const GroupCard = ({
 
     return false;
   };
-  // const queryClient = useQueryClient();
-
-  // const lockOrUnlockGroup = useMutation({
-  //   mutationFn: ({ groupId }: any) =>
-  //     groupApi.lockOrUnlockGroup({
-  //       groupId: groupId,
-  //     }),
-  //   onSuccess: () => {
-  //     // info = data.data.data.group;
-  //     queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS_OF_CLASS] });
-  //   },
-  // });
-
   return (
-    <div className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow">
+    <div
+      ref={setNodeRef}
+      style={style1}
+      className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center ">
           <div
