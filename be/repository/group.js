@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Group from "../model/Group.js";
 import Student from "../model/Student.js";
 import student from "./student.js";
+import Class from "../model/Class.js";
 
 const createJourneyRow = async ({ groupId, name }) => {
   try {
@@ -321,7 +322,7 @@ const findAllGroupsOfClass = async (classId) => {
       class: classId,
     })
       .select(
-        "GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage"
+        "GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage lock"
       )
       .populate({
         path: "teamMembers",
@@ -360,12 +361,34 @@ const addStundentInGroup = async (groupId, studentId) => {
     if (group) {
       throw new Error("Student already exists in the group");
     }
+    if (group?.lock) {
+      throw new Error("Group is locked");
+    }
 
     const updatedGroup = await Group.findByIdAndUpdate(
       groupId,
       { $push: { teamMembers: studentId } },
       { new: true }
-    );
+    )
+      .select(
+        "GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage lock"
+      )
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "tag",
+        select: "name ",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      });
 
     const updatedStudent = await Student.findByIdAndUpdate(
       studentId,
@@ -402,11 +425,184 @@ const assignLeader = async (groupId, studentId) => {
       groupId,
       { $set: { leader: studentId } },
       { new: true }
-    );
+    )
+      .select(
+        "GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage lock"
+      )
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "tag",
+        select: "name ",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      });
     return {
       message: "Student assign successfully",
       group: updatedGroup,
     };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const createGroup = async (groupName, classID, GroupDescription) => {
+  try {
+    const classfound = await Class.findById(classID);
+    if (!classfound) {
+      throw new Error("Class not found");
+    }
+
+    const newGroup = await Group.create({
+      GroupName: groupName,
+      GroupDescription: GroupDescription,
+      class: classID,
+      leader: null,
+      mentor: null,
+    });
+    return {
+      message: "Create new group successfully",
+      group: newGroup,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const deleteStudentFromGroup = async (groupId, studentId) => {
+  try {
+    const stdfound = await Student.findById(studentId);
+    if (!stdfound) {
+      throw new Error("student not found");
+    }
+    const updatestd = await Student.findByIdAndUpdate(
+      studentId,
+      { $set: { group: null } },
+      { new: true }
+    );
+    const groupfound = await Group.findById(groupId);
+    if (!groupfound) {
+      throw new Error("group not found");
+    }
+    const updateteamMember = groupfound.teamMembers.filter(
+      (memberId) => memberId.toString() !== studentId.toString()
+    );
+    const updategroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $set: { teamMembers: updateteamMember } },
+      { new: true }
+    )
+      .select(
+        "GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage lock"
+      )
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "tag",
+        select: "name ",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      });
+
+    return {
+      message: `Remove  ${stdfound.name}  from group ${groupfound.GroupName} success successfully`,
+      group: updategroup,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const ungroup = async (groupId) => {
+  try {
+    const groupfound = await Group.findById(groupId);
+    if (!groupfound) {
+      throw new Error("group not found");
+    }
+    if ("oldMark" in groupfound || groupfound.isSponsorship) {
+      return {
+        message: `Cannot delete this group`,
+      };
+    }
+    const teamMembers = groupfound.teamMembers;
+
+    for (const studentId of teamMembers) {
+      const student = await Student.findByIdAndUpdate(
+        studentId,
+        { $set: { group: null } },
+        { new: true }
+      );
+      if (!student) {
+        console.error(`Student with ID ${studentId} not found.`);
+      }
+    }
+
+    const updategroup = await Group.findByIdAndDelete(groupId);
+    return {
+      message: `Delete group ${groupfound.GroupName} success successfully`,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const lockOrUnlockGroup = async (groupId) => {
+  try {
+    const groupfound = await Group.findById(groupId);
+    if (!groupfound) {
+      throw new Error("group not found");
+    }
+    if (!("lock" in groupfound)) {
+      groupfound.lock = true;
+      const updategroup = await Group.save();
+      return {
+        message: `locked group ${groupfound.GroupName}`,
+        group: updategroup,
+      };
+    }
+
+    const newLock = !groupfound.lock;
+    const updategroup = await Group.findByIdAndUpdate(
+      groupId,
+      { $set: { lock: newLock } },
+      { new: true }
+    )
+      .select(
+        "GroupName GroupDescription isSponsorship mentor teamMembers tag leader groupImage lock"
+      )
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "tag",
+        select: "name ",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      });
+
+    const message = newLock
+      ? `locked group ${groupfound.GroupName}`
+      : `unlocked group ${groupfound.GroupName}`;
+    return { message: message, group: updategroup };
   } catch (error) {
     throw new Error(error.message);
   }
@@ -429,4 +625,8 @@ export default {
   findAllGroupsOfClass,
   addStundentInGroup,
   assignLeader,
+  createGroup,
+  deleteStudentFromGroup,
+  ungroup,
+  lockOrUnlockGroup,
 };

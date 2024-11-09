@@ -93,7 +93,15 @@ const pinClasswork = async (classworkId, classId) => {
 };
 const findClassById = async (classId) => {
   try {
-    const result = await Class.findById(classId);
+    const result = await Class.findById(classId).populate({
+      path: "teacher",
+      select: "_id name salutation account phoneNumber",
+      populate: {
+        path: "account",
+        select: "profilePicture email",
+      },
+    });
+
     return result;
   } catch (error) {
     throw new Error(error.message);
@@ -102,5 +110,5 @@ const findClassById = async (classId) => {
 export default {
   pinClasswork,
   getClassesOfTeacher,
-  findClassById
+  findClassById,
 };

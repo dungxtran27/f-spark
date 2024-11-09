@@ -71,7 +71,7 @@ const GroupSchema = new Schema(
     mentor: {
       type: Schema.Types.ObjectId,
       ref: "Mentor",
-      required: true,
+      required: false,
     },
     GroupDescription: {
       type: String,
@@ -150,7 +150,7 @@ const GroupSchema = new Schema(
           jobTitle: { type: String, default: null },
           relationshipStatus: {
             type: String,
-            enum: ['Độc thân', 'Đã kết hôn', 'Đã ly hôn', 'Góa phụ'],
+            enum: ["Độc thân", "Đã kết hôn", "Đã ly hôn", "Góa phụ"],
             default: "Độc thân",
           },
           address: { type: String, default: null },
@@ -159,7 +159,7 @@ const GroupSchema = new Schema(
         },
         bio: { type: String, default: null },
         needs: [{ type: String, default: null }],
-      }
+      },
     ],
     isSponsorship: {
       type: Boolean,
@@ -171,24 +171,33 @@ const GroupSchema = new Schema(
         type: Schema.Types.ObjectId,
         ref: "Student",
         required: false,
-      }
+      },
     ],
     tag: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'TagMajor',
+        ref: "TagMajor",
         required: true,
-      }
+      },
     ],
     leader: {
       type: Schema.Types.ObjectId,
-      ref: 'Student',
-      required: true
+      ref: "Student",
+      required: false,
     },
     groupImage: {
       type: String,
-      required: false
-    }
+      required: false,
+    },
+    lock: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    oldmark: {
+      type: Number,
+      required: false,
+    },
   },
   { timestamps: true, collection: "Groups" }
 );

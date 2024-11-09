@@ -14,6 +14,10 @@ export const LOGIN_DATA = {
   email: "email",
   password: "password",
 };
+export const CREATE_GROUP_DATA = {
+  groupName: "groupName",
+  groupDescription: "groupDescription",
+};
 export const DATE_FORMAT = {
   withYear: "MMM D, YYYY",
   withoutYear: "MMM D",
@@ -216,6 +220,7 @@ export const colorMap: Record<string, string> = {
   MKT: "gold",
   IB: "blue",
   GD: "green",
+  HS: "orange",
 };
 export const colorMajorGroup: Record<string, string> = {
   "Ky Thuat": "orange",
