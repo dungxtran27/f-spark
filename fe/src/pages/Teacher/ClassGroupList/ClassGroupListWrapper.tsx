@@ -9,6 +9,7 @@ import {
   Tooltip,
   Form,
   message,
+  Empty,
 } from "antd";
 const { Search } = Input;
 
@@ -641,7 +642,7 @@ const ClassGroupListWrapper = () => {
                   ))}
                 </>
               ) : (
-                <> no data</>
+                <Empty />
               )}
             </div>
           </div>
