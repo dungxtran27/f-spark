@@ -11,7 +11,7 @@ export const classApi = {
     groupId: string | undefined,
     requestBody: any
   ) => {
-    return await axios.post(`api/submission//createSubmission`, requestBody, {
+    return await axios.post(`api/submission/createSubmission`, requestBody, {
       params: {
         classworkId,
         groupId,

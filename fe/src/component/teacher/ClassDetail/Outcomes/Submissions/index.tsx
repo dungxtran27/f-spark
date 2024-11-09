@@ -23,6 +23,7 @@ import { useForm } from "antd/es/form/Form";
 import QuillEditor from "../../../../common/QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
 import { useRef } from "react";
+import { current } from "@reduxjs/toolkit";
 
 interface Props {
   _id: string;
@@ -85,7 +86,7 @@ const Submissions = ({
       content: string;
     }) => {
       return classApi.createOutcomeSubmission(outcome?._id, userInfo?.group, {
-        attachment: attachment,
+        attachment: attachment?.current,
         content: content,
       });
     },

@@ -8,7 +8,6 @@ import ClassGroupList from "../pages/Teacher/ClassGroupList";
 import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStudent";
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
-import TimeLineWrapper from "../pages/Student/Timeline/TimtableWrapper";
 import TimelineTeacher from "../component/teacher/Timeline";
 
 export const LOGIN_DATA = {

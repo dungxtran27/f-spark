@@ -1,277 +1,231 @@
-import React, { useState } from 'react';
-import { Tabs, Row, Col, Modal, Button, message, Tooltip, DatePicker } from 'antd';
-import CardGroup from './CardGroup';
+import { useState, useEffect } from 'react';
+import { Tabs, Steps, Card, Modal } from 'antd';
 import { CheckCircleOutlined, EditOutlined } from '@ant-design/icons';
-import dayjs from 'dayjs';
+import EditTimeline from './EditTimeline/index.tsx';
 
 const { TabPane } = Tabs;
+const { Step } = Steps;
+
+interface TimelineItem {
+    title: string;
+    description: string;
+    status: 'finish' | 'process' | 'wait' | 'error';
+    startDate: string;
+    endDate: string;
+}
+
+interface Outcome {
+    groupId: number;
+    timeline: TimelineItem[];
+}
+
+interface EditTimelineProps {
+    endDate: string;
+    description: string;
+}
 
 const TimelineTeacher = () => {
-    const [outcomes, setOutcomes] = useState([
+    const [activeTab, setActiveTab] = useState('1');
+    const [selectedTimeline, setSelectedTimeline] = useState<TimelineItem | null>(null);
+    const [activeStepIndex, setActiveStepIndex] = useState(0);
+    const [hoveredStep, setHoveredStep] = useState<number | null>(null); // Trạng thái cho bước hover
+
+    const [outcomes] = useState<Outcome[]>([
         {
-            title: 'Outcome 1',
-            groups: [
-                {
-                    GroupName: 'Nhóm 1',
-                    deadline: '2024-11-09',
-                    description: 'Nộp bài outcome 1',
-                    status: 'Hoàn thành',
-                    editable: false,
-                    membersCount: 5,
-                    createdBy: 'Giảng viên A',
-                    GroupDescription: 'Thông tin nhóm 1',
-                    completed: false,
-                },
-                {
-                    GroupName: 'Nhóm 2',
-                    deadline: '2024-11-10',
-                    description: 'Nộp bài outcome 1',
-                    status: 'Hoàn thành',
-                    editable: false,
-                    membersCount: 6,
-                    createdBy: 'Giảng viên B',
-                    GroupDescription: 'Thông tin nhóm 2',
-                    completed: true,
-                },
-                {
-                    GroupName: 'Nhóm 1',
-                    deadline: '2024-11-05',
-                    description: 'Nộp bài outcome 1',
-                    status: 'Hoàn thành',
-                    editable: false,
-                    membersCount: 5,
-                    createdBy: 'Giảng viên A',
-                    GroupDescription: 'Thông tin nhóm 1',
-                    completed: true,
-                },
-                {
-                    GroupName: 'Nhóm 2',
-                    deadline: '2024-11-10',
-                    description: 'Nộp bài outcome 1',
-                    status: 'Hoàn thành',
-                    editable: false,
-                    membersCount: 6,
-                    createdBy: 'Giảng viên B',
-                    GroupDescription: 'Thông tin nhóm 2',
-                    completed: true,
-                },
-                {
-                    GroupName: 'Nhóm 2',
-                    deadline: '2024-11-10',
-                    description: 'Nộp bài outcome 1',
-                    status: 'Hoàn thành',
-                    editable: false,
-                    membersCount: 6,
-                    createdBy: 'Giảng viên B',
-                    GroupDescription: 'Thông tin nhóm 2',
-                    completed: true,
-                },
+            groupId: 1,
+            timeline: [
+                { title: 'Outcome 1', description: 'Nộp bài outcome 1', status: 'finish', startDate: '29 Oct', endDate: '11 Nov, 2024' },
+                { title: 'Outcome 2', description: 'Kiểm tra outcome', status: 'process', startDate: '12 Nov', endDate: '20 Nov, 2024' },
+                { title: 'Outcome 3', description: 'Phê duyệt', status: 'wait', startDate: '21 Nov', endDate: '30 Nov, 2024' },
             ],
         },
         {
-            title: 'Outcome 2',
-            groups: [
-                {
-                    GroupName: 'Nhóm 3',
-                    deadline: '2024-11-15',
-                    description: 'Báo cáo tiến độ',
-                    status: 'Chưa hoàn thành',
-                    editable: false,
-                    membersCount: 4,
-                    createdBy: 'Giảng viên C',
-                    GroupDescription: 'Thông tin nhóm 3',
-                    completed: false,
-                },
-                {
-                    GroupName: 'Nhóm 4',
-                    deadline: '2024-11-20',
-                    description: 'Kiểm tra tiến độ',
-                    status: 'Chưa hoàn thành',
-                    editable: false,
-                    membersCount: 5,
-                    createdBy: 'Giảng viên D',
-                    GroupDescription: 'Thông tin nhóm 4',
-                    completed: false,
-                },
+            groupId: 2,
+            timeline: [
+                { title: 'Step 1', description: 'Nộp bài outcome 2', status: 'finish', startDate: '1 Dec', endDate: '10 Dec, 2024' },
+                { title: 'Step 2', description: 'Kiểm tra outcome', status: 'process', startDate: '11 Dec', endDate: '20 Dec, 2024' },
             ],
         },
     ]);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [confirmGroupIndex, setConfirmGroupIndex] = useState<{ outcomeIndex: number; groupIndex: number } | null>(null);
-    const [editOutcomeIndex, setEditOutcomeIndex] = useState<number | null>(null);
-    const [newDeadline, setNewDeadline] = useState<string | null>(null);
-    const [completeAllModalVisible, setCompleteAllModalVisible] = useState(false); // New state for complete all modal
+    const [modalData, setModalData] = useState<EditTimelineProps | null>(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-    // Show the modal to confirm completion
-    const showModal = (outcomeIndex: number, groupIndex: number) => {
-        setConfirmGroupIndex({ outcomeIndex, groupIndex });
-        setIsModalVisible(true);
-    };
+    useEffect(() => {
+        const firstOutcome = outcomes[0];
+        if (firstOutcome && firstOutcome.timeline.length > 0) {
+            setSelectedTimeline(firstOutcome.timeline[0]);
+        }
+    }, [outcomes]);
 
-    const handleDateChange = (date: moment.Moment | null, dateString: string) => {
-        setNewDeadline(dateString);
-    };
-
-    const showEditModal = (outcomeIndex: number) => {
-        setEditOutcomeIndex(outcomeIndex);
-        setIsModalVisible(true);
-    };
-
-    const handleCancel = () => {
-        setIsModalVisible(false);
-        setCompleteAllModalVisible(false); // Close complete all modal as well
-        setEditOutcomeIndex(null);
-        setConfirmGroupIndex(null);
-    };
-
-    // Simulated completion handler (no state change, just displaying the message)
-    const handleConfirmCompletion = () => {
-        if (confirmGroupIndex) {
-            message.success('Group marked as completed!');
-            setIsModalVisible(false);
+    const handleTabChange = (key: string) => {
+        setActiveTab(key);
+        const selectedOutcome = outcomes.find(outcome => outcome.groupId.toString() === key);
+        if (selectedOutcome && selectedOutcome.timeline.length > 0) {
+            setSelectedTimeline(selectedOutcome.timeline[0]);
+            setActiveStepIndex(0);
         }
     };
 
-    // Handle completing all groups for a specific outcome
-    const handleCompleteAllGroups = (outcomeIndex: number) => {
-        setCompleteAllModalVisible(true);
-        setEditOutcomeIndex(outcomeIndex); // Set outcome index to know which outcome we are completing all groups for
-    };
-
-    const handleConfirmCompleteAll = () => {
-        if (editOutcomeIndex !== null) {
-            const updatedOutcomes = [...outcomes];
-            updatedOutcomes[editOutcomeIndex].groups = updatedOutcomes[editOutcomeIndex].groups.map(group => ({
-                ...group,
-                completed: true,
-            }));
-            setOutcomes(updatedOutcomes);
-            message.success('All groups in this outcome have been completed!');
-            setCompleteAllModalVisible(false); // Close modal after completing all
-        }
-    };
-
-    const isOutcomeCompleted = (outcomeIndex: number) =>
-        outcomes[outcomeIndex].groups.every(group => group.completed);
-
-    const onCompleteGroup = (outcomeIndex: number, groupIndex: number) => {
-        const updatedOutcomes = [...outcomes];
-        updatedOutcomes[outcomeIndex].groups[groupIndex].completed = true;
-        setOutcomes(updatedOutcomes);
-    };
-
-    const handleEditAllDeadlines = (outcomeIndex: number) => {
-        setEditOutcomeIndex(outcomeIndex);
+    const handleEditClick = (timeline: TimelineItem) => {
+        setModalData({
+            endDate: timeline.endDate,
+            description: timeline.description,
+        });
         setIsModalVisible(true);
     };
 
-    const handleSaveAllDeadlines = () => {
-        if (newDeadline && editOutcomeIndex !== null) {
-            const updatedOutcomes = [...outcomes];
-            updatedOutcomes[editOutcomeIndex].groups = updatedOutcomes[editOutcomeIndex].groups.map(group => ({
-                ...group,
-                deadline: newDeadline,
-            }));
-            setOutcomes(updatedOutcomes);
-            message.success('All deadlines updated successfully!');
-            setIsModalVisible(false);
+    const handleSave = (updatedTimeline: EditTimelineProps) => {
+        if (selectedTimeline) {
+            setSelectedTimeline({
+                ...selectedTimeline,
+                endDate: updatedTimeline.endDate,
+                description: updatedTimeline.description,
+            });
         }
+    };
+
+    const handleStepChange = (index: number) => {
+        setActiveStepIndex(index);
+        const selectedOutcome = outcomes.find(outcome => outcome.groupId.toString() === activeTab);
+        if (selectedOutcome && selectedOutcome.timeline[index]) {
+            setSelectedTimeline(selectedOutcome.timeline[index]);
+        }
+    };
+
+    const handleMouseEnter = (index: number) => {
+        setHoveredStep(index); 
+    };
+
+    const handleMouseLeave = () => {
+        setHoveredStep(null); 
+    };
+
+    const toggleCompletionStatus = () => {
+        setShowConfirmModal(true);
+    };
+
+    const confirmStatusChange = () => {
+        if (selectedTimeline) {
+            setSelectedTimeline({
+                ...selectedTimeline,
+                status: selectedTimeline.status === 'finish' ? 'process' : 'finish',
+            });
+        }
+        setShowConfirmModal(false);
+    };
+
+    const getRemainingTime = (endDate: string) => {
+        const end = new Date(endDate);
+        const now = new Date();
+        const timeLeft = end.getTime() - now.getTime();
+        const daysLeft = Math.floor(timeLeft / (1000 * 3600 * 24));
+        const hoursLeft = Math.floor((timeLeft % (1000 * 3600 * 24)) / (1000 * 3600));
+        return { daysLeft, hoursLeft };
     };
 
     return (
-        <div className="p-3">
-            <Tabs defaultActiveKey="1" tabPosition="left">
-                {outcomes.map((outcome, outcomeIndex) => (
-                    <TabPane
-                        key={outcomeIndex}
-                        tab={
-                            <span>
-                                {outcome.title}{' '}
-                                {isOutcomeCompleted(outcomeIndex) && (
-                                    <Tooltip title="All groups completed">
-                                        <CheckCircleOutlined style={{ color: 'green' }} />
-                                    </Tooltip>
-                                )}
-                            </span>
-                        }
-                    >
-                        <Button
-                            type="primary"
-                            icon={<EditOutlined />}
-                            onClick={() => handleEditAllDeadlines(outcomeIndex)}
-                            style={{ marginBottom: '16px' }}
-                        >
-                            Edit Deadline for All Groups
-                        </Button>
-                        <Button
-                            type="primary"
-                            onClick={() => handleCompleteAllGroups(outcomeIndex)} // Show confirmation modal
-                            style={{ marginLeft: '8px', marginBottom: '16px' }}
-                        >
-                            Complete All Groups
-                        </Button>
-                        <Row gutter={[16, 16]}>
-                            {outcome.groups.map((group, groupIndex) => (
-                                <Col xs={24} sm={12} md={8} lg={6} key={groupIndex}>
-                                    <CardGroup
-                                        group={group}
-                                        groupIndex={groupIndex}
-                                        outcomeIndex={outcomeIndex}
-                                        onToggleEdit={() => { } }
-                                        onInputChange={() => { } }
-                                        onCompleteGroup={() => showModal(outcomeIndex, groupIndex)} // Show modal when clicking "Complete"
-                                        onShowModal={function (outcomeIndex: number, groupIndex: number): void {
-                                            throw new Error('Function not implemented.');
-                                        } } onUpdateTimeline={function (outcomeIndex: number, groupIndex: number, updatedTimeline: { endDate: string; description: string; }): void {
-                                            throw new Error('Function not implemented.');
-                                        } }                                    />
-                                </Col>
-                            ))}
-                        </Row>
-                    </TabPane>
+        <div className="flex">
+            <Tabs
+                activeKey={activeTab}
+                onChange={handleTabChange}
+                tabPosition="left"
+            >
+                {outcomes.map((outcome) => (
+                    <TabPane tab={`Group ${outcome.groupId}`} key={outcome.groupId.toString()} />
                 ))}
             </Tabs>
 
-            {/* Modal for editing deadlines for all groups */}
-            <Modal
-                title="Edit Deadline for All Groups"
-                visible={isModalVisible && editOutcomeIndex !== null}
-                onOk={handleSaveAllDeadlines}
-                onCancel={handleCancel}
-                okText="Save Changes"
-                cancelText="Cancel"
-            >
-                <DatePicker
-                    value={newDeadline ? dayjs(newDeadline) : null}
-                    // onChange={handleDateChange}
-                    style={{ width: '100%' }}
-                    placeholder="Select new deadline"
+            <div className="w-4/5 p-0.5">
+                <div className="w-full">
+                    {outcomes
+                        .filter((outcome) => outcome.groupId.toString() === activeTab)
+                        .map((outcome) => (
+                            <div key={outcome.groupId}>
+                                <Steps
+                                    direction="horizontal"
+                                    size="small"
+                                    current={activeStepIndex}
+                                    onChange={handleStepChange}
+                                    className="w-full"
+                                    progressDot
+                                    status="process"
+                                >
+                                    {outcome.timeline.map((step, index) => (
+                                        <Step
+                                            key={index}
+                                            title={
+                                                <div
+                                                    className={`transition-all duration-200 px-2 py-1 rounded-md ${hoveredStep === index || activeStepIndex === index ? 'bg-blue-100 text-blue-700' : ''}`}
+                                                    onMouseEnter={() => handleMouseEnter(index)}
+                                                    onMouseLeave={handleMouseLeave}
+                                                >
+                                                    <span>
+                                                        {step.title}
+                                                    </span>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {step.startDate} - {step.endDate}
+                                                    </div>
+                                                </div>
+                                            }
+                                            status={step.status}
+                                            icon={step.status === 'finish' ? <CheckCircleOutlined className="text-green-500" /> : null}
+                                        />
+                                    ))}
+                                </Steps>
+                                {selectedTimeline && (
+                                    <Card
+                                        title={<div className="flex justify-between items-center w-full"><span>{selectedTimeline.title}</span></div>}
+                                        bordered={false}
+                                        className="ml-2 w-full mt-2"
+                                        extra={
+                                            <>
+                                                <CheckCircleOutlined
+                                                    className={`text-2xl cursor-pointer ${selectedTimeline.status === 'finish' ? 'text-green-500' : 'text-gray-400'}`}
+                                                    onClick={toggleCompletionStatus}
+                                                />
+                                                <EditOutlined
+                                                    className="text-lg cursor-pointer"
+                                                    onClick={() => handleEditClick(selectedTimeline)}
+                                                />
+                                            </>
+                                        }
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <p className="my-0 text-lg"><strong>Date:</strong> {selectedTimeline.startDate} - {selectedTimeline.endDate}</p>
+                                            <p className="my-0 text-sm text-red-500">
+                                                {getRemainingTime(selectedTimeline.endDate).daysLeft < 0
+                                                    ? 'Overdue'
+                                                    : `${getRemainingTime(selectedTimeline.endDate).daysLeft} days ${getRemainingTime(selectedTimeline.endDate).hoursLeft} hours left`}
+                                            </p>
+                                        </div>
+                                        <p className="my-0 text-sm">{selectedTimeline.description}</p>
+                                    </Card>
+                                )}
+                            </div>
+                        ))}
+                </div>
+            </div>
+
+            {modalData && (
+                <EditTimeline
+                    open={isModalVisible}
+                    setOpen={setIsModalVisible}
+                    timeline={modalData}
+                    onSave={handleSave}
                 />
-            </Modal>
+            )}
 
-            {/* Modal for confirming completion of all groups */}
             <Modal
-                title="Confirm Completion of All Groups"
-                visible={completeAllModalVisible}
-                onOk={handleConfirmCompleteAll}
-                onCancel={handleCancel}
-                okText="Confirm"
-                cancelText="Cancel"
+                visible={showConfirmModal}
+                title="Confirm Status Change"
+                onOk={confirmStatusChange}
+                onCancel={() => setShowConfirmModal(false)}
+                okText="Yes"
+                cancelText="No"
             >
-                <p>Are you sure all groups in this outcome have completed their tasks?</p>
-            </Modal>
-
-            {/* Modal for confirming individual group completion */}
-            <Modal
-                title="Confirm Completion"
-                visible={isModalVisible && editOutcomeIndex === null}
-                onOk={handleConfirmCompletion} // Confirm completion action
-                onCancel={handleCancel}
-                okText="Confirm"
-                cancelText="Cancel"
-            >
-                <p>Are you sure this group has completed the task?</p>
+                <p>Are you sure you want to change the status?</p>
             </Modal>
         </div>
     );

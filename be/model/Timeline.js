@@ -26,6 +26,7 @@
       editAble:{
         type: Boolean
       }
+      
     },
     { timestamps: true, collection: 'Timelines' }
   );

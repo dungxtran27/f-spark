@@ -15,6 +15,7 @@ const createSubmission = async ({
       classworkId: classworkId,
       content: content
     }).then((result) => result.populate("student"));
+    
     return newSubmission;
   } catch (error) {
     return new Error(error.message);
