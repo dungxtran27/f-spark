@@ -8,6 +8,7 @@ import ClassGroupList from "../pages/Teacher/ClassGroupList";
 import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStudent";
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
+import TimelineTeacher from "../component/teacher/Timeline";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -44,6 +45,7 @@ export const CLASS_TABS = [
 export const TEACHER_CLASS_DETAIL_TABS = [
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people2", label: "Groups", children: <ClassGroupList /> },
+  { key: "timeline", label: "Timeline", children: <TimelineTeacher /> },
 ];
 export const TASK_STATUS_FILTER = [
   {

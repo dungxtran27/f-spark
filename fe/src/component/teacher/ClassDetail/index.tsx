@@ -1,10 +1,14 @@
+import { useParams } from "react-router-dom";
 import { Tabs, TabsProps } from "antd";
 import DefaultLayout from "../../../layout/DefaultLayout";
 import Banner from "./Banner";
 import { TEACHER_CLASS_DETAIL_TABS } from "../../../utils/const";
 import classNames from "classnames";
-import styles from "./styles.module.scss"
+import styles from "./styles.module.scss";
+
 const ClassDetailWrapper = () => {
+  const { classId } = useParams();
+
   const classDetail = {
     name: "SE1704_NJ",
     groups: 6,
@@ -20,7 +24,7 @@ const ClassDetailWrapper = () => {
     ],
     notifications: [
       {
-        content: "New submissions on  Outcomes 2",
+        content: "New submissions on Outcomes 2",
         type: "outcomes",
       },
       {
@@ -32,14 +36,17 @@ const ClassDetailWrapper = () => {
     background:
       "https://e1.pxfuel.com/desktop-wallpaper/107/730/desktop-wallpaper-the-windows-11-in-pantone-s-color-of-the-year-2022-very-peri.jpg",
   };
+
   const items: TabsProps["items"] = TEACHER_CLASS_DETAIL_TABS;
+
   return (
     <DefaultLayout>
-      <Banner name={classDetail?.name} background={classDetail?.background} />
+      <Banner name={classDetail?.name} classId={classId || ""} />
       <div className={classNames(styles.customTabs)}>
         <Tabs items={items} defaultActiveKey="stream" />
       </div>
     </DefaultLayout>
   );
 };
+
 export default ClassDetailWrapper;

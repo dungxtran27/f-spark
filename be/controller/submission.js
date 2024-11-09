@@ -8,6 +8,7 @@ const createSubmission = async (req, res) => {
     }
     const classworkId = req.query.classworkId;
     const studentId = req.decodedToken.role.id;
+    
     const createSubmiss = await SubmissionRepository.createSubmission({
       groupId: req.groupId,
       studentId,
@@ -15,6 +16,7 @@ const createSubmission = async (req, res) => {
       attachment,
       content
     });
+    
     return res
       .status(201)
       .json({ data: createSubmiss, message: "Submitted successfully" });
