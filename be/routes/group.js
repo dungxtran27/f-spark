@@ -84,8 +84,19 @@ groupRouter.get(
   "/getAllStudentByGroup/:classId",
   GroupController.findAllStudentByGroup
 );
+groupRouter.get(
+  "/getClassTeacherAndgroupInfo/:classId",
+  GroupController.getClassTeacherAndgroupInfo
+);
 
 groupRouter.post("/addStudentInGroup", GroupController.addStundentInGroup);
 
 groupRouter.post("/assignLeader", GroupController.assignLeader);
+groupRouter.post("/createGroup", GroupController.createGroup);
+groupRouter.post(
+  "/deleteStudentFromGroup",
+  GroupController.deleteStudentFromGroup
+);
+groupRouter.post("/lockOrUnlockGroup", GroupController.lockOrUnlockGroup);
+groupRouter.post("/ungroup", GroupController.ungroup);
 export default groupRouter;

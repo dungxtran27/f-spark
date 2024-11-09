@@ -8,10 +8,15 @@ import ClassGroupList from "../pages/Teacher/ClassGroupList";
 import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStudent";
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
+import TimelineTeacher from "../component/teacher/Timeline";
 
 export const LOGIN_DATA = {
   email: "email",
   password: "password",
+};
+export const CREATE_GROUP_DATA = {
+  groupName: "groupName",
+  groupDescription: "groupDescription",
 };
 export const DATE_FORMAT = {
   withYear: "MMM D, YYYY",
@@ -41,6 +46,7 @@ export const CLASS_TABS = [
 export const TEACHER_CLASS_DETAIL_TABS = [
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people2", label: "Groups", children: <ClassGroupList /> },
+  { key: "timeline", label: "Timeline", children: <TimelineTeacher /> },
 ];
 export const TASK_STATUS_FILTER = [
   {
@@ -217,6 +223,7 @@ export const colorMap: Record<string, string> = {
   MKT: "gold",
   IB: "blue",
   GD: "green",
+  HS: "orange",
 };
 export const colorMajorGroup: Record<string, string> = {
   "Ky Thuat": "orange",

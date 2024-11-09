@@ -1,7 +1,8 @@
 import classNames from "classnames";
 import styles from "./style.module.scss";
-import logo from "../../../../public/logo.png";
-import { Button, Checkbox, Form, Input, Skeleton } from "antd";
+import logo from "../../../../public/logo_header.png";
+import bgImage from "../../../../public/bgLogin1.jpg";
+import { Button, Checkbox, Form, Input } from "antd";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { BiLogoGmail } from "react-icons/bi";
 import { FaUnlockAlt } from "react-icons/fa";
@@ -47,7 +48,8 @@ const Login = () => {
   return (
     <div className="h-screen w-full flex items-center">
       <div className={classNames(styles.loginImage, "h-full")}>
-        <Skeleton.Image className={classNames(styles.defaultImage)} />
+        <img src={bgImage} alt="" />
+        {/* <Skeleton.Image className={classNames(styles.defaultImage)} /> */}
       </div>
       <div className="flex-1 h-screen flex-col items-center flex pt-3 gap-5">
         <Link to={"/"}>
