@@ -23,7 +23,6 @@ import { useForm } from "antd/es/form/Form";
 import QuillEditor from "../../../../common/QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
 import { useRef } from "react";
-import { current } from "@reduxjs/toolkit";
 
 interface Props {
   _id: string;

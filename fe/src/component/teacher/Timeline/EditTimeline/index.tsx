@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { DatePicker, Form, Modal, Checkbox, Select } from "antd";
+import { DatePicker, Form, Modal, Checkbox } from "antd";
 import moment from "moment";
 import QuillEditor from "../../../common/QuillEditor";
 
@@ -18,17 +18,16 @@ interface EditTimelineProps {
 const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave }) => {
   const [form] = Form.useForm();
   const [description, setDescription] = useState<string>("");
-  const [applyToAll, setApplyToAll] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-
-  const groups = ["Group 1", "Group 2", "Group 3"]; 
+  
+  const groups = ["Group 1", "Group 2", "Group 3"];
 
   useEffect(() => {
     if (timeline) {
       form.setFieldsValue({
         endDate: timeline.endDate ? moment(timeline.endDate) : null,
       });
-      setDescription(timeline.description || ""); 
+      setDescription(timeline.description || "");
     }
   }, [timeline, form]);
 
@@ -36,26 +35,28 @@ const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave })
     form.validateFields().then((values) => {
       const updatedTimeline: EditTimelineProps = {
         endDate: values.endDate.format("YYYY-MM-DD"),
-        description, 
+        description,
       };
-      onSave(updatedTimeline, applyToAll, selectedGroups);
+      onSave(updatedTimeline, selectedGroups.length === groups.length, selectedGroups);
       setOpen(false);
       form.resetFields();
-      setDescription(""); 
-      setApplyToAll(false);
-      setSelectedGroups([]); 
+      setDescription("");
+      setSelectedGroups([]);
     });
   };
 
-  const handleApplyToAllChange = (e: any) => {
-    setApplyToAll(e.target.checked);
-    if (!e.target.checked) {
-      setSelectedGroups([]); 
+  const handleSelectAllChange = (e: any) => {
+    if (e.target.checked) {
+      setSelectedGroups(groups); // Select all groups
+    } else {
+      setSelectedGroups([]); // Deselect all groups
     }
   };
 
-  const handleGroupChange = (value: string[]) => {
-    setSelectedGroups(value);
+  const handleGroupChange = (group: string, checked: boolean) => {
+    setSelectedGroups((prevSelected) => 
+      checked ? [...prevSelected, group] : prevSelected.filter((g) => g !== group)
+    );
   };
 
   return (
@@ -71,33 +72,40 @@ const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave })
         <Form.Item
           name="endDate"
           label="End Date"
-          rules={[{ required: true, message: "End date is required" }]}>
+          rules={[{ required: true, message: "End date is required" }]}
+        >
           <DatePicker style={{ width: "100%" }} />
         </Form.Item>
 
         <Form.Item
           label="Description"
-          rules={[{ required: true, message: "Description is required" }]} >
+          rules={[{ required: true, message: "Description is required" }]}
+        >
           <QuillEditor onChange={setDescription} />
         </Form.Item>
 
         <Form.Item>
-          <Checkbox onChange={handleApplyToAllChange}>Apply to All</Checkbox>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Select Groups:</span>
+            <Checkbox
+              checked={selectedGroups.length === groups.length}
+              onChange={handleSelectAllChange}
+            >
+              Select All
+            </Checkbox>
+          </div>
+          <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+            {groups.map((group) => (
+              <Checkbox
+                key={group}
+                checked={selectedGroups.includes(group)}
+                onChange={(e) => handleGroupChange(group, e.target.checked)}
+              >
+                {group}
+              </Checkbox>
+            ))}
+          </div>
         </Form.Item>
-
-        {applyToAll && (
-          <Form.Item label="Select Groups">
-            <Select
-              mode="multiple"
-              allowClear
-              placeholder="Select groups"
-              value={selectedGroups}
-              onChange={handleGroupChange}
-              options={groups.map(group => ({ label: group, value: group }))}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-        )}
       </Form>
     </Modal>
   );
