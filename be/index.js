@@ -18,6 +18,7 @@ import {
   TaskRouter,
   TimeBlockRouter,
   TagMajorRouter,
+  RequestRouter
 } from "./routes/index.js";
 import "./utils/google-oauth2.js";
 import path from "path";
@@ -76,6 +77,7 @@ app.use("/api/submission", SubmissionRouter);
 app.use("/api/task", TaskRouter);
 app.use("/api/timeblock", TimeBlockRouter);
 app.use("/api/tagmajor", TagMajorRouter);
+app.use("/api/request", RequestRouter);
 const port = process.env.PORT || 9999;
 const MONGODB_URI = process.env.MONGODB_URI;
 //for Periodic tasks

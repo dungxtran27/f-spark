@@ -208,6 +208,7 @@ export const QUERY_KEY = {
   STREAM_CONTENT: "streamContent",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
+  REQUESTS: "requests",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

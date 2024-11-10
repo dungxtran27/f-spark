@@ -11,6 +11,7 @@ import SubmissionRepository from "./submission.js";
 import TaskRepository from "./task.js";
 import TimeBlockRepository from "./timeblock.js";
 import TagMajorRepository from "./tagmajor.js";
+import RequestRepository from "./request.js";
 export {
   AuthenticateRepository,
   UserRepository,
@@ -24,5 +25,6 @@ export {
   SubmissionRepository,
   MentorRepository,
   TaskRepository,
-  TagMajorRepository
+  TagMajorRepository,
+  RequestRepository
 };

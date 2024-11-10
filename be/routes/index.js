@@ -11,6 +11,7 @@ import SubmissionRouter from "./submission.js";
 import TaskRouter from "./task.js";
 import TimeBlockRouter from "./timeblock.js";
 import TagMajorRouter from "./tagmajor.js";
+import RequestRouter from "./request.js";
 export {
   AuthenticationRouter,
   UserRouter,
@@ -24,5 +25,6 @@ export {
   SubmissionRouter,
   TaskRouter,
   TimeBlockRouter,
-  TagMajorRouter
+  TagMajorRouter,
+  RequestRouter
 };
