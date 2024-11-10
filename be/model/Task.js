@@ -14,7 +14,6 @@ const TaskSchema = new Schema(
     },
     description: {
       type: String,
-      required: true,
     },
     attachment: {
       type: [String],

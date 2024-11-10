@@ -52,6 +52,7 @@ const StatusSelect = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.TASKS_BOARD] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.TASK_DETAIL] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.RECORD_OF_CHANGES] });
     },
   });
   return (

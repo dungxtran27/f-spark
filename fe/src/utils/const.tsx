@@ -14,10 +14,15 @@ export const LOGIN_DATA = {
   email: "email",
   password: "password",
 };
+export const CREATE_GROUP_DATA = {
+  groupName: "groupName",
+  groupDescription: "groupDescription",
+};
 export const DATE_FORMAT = {
   withYear: "MMM D, YYYY",
   withoutYear: "MMM D",
   withYearAndTime: "HH:mm, MMM D, YYYY",
+  withoutTime: "MMM D, YYYY",
 };
 export const TEACHER_OUTCOMES_MODAL_TYPES = {
   grading: "GRADING",
@@ -210,12 +215,15 @@ export const QUERY_KEY = {
   STREAM_CONTENT: "streamContent",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
+  RECORD_OF_CHANGES: "recordOfChanges",
+  GROUP_NOTIFICATION: "groupNotification"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
   MKT: "gold",
   IB: "blue",
   GD: "green",
+  HS: "orange",
 };
 export const colorMajorGroup: Record<string, string> = {
   "Ky Thuat": "orange",
@@ -228,3 +236,8 @@ export const CLASS_WORK_TYPE = {
   ASSIGNMENT: "assignment",
   OUTCOME: "outcome",
 };
+export const NOTIFICATION_ACTION_TYPE = {
+  CHILD_TASK_CREATION: "ChildTaskCreation",
+  CREATE_TASK: "TaskCreation",
+  UPDATE_TASK_STATUS: "UpdateTaskStatus"
+}
