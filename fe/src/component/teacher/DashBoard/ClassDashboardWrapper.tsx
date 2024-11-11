@@ -1,4 +1,10 @@
+import ClassListWrapper from "../ClassList";
+
 const ClassDashboardWrapper = () => {
-  return <div className="">class</div>;
+  return (
+    <div className="">
+      <ClassListWrapper />
+    </div>
+  );
 };
 export default ClassDashboardWrapper;

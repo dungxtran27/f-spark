@@ -605,7 +605,57 @@ const lockOrUnlockGroup = async (groupId) => {
     throw new Error(error.message);
   }
 };
+const findAllSponsorGroupsOfClasses = async (classIds) => {
+  try {
+    const data = await Group.find({
+      class: { $in: classIds },
+      isSponsorship: true,
+    })
+      .select(
+        "GroupName GroupDescription isSponsorship mentor class teamMembers tag leader groupImage lock"
+      )
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "tag",
+        select: "name ",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      })
+      .populate({
+        path: "class",
+        select: "classCode",
+      });
+    // Group data by classId
+    const groupedData = data.reduce((acc, group) => {
+      const classId = group.class._id.toString();
 
+      if (!acc[classId]) {
+        acc[classId] = {
+          class: group.class,
+          groupData: [],
+        };
+      }
+
+      acc[classId].groupData.push(group);
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
+  } catch (error) {
+    console.log(error);
+
+    throw new Error(error.message);
+  }
+};
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -627,4 +677,5 @@ export default {
   deleteStudentFromGroup,
   ungroup,
   lockOrUnlockGroup,
+  findAllSponsorGroupsOfClasses,
 };

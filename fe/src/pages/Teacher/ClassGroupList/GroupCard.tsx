@@ -46,7 +46,7 @@ const GroupCard = ({
     <div
       ref={setNodeRef}
       style={style1}
-      className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow"
+      className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 max-w-[25%] h-36 shadow"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center ">

@@ -216,7 +216,8 @@ export const QUERY_KEY = {
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
   RECORD_OF_CHANGES: "recordOfChanges",
-  GROUP_NOTIFICATION: "groupNotification"
+  GROUP_NOTIFICATION: "groupNotification",
+  TEACHER_DASHBOARD: "teacherDashboard",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -239,5 +240,5 @@ export const CLASS_WORK_TYPE = {
 export const NOTIFICATION_ACTION_TYPE = {
   CHILD_TASK_CREATION: "ChildTaskCreation",
   CREATE_TASK: "TaskCreation",
-  UPDATE_TASK_STATUS: "UpdateTaskStatus"
-}
+  UPDATE_TASK_STATUS: "UpdateTaskStatus",
+};

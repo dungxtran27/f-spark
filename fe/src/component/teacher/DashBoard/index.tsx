@@ -3,88 +3,131 @@ import { FaUserXmark } from "react-icons/fa6";
 import { MdAssignment } from "react-icons/md";
 import { RiMoneyDollarCircleFill } from "react-icons/ri";
 import { SiGoogleclassroom } from "react-icons/si";
-import StreamDashboardWrapper from "./StreamDashboardWrapper";
+import AssignmentDashboardWrapper from "./AssignmentDashboardWrapper";
 import { FaPen } from "react-icons/fa";
 import AnnounceDashboardWrapper from "./AnnounceDashboardWrapper";
 import ClassDashboardWrapper from "./ClassDashboardWrapper";
 import OutcomeDashboardWrapper from "./OutcomeDashboardWrapper";
 import { useState } from "react";
+import UngroupStdDashboardWrapper from "./UngroupStudent";
+import SponsorDashboardWrapper from "./SponsorGroupDashboardWrapper";
+import { useQuery } from "@tanstack/react-query";
+import { dashBoard } from "../../../api/dashboard/dashboard";
+import { QUERY_KEY } from "../../../utils/const";
 
 const TeacherDashBoard = () => {
   const [render, setRender] = useState("class");
+
+  const { data: dashboardInfo } = useQuery({
+    queryKey: [QUERY_KEY.TEACHER_DASHBOARD],
+    queryFn: async () => {
+      return dashBoard.getTeacherDashboardInfo();
+    },
+  });
+
   const pnRender = () => {
     switch (render) {
-      case "stream":
-        return <StreamDashboardWrapper />;
+      case "assignment":
+        return <AssignmentDashboardWrapper />;
       case "announce":
         return <AnnounceDashboardWrapper />;
       case "class":
         return <ClassDashboardWrapper />;
       case "outcome":
         return <OutcomeDashboardWrapper />;
+      case "ungroupStudent":
+        return <UngroupStdDashboardWrapper />;
+      case "sponsor":
+        return (
+          <SponsorDashboardWrapper
+            data={dashboardInfo?.data.data.groupSponsor}
+          />
+        );
       default:
-        return <StreamDashboardWrapper />; // Default to StreamDashboardWrapper
+        return <ClassDashboardWrapper />;
     }
   };
+  const manage = [
+    {
+      icon: <SiGoogleclassroom />,
+      number: dashboardInfo?.data.data.class.length,
+      type: "class",
+      label: "Classes",
+    },
+    {
+      icon: <RiMoneyDollarCircleFill className="text-pendingStatus" />,
+      type: "sponsor",
+      number: dashboardInfo?.data.data.groupSponsor.length,
+
+      label: "Sponsored groups",
+    },
+    {
+      icon: <FaUserXmark className="text-red-500" />,
+      type: "ungroupStudent",
+      number: dashboardInfo?.data.data.ungroupedStudent.length,
+
+      label: "Ungrouped students",
+    },
+  ];
+  const stream = [
+    {
+      icon: <AiFillNotification />,
+      type: "announce",
+      label: "Announce",
+    },
+    {
+      icon: <FaPen className="text-pendingStatus" />,
+      type: "assignment",
+      label: "Assignment",
+    },
+    {
+      icon: <MdAssignment className="text-okStatus" />,
+      type: "outcome",
+      label: "Ungraded outcome",
+    },
+  ];
   return (
     <div className="flex flex-col h-[200vh]">
       <div className="h-[170px] shadow-md border-t-[1px] border-textSecondary/30 grid grid-cols-3 gap-5 p-4 bg-white w-full  sticky top-0 ">
         <div className="border-[1px] rounded border-textSecondary/70 h-full p-[5px] flex flex-col justify-between">
           <span className="font-medium text-sm">Managing</span>
           <div className="flex flex-col gap-[4px]">
-            <div className="flex items-center gap-4 px-2 bg-primary/30 border-[1px] border-primary rounded">
-              <SiGoogleclassroom />
-              <div>
-                <span className="text-lg font-medium">6</span>{" "}
-                <span>Classes</span>
+            {manage.map((m) => (
+              <div
+                onClick={() => {
+                  setRender(m.type);
+                }}
+                className={`flex items-center gap-4 px-2 hover:bg-primary/20  hover:shadow rounded cursor-pointer ${
+                  render === m.type ? "bg-primary/30 border-e-[1.5px] border-primary" : ""
+                }`}
+              >
+                {m.icon}
+                <div>
+                  <span className="text-lg font-medium">{m.number}</span>{" "}
+                  <span>{m.label}</span>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-4 px-2">
-              <RiMoneyDollarCircleFill className="text-pendingStatus" />
-              <div>
-                <span className="text-lg font-medium">10</span>{" "}
-                <span>Sponsored groups</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 px-2">
-              <FaUserXmark className="text-red-500" />
-              <div>
-                <span className="text-lg font-medium">6</span>{" "}
-                <span>Ungrouped students</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
         <div className="border-[1px] rounded border-textSecondary/70 h-full  p-[5px] flex flex-col justify-between">
           <span className="font-medium text-sm">Stream</span>
-          <div className="flex flex-col gap-[4px]">
-            <div
-              onClick={() => {
-                setRender("announce");
-              }}
-              className="flex items-center gap-4 px-2 hover:bg-primaryBlue/20 hover:border-[1px] hover:shadow rounded"
-            >
-              <AiFillNotification />
-              <div>
-                <span className="text-lg font-medium">6/10</span>{" "}
-                <span>Announce</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 px-2  hover:bg-primaryBlue/20 hover:border-[1px] hover:shadow rounded">
-              <FaPen className="text-pendingStatus" />
-              <div>
-                <span className="text-lg font-medium">10</span>{" "}
-                <span> Assignment</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 px-2  hover:bg-primaryBlue/20 hover:border-[1px] hover:shadow rounded">
-              <MdAssignment className="text-okStatus" />
 
-              <div>
-                <span className="text-lg font-medium">5</span>{" "}
-                <span>ungraded outcome</span>
+          <div className="flex flex-col gap-[4px]">
+            {stream.map((s) => (
+              <div
+                onClick={() => {
+                  setRender(s.type);
+                }}
+                className="flex items-center gap-4 px-2 hover:bg-primaryBlue/20 hover:border-[1px] hover:shadow rounded"
+              >
+                {s.icon}
+                <div>
+                  <span className="text-lg font-medium">6/10</span>{" "}
+                  <span>{s.label}</span>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
         <div className="border-[1px] rounded border-textSecondary/70 h-full"></div>
