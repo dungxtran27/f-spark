@@ -1,4 +1,5 @@
 import mongoose, { Schema, SchemaTypes } from "mongoose";
+import Class from "./Class.js";
 const ActionSchema = new Schema({
   action: {
     type: String,
@@ -33,6 +34,7 @@ const NotificationSchema = new Schema(
     },
     class: {
       type: SchemaTypes.ObjectId,
+      ref: "Class",
       default: null,
     },
     group: {

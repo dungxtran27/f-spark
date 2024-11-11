@@ -58,6 +58,7 @@ const createTask = async (req, res) => {
           alternateAction: "Created a child task in this Task",
           target: updatedTask?._id,
           actionType: "ChildTaskCreation",
+          newVersion: newTask,
           extraUrl: `taskDetail/${encodeURIComponent(
             newTask?.taskName
           )}/${newTask?._id.toString()}`,
@@ -112,8 +113,6 @@ export const viewTaskDetail = async (req, res) => {
 
 export const updateTaskStatus = async (req, res) => {
   try {
-    console.log(req.groupId);
-
     const taskId = req.query.taskId;
     const updateData = req.body;
     const decodedToken = req.decodedToken;

@@ -10,9 +10,14 @@ notificationRouter.get(
   NotificationController.getGroupNotification
 );
 notificationRouter.get(
-    "/taskRecordOfChanges/:taskId",
-    verifyToken,
-    // authorization.checkGroupAccess,
-    NotificationController.getTaskRecordOfChanges
-  );
+  "/taskRecordOfChanges/:taskId",
+  verifyToken,
+  // authorization.checkGroupAccess,
+  NotificationController.getTaskRecordOfChanges
+);
+notificationRouter.get(
+  "/student/statistic",
+  verifyToken,
+  NotificationController.getStudentNotificationStatisTic
+)
 export default notificationRouter;

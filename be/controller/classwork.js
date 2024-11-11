@@ -1,10 +1,14 @@
 import {
   ClassworkRepository,
+  NotificationRepository,
   StudentRepository,
   SubmissionRepository,
 } from "../repository/index.js";
 import mongoose from "mongoose";
 import moment from "moment";
+import { CLASS_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
+import _ from "lodash";
+import { io, userSocketMap } from "../index.js";
 const getClassWorkByStudent = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -14,17 +18,18 @@ const getClassWorkByStudent = async (req, res) => {
     });
     const classWorksList = await Promise.all(
       classWork.map(async (cw) => {
-        if(cw.type === 'announcement'){
+        if (cw.type === "announcement") {
           return {
-            ...cw
-          }
+            ...cw,
+          };
         }
         const submissions = await SubmissionRepository.findSubmissionOfStudent(
-          cw._id, userId
+          cw._id,
+          userId
         );
         return {
           ...cw,
-          mySubmission: submissions
+          mySubmission: submissions,
         };
       })
     );
@@ -137,6 +142,41 @@ const createClassWork = async (req, res) => {
       type,
       classId,
     });
+    if (classwork) {
+      const notificationData = {
+        class: classId,
+        sender: req.decodedToken.role.id,
+        senderType: "Teacher",
+        type: "Class",
+        action: {
+          action: `created new ${_.startCase(type)} in class`,
+          target: classId?._id,
+          actionType:
+            type === "assignment"
+              ? CLASS_NOTIFICATION_ACTION_TYPE.CREATE_ASSIGNMENT
+              : CLASS_NOTIFICATION_ACTION_TYPE.CREATE_ANNOUNCEMENT,
+          newVersion: classwork,
+          extraUrl: `/class/${classwork?._id}`,
+        },
+      };
+    await NotificationRepository.createNotification({
+        data: notificationData,
+      });
+      const studentsOfClass = await StudentRepository.getAllStudentByClassId(
+        classId
+      );
+      studentsOfClass.forEach((s) => {
+        const socketIds = userSocketMap[s?.account?.toString()];
+        if (socketIds) {
+          io.to(socketIds).emit(
+            "newNotification",
+            `Class ${classwork?.classId?.classCode} has a new ${_.startCase(
+              type
+            )}`
+          );
+        }
+      });
+    }
     return res
       .status(200)
       .json({ data: classwork, message: `${type} created` });
@@ -144,31 +184,37 @@ const createClassWork = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-const upvoteAnnouncement = async (req, res) =>{
+const upvoteAnnouncement = async (req, res) => {
   try {
     const studentId = req.decodedToken.role.id;
-    const {classWorkId} = req.params;
-    if(!classWorkId){
-      return res.status(400).json({error: "Bad request !"})
+    const { classWorkId } = req.params;
+    if (!classWorkId) {
+      return res.status(400).json({ error: "Bad request !" });
     }
-    const result = await ClassworkRepository.upvoteAnnouncement({studentId, classWorkId});
-    return res.status(201).json({data: result})
+    const result = await ClassworkRepository.upvoteAnnouncement({
+      studentId,
+      classWorkId,
+    });
+    return res.status(201).json({ data: result });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
-}
+};
 const getClassStatistics = async (req, res) => {
   try {
     const { classId } = req.params;
-    
-    const ungradedOutcomeSubmisstion = await ClassworkRepository.getUngradedOutcomesCount(classId);
-    const upvotesOnLatestAnnouncement = await ClassworkRepository.getLatestAnnouncementUpvotes(classId);
-    const submissionsOnLatestAssignment = await ClassworkRepository.getLatestAssignmentSubmissionsCount(classId);
+
+    const ungradedOutcomeSubmisstion =
+      await ClassworkRepository.getUngradedOutcomesCount(classId);
+    const upvotesOnLatestAnnouncement =
+      await ClassworkRepository.getLatestAnnouncementUpvotes(classId);
+    const submissionsOnLatestAssignment =
+      await ClassworkRepository.getLatestAssignmentSubmissionsCount(classId);
 
     const statistics = {
       ungradedOutcomeSubmisstion,
       upvotesOnLatestAnnouncement,
-      submissionsOnLatestAssignment
+      submissionsOnLatestAssignment,
     };
 
     return res.status(200).json({ data: statistics });
@@ -185,5 +231,5 @@ export default {
   deleteClasswork,
   createClassWork,
   upvoteAnnouncement,
-  getClassStatistics
+  getClassStatistics,
 };

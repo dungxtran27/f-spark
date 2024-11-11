@@ -50,7 +50,7 @@ const ClassDetailPDT = ({
   const menu = (
     <Menu onClick={handleMenuClick}>
       <Menu.Item key="1">Add student to class</Menu.Item>
-      <Menu.Item key="2">Add group to class</Menu.Item>   
+      <Menu.Item key="2">Add group to class</Menu.Item>
     </Menu>
   );
 
@@ -152,6 +152,7 @@ const ClassDetailPDT = ({
         </button>
       </div>
       <Modal
+        centered
         title="Stundent UnGroup"
         open={isModal1}
         onCancel={cancelModal1}
@@ -175,6 +176,7 @@ const ClassDetailPDT = ({
         </div>
       </Modal>
       <Modal
+        centered
         title="Group not have class"
         open={isModal2}
         onCancel={cancelModal2}

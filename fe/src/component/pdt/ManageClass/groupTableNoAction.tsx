@@ -72,6 +72,7 @@ const GroupTableNoAction = () => {
       </table>
 
       <Modal
+        centered
         title="Student UnGroup"
         open={isModalVisible}
         onCancel={handleCancel}

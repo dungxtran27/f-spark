@@ -318,7 +318,7 @@ const Stream = () => {
     <div className="w-full py-3 flex gap-3">
       <div className="w-9/12">
         {isTeacher && (
-          <div className="w-full flex h-[110px] rounded bg-white flex-col border border-textSecondary/30">
+          <div className="w-full flex h-[110px] rounded bg-white flex-col border border-textSecondary/30 mb-5">
             <div className="w-full h-3/5 border-b border-textSecondary/50 flex items-center px-5 gap-5">
               <img
                 src={userInfo?.account?.profilePicture}
@@ -376,7 +376,7 @@ const Stream = () => {
             <Divider className="border-textSecondary" />
           </div>
         )} */}
-        <div className=" flex flex-col gap-5 w-full pt-5">
+        <div className=" flex flex-col gap-5 w-full">
           {streamContent?.data?.data?.map((p: any) =>
             p?.type === CLASS_WORK_TYPE.ANNOUNCEMENT
               ? AnnouncementItem(p, userInfo, upvoteAnnouncement)
