@@ -200,8 +200,11 @@ const RequestJoinGroup = () => {
                   {renderVoteIcons(request)}
                 </div>
               </div>
-              {userInfo?.name !== request.createBy.name &&
-                ActionButtons(request)}
+              {userInfo?.name !== request.createBy.name ? (
+                ActionButtons(request)
+              ) : (
+                <div className="p-4"></div>
+              )}
               <Modal
                 open={modalStates[request._id]?.visible || false}
                 onCancel={() =>
