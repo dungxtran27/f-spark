@@ -12,6 +12,7 @@ import TaskRouter from "./task.js";
 import TimeBlockRouter from "./timeblock.js";
 import TagMajorRouter from "./tagmajor.js";
 import RequestRouter from "./request.js";
+import NotificationRouter from "./notification.js";
 export {
   AuthenticationRouter,
   UserRouter,
@@ -26,5 +27,6 @@ export {
   TaskRouter,
   TimeBlockRouter,
   TagMajorRouter,
-  RequestRouter
+  RequestRouter,
+  NotificationRouter
 };

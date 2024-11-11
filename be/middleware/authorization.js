@@ -57,11 +57,14 @@ const checkTeacherClassAccess = async (req, res, next) => {
     if (!classId) {
       return res.status(400).json({ error: "Bad request !" });
     }
-    const classRes =  await ClassRepository.findClassById(classId);
+    const classRes = await ClassRepository.findClassById(classId);
+
     if (!classRes) {
       return res.status(404).json({ error: "Class not found !" });
     }
-    if (classRes.teacher.toString() !== req.decodedToken.role.id) {
+    console.log(classRes.teacher.toString(), req.decodedToken.role.id);
+
+    if (classRes.teacher._id.toString() !== req.decodedToken.role.id) {
       return res.status(403).json({ error: "Unauthorized !" });
     }
     next();
@@ -72,5 +75,5 @@ const checkTeacherClassAccess = async (req, res, next) => {
 export default {
   checkRole,
   checkGroupAccess,
-  checkTeacherClassAccess
+  checkTeacherClassAccess,
 };

@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
 import { Server } from "socket.io";
 import {
   UserRouter,
@@ -18,7 +19,8 @@ import {
   TaskRouter,
   TimeBlockRouter,
   TagMajorRouter,
-  RequestRouter
+  RequestRouter,
+  NotificationRouter,
 } from "./routes/index.js";
 import "./utils/google-oauth2.js";
 import path from "path";
@@ -63,6 +65,7 @@ app.use(
 app.get("/hello", (req, res) => {
   return res.status(200).json("hello");
 });
+app.use(morgan("dev"));
 
 app.use("/api/auth", AuthenticationRouter);
 app.use("/api/user", UserRouter);
@@ -78,6 +81,7 @@ app.use("/api/task", TaskRouter);
 app.use("/api/timeblock", TimeBlockRouter);
 app.use("/api/tagmajor", TagMajorRouter);
 app.use("/api/request", RequestRouter);
+app.use("/api/notification", NotificationRouter)
 const port = process.env.PORT || 9999;
 const MONGODB_URI = process.env.MONGODB_URI;
 //for Periodic tasks
