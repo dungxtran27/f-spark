@@ -215,6 +215,7 @@ export const QUERY_KEY = {
   STREAM_CONTENT: "streamContent",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
+  REQUESTS: "requests",
   RECORD_OF_CHANGES: "recordOfChanges",
   GROUP_NOTIFICATION: "groupNotification"
 };

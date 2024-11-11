@@ -19,6 +19,7 @@ import ManageRequest from "./pages/PDT/manageRequest";
 import AccountManagementPage from "./pages/PDT/MangeAccount";
 import MentorProfile from "./pages/PDT/MentorProfile";
 import TeacherProfile from "./pages/PDT/TeacherProfile";
+import Requests from "./pages/Student/Request";
 import TimelineTeacher from "./pages/Teacher/Timline";
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/class" element={<Class />} />
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/taskDetail/:taskName/:taskId" element={<TaskDetail />} />
+        <Route path="/request" element={<Requests />} />
         {/* teacher */}
         <Route path="/mentorlist" element={<MentorList />} />
         <Route path="/class-grouplist/:classID" element={<ClassGroupList />} />

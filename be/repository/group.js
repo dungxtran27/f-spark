@@ -21,7 +21,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -45,7 +45,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -606,6 +606,24 @@ const lockOrUnlockGroup = async (groupId) => {
   }
 };
 
+const findAllGroups = async () => {
+  try {
+    const groups = await Group.find({ isSponsorship: false }).select("GroupName leader tag teamMembers isSponsorship").populate({
+      path: 'teamMembers',
+      select: 'major',
+    }).populate({
+      path: 'leader',
+      select: 'name',
+    }).populate({
+      path: 'tag',
+      select: 'name',
+    });
+    return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -623,6 +641,7 @@ export default {
   findAllGroupsOfClass,
   addStundentInGroup,
   assignLeader,
+  findAllGroups,
   createGroup,
   deleteStudentFromGroup,
   ungroup,
