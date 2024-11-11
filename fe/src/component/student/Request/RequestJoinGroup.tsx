@@ -84,14 +84,35 @@ const RequestJoinGroup = () => {
     }));
   };
 
-  const renderVoteIcons = (request: Request) =>
-    request.group?.teamMembers?.map((member, i) => {
-      if (request.upVoteYes.includes(member))
+  const renderVoteIcons = (request: Request) => {
+    const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
+    const totalMembers = request.group?.teamMembers?.length || 0;
+    if (request.status === "approved") {
+      return (
+        <span className="text-sm bg-green-600 text-white px-2 rounded">
+          Approved
+        </span>
+      );
+    } else if (request.status === "decline") {
+      return (
+        <span className="text-sm bg-red-600 text-white px-2 rounded">
+          Decline
+        </span>
+      );
+    }
+    return request.group?.teamMembers?.map((member, i) => {
+      if (request.upVoteYes.includes(member)) {
         return <BsFillPersonCheckFill key={i} className="text-green-500" />;
-      if (request.upVoteNo.includes(member))
+      }
+      if (request.upVoteNo.includes(member)) {
         return <BsPersonXFill key={i} className="text-red-500" />;
-      return <IoPerson key={i} className="text-gray-500" />;
+      }
+      if (totalVotes < totalMembers) {
+        return <IoPerson key={i} className="text-gray-500" />;
+      }
+      return null;
     });
+  };
 
   const filteredRequests =
     requestData?.filter(
@@ -165,7 +186,9 @@ const RequestJoinGroup = () => {
                   className="bg-gray-300"
                 />
                 <p className="text-gray-800 font-medium text-md">
-                  {request.createBy.name}
+                  {userInfo?.name === request.createBy.name
+                    ? "Created by me"
+                    : request.createBy.name}
                 </p>
                 <Tag color={colorMap[request.createBy.major]}>
                   {request.createBy.major}
@@ -177,7 +200,8 @@ const RequestJoinGroup = () => {
                   {renderVoteIcons(request)}
                 </div>
               </div>
-              {ActionButtons(request)}
+              {userInfo?.name !== request.createBy.name &&
+                ActionButtons(request)}
               <Modal
                 open={modalStates[request._id]?.visible || false}
                 onCancel={() =>

@@ -1,56 +1,70 @@
 import { Button, Modal, Tag, Tooltip, message } from "antd";
 import { useState } from "react";
 import { FaUserGroup } from "react-icons/fa6";
-import { RiMoneyDollarCircleLine } from "react-icons/ri";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { colorMajorGroup, colorMap, QUERY_KEY } from "../../../utils/const";
 import { requestList } from "../../../api/request/request";
-import { RootState } from "../../../redux/store";
-import { useSelector } from "react-redux";
-import { UserInfo } from "../../../model/auth";
-
 interface ProjectCardProps {
+  groupId: string;
   groupName: string;
   leader: string;
   tags: string[];
   members: number;
   majors: string[];
-  isSponsorship: boolean;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
+  groupId,
   groupName,
   leader,
   tags,
   members,
   majors,
-  isSponsorship,
 }) => {
   const queryClient = useQueryClient();
-  const userInfo = useSelector(
-    (state: RootState) => state.auth.userInfo
-  ) as UserInfo | null;
-
-  const groupId = userInfo?.group ?? "";
-  const userId = userInfo?._id ?? "";
 
   const [modalStates, setModalStates] = useState<{
     [key: string]: { visible: boolean; type: "accept" | "reject" | null };
   }>({});
 
+  const { data: requestData } = useQuery({
+    queryKey: [QUERY_KEY.REQUESTS],
+    queryFn: async () => {
+      const response = await requestList.getRequestJoinByStudentId();
+      return response.data.data;
+    },
+  });
+
+  const isPending = requestData?.some(
+    (request: { group: string; status: string }) =>
+      request.group === groupId && request.status === "pending"
+  );
+
   const createRequest = useMutation({
     mutationFn: async () => {
-      return await requestList.createRequest(groupId, userId, "join");
+      return await requestList.joinGroup(groupId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.REQUESTS, groupId],
+        queryKey: [QUERY_KEY.REQUESTS],
       });
       message.success("Join request created successfully");
       setModalStates((prev) => ({
         ...prev,
         [groupId]: { visible: false, type: null },
       }));
+    },
+  });
+
+  const deleteRequest = useMutation({
+    mutationFn: async () => {
+      return await requestList.deleteRequestJoinByStudentId(groupId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.REQUESTS],
+      });
+      message.success("Join request deleted successfully");
     },
   });
 
@@ -76,11 +90,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       <div className="flex justify-between items-center mb-2 border-b-2">
         <span className="font-semibold">{groupName}</span>
         <div className="flex items-center space-x-1">
-          {isSponsorship ? (
-            <RiMoneyDollarCircleLine className="text-2xl text-yellow-400" />
-          ) : (
-            ""
-          )}
           <Tooltip title="Số thành viên trong nhóm">
             <FaUserGroup className="text-xl text-gray-500" />
           </Tooltip>
@@ -116,9 +125,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         ))}
       </div>
       <div className="flex justify-end">
-        <Button type="primary" onClick={handleJoinClick}>
-          Join
-        </Button>
+        {isPending ? (
+          <div className="">
+            <Button danger onClick={() => deleteRequest.mutate()}>
+              Delete Request
+            </Button>
+          </div>
+        ) : (
+          <Button type="primary" onClick={handleJoinClick}>
+            Join
+          </Button>
+        )}
       </div>
       <Modal
         title=""

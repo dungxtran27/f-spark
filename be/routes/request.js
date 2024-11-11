@@ -8,6 +8,9 @@ requestRouter.get('/', verifyToken, authorization.checkGroupAccess, RequestContr
 requestRouter.patch('/voteGroup', verifyToken, authorization.checkGroupAccess, RequestController.voteOutGroup);
 requestRouter.post('/createRequest', verifyToken, authorization.checkGroupAccess, RequestController.createRequest);
 requestRouter.get('/findAllGroup', RequestController.getAllGroup)
+requestRouter.post('/joinGroup', verifyToken, RequestController.joinGroup)
+requestRouter.get('/findRequestJoinByStudentId', verifyToken, RequestController.getRequestJoinByStudentId)
+requestRouter.delete('/deleteRequestJoinByStudentId/:groupId', verifyToken, RequestController.deleteRequestJoinByStudentId)
 
 export default requestRouter;
 

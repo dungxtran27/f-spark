@@ -30,4 +30,20 @@ export const requestList = {
   getGroup: async () => {
     return await axios.get("api/request/findAllGroup");
   },
+
+  joinGroup: async (groupId: string) => {
+    return await axios.post("api/request/joinGroup", {
+      groupId,
+    });
+  },
+
+  getRequestJoinByStudentId: async () => {
+    return await axios.get("api/request/findRequestJoinByStudentId");
+  },
+
+  deleteRequestJoinByStudentId: async (requestId: string) => {
+    return await axios.delete(
+      `api/request/deleteRequestJoinByStudentId/${requestId}`
+    );
+  },
 };

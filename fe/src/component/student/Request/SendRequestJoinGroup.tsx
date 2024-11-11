@@ -5,12 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "antd";
 
 interface Project {
+  groupId: string;
   groupName: string;
   leader: string;
   tags: string[];
   members: number;
   majors: string[];
-  isSponsorship: boolean;
 }
 
 const RequestJoinGroup: React.FC = () => {
@@ -18,8 +18,10 @@ const RequestJoinGroup: React.FC = () => {
     queryKey: [QUERY_KEY.GROUPS_OF_CLASS],
     queryFn: async () => (await requestList.getGroup()).data.data,
   });
+
   const projects: Project[] = dataGroup
     ? dataGroup.map((group: any) => ({
+        groupId: group._id,
         groupName: group.GroupName,
         leader: group.leader.name,
         tags: group.tag.map((tag: any) => tag.name),
@@ -39,12 +41,12 @@ const RequestJoinGroup: React.FC = () => {
           {projects.map((project, index) => (
             <ProjectCard
               key={index}
+              groupId={project.groupId}
               groupName={project.groupName}
               leader={project.leader}
               tags={project.tags}
               members={project.members}
               majors={project.majors}
-              isSponsorship={project.isSponsorship}
             />
           ))}
         </div>

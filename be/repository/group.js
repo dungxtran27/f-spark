@@ -414,9 +414,7 @@ const assignLeader = async (groupId, studentId) => {
 
 const findAllGroups = async () => {
   try {
-    const groups = await Group.find({
-      $expr: { $lt: [{ $size: "$teamMembers" }, 6] }
-    }).select("GroupName leader tag teamMembers isSponsorship").populate({
+    const groups = await Group.find({ isSponsorship: false }).select("GroupName leader tag teamMembers isSponsorship").populate({
       path: 'teamMembers',
       select: 'major',
     }).populate({
