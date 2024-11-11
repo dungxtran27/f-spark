@@ -80,6 +80,7 @@ app.use("/api/task", TaskRouter);
 app.use("/api/timeblock", TimeBlockRouter);
 app.use("/api/tagmajor", TagMajorRouter);
 app.use("/api/notification", NotificationRouter)
+
 const port = process.env.PORT || 9999;
 const MONGODB_URI = process.env.MONGODB_URI;
 //for Periodic tasks

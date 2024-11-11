@@ -11,7 +11,7 @@ import SubmissionController from "./submission.js";
 import TaskController from "./task.js";
 import TimeBlockController from "./timeblock.js";
 import TagMajorController from "./tagmajor.js";
-import NotificationController from "./notification.js"
+import NotificationController from "./notification.js";
 export {
   AuthenticationController,
   UserController,
@@ -26,5 +26,5 @@ export {
   TaskController,
   TimeBlockController,
   TagMajorController,
-  NotificationController
+  NotificationController,
 };

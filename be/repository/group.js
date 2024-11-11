@@ -606,6 +606,59 @@ const lockOrUnlockGroup = async (groupId) => {
   }
 };
 
+const getGroupsByClassId = async (classId) => {
+  try {
+    const groups = await Group.find({ class: classId })
+      .select('GroupName GroupDescription timeline') 
+      .lean(); 
+    return groups; 
+  } catch (error) {
+    console.error('Error fetching groups by class:', error.message);
+    throw error;
+  }
+};
+const editTimelineForManyGroups = async (groupIds, type, updateData) => {
+  try {
+    const groups = await Group.find({
+      _id: { $in: groupIds },
+      "timeline.type": type,
+      "timeline.editAble": true
+    });
+    if (groups.length !== groupIds.length) {
+      throw new Error("Cannot edit timeline because editAble is false for one or more timelines.");
+    }
+    const updateResult = await Group.updateMany(
+      { _id: { $in: groupIds }, "timeline.type": type },
+      {
+        $set: {
+          "timeline.$[timelineItem].title": updateData.title,
+          "timeline.$[timelineItem].description": updateData.description,
+          "timeline.$[timelineItem].endDate": updateData.endDate,
+        }
+      },
+      {
+        arrayFilters: [{ "timelineItem.type": type }],
+        new: true
+      }
+    );
+
+    return await Group.find({
+      _id: { $in: groupIds },
+      "timeline.type": type
+    }).populate({
+      path: "timeline",
+      match: { type }
+    });
+
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+
+
+
+
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -627,4 +680,6 @@ export default {
   deleteStudentFromGroup,
   ungroup,
   lockOrUnlockGroup,
+  getGroupsByClassId,
+  editTimelineForManyGroups
 };

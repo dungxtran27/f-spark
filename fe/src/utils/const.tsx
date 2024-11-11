@@ -8,7 +8,7 @@ import ClassGroupList from "../pages/Teacher/ClassGroupList";
 import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStudent";
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
-import TimelineTeacher from "../component/teacher/Timeline";
+import TimelineClassWrapper from "../component/teacher/Timeline";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -39,6 +39,7 @@ export const DASHBOARD_TABS = [
   { key: "report", label: "Report", children: <Report /> },
 ];
 
+
 export const CLASS_TABS = [
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people", label: "People", children: <People /> },
@@ -46,8 +47,9 @@ export const CLASS_TABS = [
 export const TEACHER_CLASS_DETAIL_TABS = [
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people2", label: "Groups", children: <ClassGroupList /> },
-  { key: "timeline", label: "Timeline", children: <TimelineTeacher /> },
+  { key: "timeline", label: "Timeline", children: <TimelineClassWrapper /> },
 ];
+
 export const TASK_STATUS_FILTER = [
   {
     label: "All",
@@ -216,7 +218,8 @@ export const QUERY_KEY = {
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
   RECORD_OF_CHANGES: "recordOfChanges",
-  GROUP_NOTIFICATION: "groupNotification"
+  GROUP_NOTIFICATION: "groupNotification",
+  TEACHER_CLASS_TIMELINE: "teacherClassTimeline",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

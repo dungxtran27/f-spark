@@ -1,4 +1,38 @@
 import mongoose, { Schema } from "mongoose";
+const TimelineSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: false,
+    },
+    description: {
+      type: String,
+      required: false,
+    },
+    startDate: {
+      type: Date,
+      required: false,
+    },
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    editAble: {
+      type: Boolean,
+    },
+    status: {
+      type: String,
+      required: false,
+      enum: ["finish", "process", "wait"],
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: ["isSponsorship","lockgroup","outcome1", "outcome2", "outcome3"],
+    },
+  },
+  { timestamps: true }
+);
 const ColSchema = new Schema({
   name: {
     type: String,
@@ -198,6 +232,7 @@ const GroupSchema = new Schema(
       type: Number,
       required: false,
     },
+    timeline: [TimelineSchema],
   },
   { timestamps: true, collection: "Groups" }
 );
