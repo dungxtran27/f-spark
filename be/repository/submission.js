@@ -56,7 +56,7 @@ const addGrade = async ({ submissionId, grade, criteria }) => {
       .populate("group")
       .populate({
         path: "classworkId",
-        select: "title _id",
+        select: "title _id classId",
       });
     return updatedSubmission;
   } catch (error) {

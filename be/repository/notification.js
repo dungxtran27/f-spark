@@ -2,6 +2,7 @@ import Notification from "../model/Notification.js";
 import { NOTIFICATION_TYPE } from "../utils/const.js";
 import Task from "../model/Task.js";
 import mongoose from "mongoose";
+import Student from "../model/Student.js";
 const createNotification = async ({ data }) => {
   try {
     const result = await Notification.create({
@@ -89,28 +90,41 @@ const getStudentGroupNotification = async (groupId, studentId) => {
       receivers: {
         $in: [new mongoose.Types.ObjectId(studentId)],
       },
-    });
+    })
+      .populate({
+        path: "sender",
+        populate: { path: "account", select: "-password" },
+      })
+      .populate({ path: "action.target", model: Task })
+      .populate({ path: "action.target.assignee", model: Student })
+      .populate({ path: "action.newVersion.assignee", model: Student });
     return groupNotification;
   } catch (error) {
     throw new Error(error.message);
   }
 };
-const getStudentClassNotification = async (classId) =>{
+const getStudentClassNotification = async (classId) => {
   try {
     const classNotification = await Notification.find({
       type: NOTIFICATION_TYPE.CLASS,
       class: new mongoose.Types.ObjectId(classId),
-    })
-    return classNotification
+    }).populate({
+      path: "sender",
+      populate: { path: "account", select: "-password" },
+    }).populate({
+      path: "class",
+      select: "_id classCode"
+    });
+    return classNotification;
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 export default {
   createNotification,
   getGroupNotification,
   getTasksRecordOfChange,
   getStudentNotificationStatisTic,
   getStudentGroupNotification,
-  getStudentClassNotification
+  getStudentClassNotification,
 };

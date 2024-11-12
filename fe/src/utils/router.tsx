@@ -20,6 +20,7 @@ import AccountManagementPage from "../pages/PDT/MangeAccount";
 import MentorProfile from "../pages/PDT/MentorProfile";
 import TeacherProfile from "../pages/PDT/TeacherProfile";
 import Notification from "../pages/Notification";
+import Requests from "../pages/Student/Request";
 
 const Router = () => {
   return (
@@ -33,6 +34,7 @@ const Router = () => {
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/class" element={<Class />} />
         <Route path="/timeline" element={<Timeline />} />
+        <Route path="/request" element={<Requests />} />
         <Route path="/taskDetail/:taskName/:taskId" element={<TaskDetail />} />
         <Route path="/notification/:type" element={<Notification/>}/>
         {/* teacher */}
@@ -42,7 +44,7 @@ const Router = () => {
         <Route path="/class/:classId" element={<ClassDetail />} />
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
         <Route path="/timelineTeacher" element={<TimelineTeacher />} />
-
+        
         {/* PDT */}
         <Route path="/manageClass" element={<ManageClass />} />
         <Route path="/manageRequest" element={<ManageRequest />} />

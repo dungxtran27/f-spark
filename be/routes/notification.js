@@ -19,5 +19,15 @@ notificationRouter.get(
   "/student/statistic",
   verifyToken,
   NotificationController.getStudentNotificationStatisTic
+);
+notificationRouter.get(
+  "/student/groupNotification",
+  verifyToken,
+  NotificationController.getDetailGroupNotification
+);
+notificationRouter.get(
+  "/student/classNotification",
+  verifyToken,
+  NotificationController.getDetailClassNotification
 )
 export default notificationRouter;

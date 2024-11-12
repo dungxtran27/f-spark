@@ -4,6 +4,7 @@ import _ from "lodash"
 import { useParams } from "react-router-dom";
 import styles from "./styles.module.scss"
 import Group from "./Group";
+import Class from "./Class";
 const StudentNotification = () => {
   const items: TabsProps["items"] = [
     {
@@ -14,7 +15,7 @@ const StudentNotification = () => {
     {
       key: NOTIFICATION_TYPE.CLASS,
       label: _.upperFirst(NOTIFICATION_TYPE.CLASS),
-      children: "Content of Tab Pane 2",
+      children: <Class/>,
     },
     {
       key: NOTIFICATION_TYPE.SYSTEM,
@@ -23,6 +24,7 @@ const StudentNotification = () => {
     },
   ];
   const {type} = useParams();
+  
   return (
     <div className="">
       <div className="flex flex-col gap-5 bg-white">

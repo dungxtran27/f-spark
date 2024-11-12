@@ -45,10 +45,13 @@ const addGrade = async (req, res) => {
       grade,
       criteria: criteriaObjectIds,
     });
+    console.log(updateGrade);
+    
     if (updateGrade) {
       const notificationData = {
         group: updateGrade?.group,
         sender: req.decodedToken.role.id,
+        class: updateGrade?.classworkId?.classId,
         senderType: "Teacher",
         type: "Class",
         action: {

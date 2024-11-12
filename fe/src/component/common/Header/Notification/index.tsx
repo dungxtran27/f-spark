@@ -23,7 +23,7 @@ const Notification = () => {
   const { data: notificationStatistic, isLoading } = useQuery({
     queryKey: [QUERY_KEY.NOTIFICATION_STATISTIC],
     queryFn: () => {
-      return notificationApi.getStudentNotification();
+      return notificationApi.getStudentNotificationStatistic();
     },
     enabled: openNotification,
   });
