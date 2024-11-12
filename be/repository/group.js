@@ -624,9 +624,6 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
       "timeline.type": type,
       "timeline.editAble": true
     });
-    if (groups.length !== groupIds.length) {
-      throw new Error("Cannot edit timeline because editAble is false for one or more timelines.");
-    }
     const updateResult = await Group.updateMany(
       { _id: { $in: groupIds }, "timeline.type": type },
       {
@@ -657,7 +654,36 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
 
 
 
+const updateTimelineStatusIfNeeded = async (groupId, submissionData, session) => {
+  // Lấy `timeline` của `Group`
+  const group = await Group.findById(groupId).session(session).select("timeline");
+  if (!group) throw new Error("Group not found");
+  const { grade, createdAt } = submissionData;
+  const createdAtDate = new Date(createdAt);
+  let timelineUpdated = false; // Flag to check if any update is needed
 
+  // Duyệt qua từng mục trong `timeline` và cập nhật `status` dựa trên điều kiện
+  group.timeline.forEach(item => {
+    const endDate = new Date(item.endDate);
+
+    // Check if the status needs to be updated
+    if (grade && createdAtDate < endDate && item.status !== "finish") {
+      item.status = "finish";
+      timelineUpdated = true;
+    } else if (!grade && createdAtDate < endDate && item.status !== "waiting grade") {
+      item.status = "waiting grade";
+      timelineUpdated = true;
+    } else if (createdAtDate > endDate && item.status !== "overdue") {
+      item.status = "overdue";
+      timelineUpdated = true;
+    }
+  });
+
+  // Only save changes if the timeline was updated
+  if (timelineUpdated) {
+    await group.save({ session });
+  }
+};
 
 export default {
   createCellsOnUpdate,
@@ -681,5 +707,6 @@ export default {
   ungroup,
   lockOrUnlockGroup,
   getGroupsByClassId,
-  editTimelineForManyGroups
+  editTimelineForManyGroups,
+  updateTimelineStatusIfNeeded
 };

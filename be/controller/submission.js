@@ -54,8 +54,23 @@ const getSubmissionsOfClassWork = async (req, res) =>{
   }
 }
 
+export const getSubmissionsByGroup = async (req, res) => {
+  try {
+    const { groupId } = req.body;  
+    const submissions = await SubmissionRepository.getSubmissionsToTakeStatusOfTimeline(groupId);
+    res.status(200).json({
+      data: submissions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 export default {
   createSubmission,
   addGrade,
-  getSubmissionsOfClassWork
+  getSubmissionsOfClassWork,
+  getSubmissionsByGroup
 };

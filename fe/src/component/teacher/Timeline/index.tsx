@@ -14,8 +14,9 @@ interface Timeline {
     startDate: string;
     endDate: string;
     editAble: boolean;
-    status: 'finish' | 'process' | 'wait';
+    status: 'finish' | 'waiting grade' | 'overdue';
     type: string;
+    grade?: number;
 }
 
 interface Group {
@@ -27,10 +28,12 @@ interface Group {
 
 const TimelineClassWrapper: React.FC = () => {
     const { classId } = useParams();
+    
     const { data } = useQuery<AxiosResponse>({
         queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
         queryFn: () => groupApi.getAllGroupByClassId(classId),
         enabled: !!classId,
+        
     });
     const groups: Group[] = Array.isArray(data?.data?.data) ? data.data.data : [];
 

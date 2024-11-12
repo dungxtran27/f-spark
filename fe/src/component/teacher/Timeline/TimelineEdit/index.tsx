@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Checkbox, Modal, notification, Button, DatePicker } from "antd";
+import { Checkbox, Modal, notification, Button, DatePicker, message } from "antd";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { groupApi } from "../../../../api/group/group";
 import { AxiosResponse } from "axios";
@@ -23,6 +23,9 @@ interface Group {
 
 interface Timeline {
   title: string;
+  groupId: string;
+  endDate: string;
+  description: string;
 }
 
 const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
@@ -39,21 +42,17 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
     const [isEditable, setIsEditable] = useState(true);
 
     const { classId } = useParams();
-    const { data } = useQuery<AxiosResponse>({
+    const { data, refetch } = useQuery<AxiosResponse>({
       queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
       queryFn: () => groupApi.getAllGroupByClassId(classId),
       enabled: !!classId,
     });
     const groups: Group[] = Array.isArray(data?.data?.data) ? data.data.data : [];
 
-    // Cập nhật trạng thái khi mở modal và timeline không thể chỉnh sửa
     useEffect(() => {
       if (timeline?.editAble === false) {
         setIsEditable(false);
-        notification.error({
-          message: "Timeline cannot be edited",
-          description: "This timeline is locked and cannot be edited.",
-        });
+        message.error("This timeline is locked and cannot be edited.");
       } else {
         setIsEditable(true);
       }
@@ -84,13 +83,12 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
         }
       },
       onSuccess: () => {
+        refetch();
         onCancel();
       },
-      onError: (error: Error) => {
-        notification.error({
-          message: "Error updating timeline",
-          description: error.message || "An error occurred while updating the timeline.",
-        });
+      onError: () => {
+        message.error("Fail to update");
+
       },
     });
 
@@ -130,8 +128,6 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
       },
       []
     );
-
-    const remainingGroups = groups.filter((group) => group._id !== updatedData.selectedGroupIds[0]);
 
     return (
       <Modal
@@ -182,21 +178,22 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
           </div>
         </div>
         <div className="mb-2">
-          <Checkbox.Group
-            value={updatedData.selectedGroupIds}
-            onChange={handleGroupChange}
-            disabled={!isEditable}
-            className="w-full"
-          >
-            <div className="space-y-1">
-              {remainingGroups.map((group) => (
-                <Checkbox key={group._id} value={group._id}>
-                  {group.GroupName}
-                </Checkbox>
-              ))}
-            </div>
-          </Checkbox.Group>
-        </div>
+  <Checkbox.Group
+    value={updatedData.selectedGroupIds}
+    onChange={handleGroupChange}
+    disabled={!isEditable}
+    className="w-full"
+  >
+    <div className="flex flex-col space-y-1">
+      {groups.map((group) => (
+        <Checkbox key={group._id} value={group._id}>
+          {group.GroupName}
+        </Checkbox>
+      ))}
+    </div>
+  </Checkbox.Group>
+</div>
+
       </Modal>
     );
   }

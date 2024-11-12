@@ -23,7 +23,7 @@ const TimelineSchema = new Schema(
     status: {
       type: String,
       required: false,
-      enum: ["finish", "process", "wait"],
+      enum: ["finish", "overdue", "waiting grade"],
     },
     type: {
       type: String,
