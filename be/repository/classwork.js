@@ -3,6 +3,8 @@ import Class from "../model/Class.js";
 import ClassWork from "../model/ClassWork.js";
 import Student from "../model/Student.js";
 import Submission from "../model/Submisson.js";
+import { GroupRepository } from "./index.js";
+import Group from "../model/Group.js";
 const getClassWorkByStudent = async ({ userId }) => {
   try {
     const user = await Student.findById(userId);
@@ -44,27 +46,47 @@ const getOutcomes = async (classId, isTeacher) => {
     throw new Error(error.message);
   }
 };
-const getOutcomesOfClasses = async (classIds, isTeacher) => {
+const getOutcomesOfClasses = async (classIds) => {
   try {
-    const outcomeList = await ClassWork.find({
-      type: "outcome",
-      classId: { $in: classIds },
-    }).lean();
-    if (isTeacher) {
-      const outcomeWithSubmissions = await Promise.all(
-        outcomeList.map(async (o) => {
-          const submissions = await Submission.find({
-            classworkId: o._id,
-          }).populate({ path: "group", select: "GroupName" });
-          return {
+    // Fetch outcomes with their classId
+    const outcomeList = await ClassWork.aggregate([
+      {
+        $match: {
+          type: "outcome",
+          classId: { $in: classIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$classId",
+          outcomes: { $push: "$$ROOT" },
+        },
+      },
+    ]);
+    // Fetch submissions for each group of outcomes
+    const outcomeWithSubmissions = await Promise.all(
+      outcomeList.map(async ({ _id: classId, outcomes }) => {
+        const submissionIds = outcomes.map((o) => o._id);
+        const submissions = await Submission.find({
+          classworkId: { $in: submissionIds },
+        }).populate({ path: "group", select: "GroupName" });
+        const groupOfClass = await Group.find({ class: classId });
+        const classname = await Class.findById(classId);
+        return {
+          classId,
+          classname: classname.classCode,
+          groupNumber: groupOfClass.length,
+          outcomes: outcomes.map((o) => ({
             ...o,
-            submissions,
-          };
-        })
-      );
-      return outcomeWithSubmissions;
-    }
-    return outcomeList;
+            submissions: submissions.filter(
+              (s) => s.classworkId.toString() === o._id.toString()
+            ),
+          })),
+        };
+      })
+    );
+
+    return outcomeWithSubmissions;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -318,4 +340,5 @@ export default {
   getLatestAssignmentSubmissionsCount,
   getLatestAnnounceOfClassesByTeacher,
   getLatestAssignmentOfClassesByTeacher,
+  getOutcomesOfClasses,
 };

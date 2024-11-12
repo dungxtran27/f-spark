@@ -42,8 +42,12 @@ const getTeacherDashboardInfo = async (req, res) => {
       await ClassworkRepository.getLatestAssignmentOfClassesByTeacher(
         classes.map((c) => c._id)
       );
+    const outcome = await ClassworkRepository.getOutcomesOfClasses(
+      classes.map((c) => c._id)
+    );
     return res.status(200).json({
       data: {
+        outcome: outcome,
         class: classes,
         groupSponsor: groupSponsor,
         ungroupedStudent: ungroupedStudent,
@@ -52,53 +56,10 @@ const getTeacherDashboardInfo = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
-
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-const getLatestAnnounceTeacher = async (req, res) => {
-  const teacherAccId = req.decodedToken.account;
-  const teacher = await TeacherRepository.findByAccountId(teacherAccId);
 
-  try {
-    const classes = await ClassRepository.getClassNumberOfTeacher(
-      teacher._id.toString()
-    );
-
-    const newAnnounce =
-      await ClassworkRepository.getLatestAnnounceOfClassesByTeacher(
-        classes.map((c) => c._id)
-      );
-
-    return res.status(200).json({
-      data: newAnnounce,
-    });
-  } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
-const getLatestAssignmentTeacher = async (req, res) => {
-  const teacherAccId = req.decodedToken.account;
-  const teacher = await TeacherRepository.findByAccountId(teacherAccId);
-
-  try {
-    const classes = await ClassRepository.getClassNumberOfTeacher(
-      teacher._id.toString()
-    );
-
-    const newAssignment =
-      await ClassworkRepository.getLatestAssignmentOfClassesByTeacher(
-        classes.map((c) => c._id)
-      );
-
-    return res.status(200).json({
-      data: newAssignment,
-    });
-  } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
 const pinClasswork = async (req, res) => {
   try {
     const { classId, classworkId } = req.body;

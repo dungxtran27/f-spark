@@ -42,7 +42,9 @@ const TeacherDashBoard = () => {
       case "class":
         return <ClassDashboardWrapper />;
       case "outcome":
-        return <OutcomeDashboardWrapper />;
+        return (
+          <OutcomeDashboardWrapper data={dashboardInfo?.data.data.outcome} />
+        );
       case "ungroupStudent":
         return (
           <UngroupStdDashboardWrapper
