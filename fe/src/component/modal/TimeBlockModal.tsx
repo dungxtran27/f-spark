@@ -27,6 +27,7 @@ const TimeLineModal: React.FC<TimeLineModalProps> = ({ open, closeModal }) => {
   return (
     <>
       <Modal
+        centered
         title="Title"
         open={open}
         onOk={handleOk}

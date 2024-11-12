@@ -462,6 +462,7 @@ const CustomerJourneyMap: React.FC = () => {
         <div className="flex-1"></div>
       </div>
       <Modal
+        centered
         title="Edit Column"
         open={isColModalVisible}
         onOk={handleEditColumn}
@@ -511,6 +512,7 @@ const CustomerJourneyMap: React.FC = () => {
         />
       </Modal>
       <Modal
+        centered
         title="Edit Row"
         open={isRowModalVisible}
         onOk={handleEditRow}
@@ -532,6 +534,7 @@ const CustomerJourneyMap: React.FC = () => {
         />
       </Modal>
       <Modal
+        centered
         title="Edit Cell Content"
         open={isCellModalVisible}
         onOk={handleEditCell}

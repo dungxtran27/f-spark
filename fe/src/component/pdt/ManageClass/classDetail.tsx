@@ -153,6 +153,7 @@ const ClassDetailPDT = ({
         </button>
       </div>
       <Modal
+        centered
         title="Stundent UnGroup"
         open={isModal1}
         onCancel={cancelModal1}
@@ -176,6 +177,7 @@ const ClassDetailPDT = ({
         </div>
       </Modal>
       <Modal
+        centered
         title="Group not have class"
         open={isModal2}
         onCancel={cancelModal2}

@@ -162,6 +162,7 @@ const ApprovalTable: React.FC = () => {
         />
       </div>
       <Modal
+        centered
         title="Confirm Move"
         open={isModal}
         onOk={handleCloseModal}

@@ -54,7 +54,6 @@ export const TeacherRoutes = [
     icon: <FaPeopleGroup size={20} />,
   },
 ];
-
 export const AdminRoutes = [
   {
     route: "/manageClass",

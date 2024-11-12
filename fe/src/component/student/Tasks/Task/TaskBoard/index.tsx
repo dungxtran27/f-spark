@@ -1,14 +1,11 @@
 import { Skeleton, Table } from "antd";
 import dayjs from "dayjs";
 import { CiSquarePlus } from "react-icons/ci";
-// import { TaskBoardData } from "../../../../../model/taskBoard";
 import React from "react";
 import { Link } from "react-router-dom";
 import StatusSelect from "../../../../common/Task/StatusSelect";
 import { TASK_TYPE } from "../../../../../utils/const";
-import { render } from "react-dom";
 import PriorityIcon from "../../../../common/Task/PrioritySelect/PriorityIcon";
-// import { Link } from "react-router-dom";
 interface TaskBoardProps {
   taskBoardData: any; //TaskBoardData[];
   setOpenCreateTask: (open: boolean) => void;
@@ -29,7 +26,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
           {tb?.assignee?.account?.profilePicture ? (
             <img
               src={tb?.assignee?.account?.profilePicture}
-              className="rounded-full w-7 border border-primary aspect-square"
+              className="rounded-full w-7 border border-primary aspect-square object-cover object-center"
             />
           ) : (
             <span

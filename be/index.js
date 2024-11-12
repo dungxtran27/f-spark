@@ -3,7 +3,6 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import morgan from "morgan";
 import { Server } from "socket.io";
 import {
   UserRouter,
@@ -65,8 +64,6 @@ app.use(
 app.get("/hello", (req, res) => {
   return res.status(200).json("hello");
 });
-app.use(morgan("dev"));
-
 app.use("/api/auth", AuthenticationRouter);
 app.use("/api/user", UserRouter);
 app.use("/api/payment", VnPayRouter);
@@ -86,13 +83,24 @@ const port = process.env.PORT || 9999;
 const MONGODB_URI = process.env.MONGODB_URI;
 //for Periodic tasks
 // eventScheduler();
+const userSocketMap = {};
 const io = new Server(server, {
   cors: corsOptions,
 });
 io.on("connection", (socket) => {
-  console.log("A user just connected", socket.id);
+  const account = socket.handshake.query.account;
+  console.log("A user just connected", account);
+  if (account) {
+    userSocketMap[account] = socket.id;
+  }
   socket.on("disconnect", () => {
-    console.log("A user disconnected: ", socket?.userId);
+    for (let [accountId, socketId] of Object.entries(userSocketMap)) {
+      if (socketId === socket.id) {
+        console.log(`User ${accountId} disconnected`);
+        delete userSocketMap[accountId]; // Clean up the mapping
+        break;
+      }
+    }
   });
 });
 server.listen(port, async () => {
@@ -104,4 +112,4 @@ server.listen(port, async () => {
   }
   console.log(`Server running on http://localhost:${port}`);
 });
-export { io };
+export { io, userSocketMap };

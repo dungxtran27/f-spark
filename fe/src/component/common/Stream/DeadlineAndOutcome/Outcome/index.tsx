@@ -54,6 +54,7 @@ const Outcome = ({ o }: { o: any }) => {
       </div>
       {isTeacher && (
         <Modal
+        centered
           open={!!submission}
           title={"Grade submission"}
           onOk={() => {
