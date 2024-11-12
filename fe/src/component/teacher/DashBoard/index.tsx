@@ -28,19 +28,31 @@ const TeacherDashBoard = () => {
   const pnRender = () => {
     switch (render) {
       case "assignment":
-        return <AssignmentDashboardWrapper />;
+        return (
+          <AssignmentDashboardWrapper
+            data={dashboardInfo?.data.data.latestAssignment}
+          />
+        );
       case "announce":
-        return <AnnounceDashboardWrapper />;
+        return (
+          <AnnounceDashboardWrapper
+            data={dashboardInfo?.data.data.latestAnnounce}
+          />
+        );
       case "class":
         return <ClassDashboardWrapper />;
       case "outcome":
         return <OutcomeDashboardWrapper />;
       case "ungroupStudent":
-        return <UngroupStdDashboardWrapper />;
+        return (
+          <UngroupStdDashboardWrapper
+            data={dashboardInfo?.data.data.ungroupedStudent.students}
+          />
+        );
       case "sponsor":
         return (
           <SponsorDashboardWrapper
-            data={dashboardInfo?.data.data.groupSponsor}
+            data={dashboardInfo?.data.data.groupSponsor.groups}
           />
         );
       default:
@@ -57,15 +69,13 @@ const TeacherDashBoard = () => {
     {
       icon: <RiMoneyDollarCircleFill className="text-pendingStatus" />,
       type: "sponsor",
-      number: dashboardInfo?.data.data.groupSponsor.length,
-
+      number: dashboardInfo?.data.data.groupSponsor.groupNumber,
       label: "Sponsored groups",
     },
     {
       icon: <FaUserXmark className="text-red-500" />,
       type: "ungroupStudent",
-      number: dashboardInfo?.data.data.ungroupedStudent.length,
-
+      number: dashboardInfo?.data.data.ungroupedStudent.studentNumber,
       label: "Ungrouped students",
     },
   ];
@@ -76,18 +86,18 @@ const TeacherDashBoard = () => {
       label: "Announce",
     },
     {
-      icon: <FaPen className="text-pendingStatus" />,
+      icon: <FaPen />,
       type: "assignment",
       label: "Assignment",
     },
     {
-      icon: <MdAssignment className="text-okStatus" />,
+      icon: <MdAssignment />,
       type: "outcome",
       label: "Ungraded outcome",
     },
   ];
   return (
-    <div className="flex flex-col h-[200vh]">
+    <div className="flex flex-col ">
       <div className="h-[170px] shadow-md border-t-[1px] border-textSecondary/30 grid grid-cols-3 gap-5 p-4 bg-white w-full  sticky top-0 ">
         <div className="border-[1px] rounded border-textSecondary/70 h-full p-[5px] flex flex-col justify-between">
           <span className="font-medium text-sm">Managing</span>
@@ -98,7 +108,9 @@ const TeacherDashBoard = () => {
                   setRender(m.type);
                 }}
                 className={`flex items-center gap-4 px-2 hover:bg-primary/20  hover:shadow rounded cursor-pointer ${
-                  render === m.type ? "bg-primary/30 border-e-[1.5px] border-primary" : ""
+                  render === m.type
+                    ? "bg-primary/30 border-[1.5px] border-primary"
+                    : ""
                 }`}
               >
                 {m.icon}
@@ -119,11 +131,11 @@ const TeacherDashBoard = () => {
                 onClick={() => {
                   setRender(s.type);
                 }}
-                className="flex items-center gap-4 px-2 hover:bg-primaryBlue/20 hover:border-[1px] hover:shadow rounded"
+                className="flex items-center gap-4 px-2 hover:bg-primary/20 hover:border-[1px] hover:shadow rounded"
               >
                 {s.icon}
                 <div>
-                  <span className="text-lg font-medium">6/10</span>{" "}
+                  {/* <span className="text-lg font-medium">6/10</span>{" "} */}
                   <span>{s.label}</span>
                 </div>
               </div>

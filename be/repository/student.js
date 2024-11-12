@@ -92,12 +92,34 @@ const getAllStudentUngroupByClassIds = async (classIds) => {
       classId: { $in: classIds },
       group: null,
     })
-      .select("_id name gen major studentId account")
+      .select("_id name gen major studentId account classId")
       .populate({
         path: "account",
         select: "profilePicture",
+      })
+      .populate({
+        path: "classId",
+        select: "classCode",
       });
-    return students;
+    // Group students by classId
+    const groupedStudents = students.reduce((acc, student) => {
+      const classId = student.classId._id.toString();
+
+      if (!acc[classId]) {
+        acc[classId] = {
+          class: student.classId,
+          students: [],
+        };
+      }
+
+      acc[classId].students.push(student);
+      return acc;
+    }, {});
+
+    return {
+      students: Object.values(groupedStudents),
+      studentNumber: students.length,
+    };
   } catch (error) {
     throw new Error(error.message);
   }

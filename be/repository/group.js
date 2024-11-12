@@ -649,7 +649,7 @@ const findAllSponsorGroupsOfClasses = async (classIds) => {
       return acc;
     }, {});
 
-    return Object.values(groupedData);
+    return {groups:Object.values(groupedData),groupNumber:data.length};
   } catch (error) {
     console.log(error);
 

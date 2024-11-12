@@ -34,15 +34,26 @@ const getTeacherDashboardInfo = async (req, res) => {
       await StudentRepository.getAllStudentUngroupByClassIds(
         classes.map((c) => c._id)
       );
-
+    const latestAnnounce =
+      await ClassworkRepository.getLatestAnnounceOfClassesByTeacher(
+        classes.map((c) => c._id)
+      );
+    const latestAssignment =
+      await ClassworkRepository.getLatestAssignmentOfClassesByTeacher(
+        classes.map((c) => c._id)
+      );
     return res.status(200).json({
       data: {
         class: classes,
         groupSponsor: groupSponsor,
         ungroupedStudent: ungroupedStudent,
+        latestAnnounce: latestAnnounce,
+        latestAssignment: latestAssignment,
       },
     });
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json({ error: "Internal server error" });
   }
 };

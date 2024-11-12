@@ -44,6 +44,31 @@ const getOutcomes = async (classId, isTeacher) => {
     throw new Error(error.message);
   }
 };
+const getOutcomesOfClasses = async (classIds, isTeacher) => {
+  try {
+    const outcomeList = await ClassWork.find({
+      type: "outcome",
+      classId: { $in: classIds },
+    }).lean();
+    if (isTeacher) {
+      const outcomeWithSubmissions = await Promise.all(
+        outcomeList.map(async (o) => {
+          const submissions = await Submission.find({
+            classworkId: o._id,
+          }).populate({ path: "group", select: "GroupName" });
+          return {
+            ...o,
+            submissions,
+          };
+        })
+      );
+      return outcomeWithSubmissions;
+    }
+    return outcomeList;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 const getClassWorkByTeacher = async (classId) => {
   try {
@@ -95,9 +120,21 @@ const getLatestAnnounceOfClassesByTeacher = async (classIds) => {
         },
       },
       {
+        $lookup: {
+          from: "Classes", // Replace "Class" with your actual collection name
+          localField: "_id",
+          foreignField: "_id",
+          as: "classInfo",
+        },
+      },
+      {
+        $unwind: "$classInfo",
+      },
+      {
         $project: {
           _id: 0,
-          classId: "$_id",
+          classId: "$classInfo._id", // Access the populated classId
+          className: "$classInfo.classCode", // Access other fields from the Class collection
           firstAnnouncement: 1,
         },
       },
@@ -123,14 +160,26 @@ const getLatestAssignmentOfClassesByTeacher = async (classIds) => {
       {
         $group: {
           _id: "$classId",
-          firstAssignment: { $first: "$$ROOT" },
+          latestAssignment: { $first: "$$ROOT" },
         },
+      },
+      {
+        $lookup: {
+          from: "Classes", // Replace "Class" with your actual collection name
+          localField: "_id",
+          foreignField: "_id",
+          as: "classInfo",
+        },
+      },
+      {
+        $unwind: "$classInfo",
       },
       {
         $project: {
           _id: 0,
-          classId: "$_id",
-          firstAssignment: 1,
+          classId: "$classInfo._id", // Access the populated classId
+          className: "$classInfo.classCode", // Access other fields from the Class collection
+          latestAssignment: 1,
         },
       },
     ]);
