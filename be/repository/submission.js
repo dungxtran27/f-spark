@@ -52,40 +52,40 @@ const updateTimelineStatusIfNeeded = async (groupId, classworkId, submissionData
       {
         timeline: { $elemMatch: { classworkId: classWorkId } }  
       }
-    )
-      .session(session);
-    if (!group) {
-      throw new Error("Group not found");
-    }
-    let timelineUpdated = false;
-    const classwork = await Classwork.findById(classWorkId);
-    if (classwork && classwork.type !== 'outcome') {
-      return;
+    ).session(session);
+
+    if (!group || !group.timeline.length) {
+      throw new Error("Group or timeline entry not found");
     }
 
-    const endDate = new Date(classwork.dueDate);    
-    const createdAtDate = new Date(group.timeline[0].updatedAt);
+    const timelineEntry = group.timeline[0]; 
+    const endDate = new Date(timelineEntry.endDate);
+    const createdAtDate = new Date(timelineEntry.updatedAt); 
 
+    // Determine new status based on conditions
+    let newStatus = null;
     if (grade !== null && grade !== undefined && createdAtDate < endDate) {
-      group.timeline[0].status = "finish";
-      timelineUpdated = true;
+      newStatus = "finish";
+    } else if ((grade === null || grade === undefined) && createdAtDate < endDate) {
+      newStatus = "waiting grade";
+    } else if (createdAtDate > endDate) {
+      newStatus = "overdue";
     }
-    if ((grade === null || grade === undefined) && createdAtDate < endDate) {
-      group.timeline[0].status = "waiting grade";
-      timelineUpdated = true;
-    }
-    if (createdAtDate > endDate) {
-      group.timeline[0].status = "overdue";
-      timelineUpdated = true;
-    }
-    ;
-    if (timelineUpdated) {
-      await group.save({ session });
+
+    if (newStatus) {
+      await Group.updateOne(
+        { _id: groupId, "timeline.classworkId": classWorkId },
+        { $set: { "timeline.$.status": newStatus } },
+        { session }
+      );
     }
   } catch (error) {
+    console.error("Error updating timeline:", error);
     throw new Error(error.message);
   }
 };
+
+
 
 const addGrade = async ({ submissionId, grade, criteria }) => {
   const session = await mongoose.startSession();
@@ -225,5 +225,6 @@ export default {
   addGrade,
   findSubmissionOfStudent,
   getSubmissionsOfClassWork,
-  getSubmissionsToTakeStatusOfTimeline
+  getSubmissionsToTakeStatusOfTimeline,
+  updateTimelineStatusIfNeeded
 };
