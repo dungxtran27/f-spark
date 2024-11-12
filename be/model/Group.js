@@ -30,6 +30,11 @@ const TimelineSchema = new Schema(
       required: true,
       enum: ["isSponsorship","lockgroup","outcome1", "outcome2", "outcome3"],
     },
+    classworkId:{
+      type: Schema.Types.ObjectId,
+      ref: "Classwork",
+      required:true
+    }
   },
   { timestamps: true }
 );

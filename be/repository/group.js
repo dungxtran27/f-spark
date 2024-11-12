@@ -632,13 +632,11 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
           "timeline.$[timelineItem].description": updateData.description,
           "timeline.$[timelineItem].endDate": updateData.endDate,
         }
-      },
-      {
+      },{
         arrayFilters: [{ "timelineItem.type": type }],
         new: true
       }
     );
-
     return await Group.find({
       _id: { $in: groupIds },
       "timeline.type": type
@@ -646,7 +644,6 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
       path: "timeline",
       match: { type }
     });
-
   } catch (error) {
     throw new Error(error.message);
   }

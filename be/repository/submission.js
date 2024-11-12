@@ -1,3 +1,4 @@
+import submission from "../controller/submission.js";
 import Classwork from "../model/ClassWork.js";
 import Group from "../model/Group.js";
 import Submission from "../model/Submisson.js";
@@ -22,77 +23,80 @@ const createSubmission = async ({
     }], { session });
 
     const populatedSubmission = await newSubmission[0].populate("student");
-    await updateTimelineStatusIfNeeded(groupId, {
+    await updateTimelineStatusIfNeeded(groupId, classworkId, {
       createdAt: populatedSubmission.createdAt,
-      grade: populatedSubmission.grade
+      grade: populatedSubmission.grade,
     }, session);
 
-    // Commit the transaction if all goes well
     await session.commitTransaction();
-    return populatedSubmission; // Return the populated submission
+    return populatedSubmission;
 
   } catch (error) {
-    await session.abortTransaction(); // Rollback the transaction if an error occurs
-    console.error("Error creating submission:", error);
+    await session.abortTransaction();
     throw new Error(error.message);
   } finally {
-    session.endSession(); // End the session after the transaction
+    session.endSession();
   }
 };
 
-const updateTimelineStatusIfNeeded = async (groupId, submissionData, session) => {
+const updateTimelineStatusIfNeeded = async (groupId, classworkId, submissionData, session) => {
   try {
-    // Fetch the group and use the session to ensure the operation is part of the transaction
-    const group = await Group.findById(groupId).session(session).select("timeline");
+    const { grade } = submissionData;
+    const classWorkId = new mongoose.Types.ObjectId(classworkId);
+
+    const group = await Group.findOne(
+      {
+        _id: groupId,
+        "timeline.classworkId": classWorkId 
+      },
+      {
+        timeline: { $elemMatch: { classworkId: classWorkId } }  
+      }
+    )
+      .session(session);
     if (!group) {
       throw new Error("Group not found");
     }
-    const { grade, createdAt } = submissionData;
-    const createdAtDate = new Date(createdAt);
-    let timelineUpdated = false; 
-    const classwork = await Classwork.findById(submissionData.classworkId).select("type");
+    let timelineUpdated = false;
+    const classwork = await Classwork.findById(classWorkId);
     if (classwork && classwork.type !== 'outcome') {
-      return; 
+      return;
     }
-    group.timeline.forEach(item => {
-      const endDate = new Date(item.endDate);
 
-      if (grade && createdAtDate < endDate && item.status !== "finish") {
-        item.status = "finish";
-        timelineUpdated = true;
-      } 
-      else if (!grade && createdAtDate < endDate && item.status !== "waiting grade") {
-        item.status = "waiting grade";
-        timelineUpdated = true;
-      }
-      else if (createdAtDate > endDate && item.status !== "overdue") {
-        item.status = "overdue";
-        timelineUpdated = true;
-      }
-    });
+    const endDate = new Date(classwork.dueDate);    
+    const createdAtDate = new Date(group.timeline[0].updatedAt);
+
+    if (grade !== null && grade !== undefined && createdAtDate < endDate) {
+      group.timeline[0].status = "finish";
+      timelineUpdated = true;
+    }
+    if ((grade === null || grade === undefined) && createdAtDate < endDate) {
+      group.timeline[0].status = "waiting grade";
+      timelineUpdated = true;
+    }
+    if (createdAtDate > endDate) {
+      group.timeline[0].status = "overdue";
+      timelineUpdated = true;
+    }
+    ;
     if (timelineUpdated) {
       await group.save({ session });
     }
   } catch (error) {
-    console.error("Error updating timeline:", error);
     throw new Error(error.message);
   }
 };
 
-// Add grade to a submission and update timeline status if needed
 const addGrade = async ({ submissionId, grade, criteria }) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-
     const updatedSubmission = await Submission.findById(submissionId)
       .session(session)
       .populate("student")
       .populate("group");
 
     if (!updatedSubmission) throw new Error("Submission not found");
-
-    // Check if the grade or criteria has changed
     let gradeUpdated = false;
     let criteriaUpdated = false;
 
@@ -106,15 +110,12 @@ const addGrade = async ({ submissionId, grade, criteria }) => {
       criteriaUpdated = true;
     }
 
-    // Save the updated submission if there are changes
     if (gradeUpdated || criteriaUpdated) {
       await updatedSubmission.save({ session });
     }
-
-    // If the grade was updated, update the timeline status for the group
     if (gradeUpdated) {
-      await updateTimelineStatusIfNeeded(updatedSubmission.group._id, {
-        grade: updatedSubmission.grade
+      await updateTimelineStatusIfNeeded(updatedSubmission.group._id, updatedSubmission.classworkId, {
+        grade: updatedSubmission.grade,
       }, session);
     }
 
@@ -140,7 +141,7 @@ const getSubmissionsOfGroup = async (outcomeIds, groupId) => {
       path: "group",
       select: "GroupName"
     })
-    ;
+      ;
     return submissions;
   } catch (error) {
     return new Error(error.message);
@@ -195,9 +196,9 @@ const getSubmissionsOfClassWork = async (classWorkId, studentId) => {
 };
 
 
- const getSubmissionsToTakeStatusOfTimeline = async (groupId) => {
+const getSubmissionsToTakeStatusOfTimeline = async (groupId) => {
   try {
-    const group = await Group.findById(groupId).select('timeline')   
+    const group = await Group.findById(groupId).select('timeline')
     if (!group) {
       throw new Error("Group not found");
     }
@@ -205,7 +206,7 @@ const getSubmissionsOfClassWork = async (classWorkId, studentId) => {
       .select('grade createdAt')
       .populate({
         path: 'classworkId',
-        select: 'endDate id' 
+        select: 'endDate id'
       });
     return submissions.map(submission => ({
       id: submission._id,
