@@ -4,6 +4,7 @@ import { UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
 import { useSelector } from "react-redux";
 import { dashBoard } from "../../../api/dashboard/dashboard";
+import { Skeleton } from "antd";
 
 interface Task { status: string; }
 
@@ -28,7 +29,7 @@ const Status = () => {
       <h3 className="text-md font-bold mb-2">Status</h3>
       <div className="grid grid-cols-4 gap-2 text-center">
         {isLoading ? (
-          <div>Loading...</div>
+           <Skeleton active className="mt-5" />
         ) : (
           statusData.map((item, index) => (
             <div key={index} className="text-md">

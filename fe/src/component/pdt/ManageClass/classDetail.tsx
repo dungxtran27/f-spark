@@ -1,10 +1,11 @@
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { ImNotification } from "react-icons/im";
-import { Button, Dropdown, Menu, Modal, Tooltip } from "antd";
+import { Button, Dropdown, Menu, Modal, Tag, Tooltip } from "antd";
 import { useState } from "react";
 import StudentTableNoAction from "./studentTableNoAction";
 import { FiPlus } from "react-icons/fi";
 import GroupTableNoAction from "./groupTableNoAction";
+import { colorMap } from "../../../utils/const";
 
 interface ClassDetailProps {
   classId: string;
@@ -81,7 +82,7 @@ const ClassDetailPDT = ({
         {/* Group 1 */}
         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
           <div className="flex text-lg font-semibold">
-            <div className="text-xl font-semibold bg-gray-300 p-2 rounded-md">
+            <div className="text-xl font-semibold bg-gray-200 p-2 rounded-md">
               Group 1
             </div>
           </div>
@@ -97,19 +98,19 @@ const ClassDetailPDT = ({
           <div className="mt-4 border-t pt-2 flex items-center">
             <span className="px-2 py-1 text-lg">3 major</span>
             <div className="flex items-center">
-              <span className="mr-2 px-2 py-1 text-white bg-purple-500 rounded-lg text-sm">
-                HS
-              </span>
+              <Tag color={colorMap["MKT"]} className="px-2 py-1 font-bold">
+                MKT
+              </Tag>
             </div>
             <div className="flex items-center">
-              <span className="mr-2 px-2 py-1 text-white bg-blue-400 rounded-lg text-sm">
+              <Tag color={colorMap["SE"]} className="px-2 py-1 font-bold">
                 SE
-              </span>
+              </Tag>
             </div>
             <div className="flex items-center">
-              <span className="mr-2 px-2 py-1 text-white bg-red-400 rounded-lg text-sm">
+              <Tag color={colorMap["GD"]} className="px-2 py-1 font-bold">
                 GD
-              </span>
+              </Tag>
             </div>
           </div>
         </div>
@@ -117,7 +118,7 @@ const ClassDetailPDT = ({
         {/* Group 2 */}
         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
           <div className="flex text-lg font-semibold">
-            <div className="text-xl font-semibold bg-gray-300 p-2 rounded-md">
+            <div className="text-xl font-semibold bg-gray-200 p-2 rounded-md">
               Group 2
             </div>
             <div className="ml-auto">
@@ -139,9 +140,9 @@ const ClassDetailPDT = ({
           <div className="mt-4 border-t pt-2 flex items-center">
             <span className="px-2 py-1 text-lg">1 major</span>
             <div className="flex items-center">
-              <span className="mr-2 px-2 py-1 text-white bg-purple-500 rounded-lg text-sm">
-                HS
-              </span>
+              <Tag color={colorMap["MKT"]} className="px-2 py-1 font-bold">
+                MKT
+              </Tag>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { UserInfo } from "../../../model/auth";
 import { QUERY_KEY } from "../../../utils/const";
 import { dashBoard } from "../../../api/dashboard/dashboard";
 import { Link } from "react-router-dom";
+import { Skeleton } from "antd";
 
 const Overview = () => {
   const userInfo = useSelector(
@@ -55,7 +56,7 @@ const Overview = () => {
         Dự án tái chế đồ ăn cho sinh viên Bách Khoa
       </p>
       {isLoading ? (
-        <div>Loading...</div>
+        <Skeleton active className="mt-5" />
       ) : (
         <ul className="space-y-1">
           <li className="flex items-center justify-between">
