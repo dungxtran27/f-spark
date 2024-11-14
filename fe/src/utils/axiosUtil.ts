@@ -48,6 +48,11 @@ instance.interceptors.response.use(
         }
       }
     }
+    if (error.response.status === 403) {
+      setInterval(() => {
+        window.location.href = `/`;
+      }, 1000);
+    }
     if (error.response.data.error) {
       message.error(error.response.data.error);
     }
