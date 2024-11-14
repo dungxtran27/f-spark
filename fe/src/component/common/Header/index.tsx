@@ -27,7 +27,7 @@ const Header = () => {
         }
         localStorage.clear();
         setInterval(() => {
-          window.location.href = `/${role}/login`;
+          window.location.href = `${role === ROLE.student ? '' : `/${role.toLowerCase()}`}/login`;
         }, 1000);
       }
     },
