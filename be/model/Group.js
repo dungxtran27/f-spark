@@ -23,18 +23,18 @@ const TimelineSchema = new Schema(
     status: {
       type: String,
       required: false,
-      enum: ["finish", "overdue", "waiting grade"],
+      enum: ['finish' | 'waiting grade' | 'overdue' | 'pending'],
     },
     type: {
       type: String,
       required: true,
-      enum: ["isSponsorship","lockgroup","outcome1", "outcome2", "outcome3"],
+      enum: ["isSponsorship","lockgroup","outcome1", "outcome2", "outcome3",],
     },
     classworkId:{
       type: Schema.Types.ObjectId,
-      ref: "Classwork",
-      required:true
-    }
+      ref:"Classwork",
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -14,9 +14,9 @@ interface Timeline {
     startDate: string;
     endDate: string;
     editAble: boolean;
-    status: 'finish' | 'waiting grade' | 'overdue';
+    status: 'finish' | 'waiting grade' | 'overdue' | 'pending';
     type: string;
-    grade?: number;
+    classworkId: string;
 }
 
 interface Group {
@@ -28,12 +28,10 @@ interface Group {
 
 const TimelineClassWrapper: React.FC = () => {
     const { classId } = useParams();
-    
     const { data } = useQuery<AxiosResponse>({
         queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
         queryFn: () => groupApi.getAllGroupByClassId(classId),
         enabled: !!classId,
-        
     });
     const groups: Group[] = Array.isArray(data?.data?.data) ? data.data.data : [];
 
@@ -44,7 +42,7 @@ const TimelineClassWrapper: React.FC = () => {
     return (
         <div>
             <Tabs defaultActiveKey="0" tabPosition="left">
-                {groups.map((group, index) => (
+                {groups.map((group: Group, index: number) => (
                     <Tabs.TabPane tab={group.GroupName} key={index.toString()}>
                         {renderTimeline(group)}
                     </Tabs.TabPane>

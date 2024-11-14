@@ -215,6 +215,7 @@ export const QUERY_KEY = {
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
   STREAM_CONTENT: "streamContent",
+  TIMELINE_TEACHER:"timelineTeacher",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
   RECORD_OF_CHANGES: "recordOfChanges",

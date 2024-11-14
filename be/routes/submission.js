@@ -2,7 +2,6 @@ import express from "express";
 import verifyToken from "../middleware/verifyToken.js";
 import authorization from "../middleware/authorization.js";
 import { SubmissionController } from "../controller/index.js";
-import { SubmissionRouter } from "./index.js";
 
 const submissionRouter = express.Router();
 submissionRouter.post(
@@ -22,6 +21,6 @@ submissionRouter.get(
   verifyToken,
   SubmissionController.getSubmissionsOfClassWork
 );
-submissionRouter.get('/:groupId', SubmissionController.getSubmissionsByGroup);
+submissionRouter.get('/submissionsByGroup', SubmissionController.getSubmissionsByGroup);
 
 export default submissionRouter;
