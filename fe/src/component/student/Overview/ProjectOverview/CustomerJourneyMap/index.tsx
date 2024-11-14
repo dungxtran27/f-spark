@@ -8,6 +8,7 @@ import {
   Select,
   Button,
   Input,
+  Skeleton,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { customerJourneyMapApi } from "../../../../../api/apiOverview/customerJourneyMap";
@@ -38,16 +39,6 @@ interface Cell {
   col: string;
   content: string;
 }
-
-// interface CustomerJourneyMapData {
-//   cols: Cols[];
-//   rows: Rows[];
-//   cells: Cell[];
-// }
-
-// interface ErrorResponse {
-//   error: string;
-// }
 
 const colorOptions = [
   "#b2e5c6",
@@ -107,7 +98,7 @@ const CustomerJourneyMap: React.FC = () => {
   const [newColColor, setNewColColor] = useState("");
   const [cellContent, setCellContent] = useState("");
   const queryClient = useQueryClient();
-  const { data: customerJourneyMapData } = useQuery({
+  const { data: customerJourneyMapData, isLoading } = useQuery({
     queryKey: [QUERY_KEY.GROUP_CUSTOMER_JOURNEY_MAP, groupId],
     queryFn: async () => {
       return await customerJourneyMapApi.getGroupData(groupId);
@@ -344,8 +335,16 @@ const CustomerJourneyMap: React.FC = () => {
       });
     }
   };
+  
+  if (isLoading)
+    return (
+      <div className="bg-white rounded-lg p-4">
+        <Skeleton />
+      </div>
+    );
+
   return (
-    <div className="bg-white p-4 w-full rounded-lg mb-6">
+    <div className="bg-white p-4 w-full rounded-lg">
       <Title level={4} className="text-xl font-bold mb-5">
         Customer Journey Map
       </Title>

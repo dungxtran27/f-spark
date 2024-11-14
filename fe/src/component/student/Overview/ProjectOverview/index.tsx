@@ -4,9 +4,9 @@ import CustomerJourneyMap from "./CustomerJourneyMap";
 import CustomerPersonas from "./CustomerPersonas";
 import BusinessModelCanvas from "./BusinessModelCanvas";
 
-const Overview: React.FC = () => {
+const ProjectOverviewWrapper: React.FC = () => {
   return (
-    <div>
+    <div className="p-2 space-y-2 bg-gray-200 rounded-lg">
       <ViewInfoPoject />
       <CustomerJourneyMap />
       <CustomerPersonas />
@@ -14,4 +14,4 @@ const Overview: React.FC = () => {
     </div>
   );
 };
-export default Overview;
+export default ProjectOverviewWrapper;

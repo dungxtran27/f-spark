@@ -1,4 +1,25 @@
 import mongoose, { Schema } from "mongoose";
+
+const customerPersona = new Schema(
+  {
+    detail: {
+      age: { type: Number, default: null },
+      name: { type: String, default: null },
+      jobTitle: { type: String, default: null },
+      relationshipStatus: {
+        type: String,
+        enum: ["Độc thân", "Đã kết hôn", "Đã ly hôn", "Góa phụ"],
+        default: "Độc thân",
+      },
+      address: { type: String, default: null },
+      income: { type: Number, default: null },
+      image: { type: String, default: null },
+    },
+    bio: { type: String, default: null },
+    needs: [{ type: String, default: null }],
+  },
+);
+
 const ColSchema = new Schema({
   name: {
     type: String,
@@ -143,23 +164,7 @@ const GroupSchema = new Schema(
       },
     },
     customerPersonas: [
-      {
-        detail: {
-          age: { type: Number, default: null },
-          name: { type: String, default: null },
-          jobTitle: { type: String, default: null },
-          relationshipStatus: {
-            type: String,
-            enum: ["Độc thân", "Đã kết hôn", "Đã ly hôn", "Góa phụ"],
-            default: "Độc thân",
-          },
-          address: { type: String, default: null },
-          income: { type: Number, default: null },
-          image: { type: String, default: null },
-        },
-        bio: { type: String, default: null },
-        needs: [{ type: String, default: null }],
-      },
+      customerPersona
     ],
     isSponsorship: {
       type: Boolean,

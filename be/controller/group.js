@@ -180,18 +180,35 @@ const addCustomerPersona = async (req, res) => {
 const updateCustomerPersona = async (req, res) => {
   try {
     const { personaId } = req.query;
-    const { detail, bio, needs } = req.body;
+    let { detail, bio, needs } = req.body;
+    if (typeof detail === 'string') {
+      detail = JSON.parse(detail);
+    }
+    if (typeof needs === 'string') {
+      try {
+        while (typeof needs === 'string') {
+          needs = JSON.parse(needs);
+        }
+      } catch (error) {
+        return res.status(400).json({ error: "Invalid format for needs field" });
+      }
+    }
+
     const updatedPersona = { detail, bio, needs };
+    console.log(updatedPersona);
+
     const updatedGroup = await GroupRepository.updateCustomerPersona({
       groupId: req.groupId,
       personaId,
       updatedPersona,
     });
+
     return res.status(200).json({ data: updatedGroup });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
+
 
 const deleteCustomerPersona = async (req, res) => {
   try {
@@ -300,7 +317,7 @@ const ungroup = async (req, res) => {
   try {
     const { groupId } = req.body;
     const data = await GroupRepository.ungroup(groupId);
-    return res.status(200).json( data );
+    return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
