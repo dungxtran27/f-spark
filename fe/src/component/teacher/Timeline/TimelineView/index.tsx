@@ -202,7 +202,6 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                     </p>
                     <p className="my-0 text-sm">Descriptions: {group.timeline[activeStepIndex].description}</p>
 
-                    {/* Hiển thị các submission tương ứng */}
                     <div className="mt-4 flex justify-between items-center">
                         <h3 className="text-lg font-semibold">Submissions</h3>
                     </div>

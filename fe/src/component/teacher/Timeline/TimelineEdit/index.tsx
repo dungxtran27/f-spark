@@ -123,7 +123,7 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
       (date: dayjs.Dayjs | null) => {
         setUpdatedData((prev) => ({
           ...prev,
-          endDate: date ? date.format('YYYY-MM-DD') : "",
+          endDate: date ? date.format('DD/MM/YYYY') : "",
         }));
       },
       []
@@ -145,7 +145,7 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
             <DatePicker
               value={updatedData.endDate ? dayjs(updatedData.endDate) : null}
               onChange={handleDateChange}
-              format="MMM DD, YY"
+              format="DD/MM/YYYY"
               className="mt-1 p-2 w-full border rounded"
               disabled={!isEditable}
               placeholder="Select Date"
@@ -178,21 +178,21 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
           </div>
         </div>
         <div className="mb-2">
-  <Checkbox.Group
-    value={updatedData.selectedGroupIds}
-    onChange={handleGroupChange}
-    disabled={!isEditable}
-    className="w-full"
-  >
-    <div className="flex flex-col space-y-1">
-      {groups.map((group) => (
-        <Checkbox key={group._id} value={group._id}>
-          {group.GroupName}
-        </Checkbox>
-      ))}
-    </div>
-  </Checkbox.Group>
-</div>
+          <Checkbox.Group
+            value={updatedData.selectedGroupIds}
+            onChange={handleGroupChange}
+            disabled={!isEditable}
+            className="w-full"
+          >
+            <div className="flex flex-col space-y-1">
+              {groups.map((group) => (
+                <Checkbox key={group._id} value={group._id}>
+                  {group.GroupName}
+                </Checkbox>
+              ))}
+            </div>
+          </Checkbox.Group>
+        </div>
 
       </Modal>
     );
