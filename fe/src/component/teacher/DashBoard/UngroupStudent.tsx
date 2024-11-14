@@ -1,5 +1,6 @@
 import { Empty } from "antd";
 import StudentCard from "./StudentCard";
+import { Link } from "react-router-dom";
 
 const UngroupStdDashboardWrapper = ({ data }: any) => {
   return (
@@ -10,13 +11,17 @@ const UngroupStdDashboardWrapper = ({ data }: any) => {
             <span className="pl-1 pr-3">{m.class.classCode}</span>
           </div>
           <div className=" flex  justify-between ml-5 ">
-            <div className="flex flex-wrap   w-full p-1 gap-1">
-              {m.students.length > 0 ? (
-                m.students.map((s: any) => <StudentCard info={s} key={s.id} />)
-              ) : (
-                <Empty />
-              )}
-            </div>
+            <Link to={`/class/${m.class._id}?tab=people2`}>
+              <div className="flex flex-wrap   w-full p-1 gap-1">
+                {m.students.length > 0 ? (
+                  m.students.map((s: any) => (
+                    <StudentCard info={s} key={s.id} />
+                  ))
+                ) : (
+                  <Empty />
+                )}
+              </div>
+            </Link>
           </div>
         </div>
       ))}

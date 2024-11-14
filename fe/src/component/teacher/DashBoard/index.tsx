@@ -133,11 +133,15 @@ const TeacherDashBoard = () => {
                 onClick={() => {
                   setRender(s.type);
                 }}
-                className="flex items-center gap-4 px-2 hover:bg-primary/20 hover:border-[1px] hover:shadow rounded"
+                className={`flex items-center gap-4 px-2 hover:bg-primary/20  hover:shadow rounded cursor-pointer ${
+                  render === s.type
+                    ? "bg-primary/30 border-[1.5px] border-primary"
+                    : ""
+                }`}
               >
                 {s.icon}
                 <div>
-                  {/* <span className="text-lg font-medium">6/10</span>{" "} */}
+                  <span className="text-lg font-medium"></span>{" "}
                   <span>{s.label}</span>
                 </div>
               </div>

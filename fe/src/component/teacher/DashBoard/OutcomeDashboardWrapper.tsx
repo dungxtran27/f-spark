@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
 import { DATE_FORMAT, ROLE } from "../../../utils/const";
+import { Link } from "react-router-dom";
 
 const OutcomeDashboardWrapper = ({ data }: any) => {
   const userInfo = useSelector(
@@ -18,8 +19,7 @@ const OutcomeDashboardWrapper = ({ data }: any) => {
       return "";
     }
     const hasFewerGrades =
-      o?.submissions?.filter((s: any) => !!s?.grade)?.length <
-      groups?.data?.data?.groupStudent?.length;
+      o?.submissions?.filter((s: any) => !!s?.grade)?.length < o.groupNumber;``
 
     return (isTeacher && hasFewerGrades) || (!isTeacher && !o?.groupSubmission)
       ? "bg-pendingStatus/15 border-pendingStatus"
@@ -35,60 +35,65 @@ const OutcomeDashboardWrapper = ({ data }: any) => {
           <div className="flex">
             {d.outcomes.map((o: any, index: number) => (
               <div
-                className={`p-2 w-[30%] flex flex-col ml-5 gap-1 rounded border cursor-pointer bg-red-200 shadow-md`}
+                className={`p-2 w-[30%] flex flex-col ml-5 gap-1 rounded border cursor-pointer ${getStatusClass(
+                  d
+                )} shadow-md`}
                 key={o?._id}
                 // onClick={() => {
                 //   setOutcome(o);
                 // }}
               >
-                <div className="flex items-center font-medium w-full justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="aspect-square w-6 flex items-center justify-center text-[16px] rounded-full bg-gray-200">
-                      {index + 1}
-                    </span>
-                    <span className="w-[200px] whitespace-nowrap truncate">
-                      {o.title}
-                    </span>
-                  </div>
-                  {/* {o?.submissions?.filter((s: any) => !!s?.grade)?.length ===
+                <Link to={`/class/${o.classId}`}>
+                  <div className="flex items-center font-medium w-full justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="aspect-square w-6 flex items-center justify-center text-[16px] rounded-full bg-gray-200">
+                        {index + 1}
+                      </span>
+                      <span className="w-[200px] whitespace-nowrap truncate">
+                        {o.title}
+                      </span>
+                    </div>
+                    {/* {o?.submissions?.filter((s: any) => !!s?.grade)?.length ===
             groups?.data?.data?.groupStudent?.length ? (
               <></>
             ) : ( */}
-                  <span className="w-3 aspect-square rounded-full bg-pendingStatus"></span>
-                  {/* )} */}
-                </div>
-                <div className="flex items-center gap-3">
-                  <RiCalendarScheduleFill size={20} />
-                  <span className="text-[16px]">
-                    {dayjs(o?.startDate).format(DATE_FORMAT.withoutYear)} -{" "}
-                    {dayjs(o?.dueDate).format(DATE_FORMAT.withYear)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <IoNewspaperOutline
-                    className={`${
-                      (isTeacher &&
-                        o?.submissions?.filter((s: any) => !!s?.grade)?.length <
-                          d.groupNumber) ||
-                      (!isTeacher && !o?.groupSubmission)
-                        ? "text-pendingStatus"
-                        : "text-okStatus"
-                    } whitespace-nowrap text-sm`}
-                    size={20}
-                  />
-                  <span className="text-[16px]">
-                    {/* code gay lu, can sua lai */}
-                    {isTeacher
-                      ? `${
-                          o?.submissions?.filter((s: any) => !!s?.grade)?.length
-                        }/${d.groupNumber} graded`
-                      : o?.groupSubmission
-                      ? o?.groupSubmission?.grade
+                    <span className="w-3 aspect-square rounded-full bg-pendingStatus"></span>
+                    {/* )} */}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <RiCalendarScheduleFill size={20} />
+                    <span className="text-[16px]">
+                      {dayjs(o?.startDate).format(DATE_FORMAT.withoutYear)} -{" "}
+                      {dayjs(o?.dueDate).format(DATE_FORMAT.withYear)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <IoNewspaperOutline
+                      className={`${
+                        (isTeacher &&
+                          o?.submissions?.filter((s: any) => !!s?.grade)
+                            ?.length < d.groupNumber) ||
+                        (!isTeacher && !o?.groupSubmission)
+                          ? "text-pendingStatus"
+                          : "text-okStatus"
+                      } whitespace-nowrap text-sm`}
+                      size={20}
+                    />
+                    <span className="text-[16px]">
+                      {/* code gay lu, can sua lai */}
+                      {isTeacher
+                        ? `${
+                            o?.submissions?.filter((s: any) => !!s?.grade)
+                              ?.length
+                          }/${d.groupNumber} graded`
+                        : o?.groupSubmission
                         ? o?.groupSubmission?.grade
-                        : "Submitted"
-                      : "Not Submitted"}
-                  </span>
-                </div>
+                          ? o?.groupSubmission?.grade
+                          : "Submitted"
+                        : "Not Submitted"}
+                    </span>
+                  </div>
+                </Link>
               </div>
             ))}
           </div>
