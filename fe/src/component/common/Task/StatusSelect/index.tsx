@@ -14,10 +14,12 @@ const StatusSelect = ({
   status,
   taskId,
   updatable = true,
+  width = '150px'
 }: {
   status: string;
   taskId: string | undefined;
   updatable?: boolean;
+  width?: string
 }) => {
   const queryClient = useQueryClient();
   const userInfo = useSelector(
@@ -59,7 +61,7 @@ const StatusSelect = ({
     <Select
       options={TASK_STATUS_FILTER.filter((t) => t.value !== "All")}
       size="middle"
-      style={{ width: 150 }}
+      style={{ width: width}}
       optionRender={(op) => (
         <div className="flex items-center gap-3 rounded-md h-full w-full overflow-hidden">
           <span
