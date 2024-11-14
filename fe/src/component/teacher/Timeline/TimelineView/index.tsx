@@ -15,7 +15,7 @@ interface Timeline {
     startDate: string;
     endDate: string;
     editAble: boolean;
-    status: 'finish' | 'waiting grade' | 'overdue' | 'pending';
+    status: string;
     type: string;
     classworkId: string
 }
@@ -59,16 +59,33 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
     const [activeStepIndex, setActiveStepIndex] = useState<number>(-1);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalData, setModalData] = useState<Timeline | null>(null);
-    const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([]); 
-    
-
+    const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([]);
+    const updateTimelineStatus = (timeline: Timeline) => {
+        if (!submissions || submissions.length === 0) {
+            return 'pending';
+        }
+        const submission = submissions.find((sub: Submission) =>
+            sub.group._id === groupId && sub.classworkId._id === timeline.classworkId
+        );
+        if (submission) {
+            const createdAt = dayjs(submission.createdAt);
+            const endDate = dayjs(timeline.endDate);
+            if (submission.grade !== null && submission.grade !== undefined) {
+                return createdAt.isBefore(endDate) ? 'finish' : 'overdue';
+            } else {
+                return createdAt.isBefore(endDate) ? 'waiting grade' : 'overdue';
+            }
+        }
+        return 'pending';
+    };
     useEffect(() => {
-        const processStepIndex = group.timeline.findIndex((step) => step.status === 'waiting grade');
+        const processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'pending');
         if (processStepIndex !== -1) {
             setActiveStepIndex(processStepIndex);
+        } else {
+            setActiveStepIndex(-1);
         }
     }, [group.timeline]);
-
     const handleStepChange = (index: number) => {
         setActiveStepIndex(index === activeStepIndex ? -1 : index);
         if (index >= 0) {
@@ -96,26 +113,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
     });
 
     const submissions: Submission[] = Array.isArray(data?.data?.data) ? data.data.data : [];
-    const updateTimelineStatus = (timeline: Timeline) => {
-        if (!submissions || submissions.length === 0) {
-            return 'pending'; 
-        }      
-        const submission = submissions.find((sub: Submission) =>
-            sub.group._id === groupId && sub.classworkId._id === timeline.classworkId
-        );
-        if (submission) {
-            const createdAt = dayjs(submission.createdAt);
-            const endDate = dayjs(timeline.endDate);
-            if (submission.grade !== null && submission.grade !== undefined) {
-                return createdAt.isBefore(endDate) ? 'finish' : 'overdue';
-            } else {
-                return createdAt.isBefore(endDate) ? 'waiting grade' : 'overdue';
-            }
-        }
-            return 'pending';
-    };
     
-
     const getRemainingTime = (endDate: string) => {
         const end = dayjs(endDate);
         const now = dayjs();
@@ -146,7 +144,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                 onChange={handleStepChange}
                 className="w-full"
                 progressDot
-                status="waiting grade"
+                status='waiting grade'
             >
                 {group.timeline.map((step, index) => (
                     <Step
@@ -163,7 +161,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                             </div>
                         }
                         status={updateTimelineStatus(step)}
-                        icon={step.status === 'finish' ? <CheckCircleOutlined className="text-green-500" /> : null}
+                        icon={updateTimelineStatus(step) === 'finish' ? <CheckCircleOutlined className="text-green-500" /> : null}
                     />
                 ))}
             </Steps>
@@ -174,14 +172,14 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                             <span className="text-xl font-bold">{group.timeline[activeStepIndex].title}</span>
                             <div className="my-2 ml-4">
                                 <span
-                                    className={`px-2 py-1 rounded-full text-white ${group.timeline[activeStepIndex].status === 'finish'
+                                    className={`px-2 py-1 rounded-full text-white ${updateTimelineStatus(group.timeline[activeStepIndex]) === 'finish'
                                         ? 'bg-green-500'
-                                        : group.timeline[activeStepIndex].status === 'waiting grade'
+                                        : updateTimelineStatus(group.timeline[activeStepIndex]) === 'waiting grade'
                                             ? 'bg-yellow-500'
                                             : 'bg-gray-500'
                                         }`}
                                 >
-                                    {group.timeline[activeStepIndex].status}
+                                    {updateTimelineStatus(group.timeline[activeStepIndex])}
                                 </span>
                             </div>
                         </div>
@@ -221,7 +219,6 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                     ) : (
                         <div>No submissions available for this Outcome.</div>
                     )}
-
                 </div>
             )}
             <TimelineEdit
@@ -234,5 +231,5 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
     );
 });
 
-
 export default TimelineView;
+

@@ -14,7 +14,7 @@ interface Timeline {
     startDate: string;
     endDate: string;
     editAble: boolean;
-    status: 'finish' | 'waiting grade' | 'overdue' | 'pending';
+    status: string;
     type: string;
     classworkId: string;
 }

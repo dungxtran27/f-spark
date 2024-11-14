@@ -20,11 +20,10 @@ const TimelineSchema = new Schema(
     editAble: {
       type: Boolean,
     },
-    status: {
-      type: String,
-      required: false,
-      enum: ['finish' | 'waiting grade' | 'overdue' | 'pending'],
-    },
+    // status: {
+    //   type: String,
+    //   required: false,
+    // },
     type: {
       type: String,
       required: true,
