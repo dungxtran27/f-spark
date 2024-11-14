@@ -113,7 +113,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
     });
 
     const submissions: Submission[] = Array.isArray(data?.data?.data) ? data.data.data : [];
-    
+
     const getRemainingTime = (endDate: string) => {
         const end = dayjs(endDate);
         const now = dayjs();
@@ -194,9 +194,9 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                         <span>
                             Deadline: {formatDate(group.timeline[activeStepIndex].startDate)} - {formatDate(group.timeline[activeStepIndex].endDate)}
                         </span>
-                        <span className="text-red-500">
-                            {getRemainingTime(group.timeline[activeStepIndex].endDate).daysLeft < 0
-                                ? 'Overdue'
+                        <span className="text-red-500">Left: 
+                            {getRemainingTime(group.timeline[activeStepIndex].endDate).daysLeft <= 0 && getRemainingTime(group.timeline[activeStepIndex].endDate).hoursLeft <= 0
+                                ? '00:00'
                                 : `${getRemainingTime(group.timeline[activeStepIndex].endDate).daysLeft} days ${getRemainingTime(group.timeline[activeStepIndex].endDate).hoursLeft} hours left`}
                         </span>
                     </p>
@@ -205,7 +205,6 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                     {/* Hiển thị các submission tương ứng */}
                     <div className="mt-4 flex justify-between items-center">
                         <h3 className="text-lg font-semibold">Submissions</h3>
-                        <div className="font-bold text-sm">{dayjs(filteredSubmissions[0]?.createdAt).format('DD/MM/YYYY HH:mm')}</div>
                     </div>
 
                     {filteredSubmissions.length > 0 ? (
