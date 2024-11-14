@@ -13,9 +13,7 @@ import { authApi } from "../../../api/auth";
 import { login } from "../../../redux/slices/auth";
 import { useDispatch } from "react-redux";
 import { LOGIN_DATA, ROLE } from "../../../utils/const";
-// interface ErrorResponse {
-//   error: string;
-// }
+import _ from "lodash"
 const Login = () => {
   const [form] = Form.useForm();
   const { role } = useParams();
@@ -25,7 +23,7 @@ const Login = () => {
   const navigate = useNavigate();
   const loginMutation = useMutation({
     mutationFn: () =>
-      authApi.login({ email, password, role: role?.toUpperCase() }),
+      authApi.login({ email, password, role: role ? _.upperCase(role) : _.upperCase("student") }),
     onSuccess: (data) => {
       dispatch(login(data.data.data));
       switch (data.data.data?.role) {
