@@ -101,9 +101,24 @@ const getSubmissionsOfClassWork = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getSubmissionsByGroup = async (req, res) => {
+  try {
+    const { groupId } = req.query;
+        if (!groupId) {
+      return res.status(400).json({ message: 'groupId is required' });
+    }
+    const submissions = await SubmissionRepository.getSubmissionsByGroupId(groupId);
+    return res.status(200).json({ data: submissions || [] });
+  } catch (error) {
+    return res.status(500).json({ message: 'An error occurred: ' + error.message });
+  }
+};
+
+
 
 export default {
   createSubmission,
   addGrade,
   getSubmissionsOfClassWork,
+  getSubmissionsByGroup
 };

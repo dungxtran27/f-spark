@@ -99,4 +99,7 @@ groupRouter.post(
 );
 groupRouter.post("/lockOrUnlockGroup", GroupController.lockOrUnlockGroup);
 groupRouter.post("/ungroup", GroupController.ungroup);
+groupRouter.get("/:classId", GroupController.getAllGroupByClassId);
+groupRouter.put("/update",GroupController.editTimelineForManyGroups);
+
 export default groupRouter;

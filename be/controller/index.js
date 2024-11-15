@@ -27,6 +27,7 @@ export {
   TaskController,
   TimeBlockController,
   TagMajorController,
+  NotificationController,
   RequestController,
-  NotificationController
+
 };

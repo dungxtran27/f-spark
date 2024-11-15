@@ -27,6 +27,7 @@ export {
   MentorRepository,
   TaskRepository,
   TagMajorRepository,
+  NotificationRepository,
   RequestRepository,
-  NotificationRepository
+
 };

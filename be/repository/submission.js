@@ -90,10 +90,26 @@ const getSubmissionsOfClassWork = async (classWorkId, studentId) => {
     return new Error(error.message);
   }
 };
+const getSubmissionsByGroupId = async (groupId) => {
+  try {
+    const submissions = await Submission.find({ group: groupId })
+      .populate({
+        path: 'group',  // Populate the group field
+        select: 'timeline',  // Select only the timeline field from the Group model
+      })
+      .populate('classworkId')  // Populating classworkId as before
+      .exec();
+    return submissions;
+  } catch (error) {
+    throw new Error("Error fetching submissions: " + error.message);
+  }
+};
+
 export default {
   createSubmission,
   getSubmissionsOfGroup,
   addGrade,
   findSubmissionOfStudent,
   getSubmissionsOfClassWork,
+  getSubmissionsByGroupId
 };

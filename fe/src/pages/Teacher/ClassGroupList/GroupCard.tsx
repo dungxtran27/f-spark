@@ -46,12 +46,14 @@ const GroupCard = ({
     <div
       ref={setNodeRef}
       style={style1}
-      className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow"
+      // className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow"
+      className="flex flex-col bg-white rounded-sm px-2 py-2 mr-2 mb-2 shadow-md w-full max-w-[32%]"
+
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center ">
           <div
-            className="font-semibold pr-3 text-[16px] hover:text-purple-600"
+            className="font-semibold pr-3 text-[16px] hover:text-purple-600 cursor-pointer"
             onClick={() => {
               setGroup(info);
               handleOpengroupDetailModal();
@@ -70,7 +72,7 @@ const GroupCard = ({
               <FaUserGroup color={"gray"} />
             </Tooltip>
           ) : (
-            <Tooltip placement="top" title="4 < students < 6">
+            <Tooltip placement="top" title="4 < Students < 6">
               <FaUserGroup color="red" />
             </Tooltip>
           )}
@@ -79,8 +81,8 @@ const GroupCard = ({
             placement="top"
             title={
               hasAtLeastTwoMajors(info.teamMembers)
-                ? "team has 2 major above"
-                : "team has < 2 major"
+                ? "Team has 2 majors above"
+                : "Team has < 2 majors"
             }
           >
             <FaUserGraduate
@@ -95,13 +97,13 @@ const GroupCard = ({
         </div>
       </div>
       <div className="py-2">
-        <span className="text-gray-500">mentor: </span>
+        <span className="text-gray-500">Mentor: </span>
         {info?.mentor?.name ? (
           <span className="font-semibold text-[14px]">
             {info?.mentor?.name}
           </span>
         ) : role === ROLE.student ? (
-          <>no mentor</>
+          <>No mentor</>
         ) : (
           <Button
             onClick={() => {
@@ -110,12 +112,12 @@ const GroupCard = ({
             }}
             className=" text-white hover:text-red-600 border-red-600 bg-red-600 px-1 h-7 ml-1  "
           >
-            <span> assign</span>
+            <span> Assign</span>
           </Button>
         )}
       </div>
       <div className="mt-1">
-        <span className="text-gray-500 pr-2 ">tag:</span>
+        <span className="text-gray-500 pr-2 ">Tag: </span>
         {info.tag.map((t: any) => (
           <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
         ))}

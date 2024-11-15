@@ -1,0 +1,13 @@
+.customTabs {
+  :global {
+    .ant-tabs {
+      .ant-tabs-nav {
+        padding: 0.5rem;
+        background-color: white;
+      }
+      .ant-tabs-content-holder {
+        padding: 0 1.25rem;
+      }
+    }
+  }
+}
