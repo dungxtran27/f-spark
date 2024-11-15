@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Button, Modal, Skeleton, Tag, Empty } from "antd";
-import { BsFillPersonCheckFill, BsPersonXFill } from "react-icons/bs";
 import { IoPerson } from "react-icons/io5";
 import { requestList } from "../../../api/request/request";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
+import { FaCheck, FaTimes } from "react-icons/fa";
 
 interface Request {
   _id: string;
@@ -18,9 +18,6 @@ interface Request {
   attachmentUrl: string;
   upVoteYes: string[];
   upVoteNo: string[];
-  group: {
-    teamMembers?: string[];
-  };
   createBy: {
     name: string;
     studentId: string;
@@ -30,6 +27,7 @@ interface Request {
     };
   };
   actionType: string;
+  totalMembers: number;
 }
 
 const RequestJoinGroup = () => {
@@ -86,32 +84,37 @@ const RequestJoinGroup = () => {
 
   const renderVoteIcons = (request: Request) => {
     const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
-    const totalMembers = request.group?.teamMembers?.length || 0;
-    if (request.status === "approved") {
+    const totalMembers = request.totalMembers || 0;
+
+    const upVoteYesCount = request.upVoteYes.length;
+    const upVoteNoCount = request.upVoteNo.length;
+    const pendingVotes = totalMembers - totalVotes;
+    const userHasVoted =
+      request.upVoteYes.includes(userId) || request.upVoteNo.includes(userId);
+
+    if (userHasVoted) {
       return (
-        <span className="text-sm bg-green-600 text-white px-2 rounded">
-          Approved
-        </span>
-      );
-    } else if (request.status === "decline") {
-      return (
-        <span className="text-sm bg-red-600 text-white px-2 rounded">
-          Decline
-        </span>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center text-green-500 space-x-2">
+            <span className="text-[14px]">{upVoteYesCount}</span>
+            <FaCheck size={16} />
+          </div>
+          <div className="flex items-center text-red-500 space-x-2">
+            <span className="text-[14px]">{upVoteNoCount}</span>
+            <FaTimes size={16} />
+          </div>
+          {totalVotes < totalMembers ? (
+            <div className="flex items-center text-gray-500 space-x-2">
+              <span className="text-[14px]">{pendingVotes}</span>
+              <IoPerson size={16} />
+            </div>
+          ) : (
+            <div className="px-5"></div>
+          )}
+        </div>
       );
     }
-    return request.group?.teamMembers?.map((member, i) => {
-      if (request.upVoteYes.includes(member)) {
-        return <BsFillPersonCheckFill key={i} className="text-green-500" />;
-      }
-      if (request.upVoteNo.includes(member)) {
-        return <BsPersonXFill key={i} className="text-red-500" />;
-      }
-      if (totalVotes < totalMembers) {
-        return <IoPerson key={i} className="text-gray-500" />;
-      }
-      return null;
-    });
+    return <div className="px-20 -ml-7"></div>;
   };
 
   const filteredRequests =
@@ -130,11 +133,7 @@ const RequestJoinGroup = () => {
     return (
       <div className="flex justify-end space-x-2 mb-2">
         {userVote ? (
-          <span
-            className={`font-semibold ${
-              userVote === "yes" ? "text-green-600" : "text-red-600"
-            }`}
-          >
+          <span>
             You voted
             <span
               className={`rounded-md px-2 ml-2 text-white ${
