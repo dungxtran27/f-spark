@@ -78,33 +78,20 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
         }
         return 'pending';
     };
-    useEffect(() => {
-        const processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'pending');
-        if (processStepIndex !== -1) {
-            setActiveStepIndex(processStepIndex);
-        } else {
-            setActiveStepIndex(-1);
-        }
-    }, [group.timeline]);
     const handleStepChange = (index: number) => {
-        setActiveStepIndex(index === activeStepIndex ? -1 : index);
-        if (index >= 0) {
-            const selectedTimeline = group.timeline[index];
-            const relatedSubmissions = submissions.filter(
-                (submission) => submission.classworkId._id === selectedTimeline.classworkId
-            );
-            setFilteredSubmissions(relatedSubmissions);
-        } else {
-            setFilteredSubmissions([]);
-        }
+        if (index === activeStepIndex) return;
+        setActiveStepIndex(index);
+        const selectedTimeline = group.timeline[index];
+        const relatedSubmissions = submissions.filter(
+            (submission) => submission.classworkId._id === selectedTimeline.classworkId
+        );
+        setFilteredSubmissions(relatedSubmissions);
     };
-
     const handleEditClick = (timeline: Timeline) => {
         const timelineWithGroupId = { ...timeline, groupId: group._id };
         setModalData(timelineWithGroupId);
         setIsModalVisible(true);
     };
-
     const { data, isLoading, isError } = useQuery<AxiosResponse>({
         queryKey: [QUERY_KEY.TIMELINE_TEACHER, group._id],
         queryFn: () => classApi.getSubmissionsByGroup(group._id),
@@ -113,6 +100,23 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
     });
 
     const submissions: Submission[] = Array.isArray(data?.data?.data) ? data.data.data : [];
+    console.log("heheheheh");
+    useEffect(() => {
+        if (!submissions || submissions.length === 0) return;  
+        let processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'waiting grade');
+        if (processStepIndex === -1) {
+            processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'overdue');
+        }
+        if (processStepIndex !== -1) {
+            setActiveStepIndex(processStepIndex);
+            const selectedTimeline = group.timeline[processStepIndex];
+            const relatedSubmissions = submissions.filter(
+                (submission) => submission.classworkId._id === selectedTimeline.classworkId
+            );
+            setFilteredSubmissions(relatedSubmissions);
+        }
+    }, [group.timeline, submissions]);
+
 
     const getRemainingTime = (endDate: string) => {
         const end = dayjs(endDate);
@@ -194,7 +198,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                         <span>
                             Deadline: {formatDate(group.timeline[activeStepIndex].startDate)} - {formatDate(group.timeline[activeStepIndex].endDate)}
                         </span>
-                        <span className="text-red-500">Left: 
+                        <span className="text-red-500">Left:
                             {getRemainingTime(group.timeline[activeStepIndex].endDate).daysLeft <= 0 && getRemainingTime(group.timeline[activeStepIndex].endDate).hoursLeft <= 0
                                 ? '00:00'
                                 : `${getRemainingTime(group.timeline[activeStepIndex].endDate).daysLeft} days ${getRemainingTime(group.timeline[activeStepIndex].endDate).hoursLeft} hours left`}

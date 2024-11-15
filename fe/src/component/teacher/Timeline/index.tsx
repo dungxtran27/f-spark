@@ -34,11 +34,12 @@ const TimelineClassWrapper: React.FC = () => {
         enabled: !!classId,
     });
     const groups: Group[] = Array.isArray(data?.data?.data) ? data.data.data : [];
-
     const renderTimeline = (group: Group) => {
-        return <TimelineView group={group} />;
+        return (
+            <TimelineView group={group} key={group._id} />
+        );
     };
-
+    
     return (
         <div>
             <Tabs defaultActiveKey="0" tabPosition="left">
@@ -50,6 +51,7 @@ const TimelineClassWrapper: React.FC = () => {
             </Tabs>
         </div>
     );
+    
 };
 
 export default TimelineClassWrapper;

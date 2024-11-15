@@ -123,11 +123,12 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
       (date: dayjs.Dayjs | null) => {
         setUpdatedData((prev) => ({
           ...prev,
-          endDate: date ? date.format('DD/MM/YYYY') : "",
+          endDate: date ? date.format('YYYY-MM-DD') : "", 
         }));
       },
       []
     );
+    
 
     return (
       <Modal
