@@ -79,7 +79,7 @@ const GroupTable = () => {
               </td>
               <td className="p-2 font-semibold text-lg">{group.teamMembers}</td>
               <td className="p-2">
-                <MdGroupAdd  
+                <MdGroupAdd
                   className="text-black text-2xl cursor-pointer"
                   onClick={showModal}
                 />
@@ -112,6 +112,7 @@ const GroupTable = () => {
         />
       </div>
       <Modal
+        centered
         title="Class Group"
         open={isModalVisible}
         onCancel={handleCancel}

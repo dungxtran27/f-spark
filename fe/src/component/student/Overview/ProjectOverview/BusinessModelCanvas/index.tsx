@@ -39,7 +39,6 @@ const BusinessModelCanvas: React.FC = () => {
   const [channelsText, setChannelsText] = useState("");
   const [revenueStreamsText, setRevenueStreamsText] = useState("");
   const [costStructureText, setCostStructureText] = useState("");
-  
 
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
@@ -418,6 +417,7 @@ const BusinessModelCanvas: React.FC = () => {
         </div>
       </div>
       <Modal
+        centered
         title="Chỉnh sửa nội dung"
         open={isModalVisible}
         onOk={handleSubmit}

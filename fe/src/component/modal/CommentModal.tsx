@@ -21,7 +21,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
   };
 
   return (
-    <Modal title="Comment" open={open} onCancel={handleCancel}>
+    <Modal centered title="Comment" open={open} onCancel={handleCancel}>
       {comments.map((c) => (
         <div className="stream_cmt_body pt-3">
           <div className="flex items-start">

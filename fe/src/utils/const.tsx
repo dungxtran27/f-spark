@@ -201,6 +201,11 @@ export const TASK_TYPE = {
   CLASS_WORK: "Class work",
   GROUP_WORK: "Group task",
 };
+export const NOTIFICATION_READ_STATUS = [
+  { key: "Unread", label: "Unread" },
+  { key: "Read", label: "Read" },
+  { key: "All", label: "All" },
+];
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
   REFRESH_TOKEN: "refreshToken",
@@ -218,9 +223,13 @@ export const QUERY_KEY = {
   TIMELINE_TEACHER:"timelineTeacher",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
+  REQUESTS: "requests",
   RECORD_OF_CHANGES: "recordOfChanges",
   GROUP_NOTIFICATION: "groupNotification",
   TEACHER_CLASS_TIMELINE: "teacherClassTimeline",
+  GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
+  CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
+  NOTIFICATION_STATISTIC: "notificationStatistic"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -243,5 +252,15 @@ export const CLASS_WORK_TYPE = {
 export const NOTIFICATION_ACTION_TYPE = {
   CHILD_TASK_CREATION: "ChildTaskCreation",
   CREATE_TASK: "TaskCreation",
-  UPDATE_TASK_STATUS: "UpdateTaskStatus"
+  UPDATE_TASK_STATUS: "UpdateTaskStatus",
+};
+export const CLASS_NOTIFICATION_ACTION_TYPE = {
+  CREATE_ANNOUNCEMENT: "CreateAnnouncement",
+  CREATE_ASSIGNMENT: "CreateAssignment",
+  GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
+};
+export const NOTIFICATION_TYPE = {
+  CLASS: "class",
+  GROUP: "group",
+  SYSTEM: "system"
 }

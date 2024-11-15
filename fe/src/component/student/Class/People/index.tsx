@@ -151,7 +151,8 @@ const People = () => {
               <FaChalkboardTeacher size={16} />
             </Button>
           </Popover>
-          <Popover className=" mt-3"
+          <Popover
+            className=" mt-3"
             content={ungroupStudentPopoverContent}
             trigger="click"
             placement="leftTop"
@@ -168,6 +169,7 @@ const People = () => {
         </div>
 
         <Modal
+          centered
           open={groupDetailModal}
           onCancel={handleClosegroupDetailModal}
           width={1000}

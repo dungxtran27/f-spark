@@ -5,7 +5,7 @@ const createSubmission = async ({
   attachment,
   groupId,
   classworkId,
-  content
+  content,
 }) => {
   try {
     const newSubmission = await Submission.create({
@@ -13,7 +13,7 @@ const createSubmission = async ({
       attachment: attachment,
       group: groupId,
       classworkId: classworkId,
-      content: content
+      content: content,
     }).then((result) => result.populate("student"));
 
     return newSubmission;
@@ -26,13 +26,14 @@ const getSubmissionsOfGroup = async (outcomeIds, groupId) => {
     const submissions = await Submission.find({
       classworkId: { $in: outcomeIds },
       group: groupId,
-    }).populate({
-      path: "student",
-    }).populate({
-      path: "group",
-      select: "GroupName"
     })
-      ;
+      .populate({
+        path: "student",
+      })
+      .populate({
+        path: "group",
+        select: "GroupName",
+      });
     return submissions;
   } catch (error) {
     return new Error(error.message);
@@ -52,7 +53,11 @@ const addGrade = async ({ submissionId, grade, criteria }) => {
       { new: true }
     )
       .populate("student")
-      .populate("group");
+      .populate("group")
+      .populate({
+        path: "classworkId",
+        select: "title _id classId",
+      });
     return updatedSubmission;
   } catch (error) {
     return new Error(error.message);
@@ -75,9 +80,9 @@ const getSubmissionsOfClassWork = async (classWorkId, studentId) => {
       classworkId: classWorkId,
       student: { $ne: studentId },
     }).populate({
-      path: 'student',
+      path: "student",
       populate: {
-        path: 'account',
+        path: "account",
       },
     });
     return result;

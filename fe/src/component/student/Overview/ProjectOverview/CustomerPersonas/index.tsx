@@ -174,6 +174,7 @@ const CustomerPersonas: React.FC = () => {
         </div>
 
         <Modal
+          centered
           title="Chỉnh sửa thông tin"
           open={isModalVisible}
           onOk={handleSaveText}

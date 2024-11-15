@@ -21,7 +21,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -45,7 +45,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -609,9 +609,9 @@ const lockOrUnlockGroup = async (groupId) => {
 const getGroupsByClassId = async (classId) => {
   try {
     const groups = await Group.find({ class: classId })
-      .select('GroupName GroupDescription timeline') 
-      .lean(); 
-    return groups; 
+      .select('GroupName GroupDescription timeline')
+      .lean();
+    return groups;
   } catch (error) {
     console.error('Error fetching groups by class:', error.message);
     throw error;
@@ -632,10 +632,10 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
           "timeline.$[timelineItem].description": updateData.description,
           "timeline.$[timelineItem].endDate": updateData.endDate,
         }
-      },{
-        arrayFilters: [{ "timelineItem.type": type }],
-        new: true
-      }
+      }, {
+      arrayFilters: [{ "timelineItem.type": type }],
+      new: true
+    }
     );
     return await Group.find({
       _id: { $in: groupIds },
@@ -648,9 +648,23 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
     throw new Error(error.message);
   }
 };
-
-
-
+const findAllGroups = async () => {
+  try {
+    const groups = await Group.find({ isSponsorship: false }).select("GroupName leader tag teamMembers isSponsorship").populate({
+      path: 'teamMembers',
+      select: 'major',
+    }).populate({
+      path: 'leader',
+      select: 'name',
+    }).populate({
+      path: 'tag',
+      select: 'name',
+    });
+    return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 export default {
   createCellsOnUpdate,
@@ -669,6 +683,7 @@ export default {
   findAllGroupsOfClass,
   addStundentInGroup,
   assignLeader,
+  findAllGroups,
   createGroup,
   deleteStudentFromGroup,
   ungroup,

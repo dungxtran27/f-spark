@@ -15,7 +15,12 @@ submissionRouter.post(
   verifyToken,
   SubmissionController.createSubmission
 );
-submissionRouter.patch("/addGrade", SubmissionController.addGrade);
+submissionRouter.patch(
+  "/addGrade",
+  verifyToken,
+  authorization.checkRole("TEACHER"),
+  SubmissionController.addGrade
+);
 submissionRouter.get(
   "/getSubmissions/:classworkId",
   verifyToken,

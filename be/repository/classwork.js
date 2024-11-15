@@ -112,7 +112,11 @@ const createClassWork = async ({
       type,
       classId,
     });
-    return result._doc;
+    const populatedResult = await result.populate({
+      path: "classId",
+      select: "classCode",
+    });
+    return populatedResult.toObject();
   } catch (error) {
     throw new Error(error.message);
   }
@@ -153,24 +157,26 @@ const upvoteAnnouncement = async ({ studentId, classWorkId }) => {
 
 const getUngradedOutcomesCount = async (classId) => {
   try {
-    const outcomes = await ClassWork.find({ classId, type: 'outcome' }).select('_id name');
-    const outcomeIds = outcomes.map(outcome => outcome._id);
+    const outcomes = await ClassWork.find({ classId, type: "outcome" }).select(
+      "_id name"
+    );
+    const outcomeIds = outcomes.map((outcome) => outcome._id);
     const ungradedCount = await Submission.countDocuments({
       classworkId: { $in: outcomeIds },
-      grade: null
-    });    
-    return ungradedCount; 
+      grade: null,
+    });
+    return ungradedCount;
   } catch (error) {
-    throw new Error(error.message); 
+    throw new Error(error.message);
   }
 };
 const getLatestAnnouncementUpvotes = async (classId) => {
   try {
     const latestAnnouncement = await ClassWork.findOne({
       classId,
-      type: 'announcement'
+      type: "announcement",
     }).sort({ createdAt: -1 });
-    return latestAnnouncement.upVote.length ;
+    return latestAnnouncement.upVote.length;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -180,7 +186,7 @@ const getLatestAssignmentSubmissionsCount = async (classId) => {
   try {
     const latestAssignment = await ClassWork.findOne({
       classId,
-      type: 'assignment'
+      type: "assignment",
     }).sort({ createdAt: -1 });
 
     return latestAssignment
@@ -201,5 +207,5 @@ export default {
   upvoteAnnouncement,
   getUngradedOutcomesCount,
   getLatestAnnouncementUpvotes,
-  getLatestAssignmentSubmissionsCount
+  getLatestAssignmentSubmissionsCount,
 };
