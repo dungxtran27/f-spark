@@ -60,24 +60,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalData, setModalData] = useState<Timeline | null>(null);
     const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([]);
-    const updateTimelineStatus = (timeline: Timeline) => {
-        if (!submissions || submissions.length === 0) {
-            return 'pending';
-        }
-        const submission = submissions.find((sub: Submission) =>
-            sub.group._id === groupId && sub.classworkId._id === timeline.classworkId
-        );
-        if (submission) {
-            const createdAt = dayjs(submission.createdAt);
-            const endDate = dayjs(timeline.endDate);
-            if (submission.grade !== null && submission.grade !== undefined) {
-                return createdAt.isBefore(endDate) ? 'finish' : 'overdue';
-            } else {
-                return createdAt.isBefore(endDate) ? 'waiting grade' : 'overdue';
-            }
-        }
-        return 'pending';
-    };
+
     const handleStepChange = (index: number) => {
         if (index === activeStepIndex) return;
         setActiveStepIndex(index);
@@ -100,6 +83,24 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
     });
 
     const submissions: Submission[] = Array.isArray(data?.data?.data) ? data.data.data : [];
+    const updateTimelineStatus = (timeline: Timeline) => {
+        if (!submissions || submissions.length === 0) {
+            return 'pending';
+        }
+        const submission = submissions.find((sub: Submission) =>
+            sub.group._id === groupId && sub.classworkId._id === timeline.classworkId
+        );
+        if (submission) {
+            const createdAt = dayjs(submission.createdAt);
+            const endDate = dayjs(timeline.endDate);
+            if (submission.grade !== null && submission.grade !== undefined) {
+                return createdAt.isBefore(endDate) ? 'finish' : 'overdue';
+            } else {
+                return createdAt.isBefore(endDate) ? 'waiting grade' : 'overdue';
+            }
+        }
+        return 'pending';
+    };
     useEffect(() => {
         if (!submissions || submissions.length === 0) return;
         let processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'waiting grade');
@@ -113,7 +114,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                 (submission) => submission.classworkId._id === selectedTimeline.classworkId
             );
             setFilteredSubmissions(relatedSubmissions);
-        }// cái này thay đổi khi nào, set 1 dependency thôi này chỉ hiện lần đầu lúc vào page , thế để trống thôi 
+        }
     }, [group.timeline, submissions]);
 
 
@@ -169,7 +170,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                 ))}
             </Steps>
             {activeStepIndex >= 0 && (
-                <div className="bg-white p-4 border rounded-lg shadow-sm mb-4">
+                <div className="bg-white p-2 border rounded-lg shadow-sm mb-4">
                     <div className="flex justify-between items-center">
                         <div className="flex items-center">
                             <span className="text-xl font-bold">{group.timeline[activeStepIndex].title}</span>

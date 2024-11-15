@@ -29,5 +29,5 @@ export {
   TagMajorController,
   NotificationController,
   RequestController,
-  NotificationController
+
 };

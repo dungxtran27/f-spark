@@ -390,7 +390,7 @@ const ClassGroupListWrapper = () => {
 
   return (
     <>
-      <div className=" px-1">
+      <div className=" px-0.1">
         <div className="text-lg font-semibold ">
           <span>{classPeople?.data.data.groupStudent.length}</span>
           <span className="pl-1 pr-3">Groups</span>
