@@ -100,12 +100,11 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
     });
 
     const submissions: Submission[] = Array.isArray(data?.data?.data) ? data.data.data : [];
-    console.log("heheheheh");
     useEffect(() => {
-        if (!submissions || submissions.length === 0) return;  
+        if (!submissions || submissions.length === 0) return;
         let processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'waiting grade');
         if (processStepIndex === -1) {
-            processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'overdue');
+            processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'pending');
         }
         if (processStepIndex !== -1) {
             setActiveStepIndex(processStepIndex);
@@ -114,7 +113,7 @@ const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
                 (submission) => submission.classworkId._id === selectedTimeline.classworkId
             );
             setFilteredSubmissions(relatedSubmissions);
-        }
+        }// cái này thay đổi khi nào, set 1 dependency thôi này chỉ hiện lần đầu lúc vào page , thế để trống thôi 
     }, [group.timeline, submissions]);
 
 
