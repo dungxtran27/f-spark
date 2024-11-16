@@ -665,6 +665,59 @@ const findAllGroups = async () => {
     throw new Error(error.message);
   }
 };
+const getAllGroups = async ({ GroupName, class:classId, search }) => {
+  try {
+    const query = {};
+    
+    if (GroupName) {
+      query.GroupName = { $regex: GroupName, $options: "i" }; 
+    }
+    if (search) {
+      if (!query.GroupName) {
+        query.GroupName = { $regex: search, $options: "i" }; 
+      } else {
+        query.$and = [
+          { GroupName: { $regex: GroupName, $options: "i" } },
+          { GroupName: { $regex: search, $options: "i" } },
+        ];
+      }
+    }
+    const groups = await Group.find(query)
+      .populate({
+        path: "class",
+        select: "classCode",
+      })
+      .populate({
+        path: "teamMembers",
+        select: "name studentId", 
+      });
+    const totalGroup = await Group.countDocuments(groups);
+    const countGroupNotHaveClass = await Group.countDocuments({
+      class: null, class: undefined
+    });
+    let GroupNotHaveClassQuery = { class: null, class:undefined };
+    if (search) {
+      GroupNotHaveClassQuery.$or = [
+        { GroupName: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const GroupNotHaveClass = await Group.find(GroupNotHaveClassQuery)
+      .populate({
+        path: "teamMembers", 
+        select: "name studentId",
+      });
+
+    return {
+      groups,
+      totalGroup,
+      GroupNotHaveClass,
+      countGroupNotHaveClass,
+    };
+  } catch (error) {
+    throw new Error("Error fetching groups: " + error.message);
+  }
+};
 
 export default {
   createCellsOnUpdate,
@@ -690,4 +743,5 @@ export default {
   lockOrUnlockGroup,
   getGroupsByClassId,
   editTimelineForManyGroups,
+  getAllGroups
 };

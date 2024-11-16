@@ -94,6 +94,59 @@ const findById = async (studentId) =>{
     throw new Error(error.message);
   }
 }
+const getAllStudents = async ({ name, studentId, email, major }) => {
+  try {
+    const query = {};
+    if (name) {
+      query.name = { $regex: name, $options: "i" };
+    }
+    if (studentId) {
+      query.studentId = { $regex: studentId, $options: "i" };
+    }
+    if (email) {
+      query["account.email"] = { $regex: email, $options: "i" };
+    }
+    if (major) {
+      query.major = major;
+    }
+    const students = await Student.find(query)
+      .populate({
+        path: "account",
+        select: "profilePicture email",
+      })
+      .populate({
+        path: "classId",
+        select: "classCode",
+      })
+      .populate({
+        path: "group",
+        select: "GroupName",
+      });
+
+    const totalStudent = await Student.countDocuments(students);
+    const queryNotHaveClass = {
+      ...query,
+      $or: [{ classId: null }, { classId: undefined }],
+    };
+    const StudentNotHaveClass = await Student.find(queryNotHaveClass)
+      .populate({
+        path: "group",
+        select: "GroupName",
+      });
+    const countStudentNotHaveClass = await Student.countDocuments({classId: null, class: undefined});
+    return {
+      students,
+      totalStudent,
+      StudentNotHaveClass,
+      countStudentNotHaveClass,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+
+
 export default {
   findStudentByAccountId,
   getStudentsByGroup,
@@ -101,5 +154,6 @@ export default {
   getStudentsByGroup,
   getAllStudentByClassId,
   getAllStudentUngroupByClassId,
-  findById
+  findById,
+  getAllStudents
 };

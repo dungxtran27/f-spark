@@ -357,7 +357,28 @@ const editTimelineForManyGroups = async (req, res) => {
   }
 };
 
+const getAllGroups = async (req, res) => {
+  try {
+    const filters = req.body; 
+    const {
+      groups,
+      totalGroup,
+      GroupNotHaveClass,
+      countGroupNotHaveClass,
+    } = await GroupRepository.getAllGroups(filters);
 
+    return res.status(200).json({
+      data: {
+        groups,
+        totalGroup,
+        GroupNotHaveClass,
+        countGroupNotHaveClass,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 export default {
   createJourneyRow,
@@ -381,5 +402,6 @@ export default {
   ungroup,
   lockOrUnlockGroup,
   getAllGroupByClassId,
-  editTimelineForManyGroups
+  editTimelineForManyGroups,
+  getAllGroups
 };

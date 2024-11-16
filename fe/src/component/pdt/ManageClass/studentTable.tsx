@@ -1,11 +1,16 @@
-import { Button, Checkbox, Modal, Pagination } from "antd";
+import { Button, Checkbox, Modal, Pagination, Select, Input } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import ClassCard from "./classCard";
 import { FiPlus } from "react-icons/fi";
 import { MdGroupAdd } from "react-icons/md";
 
+const { Option } = Select;
+
 const StudentTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [semester, setSemester] = useState("SU-24");
+  const [majorFilter, setMajorFilter] = useState<string | null>(null);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -15,30 +20,38 @@ const StudentTable = () => {
     setIsModalVisible(false);
   };
 
+  const handleSemesterChange = (value: string) => {
+    setSemester(value);
+  };
+
+  const handleMajorChange = (value: string | null) => {
+    setMajorFilter(value);
+  };
+
   const data = [
     {
-      mssv: "HE170019",
+      studentId: "HE170019",
       name: "Trần Văn Anh Vũ",
       mail: "hieunthe163894@fpt.edu.vn",
       major: "GD",
       color: "red",
     },
     {
-      mssv: "HE170020",
+      studentId: "HE170020",
       name: "Trần Văn Anh Vũ",
       mail: "hieunthe163894@fpt.edu.vn",
       major: "HS",
       color: "green",
     },
     {
-      mssv: "HE170021",
+      studentId: "HE170021",
       name: "Trần Văn Anh Vũ",
       mail: "hieunthe163894@fpt.edu.vn",
       major: "SE",
       color: "blue",
     },
     {
-      mssv: "HE170022",
+      studentId: "HE170022",
       name: "Trần Văn Anh Vũ",
       mail: "hieunthe163894@fpt.edu.vn",
       major: "SE",
@@ -46,15 +59,56 @@ const StudentTable = () => {
     },
   ];
 
+  const filteredData = majorFilter
+    ? data.filter((student) => student.major === majorFilter)
+    : data;
+
   return (
     <div className="bg-white shadow-md rounded-md p-4">
+      {/* Search and Filter Section */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex space-x-4">
+          <div className="flex items-center space-x-2">
+            <span>Semester:</span>
+            <Select
+              value={semester}
+              onChange={handleSemesterChange}
+              className="w-24"
+            >
+              <Option value="SU-24">SU-24</Option>
+              <Option value="FA-24">FA-24</Option>
+              <Option value="SP-24">SP-24</Option>
+            </Select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span>Major:</span>
+            <Select
+              value={majorFilter}
+              onChange={handleMajorChange}
+              placeholder="Select Major"
+              className="w-36"
+            >
+              <Option value="HS">HS</Option>
+              <Option value="GD">GD</Option>
+              <Option value="SE">SE</Option>
+            </Select>
+          </div>
+          <Input
+            placeholder="Search"
+            className="w-64"
+            suffix={<SearchOutlined />}
+          />
+        </div>
+      </div>
+
+      {/* Student Table */}
       <table className="w-full table-auto">
         <thead>
           <tr className="bg-gray-200 text-left">
             <th className="p-2">
               <Checkbox />
             </th>
-            <th className="p-2">Mssv</th>
+            <th className="p-2">studentId</th>
             <th className="p-2">Major</th>
             <th className="p-2">Name</th>
             <th className="p-2">Email</th>
@@ -62,12 +116,12 @@ const StudentTable = () => {
           </tr>
         </thead>
         <tbody>
-          {data.map((student, index) => (
+          {filteredData.map((student, index) => (
             <tr className="border-b" key={index}>
               <td className="p-2">
                 <Checkbox />
               </td>
-              <td className="p-2">{student.mssv}</td>
+              <td className="p-2">{student.studentId}</td>
               <td className="p-2">
                 <span
                   className={`bg-${student.color}-400 px-2 py-1 rounded-lg`}
@@ -87,6 +141,7 @@ const StudentTable = () => {
           ))}
         </tbody>
       </table>
+
       <div className="mt-5 flex justify-center">
         <Pagination
           defaultCurrent={1}

@@ -83,6 +83,12 @@ export const TASK_FILTERS = {
   timeBlock: "timeBlock",
   searchKey: "searchKey",
 };
+export const MANAGECLASS_FILTERS = {
+  major: "major",
+  filters: "filters",
+  groupName: "GroupName",
+};
+
 export const MANAGESTUDENT_FILTERS = {
   class: "class",
   term: "term",
@@ -229,7 +235,9 @@ export const QUERY_KEY = {
   TEACHER_CLASS_TIMELINE: "teacherClassTimeline",
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
-  NOTIFICATION_STATISTIC: "notificationStatistic"
+  NOTIFICATION_STATISTIC: "notificationStatistic",
+  ALLSTUDENT:"allStudent",
+  ALLGROUP:"allGroup"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

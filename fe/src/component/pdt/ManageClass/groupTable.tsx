@@ -1,12 +1,17 @@
-import { Button, Checkbox, Modal, Pagination } from "antd";
+import { Button, Checkbox, Modal, Pagination, Input, Select } from "antd";
 import { useState } from "react";
 import { ImNotification } from "react-icons/im";
 import ClassCard from "./classCard";
 import { FiPlus } from "react-icons/fi";
 import { MdGroupAdd } from "react-icons/md";
 
-const GroupTable = () => {
+const { Option } = Select;
+
+const Group = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // Search query state
+  const [selectedMajor, setSelectedMajor] = useState([]); // Filter by major
+  const [showRequests, setShowRequests] = useState(false); // Filter by request status
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -16,6 +21,7 @@ const GroupTable = () => {
     setIsModalVisible(false);
   };
 
+  // Sample data (This will be replaced with data from the backend)
   const data = [
     {
       groupName: "banh ca oreo",
@@ -35,10 +41,39 @@ const GroupTable = () => {
       teamMembers: 5,
       request: 0,
     },
+    // Add more groups if needed
   ];
 
   return (
     <div className="bg-white shadow-md rounded-md p-4">
+      {/* Search and Filter Section */}
+      <div className="mb-4 flex gap-4">
+        <Input
+          placeholder="Search by group name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)} // Update search query state
+          style={{ width: 250 }}
+        />
+        <Select
+          mode="multiple"
+          placeholder="Filter by major"
+          value={selectedMajor}
+          onChange={setSelectedMajor} // Update major filter state
+          style={{ width: 250 }}
+        >
+          <Option value="F&B">F&B</Option>
+          <Option value="Nông sản">Nông sản</Option>
+          <Option value="Công nghệ">Công nghệ</Option>
+        </Select>
+        <Checkbox
+          checked={showRequests}
+          onChange={(e) => setShowRequests(e.target.checked)} // Update request filter state
+        >
+          Show only groups with requests
+        </Checkbox>
+      </div>
+
+      {/* Groups Table */}
       <table className="w-full table-auto">
         <thead>
           <tr className="bg-gray-200 text-left">
@@ -102,15 +137,19 @@ const GroupTable = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination */}
       <div className="mt-5 flex justify-center">
         <Pagination
           defaultCurrent={1}
-          total={5}
+          total={data.length} // Pagination based on total data length
           showTotal={(total, range) =>
             `${range[0]}-${range[1]} of ${total} groups`
           }
         />
       </div>
+
+      {/* Modal for Adding Class */}
       <Modal
         centered
         title="Class Group"
@@ -143,4 +182,4 @@ const GroupTable = () => {
   );
 };
 
-export default GroupTable;
+export default Group;

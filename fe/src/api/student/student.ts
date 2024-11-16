@@ -13,4 +13,7 @@ export const student = {
   assignLeaderToGroup: async (requestBody: any) => {
     return await axios.post(`/api/group/assignLeader`, requestBody);
   },
+  getAllStudents: async (filters: any = {}, requestBody: any = {}) => {
+    return await axios.post(`/api/student`, { ...filters, ...requestBody });
+  },
 };
