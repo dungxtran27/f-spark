@@ -47,7 +47,6 @@ const Router = () => {
         <Route path="/timelineTeacher" element={<TimelineTeacher />} />
         
         {/* PDT */}
-        <Route path="/admin/login" element={<Login />} />
         <Route path="/manageClass" element={<ManageClass />} />
         <Route path="/manageRequest" element={<ManageRequest />} />
         <Route path="/manageAccount" element={<AccountManagementPage />} />
