@@ -1,49 +1,83 @@
 import { Link } from "react-router-dom";
 import { DATE_FORMAT, TASK_TYPE } from "../../../../utils/const";
 import PriorityIcon from "../../../common/Task/PrioritySelect/PriorityIcon";
-import { Tooltip } from "antd";
+import { Tooltip, Typography } from "antd";
 import { RiCalendarScheduleLine } from "react-icons/ri";
 import dayjs from "dayjs";
 import StatusSelect from "../../../common/Task/StatusSelect";
+import { GrGroup } from "react-icons/gr";
 
-const TaskCard = ({ taskInfo }: { taskInfo: any }) => {
+const TaskCard = ({
+  taskInfo,
+  isChildTask = false,
+}: {
+  taskInfo: any;
+  isChildTask?: boolean;
+}) => {
   return (
-    <div className="bg-white py-2 px-3 flex items-center justify-between border border-textSecondary/20 rounded shadow">
-      <div className="flex items-center gap-5 w-5/12">
-        <span
-          className={`px-2 ${
-            taskInfo?.taskType === TASK_TYPE.CLASS_WORK
-              ? "bg-pendingStatus/40"
-              : "bg-primaryBlue/40"
-          } rounded whitespace-nowrap`}
-        >
-          {taskInfo?.taskType}
-        </span>
+    <div className="bg-white py-2 px-3 flex items-center justify-between border border-textSecondary/20 rounded shadow w-full">
+      <div
+        className={`flex items-center gap-5 ${
+          isChildTask ? "w-6/12" : "w-5/12"
+        } `}
+      >
+        <Tooltip title={taskInfo?.taskType}>
+          <span
+            className={`p-1 ${
+              taskInfo?.taskType === TASK_TYPE.CLASS_WORK
+                ? "bg-pendingStatus/40"
+                : "bg-primaryBlue/40"
+            } rounded whitespace-nowrap`}
+          >
+            {taskInfo?.taskType === TASK_TYPE.CLASS_WORK ? (
+              <></>
+            ) : (
+              <GrGroup className="text-white" />
+            )}
+          </span>
+        </Tooltip>
         <Link
           to={`/taskDetail/${encodeURI(taskInfo?.taskName)}/${taskInfo._id}`}
           className={`font-medium cursor-pointer hover:text-primaryBlue hover:underline whitespace-nowrap truncate`}
         >
-          {taskInfo?.taskName}
+          <Typography.Text ellipsis={{tooltip: taskInfo?.taskName}}>{taskInfo?.taskName}</Typography.Text>
         </Link>
       </div>
-      <div className="w-2/12 gap-2 flex items-center justify-center">
-        {taskInfo?.priority && <PriorityIcon status={taskInfo?.priority} />}
-        <span className="px-2">{taskInfo?.priority}</span>
-      </div>
+      {!isChildTask && (
+        <div className="w-2/12 gap-2 flex items-center justify-center">
+          {taskInfo?.priority && <PriorityIcon status={taskInfo?.priority} />}
+          <span className="px-2">{taskInfo?.priority}</span>
+        </div>
+      )}
+      {/* {!isChildTask && ( */}
       <div className="w-2/12 justify-center flex items-center gap-1">
         {taskInfo?.dueDate && (
           <div className="gap-3 flex items-center">
             <span className="text-pendingStatus font-medium">
-              <Tooltip title={"Due date"}>
+              <Tooltip
+                title={`Due date: ${dayjs(taskInfo?.dueDate).format(
+                  DATE_FORMAT.withoutTime
+                )}`}
+              >
                 <RiCalendarScheduleLine size={18} />
               </Tooltip>
             </span>{" "}
-            {dayjs(taskInfo?.dueDate).format(DATE_FORMAT.withoutTime)}
+            {!isChildTask &&
+              dayjs(taskInfo?.dueDate).format(DATE_FORMAT.withoutTime)}
           </div>
         )}
       </div>
-      <div className="flex items-center gap-5 w-3/12 justify-end">
-        <StatusSelect status={taskInfo?.status} taskId={taskInfo?._id} />
+      {/* )} */}
+      <div
+        className={`flex items-center gap-5 ${
+          isChildTask ? "w-4/12" : "w-3/12"
+        } justify-end`}
+      >
+        <StatusSelect
+          status={taskInfo?.status}
+          taskId={taskInfo?._id}
+          width="70%"
+        />
         <div className="flex items-center gap-3">
           <Tooltip
             title={`${taskInfo?.assignee?.name} - ${taskInfo?.assignee?.studentId}`}
@@ -58,4 +92,4 @@ const TaskCard = ({ taskInfo }: { taskInfo: any }) => {
     </div>
   );
 };
-export default TaskCard
+export default TaskCard;

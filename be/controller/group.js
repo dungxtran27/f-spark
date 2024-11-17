@@ -300,7 +300,7 @@ const ungroup = async (req, res) => {
   try {
     const { groupId } = req.body;
     const data = await GroupRepository.ungroup(groupId);
-    return res.status(200).json( data );
+    return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -314,6 +314,50 @@ const lockOrUnlockGroup = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getAllGroupByClassId = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const groups = await GroupRepository.getGroupsByClassId(classId);
+    res.status(200).json({ data: groups });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const editTimelineForManyGroups = async (req, res) => {
+  try {
+    const { groupIds, type, updateData, editAble } = req.body;
+    if (!groupIds || !type || !updateData || editAble === undefined) {
+      return res.status(400).json({ message: "Group IDs, timeline type, editAble, and new timeline data are required" });
+    }
+    if (editAble === false) {
+      return res.status(403).json({ message: "Cannot edit because editAble is set to false" });
+    }
+    const updatedGroups = await GroupRepository.editTimelineForManyGroups(groupIds, type, updateData, editAble);
+    const formattedData = updatedGroups.map(group => {
+      return group.timeline
+        .filter(timeline => timeline.type === type)
+        .map(timeline => ({
+          _id: timeline._id,
+          title: timeline.title,
+          description: timeline.description,
+          startDate: timeline.startDate,
+          endDate: timeline.endDate,
+          editAble: timeline.editAble,
+          status: timeline.status,   
+          updatedAt: timeline.updatedAt, 
+          type: timeline.type
+        }));
+    }).flat();
+    res.status(200).json({
+      message: "Update outcome successfully",
+      data: formattedData
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 export default {
   createJourneyRow,
@@ -336,4 +380,6 @@ export default {
   deleteStudentFromGroup,
   ungroup,
   lockOrUnlockGroup,
+  getAllGroupByClassId,
+  editTimelineForManyGroups
 };

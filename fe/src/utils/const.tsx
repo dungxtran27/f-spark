@@ -8,7 +8,7 @@ import ClassGroupList from "../pages/Teacher/ClassGroupList";
 import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStudent";
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
-import TimelineTeacher from "../component/teacher/Timeline";
+import TimelineClassWrapper from "../component/teacher/Timeline";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -46,8 +46,9 @@ export const CLASS_TABS = [
 export const TEACHER_CLASS_DETAIL_TABS = [
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people2", label: "Groups", children: <ClassGroupList /> },
-  { key: "timeline", label: "Timeline", children: <TimelineTeacher /> },
+  { key: "timeline", label: "Timeline", children: <TimelineClassWrapper /> },
 ];
+
 export const TASK_STATUS_FILTER = [
   {
     label: "All",
@@ -218,15 +219,17 @@ export const QUERY_KEY = {
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
   STREAM_CONTENT: "streamContent",
+  TIMELINE_TEACHER: "timelineTeacher",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
   REQUESTS: "requests",
   RECORD_OF_CHANGES: "recordOfChanges",
   GROUP_NOTIFICATION: "groupNotification",
   TEACHER_DASHBOARD: "teacherDashboard",
+  TEACHER_CLASS_TIMELINE: "teacherClassTimeline",
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
-  NOTIFICATION_STATISTIC: "notificationStatistic"
+  NOTIFICATION_STATISTIC: "notificationStatistic",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -259,5 +262,5 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
 export const NOTIFICATION_TYPE = {
   CLASS: "class",
   GROUP: "group",
-  SYSTEM: "system"
-}
+  SYSTEM: "system",
+};

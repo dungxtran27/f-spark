@@ -26,4 +26,6 @@ submissionRouter.get(
   verifyToken,
   SubmissionController.getSubmissionsOfClassWork
 );
+submissionRouter.get('/submissionsByGroup', SubmissionController.getSubmissionsByGroup);
+
 export default submissionRouter;

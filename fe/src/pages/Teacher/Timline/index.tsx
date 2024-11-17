@@ -1,11 +1,11 @@
-import TimelineTeacherWrapper from "../../../component/teacher/Timeline";
+import TimelineClassWrapper from "../../../component/teacher/Timeline";
 import DefaultLayout from "../../../layout/DefaultLayout";
 
-const TimelineTeacher = () => {
+const TeacherDashboard = () => {
   return (
     <DefaultLayout>
-      <TimelineTeacherWrapper />
+      <TimelineClassWrapper/>
     </DefaultLayout>
   );
 };
-export default TimelineTeacher;
+export default TeacherDashboard;

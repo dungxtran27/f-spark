@@ -68,4 +68,7 @@ export const classApi = {
   upvoteAnnouncement: async (classWorkId: string | undefined) => {
     return await axios.patch(`api/classwork/upvoteAnnouncement/${classWorkId}`);
   },
+  getSubmissionsByGroup: async (groupId: string | undefined) => {
+    return await axios.get(`api/submission/submissionsByGroup?groupId=${groupId}`);
+  }
 };
