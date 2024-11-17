@@ -3,12 +3,13 @@ import { FaTasks, FaRegCalendarAlt } from "react-icons/fa";
 import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
-import { BiSolidUserAccount } from "react-icons/bi";
+import { BiSolidDashboard, BiSolidUserAccount } from "react-icons/bi";
+import { RiMailSendFill } from "react-icons/ri";
 export const StudentRoutes = [
   {
     route: "/dashboard",
     page: "DashBoard",
-    icon: <FaTasks size={20} />,
+    icon: <BiSolidDashboard  size={20} />,
   },
   {
     route: "/projectOverview",
@@ -30,6 +31,11 @@ export const StudentRoutes = [
     page: "Timeline",
     icon: <FaRegCalendarAlt size={20} />,
   },
+  {
+    route: "/request",
+    page: "Request",
+    icon: <RiMailSendFill  size={20} />,
+  },
 ];
 export const TeacherRoutes = [
   {
@@ -48,7 +54,6 @@ export const TeacherRoutes = [
     icon: <FaPeopleGroup size={20} />,
   },
 ];
-
 export const AdminRoutes = [
   {
     route: "/manageClass",
@@ -58,7 +63,7 @@ export const AdminRoutes = [
   {
     route: "/manageAccount",
     page: "Mange Account",
-    icon: <BiSolidUserAccount />,
+    icon: <BiSolidUserAccount size={20}/>,
   },
 ];
 

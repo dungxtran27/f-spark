@@ -187,6 +187,14 @@ const getLatestAssignmentOfClassesByTeacher = async (classIds) => {
       },
       {
         $lookup: {
+          from: "Submissions",
+          localField: "latestAssignment._id", // Reference the latest assignment's ID
+          foreignField: "classworkId",
+          as: "latestAssignment.submissions", // Directly add to the latestAssignment object
+        },
+      },
+      {
+        $lookup: {
           from: "Classes", // Replace "Class" with your actual collection name
           localField: "_id",
           foreignField: "_id",
@@ -205,8 +213,29 @@ const getLatestAssignmentOfClassesByTeacher = async (classIds) => {
         },
       },
     ]);
+    const newData = data.map(async (d) => {
+      const populatedSubmissions = await Promise.all(
+        d.latestAssignment.submissions.map(async (submission) => {
+          const student = await Student.findById(submission.student).populate({
+            path: "account",
+            select: "profilePicture",
+          });
 
-    return data;
+          return { ...submission, student }; // Combine original submission and student data
+        })
+      );
+
+      return {
+        ...d,
+        latestAssignment: {
+          ...d.latestAssignment,
+          submissions: populatedSubmissions,
+        },
+      };
+    });
+    const processedData = await Promise.all(newData);
+    console.log(processedData);
+    return processedData;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -246,7 +275,11 @@ const createClassWork = async ({
       type,
       classId,
     });
-    return result._doc;
+    const populatedResult = await result.populate({
+      path: "classId",
+      select: "classCode",
+    });
+    return populatedResult.toObject();
   } catch (error) {
     throw new Error(error.message);
   }

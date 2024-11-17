@@ -437,6 +437,7 @@ const ClassGroupListWrapper = () => {
 
       {/* modal add mentor */}
       <Modal
+        centered
         className="z-40"
         open={AddMentorModal}
         onCancel={handleCloseAddMentorModal}
@@ -494,6 +495,7 @@ const ClassGroupListWrapper = () => {
       </Modal>
       {/* modal group detail */}
       <Modal
+        centered
         open={groupDetailModal}
         onCancel={handleClosegroupDetailModal}
         width={1000}
@@ -650,6 +652,7 @@ const ClassGroupListWrapper = () => {
       </Modal>
       {/* modal confirm */}
       <Modal
+        centered
         className="z-50"
         title={"Confirm"}
         open={confirm}
@@ -726,6 +729,7 @@ const ClassGroupListWrapper = () => {
       </Modal>
       {/* modal create group */}
       <Modal
+        centered
         title={"Create New Group"}
         open={createGroupModal}
         onCancel={handleClosecreateGroupModal}

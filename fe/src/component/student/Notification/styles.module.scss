@@ -1,0 +1,13 @@
+.customTabs {
+    font-size: 16px !important;
+    :global{
+        .ant-tabs-content-holder {
+            background-color: #f2f2f2;
+            padding: 10px 20px !important
+        }
+        .ant-tabs-nav {
+            padding: 0 20px !important;
+            margin: 0 !important;
+        }
+    }
+}

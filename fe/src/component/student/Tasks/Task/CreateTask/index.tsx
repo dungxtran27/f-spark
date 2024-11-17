@@ -87,9 +87,9 @@ const CreateTask: React.FC<ModalProps> = ({
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.TASKS_BOARD] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.TASK_DETAIL] });
       if (lastTaskRef) {
-        setTimeout(()=>{
+        setTimeout(() => {
           lastTaskRef?.current?.scrollIntoView();
-        }, 1000)
+        }, 1000);
       }
     },
   });

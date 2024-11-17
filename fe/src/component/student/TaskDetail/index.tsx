@@ -1,4 +1,4 @@
-import { Breadcrumb, Button, Progress, Spin, Tooltip } from "antd";
+import { Breadcrumb, Button, Modal, Progress, Spin, Tooltip } from "antd";
 import { TiAttachmentOutline } from "react-icons/ti";
 import { Link, useParams } from "react-router-dom";
 import StatusSelect from "../../common/Task/StatusSelect";
@@ -7,7 +7,6 @@ import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
 import dayjs from "dayjs";
 import { DATE_FORMAT, QUERY_KEY, TASK_TYPE } from "../../../utils/const";
-import { RiCalendarScheduleLine } from "react-icons/ri";
 import { CiEdit, CiSquarePlus } from "react-icons/ci";
 import { useQuery } from "@tanstack/react-query";
 import { taskBoard } from "../../../api/Task/Task";
@@ -15,6 +14,8 @@ import CreateTask from "../Tasks/Task/CreateTask";
 import { useRef, useState } from "react";
 import PriorityIcon from "../../common/Task/PrioritySelect/PriorityIcon";
 import RecordOfChanges from "./RecordOfChanges";
+import TaskCard from "./TaskCard";
+import { AiOutlineDelete } from "react-icons/ai";
 const Attachment = ({ url }: { url: string }) => {
   return (
     <div className="flex items-center gap-3">
@@ -25,56 +26,56 @@ const Attachment = ({ url }: { url: string }) => {
     </div>
   );
 };
-const TaskCard = ({ taskInfo }: { taskInfo: any }) => {
-  return (
-    <div className="bg-white py-2 px-3 flex items-center justify-between border border-textSecondary/20 rounded shadow">
-      <div className="flex items-center gap-5 w-5/12">
-        <span
-          className={`px-2 ${
-            taskInfo?.taskType === TASK_TYPE.CLASS_WORK
-              ? "bg-pendingStatus/40"
-              : "bg-primaryBlue/40"
-          } rounded whitespace-nowrap`}
-        >
-          {taskInfo?.taskType}
-        </span>
-        <Link
-          to={`/taskDetail/${encodeURI(taskInfo?.taskName)}/${taskInfo._id}`}
-          className={`font-medium cursor-pointer hover:text-primaryBlue hover:underline whitespace-nowrap truncate`}
-        >
-          {taskInfo?.taskName}
-        </Link>
-      </div>
-      <div className="w-2/12 gap-2 flex items-center justify-center">
-        {taskInfo?.priority && <PriorityIcon status={taskInfo?.priority} />}
-        <span className="px-2">{taskInfo?.priority}</span>
-      </div>
-      <div className="w-2/12 justify-center flex items-center gap-1">
-        {taskInfo?.dueDate && (
-          <div className="gap-3 flex items-center">
-            <span className="text-pendingStatus font-medium">
-              <Tooltip title={"Due date"}>
-                <RiCalendarScheduleLine size={18} />
-              </Tooltip>
-            </span>{" "}
-            {dayjs(taskInfo?.dueDate).format(DATE_FORMAT.withoutTime)}
-          </div>
-        )}
-      </div>
-      <div className="flex items-center gap-5 w-3/12 justify-end">
-        <StatusSelect status={taskInfo?.status} taskId={taskInfo?._id} />
-        <div className="flex items-center gap-3">
-          <Tooltip title={`${taskInfo?.assignee?.name} - ${taskInfo?.assignee?.studentId}`}>
-            <img
-              src={taskInfo?.assignee?.account?.profilePicture}
-              className="w-[30px] aspect-square rounded-full border border-primary"
-            />
-          </Tooltip>
-        </div>
-      </div>
-    </div>
-  );
-};
+// const TaskCard = ({ taskInfo }: { taskInfo: any }) => {
+//   return (
+//     <div className="bg-white py-2 px-3 flex items-center justify-between border border-textSecondary/20 rounded shadow">
+//       <div className="flex items-center gap-5 w-5/12">
+//         <span
+//           className={`px-2 ${
+//             taskInfo?.taskType === TASK_TYPE.CLASS_WORK
+//               ? "bg-pendingStatus/40"
+//               : "bg-primaryBlue/40"
+//           } rounded whitespace-nowrap`}
+//         >
+//           {taskInfo?.taskType}
+//         </span>
+//         <Link
+//           to={`/taskDetail/${encodeURI(taskInfo?.taskName)}/${taskInfo._id}`}
+//           className={`font-medium cursor-pointer hover:text-primaryBlue hover:underline whitespace-nowrap truncate`}
+//         >
+//           {taskInfo?.taskName}
+//         </Link>
+//       </div>
+//       <div className="w-2/12 gap-2 flex items-center justify-center">
+//         {taskInfo?.priority && <PriorityIcon status={taskInfo?.priority} />}
+//         <span className="px-2">{taskInfo?.priority}</span>
+//       </div>
+//       <div className="w-2/12 justify-center flex items-center gap-1">
+//         {taskInfo?.dueDate && (
+//           <div className="gap-3 flex items-center">
+//             <span className="text-pendingStatus font-medium">
+//               <Tooltip title={"Due date"}>
+//                 <RiCalendarScheduleLine size={18} />
+//               </Tooltip>
+//             </span>{" "}
+//             {dayjs(taskInfo?.dueDate).format(DATE_FORMAT.withoutTime)}
+//           </div>
+//         )}
+//       </div>
+//       <div className="flex items-center gap-5 w-3/12 justify-end">
+//         <StatusSelect status={taskInfo?.status} taskId={taskInfo?._id} />
+//         <div className="flex items-center gap-3">
+//           <Tooltip title={`${taskInfo?.assignee?.name} - ${taskInfo?.assignee?.studentId}`}>
+//             <img
+//               src={taskInfo?.assignee?.account?.profilePicture}
+//               className="w-[30px] aspect-square rounded-full border border-primary"
+//             />
+//           </Tooltip>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 const TaskDetailWrapper = () => {
   const { taskName, taskId } = useParams();
   const [openCreateTask, setOpenCreateTask] = useState(false);
@@ -172,14 +173,34 @@ const TaskDetailWrapper = () => {
                 Add children tasks
               </Button>
             )}
-           <RecordOfChanges/>
+            <RecordOfChanges />
           </div>
           <div className="flex-grow bg-white border border-textSecondary/30 rounded shadow sticky top-3 self-start p-3 flex flex-col gap-10">
             <div className="border-b-[1px] border-textSecondary/30 font-semibold text-lg flex items-center justify-between">
               Detail
-              <Tooltip title={"edit"}>
-                <CiEdit className="text-primaryBlue cursor-pointer" size={23} />
-              </Tooltip>
+              <div className="flex items-start gap-3">
+                <Tooltip title={"Edit"}>
+                  <CiEdit className="cursor-pointer" size={23} />
+                </Tooltip>
+                <Tooltip title={"Delete"}>
+                  <AiOutlineDelete
+                    onClick={() => {
+                      Modal.confirm({
+                        title: `Delete ${taskDetail?.data?.data?.taskName}`,
+                        content: (
+                          <span className="text-[16px]">
+                            This action can not be reversed, are you sure about
+                            this ?
+                          </span>
+                        ),
+                        centered: true,
+                      });
+                    }}
+                    size={23}
+                    className="text-red-500 hover:text-red-700"
+                  />
+                </Tooltip>
+              </div>
             </div>
             <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between">
@@ -209,7 +230,7 @@ const TaskDetailWrapper = () => {
                     src={
                       taskDetail?.data?.data?.createdBy?.account?.profilePicture
                     }
-                    className="w-[30px] aspect-square rounded-full border border-primary"
+                    className="w-[30px] aspect-square object-cover object-center rounded-full border border-primary"
                   />
                   <span>{taskDetail?.data?.data?.createdBy?.name}</span>
                 </div>

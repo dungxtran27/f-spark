@@ -62,8 +62,6 @@ const checkTeacherClassAccess = async (req, res, next) => {
     if (!classRes) {
       return res.status(404).json({ error: "Class not found !" });
     }
-    console.log(classRes.teacher.toString(), req.decodedToken.role.id);
-
     if (classRes.teacher._id.toString() !== req.decodedToken.role.id) {
       return res.status(403).json({ error: "Unauthorized !" });
     }

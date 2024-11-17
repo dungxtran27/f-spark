@@ -63,6 +63,7 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
 
   return (
     <Modal
+    centered
       title=<span className="text-lg font-semibold">
         {postType === "announcement"
           ? "Make an announcement"

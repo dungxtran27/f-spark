@@ -14,8 +14,13 @@ export const NOTIFICATION_TYPE = {
   CLASS: "Class",
   SYSTEM: "System",
 };
-export const NOTIFICATION_ACTION_TYPE = {
+export const GROUP_NOTIFICATION_ACTION_TYPE = {
   CHILD_TASK_CREATION: "ChildTaskCreation",
   CREATE_TASK: "TaskCreation",
-  UPDATE_TASK_STATUS: "UpdateTaskStatus"
-}
+  UPDATE_TASK_STATUS: "UpdateTaskStatus",
+};
+export const CLASS_NOTIFICATION_ACTION_TYPE = {
+  CREATE_ANNOUNCEMENT: "CreateAnnouncement",
+  CREATE_ASSIGNMENT: "CreateAssignment",
+  GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
+};

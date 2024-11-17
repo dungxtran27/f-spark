@@ -7,7 +7,11 @@ interface ModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   timeline?: EditTimelineProps;
-  onSave: (data: EditTimelineProps, applyToAll: boolean, selectedGroups: string[]) => void;
+  onSave: (
+    data: EditTimelineProps,
+    applyToAll: boolean,
+    selectedGroups: string[]
+  ) => void;
 }
 
 interface EditTimelineProps {
@@ -15,20 +19,25 @@ interface EditTimelineProps {
   description: string;
 }
 
-const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave }) => {
+const EditTimeline: React.FC<ModalProps> = ({
+  open,
+  setOpen,
+  timeline,
+  onSave,
+}) => {
   const [form] = Form.useForm();
   const [description, setDescription] = useState<string>("");
   const [applyToAll, setApplyToAll] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
-  const groups = ["Group 1", "Group 2", "Group 3"]; 
+  const groups = ["Group 1", "Group 2", "Group 3"];
 
   useEffect(() => {
     if (timeline) {
       form.setFieldsValue({
         endDate: timeline.endDate ? moment(timeline.endDate) : null,
       });
-      setDescription(timeline.description || ""); 
+      setDescription(timeline.description || "");
     }
   }, [timeline, form]);
 
@@ -36,21 +45,21 @@ const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave })
     form.validateFields().then((values) => {
       const updatedTimeline: EditTimelineProps = {
         endDate: values.endDate.format("YYYY-MM-DD"),
-        description, 
+        description,
       };
       onSave(updatedTimeline, applyToAll, selectedGroups);
       setOpen(false);
       form.resetFields();
-      setDescription(""); 
+      setDescription("");
       setApplyToAll(false);
-      setSelectedGroups([]); 
+      setSelectedGroups([]);
     });
   };
 
   const handleApplyToAllChange = (e: any) => {
     setApplyToAll(e.target.checked);
     if (!e.target.checked) {
-      setSelectedGroups([]); 
+      setSelectedGroups([]);
     }
   };
 
@@ -60,6 +69,7 @@ const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave })
 
   return (
     <Modal
+      centered
       title="Edit Timeline"
       open={open}
       onOk={handleEditTimeline}
@@ -67,17 +77,23 @@ const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave })
       destroyOnClose
       width={600}
     >
-      <Form form={form} layout="vertical" className="max-h-[550px] overflow-y-auto">
+      <Form
+        form={form}
+        layout="vertical"
+        className="max-h-[550px] overflow-y-auto"
+      >
         <Form.Item
           name="endDate"
           label="End Date"
-          rules={[{ required: true, message: "End date is required" }]}>
+          rules={[{ required: true, message: "End date is required" }]}
+        >
           <DatePicker style={{ width: "100%" }} />
         </Form.Item>
 
         <Form.Item
           label="Description"
-          rules={[{ required: true, message: "Description is required" }]} >
+          rules={[{ required: true, message: "Description is required" }]}
+        >
           <QuillEditor onChange={setDescription} />
         </Form.Item>
 
@@ -93,7 +109,7 @@ const EditTimeline: React.FC<ModalProps> = ({ open, setOpen, timeline, onSave })
               placeholder="Select groups"
               value={selectedGroups}
               onChange={handleGroupChange}
-              options={groups.map(group => ({ label: group, value: group }))}
+              options={groups.map((group) => ({ label: group, value: group }))}
               style={{ width: "100%" }}
             />
           </Form.Item>

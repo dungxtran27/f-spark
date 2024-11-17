@@ -19,6 +19,7 @@ const Submissions = ({ openSubmission, setOpen }: Props) => {
   });
   return (
     <Modal
+    centered
       title={"Submissions"}
       open={openSubmission?.open}
       onCancel={() => {

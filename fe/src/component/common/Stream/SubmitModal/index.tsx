@@ -52,6 +52,7 @@ const SubmitModal = ({ open, setOpen, classworkId }: Props) => {
   });
   return (
     <Modal
+    centered
       open={open}
       title={"Submit your answer"}
       onCancel={() => {

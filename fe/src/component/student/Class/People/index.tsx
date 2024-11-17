@@ -168,6 +168,7 @@ const People = () => {
         </div>
 
         <Modal
+          centered
           open={groupDetailModal}
           onCancel={handleClosegroupDetailModal}
           width={1000}

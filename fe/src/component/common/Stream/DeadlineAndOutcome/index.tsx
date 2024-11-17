@@ -126,6 +126,7 @@ const DeadlineAndOutcome = () => {
         ))}
       </div>
       <Modal
+      centered
         title={outcome?.title}
         open={!!outcome}
         onCancel={() => {

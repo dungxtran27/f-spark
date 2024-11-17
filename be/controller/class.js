@@ -4,6 +4,7 @@ import {
   ClassworkRepository,
   GroupRepository,
   StudentRepository,
+  SubmissionRepository,
   TeacherRepository,
 } from "../repository/index.js";
 

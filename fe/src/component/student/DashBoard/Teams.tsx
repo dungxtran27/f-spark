@@ -13,78 +13,6 @@ import dayjs from "dayjs";
 import { GoArrowRight } from "react-icons/go";
 import { Link } from "react-router-dom";
 
-const teamData = [
-  {
-    name: "Chu Thắng",
-    action: "change",
-    currentStatus: { label: "Pending", color: "#EFE363" },
-    nextStatus: { label: "In Progress", color: "#6F94DA" },
-    task: "Cập nhật mô hình Canvas",
-    content: "- Cập nhật mô hình canvas",
-    time: "about 1 minute ago",
-    taskChild: false,
-  },
-  {
-    name: "Chu Thắng",
-    action: "",
-    currentStatus: { label: "Update", color: "#9BDFEE" },
-    nextStatus: null,
-    task: "Cập nhật mô hình Canvas",
-    content: "- Cập nhật mô hình canvas",
-    time: "about 1 minute ago",
-    taskChild: false,
-  },
-  {
-    name: "Chu Thắng",
-    action: "change",
-    currentStatus: { label: "Need Review", color: "#DD7A7A" },
-    nextStatus: { label: "Done", color: "#76DA6F" },
-    task: "Cập nhật mô hình Canvas",
-    content: "- Cập nhật mô hình canvas",
-    time: "1 day ago",
-    taskChild: false,
-  },
-  {
-    name: "Chu Thắng",
-    action: "",
-    currentStatus: { label: "Create", color: "#F1A457" },
-    nextStatus: null,
-    task: "Cập nhật mô hình Canvas",
-    content: "- Cập nhật mô hình Canvas assign to Quang Huy",
-    time: "1 day ago",
-    taskChild: true,
-  },
-  {
-    name: "Chu Thắng",
-    action: "",
-    currentStatus: { label: "Create", color: "#F1A457" },
-    nextStatus: null,
-    task: "Cập nhật mô hình Canvas",
-    content: "- Cập nhật mô hình Canvas assign to Quang Huy",
-    time: "1 day ago",
-    taskChild: true,
-  },
-  {
-    name: "Chu Thắng",
-    action: "",
-    currentStatus: { label: "Create", color: "#F1A457" },
-    nextStatus: null,
-    task: "Cập nhật mô hình Canvas",
-    content: "- Cập nhật mô hình Canvas assign to Quang Huy",
-    time: "1 day ago",
-    taskChild: true,
-  },
-  {
-    name: "Chu Thắng",
-    action: "",
-    currentStatus: { label: "Create", color: "#F1A457" },
-    nextStatus: null,
-    task: "Cập nhật mô hình Canvas",
-    content: "- Cập nhật mô hình Canvas assign to Quang Huy",
-    time: "1 day ago",
-    taskChild: true,
-  },
-];
 const Team = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
@@ -112,49 +40,104 @@ const Team = () => {
           </div>
         );
       case NOTIFICATION_ACTION_TYPE.CHILD_TASK_CREATION:
-        return (
-          <Link
-            className="text-primaryBlue hover:underline"
-            to={`/${noti?.action?.extraUrl}`}
-          >
-            View Detail
-          </Link>
-        );
+        return <div></div>;
     }
   };
   const getNotiAction = (noti: any) => {
-    if (
-      noti?.action?.actionType === NOTIFICATION_ACTION_TYPE.CREATE_TASK &&
-      noti?.action?.target?.assignee === userInfo?._id
-    ) {
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="font-medium">
-            {noti?.sender?._id === userInfo?._id
-              ? "You have"
-              : `${noti?.sender?.name} has`}{" "}
-            assigned task
-          </span>
-          <span className="text-blue-500 font-medium">
-            {noti?.action?.target?.taskName}
-          </span>
-          <span>to you</span>
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex items-center space-x-2">
-          <p className="font-medium">
-            {noti?.sender?._id === userInfo?._id
-              ? "You"
-              : `${noti?.sender?.name}`}{" "}
-            {noti?.action?.action}
-          </p>
-          <p className="text-blue-500 font-medium">
-            {noti?.action?.target?.taskName}
-          </p>
-        </div>
-      );
+    switch (noti?.action?.actionType) {
+      case NOTIFICATION_ACTION_TYPE.CREATE_TASK:
+        if (noti?.action?.target?.assignee === userInfo?._id) {
+          return (
+            <div className="flex items-center space-x-2">
+              <span className="font-medium">
+                {noti?.sender?._id === userInfo?._id
+                  ? "You have created task"
+                  : `${noti?.sender?.name} has assigned task`}{" "}
+              </span>
+              <Link
+                to={`/taskDetail/${encodeURIComponent(
+                  noti?.action?.target?.taskName
+                )}/${noti?.action?.target?._id}`}
+                className="text-blue-500 font-medium hover:underline"
+              >
+                {noti?.action?.target?.taskName}
+              </Link>
+              <span>{noti?.sender?._id === userInfo?._id ? "" : `to you`}</span>
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center space-x-2">
+            <span className="font-medium">
+              {noti?.sender?.name} has created task
+            </span>
+            <Link
+              to={`/taskDetail/${encodeURIComponent(
+                noti?.action?.target?.taskName
+              )}/${noti?.action?.target?._id}`}
+              className="text-blue-500 font-medium hover:underline"
+            >
+              {noti?.action?.target?.taskName}
+            </Link>
+          </div>
+        );
+      case NOTIFICATION_ACTION_TYPE.CHILD_TASK_CREATION:
+        if (noti?.action?.target?.assignee === userInfo?._id) {
+          return (
+            <div className="flex items-center space-x-2">
+              <span className="font-medium">
+                {noti?.sender?._id === userInfo?._id
+                  ? "You have created child task"
+                  : `${noti?.sender?.name} has assigned task`}{" "}
+              </span>
+              <Link
+                to={`/taskDetail/${encodeURIComponent(
+                  noti?.action?.newVersion?.taskName
+                )}/${noti?.action?.newVersion?._id}`}
+                className="text-blue-500 font-medium hover:underline"
+              >
+                {noti?.action?.newVersion?.taskName}
+              </Link>
+              <span>{noti?.sender?._id === userInfo?._id ? "" : `to you`}</span>
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center space-x-2">
+            <span className="font-medium">
+              {noti?.sender?.name} has created task child task
+            </span>
+            <Link
+              to={`/taskDetail/${encodeURIComponent(
+                noti?.action?.newVersion?.taskName
+              )}/${noti?.action?.newVersion?._id}`}
+              className="text-blue-500 font-medium hover:underline"
+            >
+              {noti?.action?.newVersion?.taskName}
+            </Link>
+          </div>
+        );
+      case NOTIFICATION_ACTION_TYPE.UPDATE_TASK_STATUS:
+        return (
+          <div className="flex items-center space-x-2">
+            <p className="font-medium">
+              {noti?.sender?._id === userInfo?._id
+                ? "You"
+                : `${noti?.sender?.name}`}{" "}
+              {noti?.action?.action}
+            </p>
+            <Link
+              to={`/taskDetail/${encodeURIComponent(
+                noti?.action?.target?.taskName
+              )}/${noti?.action?.target?._id}`}
+              className="text-blue-500 font-medium hover:underline"
+            >
+              {noti?.action?.target?.taskName}
+            </Link>
+          </div>
+        );
+      default:
+        return <></>;
     }
   };
   const notificationCard = (noti: any) => {

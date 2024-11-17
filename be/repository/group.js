@@ -350,16 +350,21 @@ const addStundentInGroup = async (groupId, studentId) => {
   try {
     const group = await Group.findOne({
       _id: groupId,
-      teamMembers: studentId,
+      // teamMembers: studentId,
     });
+    console.log(group);
 
     const student = await Student.findById(studentId);
     if (!student) {
       throw new Error("Student not found");
     }
 
-    if (group) {
-      throw new Error("Student already exists in the group");
+    if (!group) {
+      throw new Error("Group not found");
+    }
+
+    if (group.teamMembers.includes(studentId)) {
+      throw new Error("Student already in group");
     }
     if (group?.lock) {
       throw new Error("Group is locked");
@@ -488,7 +493,10 @@ const deleteStudentFromGroup = async (groupId, studentId) => {
     );
     const groupfound = await Group.findById(groupId);
     if (!groupfound) {
-      throw new Error("group not found");
+      throw new Error("Group not found");
+    }
+    if (groupfound?.lock == true) {
+      throw new Error("Group is locked");
     }
     const updateteamMember = groupfound.teamMembers.filter(
       (memberId) => memberId.toString() !== studentId.toString()
@@ -649,13 +657,35 @@ const findAllSponsorGroupsOfClasses = async (classIds) => {
       return acc;
     }, {});
 
-    return {groups:Object.values(groupedData),groupNumber:data.length};
+    return { groups: Object.values(groupedData), groupNumber: data.length };
   } catch (error) {
     console.log(error);
 
     throw new Error(error.message);
   }
 };
+const findAllGroups = async () => {
+  try {
+    const groups = await Group.find({ isSponsorship: false })
+      .select("GroupName leader tag teamMembers isSponsorship")
+      .populate({
+        path: "teamMembers",
+        select: "major",
+      })
+      .populate({
+        path: "leader",
+        select: "name",
+      })
+      .populate({
+        path: "tag",
+        select: "name",
+      });
+    return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -673,6 +703,7 @@ export default {
   findAllGroupsOfClass,
   addStundentInGroup,
   assignLeader,
+  findAllGroups,
   createGroup,
   deleteStudentFromGroup,
   ungroup,
