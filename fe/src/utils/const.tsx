@@ -84,8 +84,8 @@ export const TASK_FILTERS = {
   searchKey: "searchKey",
 };
 export const STUDENT_FILTERS = {
-  name: "name", 
-  studentId: "studentId", 
+  name: "name",
+  studentId: "studentId",
   email: "email",
   major: "major",
   searchKey: 'searchKey',
@@ -232,7 +232,7 @@ export const QUERY_KEY = {
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
   STREAM_CONTENT: "streamContent",
-  TIMELINE_TEACHER:"timelineTeacher",
+  TIMELINE_TEACHER: "timelineTeacher",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
   REQUESTS: "requests",
@@ -242,9 +242,10 @@ export const QUERY_KEY = {
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
   NOTIFICATION_STATISTIC: "notificationStatistic",
-  ALLSTUDENT:"allStudent",
-  ALLGROUP:"allGroup",
-    ALLMAJOR:"allMajor"
+  ALLSTUDENT: "allStudent",
+  ALLGROUP: "allGroup",
+  ALLMAJOR: "allMajor",
+  CLASSCODE: "clasCode",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

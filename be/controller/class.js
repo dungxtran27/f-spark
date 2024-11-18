@@ -1,4 +1,4 @@
-import { ClassRepository } from "../repository/index.js";
+import { ClassRepository, GroupRepository } from "../repository/index.js";
 
 const getClassesOfTeacher = async (req, res) => {
   try {
@@ -35,9 +35,29 @@ const getAllClasses = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getAllClass = async (req, res) => {
+  try {
+    const { page, limit, classCode, teacherName, category } = req.body;
+    const data = await ClassRepository.getAllClass(
+      parseInt(page),
+      parseInt(limit), classCode, teacherName, category
+    );
+    return res.status(200).json({
+      data: data.classes,
+      totalItems: data.totalItems,
+      maxPages: data.maxPages,
+      isLastPage: data.isLastPage,
+      pageSize: data.pageSize,
+      pageIndex: data.pageIndex,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 export default {
   pinClasswork,
   getClassesOfTeacher,
-  getAllClasses
+  getAllClasses,
+  getAllClass
 };

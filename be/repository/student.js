@@ -179,15 +179,111 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
     );
     const updatedStudents = await Student.find({
       _id: { $in: studentIds },
-      classId: classId, 
+      classId: classId,
     })
       .select("_id name gen major studentId account classId group")
-    return updatedStudents; 
+    return updatedStudents;
   } catch (error) {
     throw new Error(error.message);
   }
 };
+const getAllAccStudent = async (page, limit, studentName, mssv, classId, status) => {
+  try {
+    let filterCondition = { $and: [] };
 
+    if (studentName) {
+      filterCondition.$and.push({ name: { $regex: studentName, $options: "i" } });
+    }
+
+    if (mssv) {
+      filterCondition.$and.push({ studentId: { $regex: mssv, $options: "i" } });
+    }
+
+    if (classId) {
+      filterCondition.$and.push({ group: mongoose.Types.ObjectId(classId) });
+    }
+
+    if (status !== undefined) {
+      filterCondition.$and.push({ isActive: status });
+    }
+
+    if (filterCondition.$and.length === 0) {
+      filterCondition = {};
+    }
+
+    const totalItems = await Student.countDocuments(filterCondition);
+    const maxPages = Math.ceil(totalItems / limit);
+
+    const students = await Student.aggregate([
+      {
+        $lookup: {
+          from: "Accounts",
+          localField: "account",
+          foreignField: "_id",
+          as: "accountDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$accountDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "group",
+          foreignField: "_id",
+          as: "groupDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$groupDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: filterCondition,
+      },
+      {
+        $project: {
+          name: 1,
+          studentId: 1,
+          gen: 1,
+          major: 1,
+          group: "$groupDetails.name",
+          accountEmail: "$accountDetails.email",
+          isActive: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+      {
+        $sort: { isActive: -1, name: 1 },
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    const isLastPage = page >= maxPages;
+
+    return {
+      students,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 export default {
   findStudentByAccountId,
@@ -198,5 +294,6 @@ export default {
   getAllStudentUngroupByClassId,
   findById,
   getAllStudents,
-  addManyStudentNoClassToClass
+  addManyStudentNoClassToClass,
+  getAllAccStudent,
 };

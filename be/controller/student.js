@@ -48,6 +48,16 @@ const getAllStudentUnGroupByClassId = async (req, res) => {
     }
 };
 
+const getAllAccStudent = async (req, res) => {
+    try {
+        const { page, limit, studentName, mssv, classId, status } = req.body;
+        const students = await StudentRepository.getAllAccStudent(page, limit, studentName, mssv, classId, status);
+        return res.status(200).json({ data: students });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 const getAllStudents = async (req, res) => {
     try {
         const filters = req.body;
@@ -96,5 +106,6 @@ export default {
     getAllStudentByClassId,
     getAllStudentUnGroupByClassId,
     getAllStudents,
-    addManyStudentNoClassToClass
+    addManyStudentNoClassToClass,
+    getAllAccStudent
 }

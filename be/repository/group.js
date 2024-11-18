@@ -650,7 +650,7 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
 };
 const findAllGroups = async () => {
   try {
-    const groups = await Group.find({ isSponsorship: false }).select("GroupName leader tag teamMembers isSponsorship").populate({
+    const groups = await Group.find().select("GroupName leader tag teamMembers isSponsorship").populate({
       path: 'teamMembers',
       select: 'major',
     }).populate({

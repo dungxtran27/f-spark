@@ -6,4 +6,5 @@ classRouter.get("/getTeacherClasses", verifyToken,ClassController.getClassesOfTe
 classRouter.put('/pinClasswork', verifyToken, ClassController.pinClasswork);
 classRouter.get("/classes", ClassController.getAllClasses);
 
+classRouter.post('/getAllClass', ClassController.getAllClass);
 export default classRouter;
