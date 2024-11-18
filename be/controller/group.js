@@ -343,8 +343,8 @@ const editTimelineForManyGroups = async (req, res) => {
           startDate: timeline.startDate,
           endDate: timeline.endDate,
           editAble: timeline.editAble,
-          status: timeline.status,   
-          updatedAt: timeline.updatedAt, 
+          status: timeline.status,
+          updatedAt: timeline.updatedAt,
           type: timeline.type
         }));
     }).flat();
@@ -359,20 +359,29 @@ const editTimelineForManyGroups = async (req, res) => {
 
 const getAllGroups = async (req, res) => {
   try {
-    const filters = req.body; 
+    const { GroupName, tag, page, limit } = req.body;
+    const pageIndex = parseInt(page) || 1;
+    const pageSize = parseInt(limit) || 10;
     const {
-      groups,
+      group,
       totalGroup,
       GroupNotHaveClass,
       countGroupNotHaveClass,
-    } = await GroupRepository.getAllGroups(filters);
-
+      totalItems,
+      maxPages,
+    } = await GroupRepository.getAllGroups(GroupName, tag, parseInt(page), parseInt(limit));
+    const isLastPage = pageIndex >= maxPages;
     return res.status(200).json({
       data: {
-        groups,
+        group,
         totalGroup,
         GroupNotHaveClass,
         countGroupNotHaveClass,
+        totalItems: totalItems,
+        maxPages: maxPages,
+        isLastPage: isLastPage,
+        pageSize: pageSize,
+        pageIndex: pageIndex,
       },
     });
   } catch (error) {

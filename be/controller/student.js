@@ -51,29 +51,26 @@ const getAllStudentUnGroupByClassId = async (req, res) => {
 const getAllStudents = async (req, res) => {
     try {
       const filters = req.body;
-  
       const {
         students,
         totalStudent,
         StudentNotHaveClass,
         countStudentNotHaveClass,
+        uniqueMajors
       } = await StudentRepository.getAllStudents(filters);
-  
       return res.status(200).json({
         data: {
           students,
           totalStudent,
           StudentNotHaveClass,
           countStudentNotHaveClass,
+          uniqueMajors
         },
       });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
   };
-  
-
-
 export default {
     getStudentsInSameGroup,
     getTeacherByStudentId,

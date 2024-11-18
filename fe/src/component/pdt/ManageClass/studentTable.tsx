@@ -1,16 +1,53 @@
-import { Button, Checkbox, Modal, Pagination, Select, Input } from "antd";
+import {
+  Button,
+  Checkbox,
+  Modal,
+  Pagination,
+  Select,
+  Input,
+} from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import {
+  Key,
+  useState,
+} from "react";
 import ClassCard from "./classCard";
 import { FiPlus } from "react-icons/fi";
 import { MdGroupAdd } from "react-icons/md";
+import { useQuery } from "@tanstack/react-query";
+import { student } from "../../../api/student/student";
+import { colorMap, QUERY_KEY } from "../../../utils/const";
 
 const { Option } = Select;
+
+interface Student {
+  studentId: string;
+  major: string;
+  name: string;
+  email: string;
+  color: string;
+}
 
 const StudentTable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [semester, setSemester] = useState("SU-24");
-  const [majorFilter, setMajorFilter] = useState<string | null>(null);
+  const [majorFilter, setMajorFilter] = useState<string[] | null>([]);
+  const [search, setSearch] = useState<string>("");
+
+  const { data: studentsData} = useQuery({
+    queryKey: [QUERY_KEY.ALLSTUDENT, { semester, majorFilter, search }],
+    queryFn: async () => {
+      return student.getAllStudents({
+        semester,
+        major: majorFilter,
+        name: search
+      });
+    },
+  });
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+  };
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -24,44 +61,11 @@ const StudentTable = () => {
     setSemester(value);
   };
 
-  const handleMajorChange = (value: string | null) => {
-    setMajorFilter(value);
-  };
-
-  const data = [
-    {
-      studentId: "HE170019",
-      name: "Trần Văn Anh Vũ",
-      mail: "hieunthe163894@fpt.edu.vn",
-      major: "GD",
-      color: "red",
-    },
-    {
-      studentId: "HE170020",
-      name: "Trần Văn Anh Vũ",
-      mail: "hieunthe163894@fpt.edu.vn",
-      major: "HS",
-      color: "green",
-    },
-    {
-      studentId: "HE170021",
-      name: "Trần Văn Anh Vũ",
-      mail: "hieunthe163894@fpt.edu.vn",
-      major: "SE",
-      color: "blue",
-    },
-    {
-      studentId: "HE170022",
-      name: "Trần Văn Anh Vũ",
-      mail: "hieunthe163894@fpt.edu.vn",
-      major: "SE",
-      color: "blue",
-    },
-  ];
-
-  const filteredData = majorFilter
-    ? data.filter((student) => student.major === majorFilter)
-    : data;
+  const filteredData: Student[] =
+    studentsData?.data?.data?.StudentNotHaveClass?.map((student: Student) => ({
+      ...student,
+      color: colorMap[student.major] || "gray",
+    })) || [];
 
   return (
     <div className="bg-white shadow-md rounded-md p-4">
@@ -69,7 +73,6 @@ const StudentTable = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex space-x-4">
           <div className="flex items-center space-x-2">
-            <span>Semester:</span>
             <Select
               value={semester}
               onChange={handleSemesterChange}
@@ -81,24 +84,40 @@ const StudentTable = () => {
             </Select>
           </div>
           <div className="flex items-center space-x-2">
-            <span>Major:</span>
             <Select
+              mode="multiple"
               value={majorFilter}
-              onChange={handleMajorChange}
-              placeholder="Select Major"
+              onChange={(value) => {
+                setMajorFilter(value);
+              }}
+              placeholder="Select Majors"
               className="w-36"
             >
-              <Option value="HS">HS</Option>
-              <Option value="GD">GD</Option>
-              <Option value="SE">SE</Option>
+              {studentsData?.data?.data?.uniqueMajors?.map((major: string) => (
+                <Option key={major} value={major}>
+                  {major}
+                </Option>
+              ))}
             </Select>
           </div>
           <Input
-            placeholder="Search"
+            placeholder="Search by name"
             className="w-64"
             suffix={<SearchOutlined />}
+            value={search}
+            onChange={handleSearch}
           />
         </div>
+
+        {/* Add to Class Button */}
+        <Button
+          className="ml-4"
+          icon={<MdGroupAdd />}
+          onClick={showModal}
+          type="primary"
+        >
+          Add to Class
+        </Button>
       </div>
 
       {/* Student Table */}
@@ -108,15 +127,14 @@ const StudentTable = () => {
             <th className="p-2">
               <Checkbox />
             </th>
-            <th className="p-2">studentId</th>
+            <th className="p-2">Student ID</th>
             <th className="p-2">Major</th>
             <th className="p-2">Name</th>
             <th className="p-2">Email</th>
-            <th className="p-2">Add Class</th>
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((student, index) => (
+          {filteredData.map((student: Student, index: Key) => (
             <tr className="border-b" key={index}>
               <td className="p-2">
                 <Checkbox />
@@ -124,19 +142,14 @@ const StudentTable = () => {
               <td className="p-2">{student.studentId}</td>
               <td className="p-2">
                 <span
-                  className={`bg-${student.color}-400 px-2 py-1 rounded-lg`}
+                  className="px-2 py-1 rounded-lg"
+                  style={{ backgroundColor: student.color }}
                 >
                   {student.major}
                 </span>
               </td>
               <td className="p-2">{student.name}</td>
-              <td className="p-2">{student.mail}</td>
-              <td className="p-2">
-                <MdGroupAdd
-                  className="text-black text-2xl cursor-pointer"
-                  onClick={showModal}
-                />
-              </td>
+              <td className="p-2">{student.email}</td>
             </tr>
           ))}
         </tbody>
@@ -145,13 +158,14 @@ const StudentTable = () => {
       <div className="mt-5 flex justify-center">
         <Pagination
           defaultCurrent={1}
-          total={5}
+          total={filteredData.length}
           showTotal={(total, range) =>
             `${range[0]}-${range[1]} of ${total} students`
           }
         />
       </div>
 
+      {/* Modal for adding students to a class */}
       <Modal
         centered
         title="Class Group"

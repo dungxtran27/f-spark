@@ -665,59 +665,102 @@ const findAllGroups = async () => {
     throw new Error(error.message);
   }
 };
-const getAllGroups = async ({ GroupName, class:classId, search }) => {
+
+const getAllGroups = async (GroupName, tag, page = 1, limit = 10) => {
   try {
-    const query = {};
-    
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page <= 0) page = 1;
+    if (isNaN(limit) || limit <= 0) limit = 10;
+    const matchStage = [];
+    const tagIdArray = Array.isArray(tag) ? tag : tag ? [tag] : [];
+    if (tagIdArray.length > 0) {
+      matchStage.push({
+        "tag": {
+          $in: tagIdArray.map((id) => new mongoose.Types.ObjectId(id)),
+        },
+      });
+    }
     if (GroupName) {
-      query.GroupName = { $regex: GroupName, $options: "i" }; 
+      matchStage.push({
+        GroupName: { $regex: GroupName, $options: "i" },
+      });
     }
-    if (search) {
-      if (!query.GroupName) {
-        query.GroupName = { $regex: search, $options: "i" }; 
-      } else {
-        query.$and = [
-          { GroupName: { $regex: GroupName, $options: "i" } },
-          { GroupName: { $regex: search, $options: "i" } },
-        ];
-      }
-    }
-    const groups = await Group.find(query)
-      .populate({
-        path: "class",
-        select: "classCode",
-      })
+    const matchCondition = matchStage.length > 0 ? { $or: matchStage } : {};
+    const totalItems = await Group.countDocuments(matchCondition);
+    const maxPages = Math.ceil(totalItems / limit);
+
+    const GroupNotHaveClass = await Group.aggregate(
+      [
+        { $match: { $and: [{ class: { $in: [null, undefined] } }, matchCondition] } },
+        { $unwind: "$tag" },
+        {
+          $lookup: {
+            from: "TagMajors",
+            localField: "tag",
+            foreignField: "_id",
+            as: "tag",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            GroupName: { $first: "$GroupName" },
+            isSponsorship: { $first: "$isSponsorship" },
+            tag: { $push: { $arrayElemAt: ["$tag", 0] } },
+            teamMembers: { $first: "$teamMembers" },
+          }
+        },
+        {
+          $project: {
+            GroupName: 1,
+            leader: 1,
+            "tag.name": 1,
+            "tag._id": 1,
+            isSponsorship: 1,
+            teamMembers: 1
+          },
+        },
+        {
+          $skip: (page - 1) * limit,
+        },
+        {
+          $limit: limit,
+        },
+      ]
+    );
+    const isLastPage = page >= maxPages;
+    const group = await Group.find()
+      .select("GroupName leader tag teamMembers isSponsorship")
       .populate({
         path: "teamMembers",
-        select: "name studentId", 
-      });
-    const totalGroup = await Group.countDocuments(groups);
-    const countGroupNotHaveClass = await Group.countDocuments({
-      class: null, class: undefined
-    });
-    let GroupNotHaveClassQuery = { class: null, class:undefined };
-    if (search) {
-      GroupNotHaveClassQuery.$or = [
-        { GroupName: { $regex: search, $options: "i" } },
-      ];
-    }
-
-    const GroupNotHaveClass = await Group.find(GroupNotHaveClassQuery)
+        select: "name",
+      })
       .populate({
-        path: "teamMembers", 
-        select: "name studentId",
-      });
-
-    return {
-      groups,
+        path: "tag",
+        select: "name",
+      })
+      .lean();
+    const totalGroup = await Group.countDocuments(group);
+    const countGroupNotHaveClass = await Group.countDocuments({
+      class: { $in: [null, undefined] },
+    }); return {
+      group,
       totalGroup,
       GroupNotHaveClass,
       countGroupNotHaveClass,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
     };
   } catch (error) {
     throw new Error("Error fetching groups: " + error.message);
   }
 };
+
 
 export default {
   createCellsOnUpdate,

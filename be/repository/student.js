@@ -106,45 +106,66 @@ const getAllStudents = async ({ name, studentId, email, major }) => {
     if (email) {
       query["account.email"] = { $regex: email, $options: "i" };
     }
-    if (major) {
-      query.major = major;
+    if (major && major.length > 0) {
+      query.major = { $in: major };
     }
     const students = await Student.find(query)
       .populate({
         path: "account",
-        select: "profilePicture email",
-      })
-      .populate({
-        path: "classId",
-        select: "classCode",
+        select: "email", 
       })
       .populate({
         path: "group",
-        select: "GroupName",
+        select: "GroupName", 
+      })
+      .populate({
+        path: "classId",
+        select: "classCode", 
       });
-
-    const totalStudent = await Student.countDocuments(students);
+    const formattedStudents = students.map((student) => ({
+      _id: student._id,
+      name: student.name,
+      studentId: student.studentId,
+      major: student.major,
+      email: student.account?.email, 
+      group: student.group?.GroupName, 
+      classId: student.classId?.classCode, 
+      updatedAt: student.updatedAt,
+    }));    
+    const totalStudent = await Student.countDocuments(query);
     const queryNotHaveClass = {
       ...query,
       $or: [{ classId: null }, { classId: undefined }],
     };
     const StudentNotHaveClass = await Student.find(queryNotHaveClass)
       .populate({
-        path: "group",
-        select: "GroupName",
+        path: "account",
+        select: "email", 
       });
-    const countStudentNotHaveClass = await Student.countDocuments({classId: null, class: undefined});
+
+    const formattedStudentsNoClass = StudentNotHaveClass.map((student) => ({
+      _id: student._id,
+      name: student.name,
+      studentId: student.studentId,
+      major: student.major,
+      email: student.account?.email, 
+      group: student.group?.GroupName, 
+      classId: student.classId?.classCode,
+      updatedAt: student.updatedAt,
+    }));
+    const countStudentNotHaveClass = await Student.countDocuments(queryNotHaveClass);
+    const uniqueMajors = await Student.distinct("major");
     return {
-      students,
+      students: formattedStudents,
       totalStudent,
-      StudentNotHaveClass,
+      StudentNotHaveClass: formattedStudentsNoClass,
       countStudentNotHaveClass,
+      uniqueMajors
     };
   } catch (error) {
     throw new Error(error.message);
   }
 };
-
 
 
 export default {
