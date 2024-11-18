@@ -39,7 +39,6 @@ export const DASHBOARD_TABS = [
   { key: "report", label: "Report", children: <Report /> },
 ];
 
-
 export const CLASS_TABS = [
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people", label: "People", children: <People /> },
@@ -221,16 +220,17 @@ export const QUERY_KEY = {
   TAGDATA: "tagData",
   ADDSTUDENTTOGROUP: "addStudentToGroup",
   STREAM_CONTENT: "streamContent",
-  TIMELINE_TEACHER:"timelineTeacher",
+  TIMELINE_TEACHER: "timelineTeacher",
   ASSIGNMENT_SUBMISSIONS: "assignemntSubmissions",
   TASK_DETAIL: "taskDetail",
   REQUESTS: "requests",
   RECORD_OF_CHANGES: "recordOfChanges",
   GROUP_NOTIFICATION: "groupNotification",
+  TEACHER_DASHBOARD: "teacherDashboard",
   TEACHER_CLASS_TIMELINE: "teacherClassTimeline",
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
-  NOTIFICATION_STATISTIC: "notificationStatistic"
+  NOTIFICATION_STATISTIC: "notificationStatistic",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -265,5 +265,5 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
 export const NOTIFICATION_TYPE = {
   CLASS: "class",
   GROUP: "group",
-  SYSTEM: "system"
-}
+  SYSTEM: "system",
+};

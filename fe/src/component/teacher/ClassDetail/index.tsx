@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import {  useParams, useSearchParams } from "react-router-dom";
 import { Tabs, TabsProps } from "antd";
 import DefaultLayout from "../../../layout/DefaultLayout";
 import Banner from "./Banner";
@@ -8,6 +8,8 @@ import styles from "./styles.module.scss";
 
 const ClassDetailWrapper = () => {
   const { classId } = useParams();
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get("tab");
 
   const classDetail = {
     name: "SE1704_NJ",
@@ -38,12 +40,12 @@ const ClassDetailWrapper = () => {
   };
 
   const items: TabsProps["items"] = TEACHER_CLASS_DETAIL_TABS;
-
+  const defaultActiveKey = tab !== null ? tab : "stream";
   return (
     <DefaultLayout>
       <Banner name={classDetail?.name} classId={classId || ""} />
       <div className={classNames(styles.customTabs)}>
-        <Tabs items={items} defaultActiveKey="stream" />
+        <Tabs items={items} defaultActiveKey={defaultActiveKey} />
       </div>
     </DefaultLayout>
   );

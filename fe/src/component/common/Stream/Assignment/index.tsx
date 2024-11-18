@@ -5,7 +5,7 @@ import { CiEdit } from "react-icons/ci";
 import { FaRegTrashCan, FaStar } from "react-icons/fa6";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import classNames from "classnames";
-import styles from "../style.module.scss"
+import styles from "../style.module.scss";
 import DOMPurify from "dompurify";
 import { TiAttachment } from "react-icons/ti";
 interface Props {
@@ -20,6 +20,7 @@ const Assignment = ({
   setOpenSubmission,
   setSubmitModal,
 }: Props) => {
+
   return (
     <div className="w-full p-5 border  rounded bg-white shadow-md">
       <div className="flex items-center justify-between">
@@ -180,4 +181,4 @@ const Assignment = ({
     </div>
   );
 };
-export default Assignment
+export default Assignment;

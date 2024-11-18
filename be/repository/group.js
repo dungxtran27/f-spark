@@ -21,7 +21,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-      updatedGroup.customerJourneyMap.rows.length - 1
+        updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -45,7 +45,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-      updatedGroup.customerJourneyMap.cols.length - 1
+        updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -350,16 +350,21 @@ const addStundentInGroup = async (groupId, studentId) => {
   try {
     const group = await Group.findOne({
       _id: groupId,
-      teamMembers: studentId,
+      // teamMembers: studentId,
     });
+    console.log(group);
 
     const student = await Student.findById(studentId);
     if (!student) {
       throw new Error("Student not found");
     }
 
-    if (group) {
-      throw new Error("Student already exists in the group");
+    if (!group) {
+      throw new Error("Group not found");
+    }
+
+    if (group.teamMembers.includes(studentId)) {
+      throw new Error("Student already in group");
     }
     if (group?.lock) {
       throw new Error("Group is locked");
@@ -488,7 +493,10 @@ const deleteStudentFromGroup = async (groupId, studentId) => {
     );
     const groupfound = await Group.findById(groupId);
     if (!groupfound) {
-      throw new Error("group not found");
+      throw new Error("Group not found");
+    }
+    if (groupfound?.lock == true) {
+      throw new Error("Group is locked");
     }
     const updateteamMember = groupfound.teamMembers.filter(
       (memberId) => memberId.toString() !== studentId.toString()
@@ -605,7 +613,56 @@ const lockOrUnlockGroup = async (groupId) => {
     throw new Error(error.message);
   }
 };
+const findAllSponsorGroupsOfClasses = async (classIds) => {
+  try {
+    const data = await Group.find({
+      class: { $in: classIds },
+      isSponsorship: true,
+    })
+      .select(
+        "GroupName GroupDescription isSponsorship mentor class teamMembers tag leader groupImage lock"
+      )
+      .populate({
+        path: "teamMembers",
+        select: "_id name gen major studentId account",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .populate({
+        path: "tag",
+        select: "name ",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      })
+      .populate({
+        path: "class",
+        select: "classCode",
+      });
+    // Group data by classId
+    const groupedData = data.reduce((acc, group) => {
+      const classId = group.class._id.toString();
 
+      if (!acc[classId]) {
+        acc[classId] = {
+          class: group.class,
+          groupData: [],
+        };
+      }
+
+      acc[classId].groupData.push(group);
+      return acc;
+    }, {});
+
+    return { groups: Object.values(groupedData), groupNumber: data.length };
+  } catch (error) {
+    console.log(error);
+    throw new Error(error.message);
+  }
+};
 const getGroupsByClassId = async (classId) => {
   try {
     const groups = await Group.find({ class: classId })
@@ -650,16 +707,20 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
 };
 const findAllGroups = async () => {
   try {
-    const groups = await Group.find({ isSponsorship: false }).select("GroupName leader tag teamMembers isSponsorship").populate({
-      path: 'teamMembers',
-      select: 'major',
-    }).populate({
-      path: 'leader',
-      select: 'name',
-    }).populate({
-      path: 'tag',
-      select: 'name',
-    });
+    const groups = await Group.find({ isSponsorship: false })
+      .select("GroupName leader tag teamMembers isSponsorship")
+      .populate({
+        path: "teamMembers",
+        select: "major",
+      })
+      .populate({
+        path: "leader",
+        select: "name",
+      })
+      .populate({
+        path: "tag",
+        select: "name",
+      });
     return groups;
   } catch (error) {
     throw new Error(error.message);
@@ -688,6 +749,7 @@ export default {
   deleteStudentFromGroup,
   ungroup,
   lockOrUnlockGroup,
+  findAllSponsorGroupsOfClasses,
   getGroupsByClassId,
   editTimelineForManyGroups,
 };

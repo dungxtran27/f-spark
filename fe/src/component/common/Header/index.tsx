@@ -35,7 +35,7 @@ const Header = () => {
   return (
     <div
       className={classNames(
-        "border-backgroundSecondary shadow-md shadow-backgroundSecondary/40 z-10 flex items-center pl-[20px] py-2 justify-between pr-[40px]",
+        "border-backgroundSecondary shadow shadow-backgroundSecondary/40 z-10 flex items-center pl-[20px] py-2 justify-between pr-[40px]",
         styles.headerWrapper
       )}
     >

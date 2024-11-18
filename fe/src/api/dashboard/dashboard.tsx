@@ -14,4 +14,7 @@ export const dashBoard = {
       },
     });
   },
+  getTeacherDashboardInfo: async () => {
+    return await axios.get(`api/class/getTeacherDashboardInfo`);
+  },
 };

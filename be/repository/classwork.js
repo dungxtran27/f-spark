@@ -3,6 +3,8 @@ import Class from "../model/Class.js";
 import ClassWork from "../model/ClassWork.js";
 import Student from "../model/Student.js";
 import Submission from "../model/Submisson.js";
+import { GroupRepository } from "./index.js";
+import Group from "../model/Group.js";
 const getClassWorkByStudent = async ({ userId }) => {
   try {
     const user = await Student.findById(userId);
@@ -44,6 +46,51 @@ const getOutcomes = async (classId, isTeacher) => {
     throw new Error(error.message);
   }
 };
+const getOutcomesOfClasses = async (classIds) => {
+  try {
+    // Fetch outcomes with their classId
+    const outcomeList = await ClassWork.aggregate([
+      {
+        $match: {
+          type: "outcome",
+          classId: { $in: classIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$classId",
+          outcomes: { $push: "$$ROOT" },
+        },
+      },
+    ]);
+    // Fetch submissions for each group of outcomes
+    const outcomeWithSubmissions = await Promise.all(
+      outcomeList.map(async ({ _id: classId, outcomes }) => {
+        const submissionIds = outcomes.map((o) => o._id);
+        const submissions = await Submission.find({
+          classworkId: { $in: submissionIds },
+        }).populate({ path: "group", select: "GroupName" });
+        const groupOfClass = await Group.find({ class: classId });
+        const classname = await Class.findById(classId);
+        return {
+          classId,
+          classname: classname.classCode,
+          groupNumber: groupOfClass.length,
+          outcomes: outcomes.map((o) => ({
+            ...o,
+            submissions: submissions.filter(
+              (s) => s.classworkId.toString() === o._id.toString()
+            ),
+          })),
+        };
+      })
+    );
+
+    return outcomeWithSubmissions;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 const getClassWorkByTeacher = async (classId) => {
   try {
@@ -76,7 +123,123 @@ const getClassWorkByTeacher = async (classId) => {
     throw new Error(error.message);
   }
 };
+const getLatestAnnounceOfClassesByTeacher = async (classIds) => {
+  try {
+    const data = await ClassWork.aggregate([
+      {
+        $match: {
+          type: "announcement",
+          classId: { $in: classIds },
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: "$classId",
+          firstAnnouncement: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $lookup: {
+          from: "Classes", // Replace "Class" with your actual collection name
+          localField: "_id",
+          foreignField: "_id",
+          as: "classInfo",
+        },
+      },
+      {
+        $unwind: "$classInfo",
+      },
+      {
+        $project: {
+          _id: 0,
+          classId: "$classInfo._id", // Access the populated classId
+          className: "$classInfo.classCode", // Access other fields from the Class collection
+          firstAnnouncement: 1,
+        },
+      },
+    ]);
 
+    return data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const getLatestAssignmentOfClassesByTeacher = async (classIds) => {
+  try {
+    const data = await ClassWork.aggregate([
+      {
+        $match: {
+          type: "assignment",
+          classId: { $in: classIds },
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: "$classId",
+          latestAssignment: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $lookup: {
+          from: "Submissions",
+          localField: "latestAssignment._id", // Reference the latest assignment's ID
+          foreignField: "classworkId",
+          as: "latestAssignment.submissions", // Directly add to the latestAssignment object
+        },
+      },
+      {
+        $lookup: {
+          from: "Classes", // Replace "Class" with your actual collection name
+          localField: "_id",
+          foreignField: "_id",
+          as: "classInfo",
+        },
+      },
+      {
+        $unwind: "$classInfo",
+      },
+      {
+        $project: {
+          _id: 0,
+          classId: "$classInfo._id", // Access the populated classId
+          className: "$classInfo.classCode", // Access other fields from the Class collection
+          latestAssignment: 1,
+        },
+      },
+    ]);
+    const newData = data.map(async (d) => {
+      const populatedSubmissions = await Promise.all(
+        d.latestAssignment.submissions.map(async (submission) => {
+          const student = await Student.findById(submission.student).populate({
+            path: "account",
+            select: "profilePicture",
+          });
+
+          return { ...submission, student }; // Combine original submission and student data
+        })
+      );
+
+      return {
+        ...d,
+        latestAssignment: {
+          ...d.latestAssignment,
+          submissions: populatedSubmissions,
+        },
+      };
+    });
+    const processedData = await Promise.all(newData);
+    console.log(processedData);
+    return processedData;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 const editClassWorkByTeacher = async (classWorkId, name, description) => {
   try {
     const updatedData = await ClassWork.findByIdAndUpdate(
@@ -208,4 +371,7 @@ export default {
   getUngradedOutcomesCount,
   getLatestAnnouncementUpvotes,
   getLatestAssignmentSubmissionsCount,
+  getLatestAnnounceOfClassesByTeacher,
+  getLatestAssignmentOfClassesByTeacher,
+  getOutcomesOfClasses,
 };
