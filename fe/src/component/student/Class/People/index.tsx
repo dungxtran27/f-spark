@@ -1,11 +1,10 @@
 import { Badge, Button, Modal, Popover, Table, Tag } from "antd";
-import { FaChalkboardTeacher, FaStar, FaUser, FaUserAlt } from "react-icons/fa";
+import { FaChalkboardTeacher, FaStar, FaUserAlt } from "react-icons/fa";
 import { classApi } from "../../../../api/Class/class";
 import { useQuery } from "@tanstack/react-query";
 import GroupCard from "../../../../pages/Teacher/ClassGroupList/GroupCard";
 import { colorMajorGroup, colorMap } from "../../../../utils/const";
 import { useState } from "react";
-import { FaPeopleArrows } from "react-icons/fa6";
 import { RootState } from "../../../../redux/store";
 import { useSelector } from "react-redux";
 import { UserInfo } from "../../../../model/auth";

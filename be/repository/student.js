@@ -86,14 +86,52 @@ const getAllStudentUngroupByClassId = async (classId) => {
     throw new Error(error.message);
   }
 };
-const findById = async (studentId) =>{
+const getAllStudentUngroupByClassIds = async (classIds) => {
+  try {
+    const students = await Student.find({
+      classId: { $in: classIds },
+      group: null,
+    })
+      .select("_id name gen major studentId account classId")
+      .populate({
+        path: "account",
+        select: "profilePicture",
+      })
+      .populate({
+        path: "classId",
+        select: "classCode",
+      });
+    // Group students by classId
+    const groupedStudents = students.reduce((acc, student) => {
+      const classId = student.classId._id.toString();
+
+      if (!acc[classId]) {
+        acc[classId] = {
+          class: student.classId,
+          students: [],
+        };
+      }
+
+      acc[classId].students.push(student);
+      return acc;
+    }, {});
+
+    return {
+      students: Object.values(groupedStudents),
+      studentNumber: students.length,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const findById = async (studentId) => {
   try {
     const student = await Student.findById(studentId);
     return student;
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 export default {
   findStudentByAccountId,
   getStudentsByGroup,
@@ -101,5 +139,6 @@ export default {
   getStudentsByGroup,
   getAllStudentByClassId,
   getAllStudentUngroupByClassId,
-  findById
+  getAllStudentUngroupByClassIds,
+  findById,
 };

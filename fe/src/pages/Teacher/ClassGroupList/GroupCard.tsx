@@ -48,7 +48,6 @@ const GroupCard = ({
       style={style1}
       // className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow"
       className="flex flex-col bg-white rounded-sm px-2 py-2 mr-2 mb-2 shadow-md w-full max-w-[32%]"
-
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center ">

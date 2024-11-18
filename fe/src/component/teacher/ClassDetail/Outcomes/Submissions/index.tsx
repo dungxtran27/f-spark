@@ -38,11 +38,13 @@ const Submissions = ({
   setOpenModal,
   groupSubmission,
   outcome,
+  classID,
 }: {
   submissions?: Props[] | undefined;
   groupSubmission?: any;
   gradingCriteria: any[];
   outcome: any;
+  classID: any;
   setOpenModal: (submission: any) => void;
 }) => {
   const [form] = useForm();
@@ -51,13 +53,14 @@ const Submissions = ({
   ) as UserInfo | null;
   const isTeacher = userInfo?.role === ROLE.teacher;
   const { classId } = useParams();
+  const fClassid = classId ? classId : classID;
   const queryClient = useQueryClient();
   const { data: groups } = useQuery({
-    queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
+    queryKey: [QUERY_KEY.GROUPS_OF_CLASS, fClassid],
     queryFn: () => {
-      return classApi.getGroupOfClass(classId);
+      return classApi.getGroupOfClass(fClassid);
     },
-    enabled: !!classId,
+    enabled: !!fClassid,
   });
   const uploadedFiles = useRef<string[]>([]);
   const props: UploadProps = {
@@ -96,6 +99,7 @@ const Submissions = ({
     },
   });
   const groupsOfClass = groups?.data?.data?.groupStudent;
+
   const items: CollapseProps["items"] = groupsOfClass?.map((g: any) => {
     const s = submissions?.find((gs) => gs?.group?._id === g?._id);
     return {
@@ -165,11 +169,14 @@ const Submissions = ({
       ),
     };
   });
+
   return (
     <div className="pt-5">
       {isTeacher ? (
         submissions && submissions?.length > 0 ? (
-          <Collapse items={items} />
+          <>
+            <Collapse items={items} />
+          </>
         ) : (
           <Empty description={"No Submissions yet"} />
         )
