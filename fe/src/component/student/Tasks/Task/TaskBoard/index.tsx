@@ -8,7 +8,7 @@ import { TASK_TYPE } from "../../../../../utils/const";
 import PriorityIcon from "../../../../common/Task/PrioritySelect/PriorityIcon";
 interface TaskBoardProps {
   taskBoardData: any; //TaskBoardData[];
-  setOpenCreateTask: (open: boolean) => void;
+  setOpenCreateTask: (value: any) => void;
   isLoading: boolean;
 }
 const TaskBoard: React.FC<TaskBoardProps> = ({
@@ -132,7 +132,10 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
           footer={() => (
             <div
               className="flex items-center gap-5 cursor-pointer"
-              onClick={() => setOpenCreateTask(true)}
+              onClick={() => setOpenCreateTask({
+                isOpen: true,
+                mode: "CREATE"
+              })}
             >
               <CiSquarePlus size={20} />
               Create Task

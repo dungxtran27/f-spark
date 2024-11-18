@@ -1,21 +1,30 @@
-import { Badge, Breadcrumb, Button, Empty, Progress, Spin } from "antd";
+import {
+  Badge,
+  Breadcrumb,
+  Button,
+  Empty,
+  Progress,
+  Spin,
+  Tooltip,
+} from "antd";
 import { TiAttachmentOutline } from "react-icons/ti";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import StatusSelect from "../../common/Task/StatusSelect";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
 import dayjs from "dayjs";
 import { DATE_FORMAT, QUERY_KEY, TASK_TYPE } from "../../../utils/const";
-import { CiSquarePlus } from "react-icons/ci";
-import { useQuery } from "@tanstack/react-query";
+import { CiEdit, CiSquarePlus } from "react-icons/ci";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { taskBoard } from "../../../api/Task/Task";
-import CreateTask from "../Tasks/Task/CreateTask";
 import { useRef, useState } from "react";
 import PriorityIcon from "../../common/Task/PrioritySelect/PriorityIcon";
 import RecordOfChanges from "./RecordOfChanges";
 import TaskCard from "./TaskCard";
 import { ImTree } from "react-icons/im";
+import { GoTrash } from "react-icons/go";
+import CreateOrUpdateTask from "../Tasks/Task/CreateTask";
 const Attachment = ({ url }: { url: string }) => {
   return (
     <div className="flex items-center gap-3">
@@ -28,10 +37,15 @@ const Attachment = ({ url }: { url: string }) => {
 };
 
 const TaskDetailWrapper = () => {
-  const { taskName, taskId } = useParams();
-  const [openCreateTask, setOpenCreateTask] = useState(false);
+  const {  taskId } = useParams();
+  const [openCreateTask, setOpenCreateTask] = useState({
+    isOpen: false,
+    mode: 'CREATE'
+  });
+  const [task, setTask] = useState<any>(null);
   const [openChildParentTask, setOpenChildParentTask] = useState(true);
   const lastTaskRef = useRef<HTMLElement>(null);
+  const navigate = useNavigate();
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
@@ -41,6 +55,14 @@ const TaskDetailWrapper = () => {
       return taskBoard.getTaskDetail(userInfo?.group, taskId);
     },
     enabled: !!taskId,
+  });
+  const deleteTask = useMutation({
+    mutationFn: (taskId: string) => {
+      return taskBoard.deleteTask(taskId);
+    },
+    onSuccess: () => {
+      navigate("/tasks", { replace: true });
+    },
   });
   return (
     <div className="w-full p-3">
@@ -65,7 +87,7 @@ const TaskDetailWrapper = () => {
               ]
             : []),
           {
-            title: <span className="text-primary">{taskName}</span>,
+            title: <span className="text-primary">{taskDetail?.data?.data?.taskName}</span>,
           },
         ]}
       />
@@ -75,22 +97,41 @@ const TaskDetailWrapper = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h1 className="font-semibold text-2xl hover:bg-primary/10 p-2 rounded">
-              {taskName}
+              {taskDetail?.data?.data?.taskName}
             </h1>
           </div>
           <div className="flex py-3 bg-white px-3">
             <div
               className={`${
-                openChildParentTask
-                  ? "w-7/12"
-                  : "w-full"
+                openChildParentTask ? "w-7/12" : "w-full"
               } flex flex-col gap-5 pr-3`}
             >
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-[18px] px-2">
-                    Description
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold text-[18px] px-2">
+                      Description
+                    </span>
+                    <Tooltip title={"edit"}>
+                      <CiEdit
+                        className="cursor-pointer hover:text-primaryBlue"
+                        onClick={() => {
+                          setOpenCreateTask({isOpen: true, mode: "UPDATE"});
+                          setTask(taskDetail?.data?.data);
+                        }}
+                        size={23}
+                      />
+                    </Tooltip>
+                    <Tooltip title={"delete"}>
+                      <GoTrash
+                        className="cursor-pointer hover:text-red-500"
+                        size={20}
+                        onClick={() =>
+                          deleteTask.mutate(taskDetail?.data?.data?._id)
+                        }
+                      />
+                    </Tooltip>
+                  </div>
                   <Badge
                     count={
                       taskDetail?.data?.data?.parentTask
@@ -181,7 +222,7 @@ const TaskDetailWrapper = () => {
                           )?.length /
                             taskDetail?.data?.data?.childTasks?.length) *
                             100
-                        ) === 100
+                        ) === 100 || !(taskDetail?.data?.data?.childTasks?.length > 0)
                       }
                     />
                   </div>
@@ -209,21 +250,19 @@ const TaskDetailWrapper = () => {
               </div>
               <RecordOfChanges />
             </div>
-            {
-              // (taskDetail?.data?.data?.parentTask ||
-              //   taskDetail?.data?.data?.childTasks?.length > 0) &&
-              openChildParentTask && (
-                <div className="w-5/12 border border-textSecondary/30 rounded sticky top-3 self-start p-3 flex flex-col gap-5">
-                  {taskDetail?.data?.data?.parentTask && (
-                    <div>
-                      <span className="font-semibold">Parent Task</span>
-                      <TaskCard
-                        taskInfo={taskDetail?.data?.data?.parentTask}
-                        isChildTask={false}
-                      />
-                    </div>
-                  )}
-                  {taskDetail?.data?.data?.childTasks?.length > 0 ? (
+            {openChildParentTask && (
+              <div className="w-5/12 border border-textSecondary/30 rounded sticky top-3 self-start p-3 flex flex-col gap-5">
+                {taskDetail?.data?.data?.parentTask && (
+                  <div>
+                    <span className="font-semibold">Parent Task</span>
+                    <TaskCard
+                      taskInfo={taskDetail?.data?.data?.parentTask}
+                      isChildTask={false}
+                    />
+                  </div>
+                )}
+                {!taskDetail?.data?.data?.parentTask ? (
+                  taskDetail?.data?.data?.childTasks?.length > 0 ? (
                     <div className="w-full">
                       <div className="flex items-center justify-between">
                         <span className="font-semibold">Children Tasks</span>
@@ -231,7 +270,10 @@ const TaskDetailWrapper = () => {
                           <Button
                             className="font-medium px-5"
                             onClick={() => {
-                              setOpenCreateTask(true);
+                              setOpenCreateTask({
+                                isOpen: true,
+                                mode: 'CREATE'
+                              });
                             }}
                           >
                             <CiSquarePlus size={25} />
@@ -280,7 +322,10 @@ const TaskDetailWrapper = () => {
                           <Button
                             className="font-medium px-5"
                             onClick={() => {
-                              setOpenCreateTask(true);
+                              setOpenCreateTask({
+                                isOpen: true,
+                                mode: 'CREATE'
+                              });
                             }}
                           >
                             <CiSquarePlus size={25} />
@@ -292,19 +337,26 @@ const TaskDetailWrapper = () => {
                         <Empty description={"This task has no child tasks"} />
                       </div>
                     </div>
-                  )}
-                </div>
-              )
-            }
-            <CreateTask
-              open={openCreateTask}
+                  )
+                ) : (
+                  <></>
+                )}
+              </div>
+            )}
+            <CreateOrUpdateTask
+              open={openCreateTask.isOpen}
               setOpen={setOpenCreateTask}
-              task={{
-                parentTask: taskId,
-                taskType: TASK_TYPE.GROUP_WORK,
-                taskName: `Child task of ${taskName}`,
-              }}
+              task={
+                task
+                  ? task
+                  : {
+                      parentTask: taskId,
+                      taskType: TASK_TYPE.GROUP_WORK,
+                      taskName: `Child task of ${taskDetail?.data?.data?.taskName}`,
+                    }
+              }
               lastTaskRef={lastTaskRef}
+              mode={openCreateTask.mode}
             />
           </div>
         </div>
