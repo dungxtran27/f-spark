@@ -68,4 +68,9 @@ export const classApi = {
   upvoteAnnouncement: async (classWorkId: string | undefined) => {
     return await axios.patch(`api/classwork/upvoteAnnouncement/${classWorkId}`);
   },
+
+  // admin
+  getClassListPagination: async (requestBody: any) => {
+    return await axios.post(`api/class/getAllClass`, requestBody);
+  },
 };

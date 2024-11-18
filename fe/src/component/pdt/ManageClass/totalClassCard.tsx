@@ -16,6 +16,10 @@ interface TotalClassCardProps {
   toggleClass: () => void;
   handleClassClick: (classId: string) => void;
   toggleRequest: () => void;
+  totalClasses: number;
+  totalMembers: number;
+  groups: number;
+  setCategory: (category: string) => void;
 }
 
 const TotalClassCard: React.FC<TotalClassCardProps> = ({
@@ -24,16 +28,31 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
   toggleClass,
   handleClassClick,
   toggleRequest,
+  totalClasses,
+  totalMembers,
+  groups,
+  setCategory,
 }) => {
   const [isClassOpen, setIsClassOpen] = useState(true);
   const [isStudentOpen, setIsStudentOpen] = useState(true);
   const [isRequestOpen, setIsRequestOpen] = useState(true);
+  const [category, setCategoryState] = useState<string>("");
+
+  const handleSetCategory = (newCategory: string) => {
+    setCategoryState(newCategory);
+    setCategory(newCategory);
+  };
 
   return (
     <>
       <div className="bg-white p-4 shadow-md rounded-md border-2 border-transparent hover:border-orange-400">
         <div className="flex justify-between items-center border-b pb-2 mb-2">
-          <div className="text-lg font-semibold">Total: 11 class</div>
+          <div
+            className="text-lg font-semibold cursor-pointer"
+            onClick={() => handleSetCategory("")}
+          >
+            Total: {totalClasses} class
+          </div>
           <span
             className="-ml-20 cursor-pointer"
             onClick={() => setIsClassOpen(!isClassOpen)}
@@ -50,19 +69,33 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
           <>
             {/* Class miss student */}
             <div className="rounded-md" onClick={toggleClass}>
-              <div className="p-2 rounded-md flex justify-between items-baseline border-2 border-transparent hover:border-red-500 hover:bg-red-100 hover:shadow-md">
+              <div
+                className="p-2 rounded-md flex justify-between items-baseline border-2 border-transparent hover:border-red-500 hover:bg-red-100 hover:shadow-md"
+                onClick={() => handleSetCategory("miss")}
+              >
                 <span className="text-red-500 font-bold text-2xl">3</span>
                 <span className="text-sm font-semibold">
                   Class miss student
                 </span>
-                <div className="flex">
-                  <span className="text-red-500 flex items-center ml-2">
-                    3 <MdGroups3 className="ml-1 text-2xl" />
-                  </span>
-                  <span className="text-red-500 flex items-center ml-2">
-                    4 <BsPersonXFill className="ml-1 text-xl" />
-                  </span>
-                </div>
+                {category === "miss" ? (
+                  <div className="flex">
+                    <span className="text-red-500 flex items-center ml-2">
+                      {groups} <MdGroups3 className="ml-1 text-2xl" />
+                    </span>
+                    <span className="text-red-500 flex items-center ml-2">
+                      {totalMembers} <BsPersonXFill className="ml-1 text-xl" />
+                    </span>
+                  </div>
+                ) : (
+                  <div className="invisible flex">
+                    <span className="text-red-500 flex items-center ml-1">
+                      {groups} <MdGroups3 className="ml-1 text-2xl" />
+                    </span>
+                    <span className="text-red-500 flex items-center ml-2">
+                      {totalMembers} <BsPersonXFill className="ml-1 text-xl" />
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="ml-4">
@@ -95,47 +128,35 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
               </div>
             </div>
 
-            {/* Class available */}
-            <div className="p-1">
-              <div className="p-2 rounded-md flex justify-between items-baseline border-2 border-transparent hover:border-yellow-500 hover:bg-yellow-100 hover:shadow-md">
-                <span className="text-yellow-500 font-bold text-2xl">3</span>
-                <span className="text-sm font-semibold">Class available</span>
-                <div className="flex">
-                  <span className="text-yellow-500 flex items-center ml-2">
-                    2 <MdGroups3 className="ml-1 text-2xl" />
-                  </span>
-                  <span className="text-yellow-500 flex items-center ml-2">
-                    2 <BsPersonXFill className="ml-1 text-xl" />
-                  </span>
-                </div>
-              </div>
-              <div className="ml-4">
-                <div className="border-l-2 border-gray-500 pl-4 ">
-                  <div className="p-2 rounded-md border-2 border-transparent hover:border-yellow-500 hover:bg-yellow-100 hover:shadow-md">
-                    <span className="flex items-center text-yellow-500">
-                      SE1705 - 2 <MdGroups3 className="ml-1 text-2xl mr-2" /> 4{" "}
-                      <BsPersonXFill className="ml-1 text-xl" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Class full student */}
-            <div className="p-1 rounded-md border-2 border-transparent hover:border-green-500 hover:bg-green-100 hover:shadow-md">
+            <div
+              className="p-1 rounded-md border-2 border-transparent hover:border-green-500 hover:bg-green-100 hover:shadow-md"
+              onClick={() => handleSetCategory("full")}
+            >
               <div className="flex justify-between items-baseline">
                 <span className="text-green-500 font-bold text-2xl">5</span>
                 <span className="text-sm font-semibold">
                   Class full student
                 </span>
-                <div className="flex">
-                  <span className="text-green-500 flex items-center ml-2">
-                    30 <MdGroups3 className="ml-1 text-2xl" />
-                  </span>
-                  <span className="text-green-500 flex items-center ml-2">
-                    180 <FaUserCheck className="ml-1 text-xl" />
-                  </span>
-                </div>
+                {category == "full" ? (
+                  <div className="flex">
+                    <span className="text-green-500 flex items-center ml-2">
+                      {groups} <MdGroups3 className="ml-1 text-2xl" />
+                    </span>
+                    <span className="text-green-500 flex items-center ml-2">
+                      {totalMembers} <FaUserCheck className="ml-1 text-xl" />
+                    </span>
+                  </div>
+                ) : (
+                  <div className="invisible flex">
+                    <span className="text-red-500 flex items-center ml-2">
+                      {groups} <MdGroups3 className="ml-1 text-2xl" />
+                    </span>
+                    <span className="text-red-500 flex items-center ml-2">
+                      {totalMembers} <BsPersonXFill className="ml-1 text-xl" />
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </>

@@ -225,7 +225,8 @@ export const QUERY_KEY = {
   GROUP_NOTIFICATION: "groupNotification",
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
-  NOTIFICATION_STATISTIC: "notificationStatistic"
+  NOTIFICATION_STATISTIC: "notificationStatistic",
+  CLASSCODE:"clasCode",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

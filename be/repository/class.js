@@ -107,8 +107,133 @@ const findClassById = async (classId) => {
     throw new Error(error.message);
   }
 };
+
+const getAllClass = async (page, limit, classCode, teacherName, category) => {
+  try {
+   let filterCondition = {
+      $and: []
+    };
+
+    if (classCode) {
+      filterCondition.$and.push({ classCode: { $regex: classCode, $options: "i" } });
+    }
+
+    if (teacherName) {
+      filterCondition.$and.push({ "teacherDetails.name": { $regex: teacherName, $options: "i" } });
+    }
+
+    if (category === 'full') {
+      filterCondition.$and.push(
+        { totalGroups: { $gte: 5 } },
+        { totalStudents: { $gte: 10 } }
+      );
+    }
+
+    if (category === 'miss') {
+      filterCondition.$and.push(
+        { totalStudents: { $lt: 10 } },
+        { totalGroups: { $lte: 5 } }
+      )
+    };
+
+    if (filterCondition.$and.length === 0) {
+      filterCondition = {};
+    }
+
+    const totalItems = await Class.countDocuments();
+    const maxPages = Math.ceil(totalItems / limit);
+
+    const classes = await Class.aggregate([
+      {
+        $lookup: {
+          from: "Teachers",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacherDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$teacherDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "_id",
+          foreignField: "class",
+          as: "groups",
+        },
+      },
+      {
+        $unwind: {
+          path: "$groups",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          classCode: { $first: "$classCode" },
+          isActive: { $first: "$isActive" },
+          teacherDetails: { $first: "$teacherDetails" },
+          pinDetails: { $first: "$pinDetails" },
+          groups: { $push: "$groups" },
+        },
+      },
+      {
+        $project: {
+          classCode: 1,
+          isActive: 1,
+          teacherDetails: { name: 1, email: 1 },
+          groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
+          totalGroups: { $size: "$groups" },
+          totalStudents: {
+            $sum: {
+              $map: {
+                input: "$groups",
+                as: "group",
+                in: { $size: "$$group.teamMembers" }
+              }
+            }
+          }
+        },
+      },
+      {
+        $match: filterCondition,
+      },
+      {
+        $sort: { classCode: 1 },
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
+      },
+    ]
+    );
+
+    const isLastPage = page >= maxPages;
+    console.log(filterCondition);
+
+    return {
+      classes,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   pinClasswork,
   getClassesOfTeacher,
   findClassById,
+  getAllClass,
 };
