@@ -1,8 +1,26 @@
 import React, { useState } from "react";
-import { AutoComplete, Button, Select, Row, Col, Table, Tag, Divider } from "antd";
-import { SearchOutlined, UserDeleteOutlined, CloseCircleOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  AutoComplete,
+  Button,
+  Select,
+  Row,
+  Col,
+  Table,
+  Tag,
+  Divider,
+} from "antd";
+import {
+  SearchOutlined,
+  UserDeleteOutlined,
+  CloseCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY } from "../../../../utils/const";
+import { Admin } from "../../../../api/manageAccoount";
 
 const { Option } = Select;
 
@@ -17,41 +35,146 @@ interface Student {
 }
 
 const data: Student[] = [
-  { id: 1, name: "Nguyen Trung Hieu", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 2, name: "Nguyen Van A", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
-  { id: 4, name: "Nguyen Trung Hieu A", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 5, name: "Nguyen Van C", studentId: "HE160001", class: "SE1705", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
-  { id: 6, name: "Tran Thi BD", studentId: "HE160002", class: "SE1707", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 7, name: "Nguyen Trung Hieu E", studentId: "HE160023", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 8, name: "Nguyen Van F", studentId: "HE160001", class: "SE17010", email: "vana123@fe.com", term: "Fall 2025", status: "Deactive" },
-  { id: 9, name: "Tran Thi G", studentId: "HE160002", class: "SE1704", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 10, name: "Nguyen Trung Hieu H", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 11, name: "Nguyen Van J", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
-  { id: 12, name: "Tran Thi B", studentId: "HE160002", class: "SE1704", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
+  {
+    id: 1,
+    name: "Nguyen Trung Hieu",
+    studentId: "HE160000",
+    class: "SE1704",
+    email: "hieuyd123@fe.com",
+    term: "Fall 2024",
+    status: "Active",
+  },
+  {
+    id: 2,
+    name: "Nguyen Van A",
+    studentId: "HE160001",
+    class: "SE1704",
+    email: "vana123@fe.com",
+    term: "Fall 2024",
+    status: "Deactive",
+  },
+  {
+    id: 4,
+    name: "Nguyen Trung Hieu A",
+    studentId: "HE160000",
+    class: "SE1704",
+    email: "hieuyd123@fe.com",
+    term: "Fall 2024",
+    status: "Active",
+  },
+  {
+    id: 5,
+    name: "Nguyen Van C",
+    studentId: "HE160001",
+    class: "SE1705",
+    email: "vana123@fe.com",
+    term: "Fall 2024",
+    status: "Deactive",
+  },
+  {
+    id: 6,
+    name: "Tran Thi BD",
+    studentId: "HE160002",
+    class: "SE1707",
+    email: "btran123@fe.com",
+    term: "Fall 2024",
+    status: "Active",
+  },
+  {
+    id: 7,
+    name: "Nguyen Trung Hieu E",
+    studentId: "HE160023",
+    class: "SE1704",
+    email: "hieuyd123@fe.com",
+    term: "Fall 2024",
+    status: "Active",
+  },
+  {
+    id: 8,
+    name: "Nguyen Van F",
+    studentId: "HE160001",
+    class: "SE17010",
+    email: "vana123@fe.com",
+    term: "Fall 2025",
+    status: "Deactive",
+  },
+  {
+    id: 9,
+    name: "Tran Thi G",
+    studentId: "HE160002",
+    class: "SE1704",
+    email: "btran123@fe.com",
+    term: "Fall 2024",
+    status: "Active",
+  },
+  {
+    id: 10,
+    name: "Nguyen Trung Hieu H",
+    studentId: "HE160000",
+    class: "SE1704",
+    email: "hieuyd123@fe.com",
+    term: "Fall 2024",
+    status: "Active",
+  },
+  {
+    id: 11,
+    name: "Nguyen Van J",
+    studentId: "HE160001",
+    class: "SE1704",
+    email: "vana123@fe.com",
+    term: "Fall 2024",
+    status: "Deactive",
+  },
+  {
+    id: 12,
+    name: "Tran Thi B",
+    studentId: "HE160002",
+    class: "SE1704",
+    email: "btran123@fe.com",
+    term: "Fall 2024",
+    status: "Active",
+  },
 ];
 
 const AccountManagement: React.FC = () => {
+  const { data: classData } = useQuery({
+    queryKey: [QUERY_KEY.STUDENT_OF_GROUP, studentName, mssv, classId, status],
+    queryFn: async () => {
+      return Admin.getStudent({
+        limit: 10,
+        page: 1,
+        studentName: studentName || undefined,
+        mssv: mssv || undefined,
+        classId: classId || undefined,
+        status: status || undefined,
+      });
+    },
+  });
+
   const [itemsPerPage] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [classFilter, setClassFilter] = useState<string | undefined>(undefined);
   const [termFilter, setTermFilter] = useState<string | undefined>(undefined);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>("Active");
-  const [autoCompleteOptions, setAutoCompleteOptions] = useState<AutoCompleteProps['options']>([]);
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(
+    "Active"
+  );
+  const [autoCompleteOptions, setAutoCompleteOptions] = useState<
+    AutoCompleteProps["options"]
+  >([]);
 
-  const handleSearch = () => {
-
-  };
+  const handleSearch = () => {};
 
   const handleAutoCompleteSearch = (input: string) => {
     const normalizedInput = input.toLowerCase();
     const filteredOptions = data
-      .filter(student =>
-        student.name.toLowerCase().includes(normalizedInput) ||
-        student.studentId.toLowerCase().includes(normalizedInput)
+      .filter(
+        (student) =>
+          student.name.toLowerCase().includes(normalizedInput) ||
+          student.studentId.toLowerCase().includes(normalizedInput)
       )
-      .map(student => ({
+      .map((student) => ({
         value: student.name,
-        label: `${student.name} (${student.studentId})`
+        label: `${student.name} (${student.studentId})`,
       }));
     setAutoCompleteOptions(filteredOptions);
   };
@@ -70,14 +193,31 @@ const AccountManagement: React.FC = () => {
     { title: "Class", dataIndex: "class", key: "class" },
     { title: "Email", dataIndex: "email", key: "email" },
     { title: "Term", dataIndex: "term", key: "term" },
-    { title: "Status", dataIndex: "status", key: "status", render: (status: string) => (<Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>), },
-    { title: "Actions", key: "actions", render: () => (<UserDeleteOutlined style={{ fontSize: "18px", cursor: "pointer" }} title="Ban Account" />), },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: () => (
+        <UserDeleteOutlined
+          style={{ fontSize: "18px", cursor: "pointer" }}
+          title="Ban Account"
+        />
+      ),
+    },
   ];
-
 
   const sortedData = [...data]
     .sort((a, b) => {
-      return (a.status === "Active" ? -1 : 1) - (b.status === "Active" ? -1 : 1);
+      return (
+        (a.status === "Active" ? -1 : 1) - (b.status === "Active" ? -1 : 1)
+      );
     })
     .map((student, index) => ({
       ...student,
@@ -107,9 +247,13 @@ const AccountManagement: React.FC = () => {
                 className="w-full"
                 showSearch
               >
-                {[...new Set(data.map(student => student.class))].map((classItem) => (
-                  <Option key={classItem} value={classItem}>{classItem}</Option>
-                ))}
+                {[...new Set(data.map((student) => student.class))].map(
+                  (classItem) => (
+                    <Option key={classItem} value={classItem}>
+                      {classItem}
+                    </Option>
+                  )
+                )}
               </Select>
             </Col>
             <Col span={4}>
@@ -119,9 +263,13 @@ const AccountManagement: React.FC = () => {
                 onChange={setTermFilter}
                 className="w-full"
               >
-                {[...new Set(data.map(student => student.term))].map((termItem) => (
-                  <Option key={termItem} value={termItem}>{termItem}</Option>
-                ))}
+                {[...new Set(data.map((student) => student.term))].map(
+                  (termItem) => (
+                    <Option key={termItem} value={termItem}>
+                      {termItem}
+                    </Option>
+                  )
+                )}
               </Select>
             </Col>
             <Col span={3}>
@@ -157,14 +305,13 @@ const AccountManagement: React.FC = () => {
           </Row>
         </Col>
 
-        <Divider type="vertical" style={{ height: 'auto', alignSelf: 'stretch', color: "black" }} />
+        <Divider
+          type="vertical"
+          style={{ height: "auto", alignSelf: "stretch", color: "black" }}
+        />
 
         <Col flex="none" className="flex justify-end">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            className="mr-2"
-          >
+          <Button type="primary" icon={<PlusOutlined />} className="mr-2">
             Add Student
           </Button>
           <Button type="default" icon={<UploadOutlined />}>
@@ -180,7 +327,6 @@ const AccountManagement: React.FC = () => {
         rowKey="id"
       />
     </div>
-
   );
 };
 

@@ -216,8 +216,6 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
     );
 
     const isLastPage = page >= maxPages;
-    console.log(filterCondition);
-
     return {
       classes,
       totalItems,

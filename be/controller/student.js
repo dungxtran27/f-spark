@@ -37,11 +37,21 @@ const getAllStudentByClassId = async (req, res) => {
 
 const getAllStudentUnGroupByClassId = async (req, res) => {
     try {
-        const { classId } = req.params; 
+        const { classId } = req.params;
         if (!classId) {
             return res.status(400).json({ message: "Class ID is required" });
-          }
-        const students = await StudentRepository.getAllStudentUngroupByClassId(classId); 
+        }
+        const students = await StudentRepository.getAllStudentUngroupByClassId(classId);
+        return res.status(200).json({ data: students });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+const getAllAccStudent = async (req, res) => {
+    try {
+        const { page, limit, studentName, mssv, classId, status } = req.body;
+        const students = await StudentRepository.getAllAccStudent(page, limit, studentName, mssv, classId, status);
         return res.status(200).json({ data: students });
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -52,5 +62,6 @@ export default {
     getStudentsInSameGroup,
     getTeacherByStudentId,
     getAllStudentByClassId,
-    getAllStudentUnGroupByClassId
+    getAllStudentUnGroupByClassId,
+    getAllAccStudent
 }
