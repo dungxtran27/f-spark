@@ -16,4 +16,7 @@ export const student = {
   getAllStudents: async (filters: any = {}, requestBody: any = {}) => {
     return await axios.post(`/api/student`, { ...filters, ...requestBody });
   },
+  addManyStudentNoClassToClass: async (requestBody: any) => {
+    return await axios.patch(`/api/student/addStudentToClass`, requestBody);
+  },
 };

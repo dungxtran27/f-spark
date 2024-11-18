@@ -7,6 +7,7 @@ studentRouter.get("/getTeacherByStudentId", verifyToken, StudentController.getTe
 studentRouter.get('/getAllStudentByClassId', verifyToken, StudentController.getAllStudentByClassId);
 studentRouter.get('/:classId', verifyToken, StudentController.getAllStudentUnGroupByClassId);
 studentRouter.post("/",verifyToken, StudentController.getAllStudents);
+studentRouter.patch("/addStudentToClass", StudentController.addManyStudentNoClassToClass);
 
 export default studentRouter;
 

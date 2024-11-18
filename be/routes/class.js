@@ -4,5 +4,6 @@ import verifyToken from "../middleware/verifyToken.js";
 const classRouter = express.Router();
 classRouter.get("/getTeacherClasses", verifyToken,ClassController.getClassesOfTeacher)
 classRouter.put('/pinClasswork', verifyToken, ClassController.pinClasswork);
+classRouter.get("/classes", ClassController.getAllClasses);
 
 export default classRouter;

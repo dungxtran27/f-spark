@@ -107,8 +107,94 @@ const findClassById = async (classId) => {
     throw new Error(error.message);
   }
 };
+
+const getAllClasses = async () => {
+  try {
+    const classes = await Class.aggregate([
+      {
+        $match: {
+          isActive: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "_id",
+          foreignField: "class",
+          as: "groups",
+        },
+      },
+      {
+        $addFields: {
+          sponsorshipCount: {
+            $size: {
+              $filter: {
+                input: "$groups",
+                as: "group",
+                cond: { $eq: ["$$group.isSponsorship", true] },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "Teachers",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacherDetails",
+        },
+      },
+      {
+        $addFields: {
+          teacher: { $arrayElemAt: ["$teacherDetails", 0] },
+        },
+      },
+      {
+        $addFields: {
+          teacherId: "$teacher._id",
+          teacherName: "$teacher.name",
+        },
+      },
+      {
+        $addFields: {
+          groupCount: { $size: "$groups" },
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "_id",
+          foreignField: "classId",
+          as: "students",
+        },
+      },
+      {
+        $addFields: {
+          studentCount: { $size: "$students" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          classCode: 1,
+          isActive: 1,
+          sponsorshipCount: 1,
+          teacherId: 1,
+          teacherName: 1,
+          groupCount: 1,
+          studentCount: 1,
+        },
+      },
+    ]);
+    return classes;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   pinClasswork,
   getClassesOfTeacher,
   findClassById,
+  getAllClasses
 };

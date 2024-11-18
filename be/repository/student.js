@@ -86,7 +86,7 @@ const getAllStudentUngroupByClassId = async (classId) => {
     throw new Error(error.message);
   }
 };
-const findById = async (studentId) =>{
+const findById = async (studentId) => {
   try {
     const student = await Student.findById(studentId);
     return student;
@@ -112,26 +112,26 @@ const getAllStudents = async ({ name, studentId, email, major }) => {
     const students = await Student.find(query)
       .populate({
         path: "account",
-        select: "email", 
+        select: "email",
       })
       .populate({
         path: "group",
-        select: "GroupName", 
+        select: "GroupName",
       })
       .populate({
         path: "classId",
-        select: "classCode", 
+        select: "classCode",
       });
     const formattedStudents = students.map((student) => ({
       _id: student._id,
       name: student.name,
       studentId: student.studentId,
       major: student.major,
-      email: student.account?.email, 
-      group: student.group?.GroupName, 
-      classId: student.classId?.classCode, 
+      email: student.account?.email,
+      group: student.group?.GroupName,
+      classId: student.classId?.classCode,
       updatedAt: student.updatedAt,
-    }));    
+    }));
     const totalStudent = await Student.countDocuments(query);
     const queryNotHaveClass = {
       ...query,
@@ -140,7 +140,7 @@ const getAllStudents = async ({ name, studentId, email, major }) => {
     const StudentNotHaveClass = await Student.find(queryNotHaveClass)
       .populate({
         path: "account",
-        select: "email", 
+        select: "email",
       });
 
     const formattedStudentsNoClass = StudentNotHaveClass.map((student) => ({
@@ -148,8 +148,8 @@ const getAllStudents = async ({ name, studentId, email, major }) => {
       name: student.name,
       studentId: student.studentId,
       major: student.major,
-      email: student.account?.email, 
-      group: student.group?.GroupName, 
+      email: student.account?.email,
+      group: student.group?.GroupName,
       classId: student.classId?.classCode,
       updatedAt: student.updatedAt,
     }));
@@ -166,6 +166,27 @@ const getAllStudents = async ({ name, studentId, email, major }) => {
     throw new Error(error.message);
   }
 };
+const addManyStudentNoClassToClass = async (studentIds, classId) => {
+  try {
+    const result = await Student.updateMany(
+      {
+        _id: { $in: studentIds },
+        classId: { $in: [null, undefined] },
+      },
+      {
+        $set: { classId: classId },
+      }
+    );
+    const updatedStudents = await Student.find({
+      _id: { $in: studentIds },
+      classId: classId, 
+    })
+      .select("_id name gen major studentId account classId group")
+    return updatedStudents; 
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 
 export default {
@@ -176,5 +197,6 @@ export default {
   getAllStudentByClassId,
   getAllStudentUngroupByClassId,
   findById,
-  getAllStudents
+  getAllStudents,
+  addManyStudentNoClassToClass
 };

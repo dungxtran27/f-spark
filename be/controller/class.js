@@ -27,7 +27,17 @@ const pinClasswork = async (req, res) => {
   }
 };
 
+const getAllClasses = async (req, res) => {
+  try {
+    const classes = await ClassRepository.getAllClasses();
+    return res.status(200).json({ data: classes });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   pinClasswork,
   getClassesOfTeacher,
+  getAllClasses
 };
