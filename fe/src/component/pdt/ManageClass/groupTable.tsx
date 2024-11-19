@@ -8,6 +8,7 @@ import { groupApi } from "../../../api/group/group";
 import { useQuery } from "@tanstack/react-query";
 import { FaStar } from "react-icons/fa"; // Importing star icon
 import { tagMajorApi } from "../../../api/tagMajors/tagMajor";
+import { classApi } from "../../../api/Class/class";
 
 const { Option } = Select;
 
@@ -58,6 +59,15 @@ const Group = () => {
     queryKey: [QUERY_KEY.ALLMAJOR],
     queryFn: async () => {
       return tagMajorApi.getAllMajor();
+    },
+  });
+  const { data: classData } = useQuery({
+    queryKey: [QUERY_KEY.CLASSES],
+    queryFn: async () => {
+      return classApi.getClassListPagination({
+        limit: 12,
+        page: 1,
+      });
     },
   });
   const filteredData: Group[] =
@@ -247,7 +257,21 @@ const Group = () => {
         }}
       >
         <div className="grid grid-cols-3 gap-4">
-          <ClassCard />
+          {classData?.data.data.map((classItem: any) => {
+            const sponsorshipCount = classItem.groups.filter(
+              (group: any) => group.isSponsorship === true
+            ).length;
+            return (
+              <ClassCard
+                key={classItem._id}
+                classCode={classItem.classCode}
+                teacherName={classItem.teacherDetails.name}
+                groups={classItem.totalGroups}
+                isSponsorship={sponsorshipCount}
+                totalMembers={classItem.totalStudents}
+              />
+            );
+          })}
           <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-purple-400">
             <FiPlus className="text-3xl" />
             <span className="mt-1 text-lg">Create new class</span>
