@@ -256,10 +256,46 @@ const getAllAccMentor = async (page, limit, mentorName, email, status, tag) => {
     throw new Error(error.message);
   }
 };
+const getMentorAssignedGroupInfo = async (mentorId) => {
+  try {
+    const mentor = await Mentor.findById(mentorId)
+      .select("name email phoneNumber profile tag profilePicture isActive") 
+      .populate({
+        path: "assignedGroup",
+        select: "GroupName GroupDescription teamMembers class", 
+        populate: {
+          path: "class",
+          select: "classCode",
+        },
+      })
+      .lean(); 
+    if (!mentor) {
+      throw new Error("Mentor not found");
+    }
+    return {
+      name: mentor.name,
+      email: mentor.email,
+      phoneNumber: mentor.phoneNumber,
+      profile: mentor.profile,
+      tag: mentor.tag,
+      profilePicture: mentor.profilePicture,
+      isActive: mentor.isActive,
+      assignedGroup: mentor.assignedGroup.map(group => ({
+        GroupName: group.GroupName,
+        GroupDescription: group.GroupDescription,
+        teamMembersCount: group.teamMembers.length,
+        classCode: group.class ? group.class.classCode : null, 
+      })),
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 export default {
   getMentor,
   assignMentor,
   getAllMentors,
-  getAllAccMentor
+  getAllAccMentor,
+  getMentorAssignedGroupInfo
 };
