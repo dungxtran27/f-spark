@@ -2,6 +2,8 @@ import Class from "../model/Class.js";
 import Mentor from "../model/Mentor.js";
 import Student from "../model/Student.js";
 import Teacher from "../model/Teacher.js";
+import mongoose from "mongoose";
+
 const getTeacherByClassId = async (classId) => {
   try {
     const classDoc = await Class.findById(classId);
@@ -124,9 +126,88 @@ const getAllAccTeacher = async (page, limit, teacherName, email, status) => {
   }
 };
 
+const getTeacherWithClasses = async (teacherId) => {
+  try {
+    const teacherData = await Teacher.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(teacherId) } },
+      {
+        $lookup: {
+          from: "Accounts",
+          localField: "account",
+          foreignField: "_id",
+          as: "account",
+        },
+      },
+      { $unwind: "$account" },
+      {
+        $lookup: {
+          from: "Classes",
+          localField: "assignedClasses.id",
+          foreignField: "_id",
+          as: "assignedClasses",
+        },
+      },
+      {
+        $unwind: {
+          path: "$assignedClasses",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          let: { classId: "$assignedClasses._id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$classId", "$$classId"] } } },
+            { $count: "studentCount" },
+          ],
+          as: "studentData",
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          let: { classId: "$assignedClasses._id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$class", "$$classId"] } } },
+            { $count: "groupCount" },
+          ],
+          as: "groupData",
+        },
+      },
+      {
+        $addFields: {
+          "assignedClasses.studentCount": {
+            $arrayElemAt: ["$studentData.studentCount", 0],
+          },
+          "assignedClasses.groupCount": {
+            $arrayElemAt: ["$groupData.groupCount", 0],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          salutation: { $first: "$salutation" },
+          name: { $first: "$name" },
+          phoneNumber: { $first: "$phoneNumber" },
+          email: { $first: "$account.email" },
+          profilePicture: { $first: "$account.profilePicture" },
+          assignedClasses: { $push: "$assignedClasses" },
+        },
+      },
+    ]);
+    return teacherData.length > 0 ? teacherData[0] : null;
+  } catch (error) {
+    throw new Error(`Error fetching teacher info: ${error.message}`);
+  }
+}
+
+
 
 export default {
   getTeacherByClassId,
   findByAccountId,
-  getAllAccTeacher
+  getAllAccTeacher,
+  getTeacherWithClasses
 };

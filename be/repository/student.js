@@ -173,7 +173,8 @@ const getAllStudentsNoClass = async ({ name, studentId, email, major }) => {
     const totalStudent = await Student.countDocuments(query);
     const queryNotHaveClass = {
       ...query,
-      $or: [{ classId: null }, { classId: undefined }],
+      classId: { $in: [null, undefined] },
+      group: { $in: [null, undefined] },
     };
     const StudentNotHaveClass = await Student.find(queryNotHaveClass)
       .populate({

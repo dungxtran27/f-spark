@@ -59,10 +59,19 @@ const getAllAccMentor = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
+const getMentorGroups = async (req, res) => {
+  const  mentorId  = req.params.mentorId;
+  try {
+    const groupInfo = await MentorRepository.getMentorAssignedGroupInfo(mentorId);
+    return res.status(200).json({data: groupInfo});
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getMentor,
   assignMentor,
   viewAllMentors,
-  getAllAccMentor
+  getAllAccMentor,
+  getMentorGroups
 };

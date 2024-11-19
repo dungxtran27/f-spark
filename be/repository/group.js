@@ -855,7 +855,6 @@ const addGroupAndStudentsToClass = async (groupIds, classId) => {
   }
 };
 
-
 export default {
   createCellsOnUpdate,
   createJourneyRow,
