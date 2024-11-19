@@ -48,6 +48,10 @@ const RequestSchema = new Schema(
         required: false,
       },
     ],
+    totalMembers: {
+      type: Number,
+      required: false,
+    },
     group: {
       type: Schema.Types.ObjectId,
       ref: "Group",

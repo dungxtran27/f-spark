@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Col, Card, Typography, Tooltip, Modal, Input, message } from "antd";
+import {
+  Col,
+  Card,
+  Typography,
+  Tooltip,
+  Modal,
+  Input,
+  message,
+  Skeleton,
+} from "antd";
 import {
   ApartmentOutlined,
   BulbOutlined,
@@ -40,16 +49,22 @@ const BusinessModelCanvas: React.FC = () => {
   const [revenueStreamsText, setRevenueStreamsText] = useState("");
   const [costStructureText, setCostStructureText] = useState("");
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
 
   const groupId = userInfo?.group ?? "";
   const fetchSections = async () => {
+    setIsLoading(true);
     try {
       const response = await businessModelCanvas.getBusinessModelCanvas(
         groupId
       );
+      if (response) {
+        setIsLoading(false);
+      }
       const sections = response.data.data.businessModelCanvas.sections;
       setKeyPartnersText(
         sections.find((section: any) => section.name === "Key Partner")
@@ -114,9 +129,6 @@ const BusinessModelCanvas: React.FC = () => {
     onSuccess: () => {
       message.success("updated successfully");
       fetchSections();
-    },
-    onError: () => {
-      message.error("Failed to update");
     },
   });
 
@@ -191,8 +203,15 @@ const BusinessModelCanvas: React.FC = () => {
     setTempText(e.target.value);
   };
 
+  if (isLoading)
+    return (
+      <div className="bg-white rounded-lg p-4">
+        <Skeleton />
+      </div>
+    );
+
   return (
-    <div className="bg-white p-8 mt-5 rounded-lg flex flex-col justify-center mb-6">
+    <div className="bg-white p-8 mt-5 rounded-lg flex flex-col justify-center">
       <Title level={4} className="font-bold">
         Business Model Canvas
       </Title>
@@ -367,7 +386,7 @@ const BusinessModelCanvas: React.FC = () => {
         </div>
         <div className="justify-center flex flex-row mt-2">
           <Col span={10}>
-            <Card className="bg-green-300 h-36 mr-2">
+            <Card className="bg-green-300 h-36 mr-2 -ml-2">
               <Title level={4} className="flex items-center justify-between">
                 Revenue Streams
                 <FileTextOutlined
@@ -392,7 +411,7 @@ const BusinessModelCanvas: React.FC = () => {
             </Card>
           </Col>
           <Col span={10}>
-            <Card className="bg-green-300 h-36 ml-2">
+            <Card className="bg-green-300 h-36 ml-2 -mr-2">
               <Title level={4} className="flex items-center justify-between">
                 Cost Structure
                 <DollarCircleOutlined

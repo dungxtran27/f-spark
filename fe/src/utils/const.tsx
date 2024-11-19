@@ -82,6 +82,18 @@ export const TASK_FILTERS = {
   timeBlock: "timeBlock",
   searchKey: "searchKey",
 };
+export const STUDENT_FILTERS = {
+  name: "name",
+  studentId: "studentId",
+  email: "email",
+  major: "major",
+  searchKey: 'searchKey',
+};
+
+export const GROUP_FILTERS = {
+  groupName: "GroupName",
+  filters: "filters",
+};
 export const MANAGESTUDENT_FILTERS = {
   class: "class",
   term: "term",
@@ -107,6 +119,7 @@ export const CREATE_TASK_FILTER = {
   timeBlock: "timeBlock",
   parentTask: "parentTask",
   priority: "priority",
+  status: "status"
 };
 export const TASK_PRIORITY = [
   {
@@ -231,6 +244,10 @@ export const QUERY_KEY = {
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
   NOTIFICATION_STATISTIC: "notificationStatistic",
   REQUEST_LEAVE_CLASS: "requestLeaveClass",
+  ALLSTUDENT: "allStudent",
+  ALLGROUP: "allGroup",
+  ALLMAJOR: "allMajor",
+  CLASSCODE: "clasCode",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -254,6 +271,8 @@ export const NOTIFICATION_ACTION_TYPE = {
   CHILD_TASK_CREATION: "ChildTaskCreation",
   CREATE_TASK: "TaskCreation",
   UPDATE_TASK_STATUS: "UpdateTaskStatus",
+  UPDATE_TASK: "UpdateTask",
+  DELETE_TASK: "DeleteTask"
 };
 export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",

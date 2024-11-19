@@ -1,4 +1,9 @@
-import { RequestRepository, GroupRepository } from "../repository/index.js";
+import { io, userSocketMap } from "../index.js";
+import {
+  RequestRepository,
+  GroupRepository,
+  NotificationRepository,
+} from "../repository/index.js";
 
 const getAllRequest = async (req, res) => {
   try {
@@ -107,12 +112,15 @@ const createLeaveClassRequest = async (req, res) => {
 const declineLeaveClassRequest = async (req, res) => {
   try {
     const { requestId } = req.body;
-    const foundRequest = RequestRepository.getRequestById(requestId);
+    const decodedToken = req.decodedToken;
+    const foundRequest = await RequestRepository.getRequestById({ requestId });
+    console.log(foundRequest);
+
     if (!foundRequest) {
-      return res.status(400).json({ message: "No Request found." });
+      return res.status(400).json({ error: "No Request found." });
     }
-    if (foundRequest.status == "pending") {
-      return res.status(400).json({ message: "Request is declined" });
+    if (foundRequest.status !== "pending") {
+      return res.status(400).json({ error: "Request is declined" });
     }
     const data = await RequestRepository.declineLeaveRequest({
       requestId,
@@ -134,7 +142,8 @@ const declineLeaveClassRequest = async (req, res) => {
         data: notificationData,
       });
 
-      const socketIds = userSocketMap[foundRequest.createBy.toString()];
+      const socketIds =
+        userSocketMap[foundRequest.createBy?.account._id.toString()];
       if (socketIds) {
         io.to(socketIds).emit(
           "newNotification",

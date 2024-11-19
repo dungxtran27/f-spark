@@ -36,6 +36,7 @@ const Router = () => {
         <Route path="/request" element={<Requests />} />
         <Route path="/taskDetail/:taskName/:taskId" element={<TaskDetail />} />
         <Route path="/notification/:type" element={<Notification/>}/>
+        <Route path="/notification" element={<Notification/>}/>
         {/* teacher */}
         <Route path="/:role/login" element={<Login />} />
         <Route path="/mentorlist" element={<MentorList />} />
@@ -46,7 +47,6 @@ const Router = () => {
         <Route path="/timelineTeacher" element={<TimelineTeacher />} />
         
         {/* PDT */}
-        <Route path="/admin/login" element={<Login />} />
         <Route path="/manageClass" element={<ManageClass />} />
         <Route path="/manageRequest" element={<ManageRequest />} />
         <Route path="/manageAccount" element={<AccountManagementPage />} />

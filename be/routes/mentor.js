@@ -6,4 +6,5 @@ const mentorRouter = express.Router();
 mentorRouter.post("/", MentorController.viewAllMentors);
 mentorRouter.get("/getMentor", MentorController.getMentor);
 mentorRouter.put("/assignMentor", MentorController.assignMentor);
+mentorRouter.post("/getAllAccMentor", MentorController.getAllAccMentor);
 export default mentorRouter;

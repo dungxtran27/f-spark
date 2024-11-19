@@ -28,7 +28,6 @@ const checkGroupAccess = async (req, res, next) => {
         const groupOfStudent = await GroupRepository.findGroupById({
           groupId: student.group,
         });
-
         if (!groupOfStudent) {
           return res.status(403).json({
             error:

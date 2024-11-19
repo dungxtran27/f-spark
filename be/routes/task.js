@@ -40,5 +40,10 @@ taskRouter.post(
   authorization.checkGroupAccess,
   TaskController.getTasksByGroup
 );
+taskRouter.delete(
+  "/:taskId",
+  verifyToken, 
+  TaskController.deleteTask
+)
 
 export default taskRouter;

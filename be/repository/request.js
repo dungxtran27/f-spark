@@ -24,6 +24,7 @@ const getAllRequest = async ({ groupId }) => {
   }
 };
 const getRequestById = async ({ requestId }) => {
+  
   try {
     const requests = await Request.findById(requestId)
       .populate({
@@ -49,7 +50,7 @@ const createRequest = async ({ groupId, studentId, actionType }) => {
     const existingRequest = await Request.findOne({
       createBy: studentId,
       group: groupId,
-      actionType,
+      actionType: "leave",
       status: "pending",
     });
 
@@ -57,20 +58,31 @@ const createRequest = async ({ groupId, studentId, actionType }) => {
       throw new Error("Request already exists for this student and group.");
     }
 
-    const newRequest = await Request.create({
-      typeRequest: "Student",
-      createBy: studentId,
-      actionType,
-      group: groupId,
-    });
-
     if (actionType === "leave") {
-      await Request.updateOne(
-        { _id: newRequest._id },
-        { $addToSet: { upVoteYes: studentId } }
-      );
+      const group = await Group.findOne({
+        _id: groupId,
+        teamMembers: studentId,
+      });
+
+      if (group) {
+        await Request.create({
+          typeRequest: "Student",
+          createBy: studentId,
+          actionType: "leave",
+          group: groupId,
+          status: "approved",
+          totalMembers: group.teamMembers.length,
+        });
+        await Group.updateOne(
+          { _id: groupId },
+          { $pull: { teamMembers: studentId } }
+        );
+        await Student.updateOne({ _id: studentId }, { group: null });
+        return group;
+      } else {
+        throw new Error("Student is not part of the specified group.");
+      }
     }
-    return newRequest._doc;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -103,7 +115,7 @@ const voteOutGroup = async ({ requestId, groupId, studentId, voteType }) => {
       select: "teamMembers",
     });
 
-    const totalMembers = updatedRequest.group.teamMembers.length;
+    let totalMembers = updatedRequest.group.teamMembers.length;
     const totalYesVotes = updatedRequest.upVoteYes.length;
     const totalVotes =
       updatedRequest.upVoteYes.length + updatedRequest.upVoteNo.length;
@@ -119,15 +131,15 @@ const voteOutGroup = async ({ requestId, groupId, studentId, voteType }) => {
             { _id: request.createBy },
             { group: groupId }
           );
-          await Request.updateOne({ _id: requestId }, { status: "approved" });
-          await Request.deleteMany({
-            createBy: request.createBy,
-            actionType: "join",
-            group: { $ne: groupId },
-            status: "pending",
-          });
+          await Request.updateOne(
+            { _id: requestId },
+            { status: "approved", totalMembers: totalMembers }
+          );
         } else {
-          await Request.updateOne({ _id: requestId }, { status: "declined" });
+          await Request.updateOne(
+            { _id: requestId },
+            { status: "declined", totalMembers: totalMembers }
+          );
         }
       } else if (request.actionType === "leave") {
         if (totalYesVotes === totalMembers) {
@@ -136,9 +148,15 @@ const voteOutGroup = async ({ requestId, groupId, studentId, voteType }) => {
             { $pull: { teamMembers: request.createBy } }
           );
           await Student.updateOne({ _id: request.createBy }, { group: null });
-          await Request.updateOne({ _id: requestId }, { status: "approved" });
+          await Request.updateOne(
+            { _id: requestId },
+            { status: "approved", totalMembers: totalMembers }
+          );
         } else {
-          await Request.updateOne({ _id: requestId }, { status: "declined" });
+          await Request.updateOne(
+            { _id: requestId },
+            { status: "declined", totalMembers: totalMembers }
+          );
         }
       }
     }
@@ -167,13 +185,17 @@ const joinGroup = async ({ groupId, studentId }) => {
   try {
     const existingRequest = await Request.findOne({
       createBy: studentId,
-      group: groupId,
       actionType: "join",
       status: "pending",
     });
 
     if (existingRequest) {
-      throw new Error("Request already exists for this student and group.");
+      throw new Error("Request join group is already exists");
+    }
+
+    const group = await Group.findById(groupId);
+    if (!group) {
+      throw new Error("Group not found.");
     }
 
     const newRequest = await Request.create({
@@ -181,6 +203,7 @@ const joinGroup = async ({ groupId, studentId }) => {
       createBy: studentId,
       actionType: "join",
       group: groupId,
+      totalMembers: group.teamMembers.length,
     });
 
     return newRequest._doc;

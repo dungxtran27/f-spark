@@ -77,7 +77,7 @@ const GradingSubmission = ({
           <Checkbox.Group
             className="flex flex-col"
             key={gradingCriteria}
-            options={gradingCriteria.map((gc: any) => {
+            options={gradingCriteria?.map((gc: any) => {
               return {
                 label: gc?.description,
                 value: gc?._id,

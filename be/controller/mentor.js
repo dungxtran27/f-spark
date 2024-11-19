@@ -49,8 +49,20 @@ const assignMentor = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const getAllAccMentor = async (req, res) => {
+  try {
+    const { page, limit, mentorName, email, status, tag } = req.body;
+    const mentors = await MentorRepository.getAllAccMentor(page, limit, mentorName, email, status, tag);
+    return res.status(200).json({ data: mentors });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   getMentor,
   assignMentor,
   viewAllMentors,
+  getAllAccMentor
 };

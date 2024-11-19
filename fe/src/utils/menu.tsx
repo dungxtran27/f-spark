@@ -1,5 +1,5 @@
 import { FaChartPie } from "react-icons/fa6";
-import { FaTasks, FaRegCalendarAlt } from "react-icons/fa";
+import { FaTasks } from "react-icons/fa";
 import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
@@ -25,11 +25,6 @@ export const StudentRoutes = [
     route: "/class",
     page: "Class",
     icon: <FaBookJournalWhills size={20} />,
-  },
-  {
-    route: "/timeline",
-    page: "Timeline",
-    icon: <FaRegCalendarAlt size={20} />,
   },
   {
     route: "/request",

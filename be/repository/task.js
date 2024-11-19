@@ -19,7 +19,7 @@ const createTask = async ({
   dueDate,
   parentTask,
   childTasks,
-  priority
+  priority,
 }) => {
   try {
     const result = await Task.create({
@@ -36,7 +36,7 @@ const createTask = async ({
       dueDate,
       parentTask,
       childTasks,
-      priority
+      priority,
     });
     return result._doc;
   } catch (error) {
@@ -109,7 +109,7 @@ const updatedTask = async (taskId, updateData) => {
         select: "name studentId",
         populate: {
           path: "account",
-          select: "profilePicture -_id",
+          select: "profilePicture _id",
         },
       })
       .populate({
@@ -146,7 +146,7 @@ const viewListTaskInGroup = async ({
   try {
     const query = {
       group: groupId,
-      parentTask: null||undefined
+      parentTask: null || undefined,
     };
     if (taskType) {
       query.taskType = taskType;
@@ -205,26 +205,34 @@ const updateTaskChildren = async (taskId, childrenTaskId) => {
         childTasks: childrenTaskId,
       },
     });
-    console.log(updatedTask);
-    
-    return updatedTask
+    return updatedTask;
   } catch (error) {
     throw new Error(error.message);
   }
 };
-const findById = async (taskId) =>{
+const findById = async (taskId) => {
   try {
     const result = await Task.findById(taskId);
     return result;
   } catch (error) {
-    throw new Error(error)
+    throw new Error(error);
   }
-}
+};
+
+const deleteTask = async (taskId) => {
+  try {
+    const result = await Task.findByIdAndDelete(taskId);
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 export default {
   createTask,
   viewTaskDetail,
   updatedTask,
   viewListTaskInGroup,
   updateTaskChildren,
-  findById
+  findById,
+  deleteTask
 };

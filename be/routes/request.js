@@ -36,13 +36,14 @@ requestRouter.delete(
 );
 requestRouter.post(
   "/approvedLeaveClassRequest",
-  // verifyToken,
-  // authorization.checkRole("ADMIN"),
+  verifyToken,
+  authorization.checkRole("ADMIN"),
   RequestController.approvedLeaveClassRequest
 );
 requestRouter.post(
   "/declinedLeaveClassRequest",
-  // verifyToken,    authorization.checkRole("ADMIN"),
+  verifyToken,
+  authorization.checkRole("ADMIN"),
 
   RequestController.declineLeaveClassRequest
 );
@@ -58,7 +59,8 @@ requestRouter.post(
 );
 requestRouter.get(
   "/getAllLeaveClassRequest",
-  //   verifyToken,    authorization.checkRole("ADMIN"),
+  verifyToken,
+  authorization.checkRole("ADMIN"),
 
   RequestController.getAllLeaveClassRequest
 );
