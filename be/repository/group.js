@@ -666,11 +666,11 @@ const findAllSponsorGroupsOfClasses = async (classIds) => {
 const getGroupsByClassId = async (classId) => {
   try {
     const groups = await Group.find({ class: classId })
-      .select('GroupName GroupDescription timeline')
+      .select("GroupName GroupDescription timeline")
       .lean();
     return groups;
   } catch (error) {
-    console.error('Error fetching groups by class:', error.message);
+    console.error("Error fetching groups by class:", error.message);
     throw error;
   }
 };
@@ -679,7 +679,7 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
     const groups = await Group.find({
       _id: { $in: groupIds },
       "timeline.type": type,
-      "timeline.editAble": true
+      "timeline.editAble": true,
     });
     const updateResult = await Group.updateMany(
       { _id: { $in: groupIds }, "timeline.type": type },
@@ -688,18 +688,19 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
           "timeline.$[timelineItem].title": updateData.title,
           "timeline.$[timelineItem].description": updateData.description,
           "timeline.$[timelineItem].endDate": updateData.endDate,
-        }
-      }, {
-      arrayFilters: [{ "timelineItem.type": type }],
-      new: true
-    }
+        },
+      },
+      {
+        arrayFilters: [{ "timelineItem.type": type }],
+        new: true,
+      }
     );
     return await Group.find({
       _id: { $in: groupIds },
-      "timeline.type": type
+      "timeline.type": type,
     }).populate({
       path: "timeline",
-      match: { type }
+      match: { type },
     });
   } catch (error) {
     throw new Error(error.message);
