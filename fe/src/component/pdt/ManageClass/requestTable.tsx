@@ -1,5 +1,6 @@
-import { Modal, Pagination } from "antd";
+import { Modal, Pagination, Tag } from "antd";
 import React, { useState } from "react";
+import { colorMap } from "../../../utils/const";
 
 interface Requests {
   mssv: string;
@@ -98,8 +99,8 @@ const ApprovalTable: React.FC = () => {
             <th className="p-2">Mssv</th>
             <th className="p-2">Major</th>
             <th className="p-2">Name</th>
-            <th className="p-2">Move</th>
-            <th className="p-2">Action</th>
+            <th className="p-2 text-center">Move</th>
+            <th className="p-2 text-center">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -107,34 +108,20 @@ const ApprovalTable: React.FC = () => {
             <tr key={index} className="border-b">
               <td className="p-2">{request.mssv}</td>
               <td className="p-2">
-                <span
-                  className="px-2 py-1 rounded-lg"
-                  style={{
-                    backgroundColor: `${
-                      request.color === "yellow"
-                        ? "rgba(255, 255, 0, 0.4)"
-                        : request.color === "blue"
-                        ? "rgba(0, 0, 255, 0.4)"
-                        : request.color === "green"
-                        ? "rgba(0, 128, 0, 0.4)"
-                        : "rgba(255, 0, 0, 0.4)"
-                    }`,
-                  }}
+                <Tag
+                  className="px-2 "
+                  color={colorMap[request.major]}
                 >
                   {request.major}
-                </span>
+                </Tag>
               </td>
               <td className="p-2">{request.name}</td>
-              <td className="p-2 flex items-center">
-                <span className="px-2 py-1 text-green-700 bg-green-200 rounded">
-                  {request.from}
-                </span>
+              <td className="p-2 flex items-center justify-center ">
+                <Tag color="blue" className="py-1">{request.from}</Tag>
                 <span className="mx-2">→</span>
-                <span className="px-2 py-1 text-blue-700 bg-blue-200 rounded">
-                  {request.to}
-                </span>
+                <Tag color="green" className="py-1">{request.to}</Tag>
               </td>
-              <td className="p-2">
+              <td className="p-2 text-center">
                 {request.isDone ? (
                   <button className="px-4 py-1 font-semibold text-white bg-orange-500 rounded">
                     Done

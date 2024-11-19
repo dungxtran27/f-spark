@@ -86,7 +86,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 w-72 border border-gray-300">
+    <div className="bg-white shadow-md rounded-lg p-4  border border-gray-300">
       <div className="flex justify-between items-center mb-2 border-b-2">
         <span className="font-semibold">{groupName}</span>
         <div className="flex items-center space-x-1">
