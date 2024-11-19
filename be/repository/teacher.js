@@ -107,9 +107,7 @@ const getAllAccTeacher = async (page, limit, teacherName, email, status) => {
       {
         $skip: (page - 1) * limit,
       },
-      {
-        $limit: limit,
-      },
+      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
     ]);
 
     const isLastPage = page >= maxPages;

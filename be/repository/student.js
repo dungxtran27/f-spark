@@ -228,6 +228,7 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
 const getAllAccStudent = async (page, limit, studentName, mssv, classId, status) => {
   try {
     let filterCondition = { $and: [] };
+    console.log(status);
 
     if (studentName) {
       filterCondition.$and.push({ name: { $regex: studentName, $options: "i" } });
@@ -238,10 +239,15 @@ const getAllAccStudent = async (page, limit, studentName, mssv, classId, status)
     }
 
     if (classId) {
-      filterCondition.$and.push({ group: mongoose.Types.ObjectId(classId) });
+      const classDoc = await Class.findOne({ classCode: classId });
+      if (classDoc) {
+        filterCondition.$and.push({
+          classId: new mongoose.Types.ObjectId(classDoc._id),
+        });
+      }
     }
 
-    if (status !== undefined) {
+    if (status) {
       filterCondition.$and.push({ isActive: status });
     }
 
@@ -282,6 +288,20 @@ const getAllAccStudent = async (page, limit, studentName, mssv, classId, status)
         },
       },
       {
+        $lookup: {
+          from: "Classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "classDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$classDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $match: filterCondition,
       },
       {
@@ -292,6 +312,7 @@ const getAllAccStudent = async (page, limit, studentName, mssv, classId, status)
           major: 1,
           group: "$groupDetails.name",
           accountEmail: "$accountDetails.email",
+          classId: "$classDetails.classCode",
           isActive: 1,
           createdAt: 1,
           updatedAt: 1,
@@ -303,9 +324,7 @@ const getAllAccStudent = async (page, limit, studentName, mssv, classId, status)
       {
         $skip: (page - 1) * limit,
       },
-      {
-        $limit: limit,
-      },
+      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
     ]);
 
     const isLastPage = page >= maxPages;

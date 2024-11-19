@@ -9,6 +9,7 @@ import {
   Tag,
   Divider,
   Popover,
+  Pagination,
 } from "antd";
 import {
   SearchOutlined,
@@ -20,7 +21,9 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
 import { Link } from "react-router-dom";
-import { colorMajorGroup } from "../../../../utils/const";
+import { colorMajorGroup, QUERY_KEY } from "../../../../utils/const";
+import { useQuery } from "@tanstack/react-query";
+import { Admin } from "../../../../api/manageAccoount";
 
 const { Option } = Select;
 
@@ -32,73 +35,53 @@ interface Mentor {
   id: number;
   name: string;
   email: string;
-  tags: Tag[];
+  tag: Tag[];
   phoneNumber: string;
-  status: "Active" | "Deactive";
+  status: boolean;
 }
 
-const data: Mentor[] = [
-  {
-    id: 1,
-    name: "Nguyen Trung Hieu",
-    tags: [{ _id: "1", name: "Ky Thuat" }],
-    email: "hieuyd1234@fe.com",
-    phoneNumber: "0123456789",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Nguyen Van A",
-    tags: [{ _id: "2", name: "Kinh Te" }],
-    email: "vana1231@fe.com",
-    phoneNumber: "0123456789",
-    status: "Deactive",
-  },
-  {
-    id: 3,
-    name: "Tran Thi B",
-    tags: [
-      { _id: "3", name: "Khoa Hoc" },
-      { _id: "4", name: "Ky Thuat" },
-    ],
-    email: "btran1232@fe.com",
-    phoneNumber: "0123456789",
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Nguyen Trung Hieu A",
-    tags: [{ _id: "5", name: "Ky Thuat" }],
-    email: "hieuyd1233@fe.com",
-    phoneNumber: "0123456789",
-    status: "Active",
-  },
-  {
-    id: 5,
-    name: "Nguyen Van C",
-    tags: [
-      { _id: "6", name: "Kinh Te" },
-      { _id: "7", name: "Khoa Hoc" },
-      { _id: "8", name: "Ky Thuat" },
-    ],
-    email: "vana1234@fe.com",
-    phoneNumber: "0123456789",
-    status: "Deactive",
-  },
-];
-
 const Mentor: React.FC = () => {
+  const [page, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [tagFilter, setTagFitler] = useState<string | undefined>(undefined);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(
-    "Active"
-  );
+  const [statusFilter, setStatusFilter] = useState<boolean>(true);
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<
     AutoCompleteProps["options"]
   >([]);
 
-  const handleSearch = () => {};
+  const handleSearch = () => {
+    setCurrentPage(1);
+  };
+
+  const isEmail = (input: string) => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(input);
+  };
+  const { data: mentorData } = useQuery({
+    queryKey: [QUERY_KEY.MENTORLIST, page, searchText],
+    queryFn: async () => {
+      if (isEmail(searchText)) {
+        return Admin.getMentor({
+          limit: 10,
+          page: page || 1,
+          mentorName: null,
+          email: searchText || null,
+        });
+      } else {
+        return Admin.getMentor({
+          limit: 10,
+          page: page || 1,
+          mentorName: searchText || null,
+          email: null,
+        });
+      }
+    },
+  });
+
+  const data: Mentor[] = Array.isArray(mentorData?.data?.data?.mentors)
+    ? mentorData?.data?.data?.mentors
+    : [];
 
   const handleAutoCompleteSearch = (input: string) => {
     const normalizedInput = input.toLowerCase();
@@ -109,8 +92,12 @@ const Mentor: React.FC = () => {
           mentor.email.toLowerCase().includes(normalizedInput)
       )
       .map((mentor) => ({
-        value: mentor.name,
-        label: `${mentor.name} (${mentor.tags})`,
+        value: mentor.email.toLowerCase().includes(normalizedInput)
+          ? mentor.email
+          : mentor.name,
+        label: mentor.email.toLowerCase().includes(normalizedInput)
+          ? mentor.email
+          : mentor.name,
       }));
     setAutoCompleteOptions(filteredOptions);
   };
@@ -118,11 +105,22 @@ const Mentor: React.FC = () => {
   const handleClearFilters = () => {
     setSearchText("");
     setTagFitler(undefined);
-    setStatusFilter("Active");
+    setStatusFilter(true);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const totalItems = mentorData?.data?.data?.totalItems || 0;
+
   const columns: ColumnsType<Mentor> = [
-    { title: "#", dataIndex: "id", key: "id" },
+    {
+      title: "#",
+      dataIndex: "_id",
+      key: "_id",
+      render: (_, __, index) => (page - 1) * itemsPerPage + index + 1,
+    },
     {
       title: "Name",
       dataIndex: "name",
@@ -138,12 +136,11 @@ const Mentor: React.FC = () => {
     },
     {
       title: "Tag",
-      dataIndex: "tags",
-      key: "tags",
+      dataIndex: "tag",
+      key: "tag",
       render: (tags: Tag[]) => {
         if (tags.length === 0) return null;
         const firstTag = tags[0];
-        // Nội dung hiển thị trong Popover khi hover vào tag đầu tiên
         const popoverContent = (
           <div>
             {tags.map((tag) => (
@@ -184,17 +181,6 @@ const Mentor: React.FC = () => {
     },
   ];
 
-  const sortedData = [...data]
-    .sort((a, b) => {
-      return (
-        (a.status === "Active" ? -1 : 1) - (b.status === "Active" ? -1 : 1)
-      );
-    })
-    .map((Mentor, index) => ({
-      ...Mentor,
-      id: index + 1,
-    }));
-
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <Row gutter={[16, 16]} className="mb-4" justify="space-between">
@@ -221,7 +207,9 @@ const Mentor: React.FC = () => {
               >
                 {Array.from(
                   new Set(
-                    data.flatMap((mentor) => mentor.tags.map((tag) => tag.name))
+                    data.flatMap((mentor) =>
+                      mentor.tag.map((tag: any) => tag.name)
+                    )
                   )
                 ).map((tag) => (
                   <Option key={tag} value={tag}>
@@ -274,11 +262,20 @@ const Mentor: React.FC = () => {
       </Row>
       <Table
         columns={columns}
-        dataSource={sortedData}
-        pagination={{ pageSize: itemsPerPage }}
+        dataSource={data}
+        pagination={false}
         rowKey="id"
         className="rounded-md"
       />
+      <div className="flex justify-center mt-4">
+        <Pagination
+          current={page}
+          pageSize={itemsPerPage}
+          total={totalItems}
+          onChange={handlePageChange}
+          showTotal={(total) => `Total ${total} mentors`}
+        />
+      </div>
     </div>
   );
 };
