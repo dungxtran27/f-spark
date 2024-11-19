@@ -55,7 +55,7 @@ const getAllMentors = async (tagIds, name, page, limit) => {
       {
         $skip: (page - 1) * limit,
       },
-      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
+      { $limit: limit },
     ]);
     const isLastPage = page >= maxPages;
     return {

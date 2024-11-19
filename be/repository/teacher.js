@@ -59,7 +59,7 @@ const getAllAccTeacher = async (page, limit, teacherName, email, status) => {
     if (email) {
       filterCondition.$and.push({ "accountDetails.email": { $regex: email, $options: "i" } });
     }
-
+ 
     if (status !== undefined) {
       filterCondition.$and.push({ "accountDetails.isActive": status });
     }
@@ -70,7 +70,6 @@ const getAllAccTeacher = async (page, limit, teacherName, email, status) => {
 
     const totalItems = await Teacher.countDocuments(filterCondition);
     const maxPages = Math.ceil(totalItems / limit);
-
     const teachers = await Teacher.aggregate([
       {
         $lookup: {
@@ -107,7 +106,7 @@ const getAllAccTeacher = async (page, limit, teacherName, email, status) => {
       {
         $skip: (page - 1) * limit,
       },
-      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
+      { $limit: limit },
     ]);
 
     const isLastPage = page >= maxPages;

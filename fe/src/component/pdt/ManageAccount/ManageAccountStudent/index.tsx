@@ -8,7 +8,6 @@ import {
   Table,
   Tag,
   Divider,
-  Pagination,
 } from "antd";
 import {
   SearchOutlined,
@@ -116,12 +115,6 @@ const AccountManagement: React.FC = () => {
     setTermFilter(undefined);
     setStatusFilter(true);
   };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const totalItems = studentData?.data?.data?.totalItems || 0;
 
   const columns: ColumnsType<Student> = [
     {
@@ -254,19 +247,8 @@ const AccountManagement: React.FC = () => {
       <Table
         columns={columns}
         dataSource={data}
-        pagination={false}
         rowKey="id"
       />
-      <div className="flex justify-center mt-4">
-        <Pagination
-          current={page}
-          pageSize={itemsPerPage}
-          total={totalItems}
-          onChange={handlePageChange}
-          showSizeChanger={false}
-          showTotal={(total) => `Total ${total} students`}
-        />
-      </div>
     </div>
   );
 };

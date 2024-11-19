@@ -229,14 +229,23 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
 const getAllAccStudent = async (page, limit, studentName, mssv, classId, status) => {
   try {
     let filterCondition = { $and: [] };
-    console.log(status);
 
     if (studentName) {
-      filterCondition.$and.push({ name: { $regex: studentName, $options: "i" } });
+      filterCondition.$and.push({
+        $or: [
+          { name: { $regex: studentName, $options: "i" } },
+          { accountEmail: { $regex: studentName.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } }
+        ]
+      });
     }
 
     if (mssv) {
-      filterCondition.$and.push({ studentId: { $regex: mssv, $options: "i" } });
+      filterCondition.$and.push({
+        $or: [
+          { name: { $regex: studentName, $options: "i" } },
+          { "$accountDetails.email": { $regex: studentEmail, $options: "i" } }
+        ]
+      });
     }
 
     if (classId) {
@@ -303,9 +312,6 @@ const getAllAccStudent = async (page, limit, studentName, mssv, classId, status)
         },
       },
       {
-        $match: filterCondition,
-      },
-      {
         $project: {
           name: 1,
           studentId: 1,
@@ -320,12 +326,15 @@ const getAllAccStudent = async (page, limit, studentName, mssv, classId, status)
         },
       },
       {
+        $match: filterCondition,
+      },
+      {
         $sort: { isActive: -1, name: 1 },
       },
       {
         $skip: (page - 1) * limit,
       },
-      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
+      { $limit: limit },
     ]);
 
     const isLastPage = page >= maxPages;
