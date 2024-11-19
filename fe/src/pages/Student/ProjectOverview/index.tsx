@@ -1,5 +1,5 @@
 import DefaultLayout from "../../../layout/DefaultLayout";
-import ProjectOverviewWrapper from "../../../component/student/Overview";
+import ProjectOverviewWrapper from "../../../component/student/Overview/ProjectOverview/index";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { useNavigate } from "react-router-dom";
