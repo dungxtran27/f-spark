@@ -19,7 +19,7 @@ const Group = () => {
   const getActionTypeValue = (noti: any) => {
     return noti?.action?.actionType === NOTIFICATION_ACTION_TYPE?.CREATE_TASK;
   };
-  const taskNotification = (n: any) => {
+  const taskCreateNotification = (n: any) => {
     return (
       <div className="flex-grow pt-3 flex flex-col gap-3">
         <span>
@@ -50,11 +50,34 @@ const Group = () => {
       </div>
     );
   };
+
+  const taskUpdateNotification = (n: any) => {
+    return (
+      <div className="flex-grow pt-3 flex flex-col gap-3">
+        <span>
+          Changed task{" "}
+          <Link
+            className="text-primaryBlue hover:underline font-bold"
+            to={`/taskDetail/${encodeURIComponent(
+              n?.action?.newVersion?.taskName
+            )}/${n?.action?.newVersion?._id}`}
+          >
+            {n?.action?.newVersion?.taskName}
+          </Link>
+          's assignee to You &nbsp;
+        </span>
+        <TaskCard taskInfo={n?.action?.newVersion} />
+        <div></div>
+      </div>
+    );
+  };
   const getNotificationContent = (n: any) => {
     switch (n?.action?.actionType) {
       case NOTIFICATION_ACTION_TYPE.CREATE_TASK:
       case NOTIFICATION_ACTION_TYPE.CHILD_TASK_CREATION:
-        return taskNotification(n);
+        return taskCreateNotification(n);
+      case NOTIFICATION_ACTION_TYPE.UPDATE_TASK:
+        return taskUpdateNotification(n);
       default:
         return <></>;
     }

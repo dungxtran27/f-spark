@@ -3,6 +3,7 @@ import { NOTIFICATION_TYPE } from "../utils/const.js";
 import Task from "../model/Task.js";
 import mongoose from "mongoose";
 import Student from "../model/Student.js";
+import Account from "../model/Account.js";
 const createNotification = async ({ data }) => {
   try {
     const result = await Notification.create({
@@ -36,7 +37,14 @@ const getGroupNotification = async (groupId) => {
         model: Task,
         select: "taskName _id assignee",
       })
-
+      .populate({
+        path: "action.priorVersion.assignee",
+        model: Student,
+        populate: {
+          path: "account",
+          model: Account,
+        },
+      })
       .sort({ createdAt: -1 });
 
     return result;
@@ -47,13 +55,30 @@ const getGroupNotification = async (groupId) => {
 const getTasksRecordOfChange = async (taskId) => {
   try {
     const result = await Notification.find({
-      "action.target": taskId,
-    }).populate({
-      path: "sender",
-      populate: {
-        path: "account",
-      },
-    });
+      $or: [
+        { "action.target": taskId },
+        {
+          "action.priorVersion.parentTask": new mongoose.Types.ObjectId(taskId),
+        },
+      ],
+    })
+      .populate({
+        path: "sender",
+        populate: {
+          path: "account",
+        },
+      })
+      .populate({
+        path: "action.priorVersion.assignee",
+        model: Student,
+        populate: {
+          path: "account",
+          model: Account,
+        },
+      })
+      .sort({
+        createdAt: -1,
+      });
     return result;
   } catch (error) {
     throw new Error(error.message);
@@ -108,13 +133,15 @@ const getStudentClassNotification = async (classId) => {
     const classNotification = await Notification.find({
       type: NOTIFICATION_TYPE.CLASS,
       class: new mongoose.Types.ObjectId(classId),
-    }).populate({
-      path: "sender",
-      populate: { path: "account", select: "-password" },
-    }).populate({
-      path: "class",
-      select: "_id classCode"
-    });
+    })
+      .populate({
+        path: "sender",
+        populate: { path: "account", select: "-password" },
+      })
+      .populate({
+        path: "class",
+        select: "_id classCode",
+      });
     return classNotification;
   } catch (error) {
     throw new Error(error.message);

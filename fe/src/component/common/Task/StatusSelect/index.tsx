@@ -48,7 +48,7 @@ const StatusSelect = ({
   };
   const updateTaskStatus = useMutation({
     mutationFn: ({ groupId, taskId, status }: UpdateTaskProps) =>
-      taskBoard.updateTask(groupId, taskId, {
+      taskBoard.updateTaskStatus(groupId, taskId, {
         status: status,
       }),
     onSuccess: () => {

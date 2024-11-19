@@ -37,10 +37,12 @@ const TaskCard = ({
           </span>
         </Tooltip>
         <Link
-          to={`/taskDetail/${encodeURI(taskInfo?.taskName)}/${taskInfo._id}`}
+          to={`/taskDetail/${encodeURI(taskInfo?.taskName)}/${taskInfo?._id}`}
           className={`font-medium cursor-pointer hover:text-primaryBlue hover:underline whitespace-nowrap truncate`}
         >
-          <Typography.Text ellipsis={{tooltip: taskInfo?.taskName}}>{taskInfo?.taskName}</Typography.Text>
+          <Typography.Text ellipsis={{ tooltip: taskInfo?.taskName }}>
+            {taskInfo?.taskName}
+          </Typography.Text>
         </Link>
       </div>
       {!isChildTask && (
@@ -77,6 +79,14 @@ const TaskCard = ({
           status={taskInfo?.status}
           taskId={taskInfo?._id}
           width="70%"
+          updatable={
+            Math.round(
+              (taskInfo?.childTasks?.filter((t: any) => t?.status === "Done")
+                ?.length /
+                taskInfo?.childTasks?.length) *
+                100
+            ) === 100 || !(taskInfo?.data?.data?.childTasks?.length > 0)
+          }
         />
         <div className="flex items-center gap-3">
           <Tooltip

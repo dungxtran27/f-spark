@@ -57,7 +57,7 @@ const ClassDetailPDT = ({
 
   return (
     <div className="rounded-lg overflow-hidden shadow-md mb-4">
-      <div className={`bg-red-500 p-4 text-white`}>
+      <div className={`bg-red-400 p-4 text-white`}>
         <div className="flex text-2xl font-semibold">
           {classId}
           <div className="ml-auto">
@@ -80,9 +80,9 @@ const ClassDetailPDT = ({
 
       <div className="grid grid-cols-3 gap-4 p-4 bg-white">
         {/* Group 1 */}
-        <div className="bg-gray-100 p-4 rounded-lg shadow-md">
+        <div className="bg-backgroundPrimary border p-4 rounded-lg shadow-md">
           <div className="flex text-lg font-semibold">
-            <div className="text-xl font-semibold bg-gray-200 p-2 rounded-md">
+            <div className="text-xl font-semibold bg-backgroundSecondary p-2 rounded-md">
               Group 1
             </div>
           </div>
@@ -116,7 +116,7 @@ const ClassDetailPDT = ({
         </div>
 
         {/* Group 2 */}
-        <div className="bg-gray-100 p-4 rounded-lg shadow-md">
+        <div className="bg-backgroundPrimary border p-4 rounded-lg shadow-md ">
           <div className="flex text-lg font-semibold">
             <div className="text-xl font-semibold bg-gray-200 p-2 rounded-md">
               Group 2

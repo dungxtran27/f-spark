@@ -11,13 +11,13 @@ import { SearchOutlined } from "@ant-design/icons";
 import { FaFileExcel } from "react-icons/fa6";
 import TaskBoard from "./TaskBoard";
 import classNames from "classnames";
-import CreateTask from "./CreateTask";
 import { useQuery } from "@tanstack/react-query";
 import { taskBoard } from "../../../../api/Task/Task";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
 import { student } from "../../../../api/student/student";
+import CreateOrUpdateTask from "./CreateTask";
 // type LabelRender = SelectProps["labelRender"];
 const Task = () => {
   const userInfo = useSelector(
@@ -30,7 +30,10 @@ const Task = () => {
   const groupId = userInfo?.group ?? "";
   const [status, setStatus] = useState<string>("All");
   const [memberSearch, setMemberSearch] = useState<string>("");
-  const [openCreateTask, setOpenCreateTask] = useState<boolean>(false);
+  const [openCreateTask, setOpenCreateTask] = useState({
+    isOpen: false,
+    mode: "CREATE"
+  });
   const { data: taskBoardData, isLoading } = useQuery({
     queryKey: [
       QUERY_KEY.TASKS_BOARD,
@@ -70,8 +73,8 @@ const Task = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error : any) {
-      message.error(error)
+    } catch (error: any) {
+      message.error(error);
     }
   };
   const statusFilter = () => {
@@ -169,8 +172,9 @@ const Task = () => {
           isLoading={isLoading}
         />
       </div>
-      <CreateTask
-        open={openCreateTask}
+      <CreateOrUpdateTask
+        mode="CREATE"
+        open={openCreateTask.isOpen}
         setOpen={setOpenCreateTask}
         task={null}
       />

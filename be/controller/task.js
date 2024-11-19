@@ -4,6 +4,8 @@ import {
   NotificationRepository,
 } from "../repository/index.js";
 import XLSX from "xlsx";
+import { GROUP_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
+import { io, userSocketMap } from "../index.js";
 const createTask = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -150,13 +152,47 @@ export const updateTask = async (req, res) => {
   try {
     const taskId = req.query.taskId;
     const updateData = req.body;
-
-    const task = await TaskRepository.updatedTask(taskId, updateData);
-
-    if (!task) {
+    const decodedToken = req.decodedToken;
+    const existingTask = await TaskRepository.findById(taskId);
+    if (!existingTask) {
       return res.status(404).json({ error: "Task not found" });
     }
-
+    const task = await TaskRepository.updatedTask(taskId, updateData);
+    const notiData = {
+      sender: decodedToken?.role?.id,
+      receivers:
+        decodedToken?.role?.id === updateData?.assignee
+          ? []
+          : [updateData?.assignee],
+      type: "Group",
+      group: req.groupId,
+      senderType: "Student",
+      action: {
+        action: "Updated task",
+        alternateAction: "Update this task",
+        target: task?._id,
+        actionType: GROUP_NOTIFICATION_ACTION_TYPE.UPDATE_TASK,
+        priorVersion: existingTask,
+        newVersion: task,
+        extraUrl: `taskDetail/${encodeURIComponent(
+          task?.taskName
+        )}/${task?._id.toString()}`,
+      },
+    };
+    await NotificationRepository.createNotification({ data: notiData });
+    console.log({
+      user: decodedToken?.role?.id,
+      assignee: task?.assignee,
+    });
+    console.log(decodedToken);
+    
+    if (decodedToken?.role?.id !== task?.assignee?._id.toString()) {
+      const socketIds = userSocketMap[task?.assignee?.account?._id.toString()];
+      io.to(socketIds).emit(
+        "newNotification",
+        `Your task ${task?.taskName} has been updated. Check it out !`
+      );
+    }
     res.status(200).json({ message: "Task updated", data: task });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -186,17 +222,7 @@ const exportGroupTaskToExcel = async (req, res) => {
       assignee: [],
       search: "",
     });
-    // const ws_data = tasks?.map((t) => ({
-    //   Id: t?._id?.toString(),
-    //   taskName: t?.taskName,
-    //   description: t?.description,
-    //   status: t?.status,
-    //   priority: t?.priority,
-    //   assignee: `${t?.assignee?.name} ${t?.assignee?.studentId}`,
-    //   createdBy: `${t?.createdBy?.name} ${t?.createdBy?.studentId}`,
-    //   taskType: t?.taskType,
-    //   childTasks: t?.childTasks?.length,
-    // }));
+
     const header = [
       "ID",
       "Task Name",
@@ -239,6 +265,47 @@ const exportGroupTaskToExcel = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const deleteTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const decodedToken = req.decodedToken;
+    const task = await TaskRepository.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+    const student = await StudentRepository.findStudentByAccountId(
+      decodedToken.account
+    );
+    if (!student.group.equals(task.group)) {
+      return res.status(403).json({ error: "Unauthorized !" });
+    }
+    const result = await TaskRepository.deleteTask(taskId);
+    console.log(result);
+
+    const notiData = {
+      sender: decodedToken?.role?.id,
+      receivers: [],
+      type: "Group",
+      group: student?.group,
+      senderType: "Student",
+      action: {
+        action: result?.parentTask ? "Deleted child task" : "Deleted task",
+        alternateAction: result?.parentTask
+          ? "Deleted child task"
+          : "Deleted task",
+        target: result?._id,
+        actionType: GROUP_NOTIFICATION_ACTION_TYPE.DELETE_TASK,
+        priorVersion: result,
+      },
+    };
+    await NotificationRepository.createNotification({ data: notiData });
+    return res.status(200).json({ message: "Deleted Tasks" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   createTask,
   viewTaskDetail,
@@ -246,4 +313,5 @@ export default {
   updateTaskStatus,
   getTasksByGroup,
   exportGroupTaskToExcel,
+  deleteTask,
 };

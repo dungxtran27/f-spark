@@ -7,13 +7,23 @@ export const taskBoard = {
       requestBody
     );
   },
-  updateTask: async (
+  updateTaskStatus: async (
     groupId: string,
     taskId: string | undefined,
     requestBody: any
   ) => {
     return await axios.patch(
       `/api/task/updateTaskStatus?taskId=${taskId}&groupId=${groupId}`,
+      requestBody
+    );
+  },
+  updateTask: async (
+    groupId: string,
+    taskId: string | undefined,
+    requestBody: any
+  ) => {
+    return await axios.patch(
+      `/api/task/updateTask?taskId=${taskId}&groupId=${groupId}`,
       requestBody
     );
   },
@@ -42,4 +52,7 @@ export const taskBoard = {
   getTaskRecordOfChanges: async (taskId: string|undefined) => {
     return await axios.get(`api/notification/taskRecordOfChanges/${taskId}`);
   },
+  deleteTask: async (taskId: string|undefined) =>{
+    return await axios.delete(`api/task/${taskId}`)
+  }
 };

@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import {
   CREATE_TASK_FILTER,
   QUERY_KEY,
+  TASK_STATUS_FILTER,
   TASK_TYPE,
 } from "../../../../../utils/const";
 import TextArea from "antd/es/input/TextArea";
@@ -16,11 +17,15 @@ import { UserInfo } from "../../../../../model/auth";
 import { taskBoard } from "../../../../../api/Task/Task";
 import { student } from "../../../../../api/student/student";
 import PrioritySelect from "../../../../common/Task/PrioritySelect";
+import dayjs from "dayjs";
+import StatusSelect from "../../../../common/Task/StatusSelect";
 interface CreateTaskProps {
+  _id?: string;
+  status?: string;
   taskType?: string;
   description?: string;
   attachment?: string[];
-  assignee?: string;
+  assignee?: any;
   taskName?: string;
   dueDate?: string;
   priority?: string;
@@ -28,15 +33,17 @@ interface CreateTaskProps {
 }
 interface ModalProps {
   open: boolean;
-  setOpen: (open: boolean) => void;
+  setOpen: (value: any) => void;
   task: CreateTaskProps | null;
   lastTaskRef?: any;
+  mode?: string;
 }
-const CreateTask: React.FC<ModalProps> = ({
+const CreateOrUpdateTask: React.FC<ModalProps> = ({
   open,
   setOpen,
   task,
   lastTaskRef,
+  mode = "CREATE",
 }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
@@ -72,27 +79,46 @@ const CreateTask: React.FC<ModalProps> = ({
       parentTask,
       priority,
     }: CreateTaskProps) => {
-      return taskBoard.create(userInfo?.group || "", {
-        taskType,
-        taskName,
-        assignee,
-        attachment: uploadedFiles?.current,
-        description,
-        dueDate,
-        parentTask: parentTask || null,
-        priority: priority,
-      });
+      return mode === "CREATE"
+        ? taskBoard.create(userInfo?.group || "", {
+            taskType,
+            taskName,
+            assignee,
+            attachment: uploadedFiles?.current,
+            description,
+            dueDate,
+            parentTask: parentTask || null,
+            priority: priority,
+          })
+        : taskBoard.updateTask(userInfo?.group || "", task?._id, {
+            taskType,
+            taskName,
+            assignee,
+            attachment: uploadedFiles?.current,
+            description,
+            dueDate,
+            parentTask: parentTask || null,
+            priority: priority,
+          });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.TASKS_BOARD] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.TASK_DETAIL] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.RECORD_OF_CHANGES],
+      });
       if (lastTaskRef) {
         setTimeout(() => {
           lastTaskRef?.current?.scrollIntoView();
         }, 1000);
       }
+      setOpen({
+        isOpen: false,
+        mode: "CREATE",
+      });
     },
   });
+
   const { data: studentOfGroup } = useQuery({
     queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
     queryFn: async () => {
@@ -103,17 +129,20 @@ const CreateTask: React.FC<ModalProps> = ({
     if (task) {
       form.setFieldsValue({
         [CREATE_TASK_FILTER.taskName]: task?.taskName,
+        [CREATE_TASK_FILTER.status]: task?.status,
         [CREATE_TASK_FILTER.description]: task?.description,
-        [CREATE_TASK_FILTER.assignee]: task?.assignee,
+        [CREATE_TASK_FILTER.assignee]: task?.assignee?._id,
         [CREATE_TASK_FILTER.priority]: task?.priority,
         [CREATE_TASK_FILTER.attachment]: task?.attachment,
-        [CREATE_TASK_FILTER.dueDate]: task?.dueDate,
+        [CREATE_TASK_FILTER.dueDate]: task?.dueDate
+          ? dayjs(task?.dueDate)
+          : null,
       });
     }
   }, [task, form]);
   return (
     <Modal
-      title="Create Task"
+      title={mode === "CREATE" ? "Create Task" : "Update Task"}
       open={open}
       onOk={() => {
         createTask.mutate({
@@ -125,11 +154,15 @@ const CreateTask: React.FC<ModalProps> = ({
           priority: priority,
           parentTask: task?.parentTask,
         });
-        setOpen(false);
         uploadedFiles.current = [];
         form.resetFields();
       }}
-      onCancel={() => setOpen(false)}
+      onCancel={() =>
+        setOpen({
+          isOpen: false,
+          mode: "CREATE",
+        })
+      }
       destroyOnClose
       centered
       width={700}
@@ -208,13 +241,19 @@ const CreateTask: React.FC<ModalProps> = ({
             </p>
           </Dragger>
         </FormItem>
-        <div>
+        <div className="flex items-center justify-between">
           <FormItem name={CREATE_TASK_FILTER.dueDate} label={"Due date"}>
-            <DatePicker style={{ width: 320 }} />
+            <DatePicker style={{ width: 320 }} showTime={{ format: "HH:mm" }} />
           </FormItem>
+          {/* TODO: bổ sung update status bên trong modal update */}
+          {/* {mode === "UPDATE" && (
+            <FormItem name={CREATE_TASK_FILTER.status} label={"Status"}>
+              <StatusSelect status={task?.status || 'PENDING'} />
+            </FormItem>
+          )} */}
         </div>
       </Form>
     </Modal>
   );
 };
-export default CreateTask;
+export default CreateOrUpdateTask;
