@@ -23,10 +23,10 @@ const RequestJoinGroup: React.FC = () => {
     ? dataGroup.map((group: any) => ({
         groupId: group._id,
         groupName: group.GroupName,
-        leader: group.leader.name,
-        tags: group.tag.map((tag: any) => tag.name),
-        members: group.teamMembers.length,
-        majors: group.teamMembers.map((member: any) => member.major),
+        leader: group?.leader?.name,
+        tags: group?.tag.map((tag: any) => tag.name),
+        members: group?.teamMembers.length,
+        majors: group?.teamMembers.map((member: any) => member.major),
         isSponsorship: group.isSponsorship,
       }))
     : [];

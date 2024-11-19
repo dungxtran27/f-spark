@@ -55,9 +55,7 @@ const getAllMentors = async (tagIds, name, page, limit) => {
       {
         $skip: (page - 1) * limit,
       },
-      {
-        $limit: limit,
-      },
+      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
     ]);
     const isLastPage = page >= maxPages;
     return {
@@ -166,8 +164,102 @@ const assignMentor = async ({ groupId, mentorId }) => {
     throw new Error(error.message);
   }
 };
+
+const getAllAccMentor = async (page, limit, mentorName, email, status, tag) => {
+  try {
+    let filterCondition = { $and: [] };
+
+    if (mentorName) {
+      filterCondition.$and.push({ name: { $regex: mentorName, $options: "i" } });
+    }
+
+    if (email) {
+      filterCondition.$and.push({ email: { $regex: email, $options: "i" } });
+    }
+
+    if (status !== undefined) {
+      filterCondition.$and.push({ isActive: status });
+    }
+
+    if (tag) {
+      if (Array.isArray(tag)) {
+        filterCondition.$and.push({
+          "tag.name": { $in: tag },
+        });
+      } else {
+        filterCondition.$and.push({
+          "tag.name": tag,
+        });
+      }
+    }
+
+    if (filterCondition.$and.length === 0) {
+      filterCondition = {};
+    }
+
+    const totalItems = await Mentor.countDocuments(filterCondition);
+    const maxPages = Math.ceil(totalItems / limit);
+
+    const mentors = await Mentor.aggregate([
+      {
+        $match: filterCondition,
+      },
+      {
+        $lookup: {
+          from: "TagMajors",
+          localField: "tag.id",
+          foreignField: "_id",
+          as: "tagDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$tagDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          phoneNumber: 1,
+          profile: 1,
+          profilePicture: 1,
+          isActive: 1,
+          assignedClasses: 1,
+          assignedGroup: 1,
+          tag: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+      {
+        $sort: { isActive: -1, name: 1 },
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
+    ]);
+
+    const isLastPage = page >= maxPages;
+
+    return {
+      mentors,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   getMentor,
   assignMentor,
   getAllMentors,
+  getAllAccMentor
 };

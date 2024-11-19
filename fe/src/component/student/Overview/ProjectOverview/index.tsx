@@ -3,10 +3,21 @@ import ViewInfoPoject from "./ViewInfoPoject";
 import CustomerJourneyMap from "./CustomerJourneyMap";
 import CustomerPersonas from "./CustomerPersonas";
 import BusinessModelCanvas from "./BusinessModelCanvas";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/store";
+import { UserInfo } from "../../../../model/auth";
 
-const Overview: React.FC = () => {
+const ProjectOverviewWrapper: React.FC = () => {
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
+
+  if (!userInfo?.group) {
+    return <div> abc </div>;
+  }
+
   return (
-    <div>
+    <div className="p-2 space-y-2 bg-gray-200 rounded-lg">
       <ViewInfoPoject />
       <CustomerJourneyMap />
       <CustomerPersonas />
@@ -14,4 +25,4 @@ const Overview: React.FC = () => {
     </div>
   );
 };
-export default Overview;
+export default ProjectOverviewWrapper;

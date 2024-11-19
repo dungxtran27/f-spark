@@ -70,5 +70,12 @@ export const classApi = {
   },
   getSubmissionsByGroup: async (groupId: string | undefined) => {
     return await axios.get(`api/submission/submissionsByGroup?groupId=${groupId}`);
-  }
+  },
+  getAllClasses: async () => {
+    return await axios.get(`api/class/classes`);
+  },
+  // admin
+  getClassListPagination: async (requestBody: any) => {
+    return await axios.post(`api/class/getAllClass`, requestBody);
+  },
 };

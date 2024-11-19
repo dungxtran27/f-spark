@@ -3,6 +3,7 @@ import Group from "../model/Group.js";
 import Student from "../model/Student.js";
 import student from "./student.js";
 import Class from "../model/Class.js";
+import { StudentRepository } from "./index.js";
 
 const createJourneyRow = async ({ groupId, name }) => {
   try {
@@ -21,7 +22,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -45,7 +46,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -707,6 +708,16 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
 };
 const findAllGroups = async () => {
   try {
+    // const groups = await Group.find().select("GroupName leader tag teamMembers isSponsorship").populate({
+    //   path: 'teamMembers',
+    //   select: 'major',
+    // }).populate({
+    //   path: 'leader',
+    //   select: 'name',
+    // }).populate({
+    //   path: 'tag',
+    //   select: 'name',
+    // });
     const groups = await Group.find({ isSponsorship: false })
       .select("GroupName leader tag teamMembers isSponsorship")
       .populate({
@@ -726,6 +737,124 @@ const findAllGroups = async () => {
     throw new Error(error.message);
   }
 };
+
+const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
+  try {
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page <= 0) page = 1;
+    if (isNaN(limit) || limit <= 0) limit = 10;
+    const matchStage = [];
+    const tagIdArray = Array.isArray(tag) ? tag : tag ? [tag] : [];
+    if (tagIdArray.length > 0) {
+      matchStage.push({
+        "tag": {
+          $in: tagIdArray.map((id) => new mongoose.Types.ObjectId(id)),
+        },
+      });
+    }
+    if (GroupName) {
+      matchStage.push({
+        GroupName: { $regex: GroupName, $options: "i" },
+      });
+    }
+    const matchCondition = matchStage.length > 0 ? { $or: matchStage } : {};
+    const totalItems = await Group.countDocuments(matchCondition);
+    const maxPages = Math.ceil(totalItems / limit);
+
+    const GroupNotHaveClass = await Group.aggregate(
+      [
+        { $match: { $and: [{ class: { $in: [null, undefined] } }, matchCondition] } },
+        { $unwind: "$tag" },
+        {
+          $lookup: {
+            from: "TagMajors",
+            localField: "tag",
+            foreignField: "_id",
+            as: "tag",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            GroupName: { $first: "$GroupName" },
+            isSponsorship: { $first: "$isSponsorship" },
+            tag: { $push: { $arrayElemAt: ["$tag", 0] } },
+            teamMembers: { $first: "$teamMembers" },
+          }
+        },
+        {
+          $project: {
+            GroupName: 1,
+            leader: 1,
+            "tag.name": 1,
+            "tag._id": 1,
+            isSponsorship: 1,
+            teamMembers: 1
+          },
+        },
+        {
+          $skip: (page - 1) * limit,
+        },
+        {
+          $limit: limit,
+        },
+      ]
+    );
+    const isLastPage = page >= maxPages;
+    const group = await Group.find()
+      .select("GroupName leader tag teamMembers isSponsorship")
+      .populate({
+        path: "teamMembers",
+        select: "name",
+      })
+      .populate({
+        path: "tag",
+        select: "name",
+      })
+      .lean();
+    const totalGroup = await Group.countDocuments(group);
+    const countGroupNotHaveClass = await Group.countDocuments({
+      class: { $in: [null, undefined] },
+    }); return {
+      group,
+      totalGroup,
+      GroupNotHaveClass,
+      countGroupNotHaveClass,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
+    };
+  } catch (error) {
+    throw new Error("Error fetching groups: " + error.message);
+  }
+};
+const addGroupAndStudentsToClass = async (groupIds, classId) => {
+  try {
+    if (!Array.isArray(groupIds) || groupIds.length === 0) {
+      throw new Error("Group IDs must be provided as an array.");
+    }
+    const updatedGroups = await Group.updateMany(
+      { _id: { $in: groupIds }, class: { $in: [null, undefined] } },
+      { $set: { class: classId } }
+    );
+    const groups = await Group.find({ _id: { $in: groupIds } }).populate('teamMembers');
+    const studentIds = groups.reduce((acc, group) => {
+      return acc.concat(group.teamMembers.map(member => member._id));
+    }, []);
+    const updatedStudents = await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
+    return {
+      groups: groups,
+      students: updatedStudents
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 
 export default {
   createCellsOnUpdate,
@@ -752,4 +881,6 @@ export default {
   findAllSponsorGroupsOfClasses,
   getGroupsByClassId,
   editTimelineForManyGroups,
+  getAllGroupsNoClass,
+  addGroupAndStudentsToClass
 };

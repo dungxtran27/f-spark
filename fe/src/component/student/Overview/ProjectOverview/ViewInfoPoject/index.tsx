@@ -1,34 +1,43 @@
 import React from "react";
-import { Avatar, Row, Col, Typography } from "antd";
+import { Avatar, Row, Col, Typography, Skeleton } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY } from "../../../../../utils/const";
+import { businessModelCanvas } from "../../../../../api/apiOverview/businessModelCanvas";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../../redux/store";
+import { UserInfo } from "../../../../../model/auth";
 
 const { Title, Text } = Typography;
 
 const ViewInfoPoject: React.FC = () => {
-  const avatarUrl =
-    "https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png";
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
 
-  const teamMembers = [
-    { name: "Nguyễn Trung Hiếu", avatar: avatarUrl },
-    { name: "Nguyễn Trung Huy", avatar: avatarUrl },
-    { name: "Nguyễn Trung Thắng", avatar: avatarUrl },
-    { name: "Nguyễn Trung Sơn", avatar: avatarUrl },
-    { name: "Nguyễn Trung Dũng", avatar: avatarUrl },
-    // { name: "HIEUTHUHAI", avatar: avatarUrl },
-  ];
+  const groupId = userInfo?.group ?? "";
+  const userId = userInfo?._id ?? "";
+
+  const { data, isLoading } = useQuery({
+    queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
+    queryFn: async () =>
+      (await businessModelCanvas.getBusinessModelCanvas(groupId)).data.data,
+  });
+
+  if (isLoading)
+    return (
+      <div className="bg-white rounded-lg p-4">
+        <Skeleton />
+      </div>
+    );
 
   return (
-    <div className="bg-white p-4 w-full rounded-lg mb-6">
-      <div className="flex flex-row">
+    <div className="bg-white p-4 w-full rounded-lg">
+      <Row gutter={16}>
         <Col span={12}>
-          <div className="bg-gray-100 p-5 rounded-lg h-full flex flex-col justify-between">
+          <div className="bg-gray-100 p-5 rounded-lg h-full flex flex-col justify-between mb-10">
             <div>
-              <Title level={3}>
-                Tên Đề Tài: Dự Án Tái Chế Màng Bọc Thực Phẩm
-              </Title>
-              <p>
-                Đây là dự án sử dụng màng bọc bằng sáp ong để thay thế cho màng
-                bọc thực phẩm bằng nilong.
-              </p>
+              <Title level={3}>{data?.GroupName}</Title>
+              <p>{data?.GroupDescription}</p>
             </div>
             <Row>
               <Col span={12}>
@@ -36,9 +45,13 @@ const ViewInfoPoject: React.FC = () => {
                   Teacher
                 </Text>
                 <div className="flex flex-row items-center">
-                  <Avatar size={50} src={avatarUrl} />
+                  <Avatar
+                    size={50}
+                    src={data?.class?.teacher?.account?.profilePicture}
+                  />
                   <Text className="text-gray-600 text-center ml-2 mt-2">
-                    Nguyễn Trung Hiếu
+                    {data?.class?.teacher?.salutation}{" "}
+                    {data?.class?.teacher?.name}
                   </Text>
                 </div>
               </Col>
@@ -47,9 +60,9 @@ const ViewInfoPoject: React.FC = () => {
                   Mentor
                 </Text>
                 <div className="flex flex-row items-center">
-                  <Avatar size={50} src={avatarUrl} />
+                  <Avatar size={50} src={data?.mentor?.profilePicture} />
                   <Text className="text-gray-600 text-center ml-2 mt-2">
-                    Nguyễn Trung Huy
+                    {data?.mentor?.name}
                   </Text>
                 </div>
               </Col>
@@ -57,24 +70,42 @@ const ViewInfoPoject: React.FC = () => {
           </div>
         </Col>
 
-        <Col span={12} className="ml-9">
+        <Col span={12}>
           <div className="p-5 rounded-lg flex flex-col w-full">
             <Title level={4}>Team Members</Title>
-            <Row>
-              {teamMembers.map((member, index) => (
-                <Col key={index} span={12} className="w-24">
-                  <div className="flex flex-row items-center">
-                    <Avatar size={50} src={member.avatar} className="m-2"/>
-                    <Text className="text-gray-600 text-center">
-                      {member.name}
-                    </Text>
-                  </div>
-                </Col>
-              ))}
+            <Row gutter={8}>
+              {data?.teamMembers
+                ?.filter((member: { _id: string }) => member._id !== userId)
+                .map(
+                  (member: {
+                    _id: React.Key | null | undefined;
+                    account: { profilePicture: string | undefined };
+                    name: string | undefined;
+                  }) => (
+                    <Col span={12} key={member._id}>
+                      <div className="flex flex-row items-center">
+                        <Avatar
+                          size={50}
+                          src={member?.account?.profilePicture}
+                          className="m-2"
+                        />
+                        <Text
+                          className={`text-gray-600 text-center ${
+                            member._id === data.leader
+                              ? "text-red-500 font-semibold"
+                              : ""
+                          }`}
+                        >
+                          {member.name}
+                        </Text>
+                      </div>
+                    </Col>
+                  )
+                )}
             </Row>
           </div>
         </Col>
-      </div>
+      </Row>
     </div>
   );
 };

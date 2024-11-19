@@ -1,57 +1,111 @@
 import React, { useState } from "react";
-import { AutoComplete, Button, Select, Row, Col, Table, Tag, Divider } from "antd";
-import { SearchOutlined, UserDeleteOutlined, CloseCircleOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  AutoComplete,
+  Button,
+  Select,
+  Row,
+  Col,
+  Table,
+  Tag,
+  Divider,
+  Pagination,
+} from "antd";
+import {
+  SearchOutlined,
+  UserDeleteOutlined,
+  CloseCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY } from "../../../../utils/const";
+import { Admin } from "../../../../api/manageAccoount";
 
 const { Option } = Select;
 
 interface Student {
-  id: number;
+  _id: string;
   name: string;
   studentId: string;
-  class: string;
-  email: string;
+  classId: string;
+  accountEmail: string;
   term: string;
-  status: "Active" | "Deactive";
+  status: boolean;
 }
 
-const data: Student[] = [
-  { id: 1, name: "Nguyen Trung Hieu", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 2, name: "Nguyen Van A", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
-  { id: 4, name: "Nguyen Trung Hieu A", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 5, name: "Nguyen Van C", studentId: "HE160001", class: "SE1705", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
-  { id: 6, name: "Tran Thi BD", studentId: "HE160002", class: "SE1707", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 7, name: "Nguyen Trung Hieu E", studentId: "HE160023", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 8, name: "Nguyen Van F", studentId: "HE160001", class: "SE17010", email: "vana123@fe.com", term: "Fall 2025", status: "Deactive" },
-  { id: 9, name: "Tran Thi G", studentId: "HE160002", class: "SE1704", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 10, name: "Nguyen Trung Hieu H", studentId: "HE160000", class: "SE1704", email: "hieuyd123@fe.com", term: "Fall 2024", status: "Active" },
-  { id: 11, name: "Nguyen Van J", studentId: "HE160001", class: "SE1704", email: "vana123@fe.com", term: "Fall 2024", status: "Deactive" },
-  { id: 12, name: "Tran Thi B", studentId: "HE160002", class: "SE1704", email: "btran123@fe.com", term: "Fall 2024", status: "Active" },
-];
-
 const AccountManagement: React.FC = () => {
+  const [page, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [classFilter, setClassFilter] = useState<string | undefined>(undefined);
   const [termFilter, setTermFilter] = useState<string | undefined>(undefined);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>("Active");
-  const [autoCompleteOptions, setAutoCompleteOptions] = useState<AutoCompleteProps['options']>([]);
+  const [statusFilter, setStatusFilter] = useState<boolean>(true);
+  const [autoCompleteOptions, setAutoCompleteOptions] = useState<
+    AutoCompleteProps["options"]
+  >([]);
 
   const handleSearch = () => {
-
+    setCurrentPage(1);
   };
+
+  const isStudentId = (input: string) => {
+    const studentIdRegex = /^[a-zA-Z]{2}\d{6,}$/;
+    return studentIdRegex.test(input);
+  };
+
+  const { data: studentData } = useQuery({
+    queryKey: [
+      QUERY_KEY.STUDENT_OF_GROUP,
+      page,
+      searchText,
+      classFilter,
+      termFilter,
+      statusFilter,
+    ],
+    queryFn: async () => {
+      if (isStudentId(searchText)) {
+        return Admin.getStudent({
+          limit: 10,
+          page: page || 1,
+          studentName: null,
+          mssv: searchText || null,
+          classId: classFilter || null,
+          // status: statusFilter || null,
+        });
+      } else {
+        return Admin.getStudent({
+          limit: 10,
+          page: page || 1,
+          studentName: searchText || null,
+          mssv: null,
+          classId: classFilter || null,
+          // status: statusFilter || null,
+        });
+      }
+    },
+  });
+
+  const data: Student[] = Array.isArray(studentData?.data?.data?.students)
+    ? studentData.data.data.students
+    : [];
 
   const handleAutoCompleteSearch = (input: string) => {
     const normalizedInput = input.toLowerCase();
-    const filteredOptions = data
-      .filter(student =>
-        student.name.toLowerCase().includes(normalizedInput) ||
-        student.studentId.toLowerCase().includes(normalizedInput)
+    const filteredOptions = studentData?.data?.data?.students
+      .filter(
+        (student: any) =>
+          student.name.toLowerCase().includes(normalizedInput) ||
+          student.studentId.toLowerCase().includes(normalizedInput)
       )
-      .map(student => ({
-        value: student.name,
-        label: `${student.name} (${student.studentId})`
+      .map((student: any) => ({
+        value: student.name.toLowerCase().includes(normalizedInput)
+          ? student.name
+          : student.studentId,
+        label: student.name.toLowerCase().includes(normalizedInput)
+          ? student.name
+          : student.studentId,
       }));
     setAutoCompleteOptions(filteredOptions);
   };
@@ -60,29 +114,46 @@ const AccountManagement: React.FC = () => {
     setSearchText("");
     setClassFilter(undefined);
     setTermFilter(undefined);
-    setStatusFilter("Active");
+    setStatusFilter(true);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const totalItems = studentData?.data?.data?.totalItems || 0;
+
   const columns: ColumnsType<Student> = [
-    { title: "#", dataIndex: "id", key: "id" },
+    {
+      title: "#",
+      dataIndex: "_id",
+      key: "_id",
+      render: (_, __, index) => (page - 1) * itemsPerPage + index + 1,
+    },
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "MSSV", dataIndex: "studentId", key: "studentId" },
-    { title: "Class", dataIndex: "class", key: "class" },
-    { title: "Email", dataIndex: "email", key: "email" },
-    { title: "Term", dataIndex: "term", key: "term" },
-    { title: "Status", dataIndex: "status", key: "status", render: (status: string) => (<Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>), },
-    { title: "Actions", key: "actions", render: () => (<UserDeleteOutlined style={{ fontSize: "18px", cursor: "pointer" }} title="Ban Account" />), },
+    { title: "Class", dataIndex: "classId", key: "classId" },
+    { title: "Email", dataIndex: "accountEmail", key: "accountEmail" },
+    // { title: "Term", dataIndex: "term", key: "term" },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: () => (
+        <UserDeleteOutlined
+          style={{ fontSize: "18px", cursor: "pointer" }}
+          title="Ban Account"
+        />
+      ),
+    },
   ];
-
-
-  const sortedData = [...data]
-    .sort((a, b) => {
-      return (a.status === "Active" ? -1 : 1) - (b.status === "Active" ? -1 : 1);
-    })
-    .map((student, index) => ({
-      ...student,
-      id: index + 1,
-    }));
 
   return (
     <div className="max-w-full mx-auto p-4 bg-white rounded-lg shadow-md">
@@ -107,9 +178,13 @@ const AccountManagement: React.FC = () => {
                 className="w-full"
                 showSearch
               >
-                {[...new Set(data.map(student => student.class))].map((classItem) => (
-                  <Option key={classItem} value={classItem}>{classItem}</Option>
-                ))}
+                {[...new Set(data.map((student) => student.classId))].map(
+                  (classItem) => (
+                    <Option key={classItem} value={classItem}>
+                      {classItem}
+                    </Option>
+                  )
+                )}
               </Select>
             </Col>
             <Col span={4}>
@@ -119,9 +194,13 @@ const AccountManagement: React.FC = () => {
                 onChange={setTermFilter}
                 className="w-full"
               >
-                {[...new Set(data.map(student => student.term))].map((termItem) => (
-                  <Option key={termItem} value={termItem}>{termItem}</Option>
-                ))}
+                {[...new Set(data.map((student) => student.term))].map(
+                  (termItem) => (
+                    <Option key={termItem} value={termItem}>
+                      {termItem}
+                    </Option>
+                  )
+                )}
               </Select>
             </Col>
             <Col span={3}>
@@ -157,14 +236,13 @@ const AccountManagement: React.FC = () => {
           </Row>
         </Col>
 
-        <Divider type="vertical" style={{ height: 'auto', alignSelf: 'stretch', color: "black" }} />
+        <Divider
+          type="vertical"
+          style={{ height: "auto", alignSelf: "stretch", color: "black" }}
+        />
 
         <Col flex="none" className="flex justify-end">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            className="mr-2"
-          >
+          <Button type="primary" icon={<PlusOutlined />} className="mr-2">
             Add Student
           </Button>
           <Button type="default" icon={<UploadOutlined />}>
@@ -175,12 +253,21 @@ const AccountManagement: React.FC = () => {
 
       <Table
         columns={columns}
-        dataSource={sortedData}
-        pagination={{ pageSize: itemsPerPage }}
+        dataSource={data}
+        pagination={false}
         rowKey="id"
       />
+      <div className="flex justify-center mt-4">
+        <Pagination
+          current={page}
+          pageSize={itemsPerPage}
+          total={totalItems}
+          onChange={handlePageChange}
+          showSizeChanger={false}
+          showTotal={(total) => `Total ${total} students`}
+        />
+      </div>
     </div>
-
   );
 };
 

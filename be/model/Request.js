@@ -44,11 +44,15 @@ const RequestSchema = new Schema(
             ref: "Student",
             required: false,
         }],
-        group:{
+        group: {
             type: Schema.Types.ObjectId,
             ref: "Group",
             required: false,
-        }
+        },
+        totalMembers: {
+            type: Number,
+            required: false,
+        },
     },
     { timestamps: true, collection: "Requests" }
 );
