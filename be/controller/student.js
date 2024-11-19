@@ -58,7 +58,7 @@ const getAllAccStudent = async (req, res) => {
     }
 };
 
-const getAllStudents = async (req, res) => {
+const getAllStudentsNoClass = async (req, res) => {
     try {
         const filters = req.body;
         const {
@@ -67,7 +67,7 @@ const getAllStudents = async (req, res) => {
             StudentNotHaveClass,
             countStudentNotHaveClass,
             uniqueMajors
-        } = await StudentRepository.getAllStudents(filters);
+        } = await StudentRepository.getAllStudentsNoClass(filters);
         return res.status(200).json({
             data: {
                 students,
@@ -105,7 +105,7 @@ export default {
     getTeacherByStudentId,
     getAllStudentByClassId,
     getAllStudentUnGroupByClassId,
-    getAllStudents,
+    getAllStudentsNoClass,
     addManyStudentNoClassToClass,
     getAllAccStudent
 }

@@ -17,6 +17,7 @@ import { MdGroupAdd } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { student } from "../../../api/student/student";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
+import { classApi } from "../../../api/Class/class";
 
 const { Option } = Select;
 
@@ -34,10 +35,19 @@ const StudentTable = () => {
   const [majorFilter, setMajorFilter] = useState<string[] | null>([]);
   const [search, setSearch] = useState<string>("");
 
+  const { data: classData } = useQuery({
+    queryKey: [QUERY_KEY.CLASSES],
+    queryFn: async () => {
+      return classApi.getClassListPagination({
+        limit: 12,
+        page: 1,
+      });
+    },
+  });
   const { data: studentsData} = useQuery({
     queryKey: [QUERY_KEY.ALLSTUDENT, { semester, majorFilter, search }],
     queryFn: async () => {
-      return student.getAllStudents({
+      return student.getAllStudentsNoClass({
         semester,
         major: majorFilter,
         name: search
@@ -187,7 +197,21 @@ const StudentTable = () => {
         }}
       >
         <div className="grid grid-cols-3 gap-4">
-          <ClassCard />
+        {classData?.data.data.map((classItem: any) => {
+            const sponsorshipCount = classItem.groups.filter(
+              (group: any) => group.isSponsorship === true
+            ).length;
+            return (
+              <ClassCard
+                key={classItem._id}
+                classCode={classItem.classCode}
+                teacherName={classItem.teacherDetails.name}
+                groups={classItem.totalGroups}
+                isSponsorship={sponsorshipCount}
+                totalMembers={classItem.totalStudents}
+              />
+            );
+          })}
           <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-purple-400">
             <FiPlus className="text-3xl" />
             <span className="mt-1 text-lg">Create new class</span>

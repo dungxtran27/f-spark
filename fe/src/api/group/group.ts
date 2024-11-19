@@ -19,7 +19,7 @@ export const groupApi = {
   editTimelineForMultipleGroups: async (requestBody: any) => {
     return await axios.put(`/api/group/update`, requestBody);
   },
-  getAllGroups: async (filters: any = {}, requestBody: any = {}) => {
+  getAllGroupsNoClass: async (filters: any = {}, requestBody: any = {}) => {
     return await axios.post(`/api/group`, { ...filters, ...requestBody });
   },
 

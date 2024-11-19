@@ -48,7 +48,7 @@ const Group = () => {
   const { data: groupData } = useQuery({
     queryKey: [QUERY_KEY.ALLGROUP, { semester, tagFilter, search }],
     queryFn: async () => {
-      return groupApi.getAllGroups({
+      return groupApi.getAllGroupsNoClass({
         semester,
         tag: tagFilter,
         GroupName: search,

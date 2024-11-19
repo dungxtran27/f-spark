@@ -737,7 +737,7 @@ const findAllGroups = async () => {
   }
 };
 
-const getAllGroups = async (GroupName, tag, page = 1, limit = 10) => {
+const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
   try {
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -858,5 +858,5 @@ export default {
   findAllSponsorGroupsOfClasses,
   getGroupsByClassId,
   editTimelineForManyGroups,
-  getAllGroups
+  getAllGroupsNoClass
 };

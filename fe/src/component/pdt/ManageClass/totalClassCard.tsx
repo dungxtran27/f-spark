@@ -49,12 +49,12 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
 
   const { data: studentsData  } = useQuery({
     queryKey: [QUERY_KEY.ALLSTUDENT],
-    queryFn: async () => student.getAllStudents(),
+    queryFn: async () => student.getAllStudentsNoClass(),
   });
 
   const { data: groupsData } = useQuery({
     queryKey: [QUERY_KEY.ALLGROUP],
-    queryFn: async () => groupApi.getAllGroups(),
+    queryFn: async () => groupApi.getAllGroupsNoClass(),
   });
 
 

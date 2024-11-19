@@ -374,7 +374,7 @@ const editTimelineForManyGroups = async (req, res) => {
   }
 };
 
-const getAllGroups = async (req, res) => {
+const getAllGroupsNoClass = async (req, res) => {
   try {
     const { GroupName, tag, page, limit } = req.body;
     const pageIndex = parseInt(page) || 1;
@@ -386,7 +386,7 @@ const getAllGroups = async (req, res) => {
       countGroupNotHaveClass,
       totalItems,
       maxPages,
-    } = await GroupRepository.getAllGroups(GroupName, tag, parseInt(page), parseInt(limit));
+    } = await GroupRepository.getAllGroupsNoClass(GroupName, tag, parseInt(page), parseInt(limit));
     const isLastPage = pageIndex >= maxPages;
     return res.status(200).json({
       data: {
@@ -429,5 +429,5 @@ export default {
   lockOrUnlockGroup,
   getAllGroupByClassId,
   editTimelineForManyGroups,
-  getAllGroups
+  getAllGroupsNoClass
 };

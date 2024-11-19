@@ -132,7 +132,7 @@ const findById = async (studentId) => {
     throw new Error(error.message);
   }
 }
-const getAllStudents = async ({ name, studentId, email, major }) => {
+const getAllStudentsNoClass = async ({ name, studentId, email, major }) => {
   try {
     const query = {};
     if (name) {
@@ -332,7 +332,7 @@ export default {
   getAllStudentByClassId,
   getAllStudentUngroupByClassId,
   findById,
-  getAllStudents,
+  getAllStudentsNoClass,
   addManyStudentNoClassToClass,
   getAllAccStudent,
   getAllStudentUngroupByClassIds,
