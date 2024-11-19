@@ -55,9 +55,7 @@ const getAllMentors = async (tagIds, name, page, limit) => {
       {
         $skip: (page - 1) * limit,
       },
-      {
-        $limit: limit,
-      },
+      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
     ]);
     const isLastPage = page >= maxPages;
     return {
@@ -241,9 +239,7 @@ const getAllAccMentor = async (page, limit, mentorName, email, status, tag) => {
       {
         $skip: (page - 1) * limit,
       },
-      {
-        $limit: limit,
-      },
+      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
     ]);
 
     const isLastPage = page >= maxPages;
