@@ -3,6 +3,7 @@ import Group from "../model/Group.js";
 import Student from "../model/Student.js";
 import student from "./student.js";
 import Class from "../model/Class.js";
+import { StudentRepository } from "./index.js";
 
 const createJourneyRow = async ({ groupId, name }) => {
   try {
@@ -21,7 +22,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -45,7 +46,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -831,6 +832,28 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
     throw new Error("Error fetching groups: " + error.message);
   }
 };
+const addGroupAndStudentsToClass = async (groupIds, classId) => {
+  try {
+    if (!Array.isArray(groupIds) || groupIds.length === 0) {
+      throw new Error("Group IDs must be provided as an array.");
+    }
+    const updatedGroups = await Group.updateMany(
+      { _id: { $in: groupIds }, class: { $in: [null, undefined] } },
+      { $set: { class: classId } }
+    );
+    const groups = await Group.find({ _id: { $in: groupIds } }).populate('teamMembers');
+    const studentIds = groups.reduce((acc, group) => {
+      return acc.concat(group.teamMembers.map(member => member._id));
+    }, []);
+    const updatedStudents = await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
+    return {
+      groups: groups,
+      students: updatedStudents
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 
 export default {
@@ -858,5 +881,6 @@ export default {
   findAllSponsorGroupsOfClasses,
   getGroupsByClassId,
   editTimelineForManyGroups,
-  getAllGroupsNoClass
+  getAllGroupsNoClass,
+  addGroupAndStudentsToClass
 };

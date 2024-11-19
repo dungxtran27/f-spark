@@ -405,6 +405,24 @@ const getAllGroupsNoClass = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+const addGroupToClass = async (req, res) => {
+  try {
+    const { groupIds, classId } = req.body;
+    if (!classId) {
+      return res.status(400).json({ message: "Class ID must be provided." });
+    }
+    if (!Array.isArray(groupIds) || groupIds.length === 0) {
+      return res.status(400).json({ message: "Group IDs must be provided as an array." });
+    }
+    const result = await GroupRepository.addGroupAndStudentsToClass(groupIds, classId);
+    return res.status(200).json({
+      message: `${result.groups.length} group(s)have been successfully added to the class.`,
+      data: { groups: result.groups, students: result.students }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 export default {
   createJourneyRow,
@@ -429,5 +447,6 @@ export default {
   lockOrUnlockGroup,
   getAllGroupByClassId,
   editTimelineForManyGroups,
-  getAllGroupsNoClass
+  getAllGroupsNoClass,
+  addGroupToClass
 };

@@ -13,6 +13,7 @@ interface ClassCardProps {
   groups?: number;
   isSponsorship?: number;
   totalMembers?: number;
+  onClick?: () => void; // Add onClick prop
 }
 
 const ClassCard: React.FC<ClassCardProps> = ({
@@ -21,6 +22,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
   isSponsorship,
   groups = 0,
   totalMembers = 0,
+  onClick, // Destructure onClick
 }) => {
   const getCardColor = () => {
     if (groups >= 5 && totalMembers >= 10) {
@@ -29,50 +31,52 @@ const ClassCard: React.FC<ClassCardProps> = ({
       return "bg-red-500";
     }
   };
+
   return (
-    <>
-      <div className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer">
-        <div className={`${getCardColor()} opacity-100 p-4 text-white`}>
-          <div className="flex text-lg font-semibold">
-            {classCode}
-            <div className="ml-auto">
-              <Tooltip title="Class Information">
-                <span className="text-white text-xl cursor-pointer">
-                  <ImNotification />
-                </span>
-              </Tooltip>
-            </div>
+    <div
+      className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer"
+      onClick={onClick} // Attach onClick event
+    >
+      <div className={`${getCardColor()} opacity-100 p-4 text-white`}>
+        <div className="flex text-lg font-semibold">
+          {classCode}
+          <div className="ml-auto">
+            <Tooltip title="Class Information">
+              <span className="text-white text-xl cursor-pointer">
+                <ImNotification />
+              </span>
+            </Tooltip>
           </div>
-          <div className="text-sm">Teacher: {teacherName}</div>
         </div>
-        <div className="bg-white p-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-600">
-                {totalMembers} Students
-              </span>
-              <FaUser className="ml-2 text-gray-600" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium text-gray-600">Request</span>
-              <MdOutlineMessage className="text-xl ml-2 text-gray-600" />
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-600">
-                {groups} Group
-              </span>
-              <FaUserGroup className="ml-2 text-gray-600" />
-            </div>
-            <div className="flex items-center justify-end">
-              <span className="text-sm font-medium text-gray-600">
-                {isSponsorship} Sponsorship
-              </span>
-              <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
-            </div>
+        <div className="text-sm">Teacher: {teacherName}</div>
+      </div>
+      <div className="bg-white p-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center">
+            <span className="text-sm font-medium text-gray-600">
+              {totalMembers} Students
+            </span>
+            <FaUser className="ml-2 text-gray-600" />
+          </div>
+          <div className="flex items-center justify-end">
+            <span className="text-sm font-medium text-gray-600">Request</span>
+            <MdOutlineMessage className="text-xl ml-2 text-gray-600" />
+          </div>
+          <div className="flex items-center">
+            <span className="text-sm font-medium text-gray-600">
+              {groups} Group
+            </span>
+            <FaUserGroup className="ml-2 text-gray-600" />
+          </div>
+          <div className="flex items-center justify-end">
+            <span className="text-sm font-medium text-gray-600">
+              {isSponsorship} Sponsorship
+            </span>
+            <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

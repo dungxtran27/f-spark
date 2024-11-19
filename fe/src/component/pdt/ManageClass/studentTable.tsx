@@ -22,6 +22,7 @@ import { classApi } from "../../../api/Class/class";
 const { Option } = Select;
 
 interface Student {
+  _id: string;
   studentId: string;
   major: string;
   name: string;
@@ -34,6 +35,8 @@ const StudentTable = () => {
   const [semester, setSemester] = useState("SU-24");
   const [majorFilter, setMajorFilter] = useState<string[] | null>([]);
   const [search, setSearch] = useState<string>("");
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
   const { data: classData } = useQuery({
     queryKey: [QUERY_KEY.CLASSES],
@@ -44,7 +47,7 @@ const StudentTable = () => {
       });
     },
   });
-  const { data: studentsData} = useQuery({
+  const { data: studentsData } = useQuery({
     queryKey: [QUERY_KEY.ALLSTUDENT, { semester, majorFilter, search }],
     queryFn: async () => {
       return student.getAllStudentsNoClass({
@@ -76,7 +79,48 @@ const StudentTable = () => {
       ...student,
       color: colorMap[student.major] || "gray",
     })) || [];
+  const handleCheckboxChange = (studentId: string) => {
+    setSelectedStudentIds((prev) =>
+      prev.includes(studentId)
+        ? prev.filter((id) => id !== studentId) 
+        : [...prev, studentId] 
+    );
+  }
+  const isChecked = (studentId: string) => selectedStudentIds.includes(studentId); 
 
+  const handleClassSelect = (classId: string) => {
+    setSelectedClassId(classId);
+  };
+  const handleSave = async () => {
+    if (!selectedClassId || selectedStudentIds.length === 0) {
+      console.warn("Please select a class and at least one student.");
+      return;
+    }
+    try {
+      const response = await student.addManyStudentNoClassToClass({
+        classId: selectedClassId,
+        studentIds: selectedStudentIds,
+      });
+  
+      if (response.data.success) {
+        console.log("Success:", response.data.message || "Students added successfully.");
+        // Reset state
+        setSelectedStudentIds([]);
+        setSelectedClassId(null);
+        setIsModalVisible(false);
+      } else {
+        console.error("Error:", response.data.message || "Failed to add students to the class.");
+      }
+    } catch (error: any) {
+      console.error(
+        "Error:",
+        error.response?.data?.message ||
+          error.message ||
+          "An unexpected error occurred."
+      );
+    }
+  };
+  
   return (
     <div className="bg-white shadow-md rounded-md p-4">
       {/* Search and Filter Section */}
@@ -135,7 +179,20 @@ const StudentTable = () => {
         <thead>
           <tr className="bg-gray-200 text-left">
             <th className="p-2">
-              <Checkbox />
+              <Checkbox
+                indeterminate={
+                  selectedStudentIds.length > 0 &&
+                  selectedStudentIds.length < filteredData.length
+                }
+                checked={selectedStudentIds.length === filteredData.length}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedStudentIds(filteredData.map((s) => s._id));
+                  } else {
+                    setSelectedStudentIds([]);
+                  }
+                }}
+              />
             </th>
             <th className="p-2">Student ID</th>
             <th className="p-2">Major</th>
@@ -147,7 +204,10 @@ const StudentTable = () => {
           {filteredData.map((student: Student, index: Key) => (
             <tr className="border-b" key={index}>
               <td className="p-2">
-                <Checkbox />
+                <Checkbox
+                  checked={isChecked(student._id)} 
+                  onChange={() => handleCheckboxChange(student._id)}
+                />
               </td>
               <td className="p-2">{student.studentId}</td>
               <td className="p-2">
@@ -186,7 +246,7 @@ const StudentTable = () => {
           <Button key="cancel" onClick={handleCancel}>
             Cancel
           </Button>,
-          <Button key="save" type="primary" onClick={handleCancel}>
+          <Button key="save" type="primary" onClick={handleSave}>
             Save
           </Button>,
         ]}
@@ -197,7 +257,7 @@ const StudentTable = () => {
         }}
       >
         <div className="grid grid-cols-3 gap-4">
-        {classData?.data.data.map((classItem: any) => {
+          {classData?.data.data.map((classItem: any) => {
             const sponsorshipCount = classItem.groups.filter(
               (group: any) => group.isSponsorship === true
             ).length;
@@ -209,6 +269,7 @@ const StudentTable = () => {
                 groups={classItem.totalGroups}
                 isSponsorship={sponsorshipCount}
                 totalMembers={classItem.totalStudents}
+                onClick={() => handleClassSelect(classItem._id)}
               />
             );
           })}
