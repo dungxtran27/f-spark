@@ -114,7 +114,6 @@ const declineLeaveClassRequest = async (req, res) => {
     const { requestId } = req.body;
     const decodedToken = req.decodedToken;
     const foundRequest = await RequestRepository.getRequestById({ requestId });
-    console.log(foundRequest);
 
     if (!foundRequest) {
       return res.status(400).json({ error: "No Request found." });
@@ -159,12 +158,14 @@ const declineLeaveClassRequest = async (req, res) => {
 const approvedLeaveClassRequest = async (req, res) => {
   try {
     const { requestId } = req.body;
-    const foundRequest = RequestRepository.getRequestById(requestId);
+    const decodedToken = req.decodedToken;
+
+    const foundRequest = RequestRepository.getRequestById({ requestId });
     if (!foundRequest) {
-      return res.status(400).json({ message: "No Request found." });
+      return res.status(400).json({ error: "No Request found." });
     }
-    if (foundRequest.status == "pending") {
-      return res.status(400).json({ message: "Request is declined" });
+    if (foundRequest.status !== "pending") {
+      return res.status(400).json({ error: "Request is processed" });
     }
     const data = await RequestRepository.approveLeaveRequest({
       requestId,
@@ -186,12 +187,13 @@ const approvedLeaveClassRequest = async (req, res) => {
         data: notificationData,
       });
 
-      const socketIds = userSocketMap[foundRequest.createBy.toString()];
+      const socketIds =
+        userSocketMap[foundRequest.createBy?.account._id.toString()];
       if (socketIds) {
-        io.to(socketIds).emit("newNotification", `Your request is approve`);
+        io.to(socketIds).emit("newNotification", `Your request is approved`);
       }
     }
-    return res.status(200).json({ data: data, message: "Success" });
+    return res.status(200).json({ data: data, message: "Approve success" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
