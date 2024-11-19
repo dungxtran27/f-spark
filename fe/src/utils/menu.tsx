@@ -9,7 +9,7 @@ export const StudentRoutes = [
   {
     route: "/dashboard",
     page: "DashBoard",
-    icon: <BiSolidDashboard  size={20} />,
+    icon: <BiSolidDashboard size={20} />,
   },
   {
     route: "/projectOverview",
@@ -29,7 +29,7 @@ export const StudentRoutes = [
   {
     route: "/request",
     page: "Request",
-    icon: <RiMailSendFill  size={20} />,
+    icon: <RiMailSendFill size={20} />,
   },
 ];
 export const TeacherRoutes = [
@@ -57,8 +57,13 @@ export const AdminRoutes = [
   },
   {
     route: "/manageAccount",
-    page: "Mange Account",
-    icon: <BiSolidUserAccount size={20}/>,
+    page: "Manage Account",
+    icon: <BiSolidUserAccount size={20} />,
+  },
+  {
+    route: "/manageRequest",
+    page: "Requests",
+    icon: <BiSolidUserAccount size={20} />,
   },
 ];
 
