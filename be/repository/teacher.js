@@ -41,6 +41,7 @@ const findByAccountId = async (accountId) => {
     const teacher = await Teacher.findOne({
       account: accountId,
     }).populate("account", "-password");
+
     return teacher;
   } catch (error) {
     throw new Error(error.message);

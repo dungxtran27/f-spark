@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
 import { UserInfo } from "../../../../../model/auth";
 
-const Outcome = ({ o }: { o: any }) => {
+const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
@@ -50,11 +50,12 @@ const Outcome = ({ o }: { o: any }) => {
           gradingCriteria={o?.GradingCriteria}
           setOpenModal={setSubmission}
           outcome={o}
+          classID={classID}
         />
       </div>
       {isTeacher && (
         <Modal
-        centered
+          centered
           open={!!submission}
           title={"Grade submission"}
           onOk={() => {

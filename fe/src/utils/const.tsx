@@ -39,7 +39,6 @@ export const DASHBOARD_TABS = [
   { key: "report", label: "Report", children: <Report /> },
 ];
 
-
 export const CLASS_TABS = [
   { key: "stream", label: "Stream", children: <Stream /> },
   { key: "people", label: "People", children: <People /> },
@@ -238,6 +237,7 @@ export const QUERY_KEY = {
   REQUESTS: "requests",
   RECORD_OF_CHANGES: "recordOfChanges",
   GROUP_NOTIFICATION: "groupNotification",
+  TEACHER_DASHBOARD: "teacherDashboard",
   TEACHER_CLASS_TIMELINE: "teacherClassTimeline",
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
@@ -278,5 +278,5 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
 export const NOTIFICATION_TYPE = {
   CLASS: "class",
   GROUP: "group",
-  SYSTEM: "system"
-}
+  SYSTEM: "system",
+};

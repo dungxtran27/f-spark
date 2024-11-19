@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import Class from "../model/Class.js";
+import teacher from "./teacher.js";
 const getClassesOfTeacher = async (teacherId) => {
   try {
+    
     const classes = await Class.aggregate([
       {
         $match: {
@@ -16,8 +18,17 @@ const getClassesOfTeacher = async (teacherId) => {
             {
               $match: {
                 $expr: {
-                  $eq: ["$classId", "$$classId"],
-                  $eq: ["$group", null],
+                  $and: [
+                    {
+                      $eq: ["$classId", "$$classId"],
+                    },
+                    {
+                      $or: [
+                        { $eq: ["$group", null] },
+                        { $not: { $gt: [{ $type: "$group" }, "missing"] } },
+                      ],
+                    },
+                  ],
                 },
               },
             },
@@ -66,6 +77,14 @@ const getClassesOfTeacher = async (teacherId) => {
         },
       },
     ]);
+    return classes;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const getClassNumberOfTeacher = async (teacherId) => {
+  try {
+    const classes = await Class.find({ teacher: teacherId });
     return classes;
   } catch (error) {
     throw new Error(error.message);
@@ -318,4 +337,5 @@ export default {
   findClassById,
   getAllClasses,
   getAllClass,
+  getClassNumberOfTeacher,
 };

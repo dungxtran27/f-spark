@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import styles from "./style.module.scss";
 import logo from "../../../../public/logo_header.png";
-import bgImage from "../../../../public/bgLogin1.jpg";
+import bgImage from "../../../../public/bg_1.png";
 import { Button, Checkbox, Form, Input } from "antd";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { BiLogoGmail } from "react-icons/bi";
@@ -45,13 +45,13 @@ const Login = () => {
 
   return (
     <div className="h-screen w-full flex items-center">
-      <div className={classNames(styles.loginImage, "h-full")}>
-        <img src={bgImage} alt="" />
+      <div className={classNames(styles.loginImage, "h-full  ")}>
+        <img src={bgImage} alt="" className="h-full object-cover" />
         {/* <Skeleton.Image className={classNames(styles.defaultImage)} /> */}
       </div>
       <div className="flex-1 h-screen flex-col items-center flex pt-3 gap-5">
         <Link to={"/"}>
-          <img src={logo} className="aspect-square w-[200px]" />
+          <img src={logo} className=" w-[200px]" />
         </Link>
         <div className="flex flex-col items-center">
           <span className="text-[28px]">Log in</span>
