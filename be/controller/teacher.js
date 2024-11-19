@@ -12,8 +12,8 @@ const getTeacherByClassId = async (req, res) => {
 
 const getAllAccTeacher = async (req, res) => {
     try {
-        const { page, limit, teacherName, email, status } = req.body;
-        const teachers = await TeacherRepository.getAllAccTeacher(page, limit, teacherName, email, status);
+        const { page, limit, searchText, status } = req.body;
+        const teachers = await TeacherRepository.getAllAccTeacher(page, limit, searchText, status);
         return res.status(201).json({ data: teachers });
     } catch (error) {
         return res.status(500).json({ error: error.message });

@@ -165,16 +165,16 @@ const assignMentor = async ({ groupId, mentorId }) => {
   }
 };
 
-const getAllAccMentor = async (page, limit, mentorName, email, status, tag) => {
+const getAllAccMentor = async (page, limit, searchText, status, tag) => {
   try {
     let filterCondition = { $and: [] };
-
-    if (mentorName) {
-      filterCondition.$and.push({ name: { $regex: mentorName, $options: "i" } });
-    }
-
-    if (email) {
-      filterCondition.$and.push({ email: { $regex: email, $options: "i" } });
+    if (searchText) {
+      filterCondition.$and.push({
+        $or: [
+          { name: { $regex: searchText, $options: "i" } },
+          { email: { $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } },
+        ]
+      });
     }
 
     if (status !== undefined) {
@@ -201,9 +201,6 @@ const getAllAccMentor = async (page, limit, mentorName, email, status, tag) => {
     const maxPages = Math.ceil(totalItems / limit);
 
     const mentors = await Mentor.aggregate([
-      {
-        $match: filterCondition,
-      },
       {
         $lookup: {
           from: "TagMajors",
@@ -234,12 +231,15 @@ const getAllAccMentor = async (page, limit, mentorName, email, status, tag) => {
         },
       },
       {
+        $match: filterCondition,
+      },
+      {
         $sort: { isActive: -1, name: 1 },
       },
       {
         $skip: (page - 1) * limit,
       },
-      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
+      { $limit: limit },
     ]);
 
     const isLastPage = page >= maxPages;
@@ -259,16 +259,16 @@ const getAllAccMentor = async (page, limit, mentorName, email, status, tag) => {
 const getMentorAssignedGroupInfo = async (mentorId) => {
   try {
     const mentor = await Mentor.findById(mentorId)
-      .select("name email phoneNumber profile tag profilePicture isActive") 
+      .select("name email phoneNumber profile tag profilePicture isActive")
       .populate({
         path: "assignedGroup",
-        select: "GroupName GroupDescription teamMembers class", 
+        select: "GroupName GroupDescription teamMembers class",
         populate: {
           path: "class",
           select: "classCode",
         },
       })
-      .lean(); 
+      .lean();
     if (!mentor) {
       throw new Error("Mentor not found");
     }
@@ -284,7 +284,7 @@ const getMentorAssignedGroupInfo = async (mentorId) => {
         GroupName: group.GroupName,
         GroupDescription: group.GroupDescription,
         teamMembersCount: group.teamMembers.length,
-        classCode: group.class ? group.class.classCode : null, 
+        classCode: group.class ? group.class.classCode : null,
       })),
     };
   } catch (error) {

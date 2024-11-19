@@ -50,18 +50,18 @@ const findByAccountId = async (accountId) => {
   }
 };
 
-const getAllAccTeacher = async (page, limit, teacherName, email, status) => {
+const getAllAccTeacher = async (page, limit, searchText, status) => {
   try {
     let filterCondition = { $and: [] };
-
-    if (teacherName) {
-      filterCondition.$and.push({ name: { $regex: teacherName, $options: "i" } });
+    if (searchText) {
+      filterCondition.$and.push({
+        $or: [
+          { name: { $regex: searchText, $options: "i" } },
+          { email: { $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } },
+        ]
+      });
     }
 
-    if (email) {
-      filterCondition.$and.push({ "accountDetails.email": { $regex: email, $options: "i" } });
-    }
- 
     if (status !== undefined) {
       filterCondition.$and.push({ "accountDetails.isActive": status });
     }
@@ -88,9 +88,6 @@ const getAllAccTeacher = async (page, limit, teacherName, email, status) => {
         },
       },
       {
-        $match: filterCondition,
-      },
-      {
         $project: {
           name: 1,
           salutation: 1,
@@ -101,6 +98,9 @@ const getAllAccTeacher = async (page, limit, teacherName, email, status) => {
           createdAt: 1,
           updatedAt: 1,
         },
+      },
+      {
+        $match: filterCondition,
       },
       {
         $sort: { isActive: -1, name: 1 },

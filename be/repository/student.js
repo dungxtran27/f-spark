@@ -227,24 +227,16 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
   }
 };
 
-const getAllAccStudent = async (page, limit, studentName, mssv, classId, status) => {
+const getAllAccStudent = async (page, limit, searchText, classId, status) => {
   try {
     let filterCondition = { $and: [] };
 
-    if (studentName) {
+    if (searchText) {
       filterCondition.$and.push({
         $or: [
-          { name: { $regex: studentName, $options: "i" } },
-          { accountEmail: { $regex: studentName.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } }
-        ]
-      });
-    }
-
-    if (mssv) {
-      filterCondition.$and.push({
-        $or: [
-          { name: { $regex: studentName, $options: "i" } },
-          { "$accountDetails.email": { $regex: studentEmail, $options: "i" } }
+          { name: { $regex: searchText, $options: "i" } },
+          { accountEmail: { $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } },
+          { studentId: { $regex: searchText, $options: "i" } }
         ]
       });
     }
