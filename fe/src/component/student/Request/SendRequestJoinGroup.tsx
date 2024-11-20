@@ -75,6 +75,18 @@ const RequestJoinGroup: React.FC = () => {
       });
     },
   });
+  const cancelLeaveClassRequest = useMutation({
+    mutationFn: ({ requestId }: any) =>
+      requestList.cancelLeaveClassRequest({
+        requestId: requestId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.REQUEST_LEAVE_CLASS],
+      });
+    },
+  });
   const projects: Project[] = dataGroup
     ? dataGroup.map((group: any) => ({
         groupId: group._id,
@@ -100,14 +112,20 @@ const RequestJoinGroup: React.FC = () => {
     },
     {
       title: "Status",
-      dataIndex: "status",
-      render: (c: string) => {
-        return c == "pending" ? (
+      // dataIndex: "status",
+      render: (c: any) => {
+        return c.status == "pending" ? (
           <Tooltip title={"Cancel this request"}>
-            <MdCancelPresentation size={20} color="red" />
+            <MdCancelPresentation
+              size={20}
+              color="red"
+              onClick={() => {
+                cancelLeaveClassRequest.mutate({ requestId: c._id });
+              }}
+            />
           </Tooltip>
         ) : (
-          <p>{c}</p>
+          <p>{c.status}</p>
         );
       },
     },
@@ -169,7 +187,7 @@ const RequestJoinGroup: React.FC = () => {
             </div>
           )}
           {/* modal confirm */}
-          <Divider/>
+          <Divider />
           <Modal
             centered
             className="z-50"

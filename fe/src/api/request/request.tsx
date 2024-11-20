@@ -71,4 +71,10 @@ export const requestList = {
       requestBody
     );
   },
+  cancelLeaveClassRequest: async (requestBody: any) => {
+    return await axios.post(
+      `/api/request/cancelLeaveClassRequest`,
+      requestBody
+    );
+  },
 };
