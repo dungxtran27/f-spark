@@ -279,7 +279,8 @@ const getLeaveClassRequestOfStudent = async ({ studentId }) => {
     })
       .populate({ path: "fromClass", select: " classCode " })
       .populate({ path: "toClass", select: " classCode " })
-      .populate({ path: "createBy", select: "studentId name major" });
+      .populate({ path: "createBy", select: "studentId name major" })
+      .sort({ createdAt: -1 });
 
     return result;
   } catch (error) {

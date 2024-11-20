@@ -206,7 +206,9 @@ const cancelLeaveClassRequest = async (req, res) => {
     const data = await RequestRepository.cancelLeaveRequest({
       requestId,
     });
-    return res.status(200).json({ data: data, message: "Success" });
+    return res
+      .status(200)
+      .json({ data: data, message: "Cancel request success" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
