@@ -108,7 +108,7 @@ const Teacher: React.FC = () => {
           to={`/teacherProfile/${record._id}`}
           style={{ fontWeight: "bold" }}
         >
-          {`${record.salutation}. ${record.name}`}
+          {`${record.salutation} ${record.name}`}
         </Link>
       ),
     },
