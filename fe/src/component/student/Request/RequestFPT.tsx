@@ -87,7 +87,7 @@ const RequestFPT = () => {
     ) {
       return (
         <div className="flex items-center text-red-500">
-          <span className="text-lg">Nhóm bạn đã từ chối tài trợ</span>
+          <span className="text-lg">Your group has decline the sponsorship request</span>
         </div>
       );
     }
@@ -98,7 +98,7 @@ const RequestFPT = () => {
     ) {
       return (
         <div className="flex items-center text-green-500">
-          <span className="text-lg">Nhóm bạn đã chấp nhận yêu cầu tài trợ</span>
+          <span className="text-lg">Your group has accepted the sponsorship request</span>
         </div>
       );
     }
