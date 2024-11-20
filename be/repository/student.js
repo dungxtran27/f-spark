@@ -51,7 +51,7 @@ const getTeacherByStudentId = async (userId) => {
 const getStudentsByGroup = async (groupId) => {
   try {
     const students = await Student.find({ group: groupId }).select(
-      "_id name studentId account"
+      "_id name studentId account major"
     );
     return students;
   } catch (error) {
@@ -348,7 +348,6 @@ export default {
   findStudentByAccountId,
   getStudentsByGroup,
   getTeacherByStudentId,
-  getStudentsByGroup,
   getAllStudentByClassId,
   getAllStudentUngroupByClassId,
   findById,

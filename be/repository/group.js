@@ -667,7 +667,7 @@ const findAllSponsorGroupsOfClasses = async (classIds) => {
 const getGroupsByClassId = async (classId) => {
   try {
     const groups = await Group.find({ class: classId })
-      .select("GroupName GroupDescription timeline")
+      .select("GroupName GroupDescription timeline isSponsorship")
       .lean();
     return groups;
   } catch (error) {

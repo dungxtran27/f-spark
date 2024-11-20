@@ -272,7 +272,7 @@ const Group = () => {
               />
             );
           })}
-          <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-purple-400">
+          <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-primary/30">
             <FiPlus className="text-3xl" />
             <span className="mt-1 text-lg">Create new class</span>
           </button>

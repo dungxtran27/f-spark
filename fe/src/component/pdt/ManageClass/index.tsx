@@ -162,6 +162,10 @@ const ManageClassWrapper = () => {
                       groups={classItem.totalGroups}
                       isSponsorship={sponsorshipCount}
                       totalMembers={classItem.totalStudents}
+                      onClick={() => {
+                        setSelectedClass(classItem._id)
+                        setShowClass(false)
+                      }}
                     />
                   );
                 })}

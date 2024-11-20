@@ -181,16 +181,18 @@ const updateCustomerPersona = async (req, res) => {
   try {
     const { personaId } = req.query;
     let { detail, bio, needs } = req.body;
-    if (typeof detail === 'string') {
+    if (typeof detail === "string") {
       detail = JSON.parse(detail);
     }
-    if (typeof needs === 'string') {
+    if (typeof needs === "string") {
       try {
-        while (typeof needs === 'string') {
+        while (typeof needs === "string") {
           needs = JSON.parse(needs);
         }
       } catch (error) {
-        return res.status(400).json({ error: "Invalid format for needs field" });
+        return res
+          .status(400)
+          .json({ error: "Invalid format for needs field" });
       }
     }
 
@@ -208,7 +210,6 @@ const updateCustomerPersona = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
 
 const deleteCustomerPersona = async (req, res) => {
   try {
@@ -335,7 +336,14 @@ const getAllGroupByClassId = async (req, res) => {
   try {
     const { classId } = req.params;
     const groups = await GroupRepository.getGroupsByClassId(classId);
-    res.status(200).json({ data: groups });
+    const mappedGroups = await Promise.all(
+      groups.map(async (g) => {
+        const members = await StudentRepository.getStudentsByGroup(g._id);
+        const majors = [...new Set(members?.map((m) => m.major))];
+        return { ...g, members, majors: majors };
+      })
+    );
+    res.status(200).json({ data: mappedGroups });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -344,30 +352,44 @@ const editTimelineForManyGroups = async (req, res) => {
   try {
     const { groupIds, type, updateData, editAble } = req.body;
     if (!groupIds || !type || !updateData || editAble === undefined) {
-      return res.status(400).json({ message: "Group IDs, timeline type, editAble, and new timeline data are required" });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Group IDs, timeline type, editAble, and new timeline data are required",
+        });
     }
     if (editAble === false) {
-      return res.status(403).json({ message: "Cannot edit because editAble is set to false" });
+      return res
+        .status(403)
+        .json({ message: "Cannot edit because editAble is set to false" });
     }
-    const updatedGroups = await GroupRepository.editTimelineForManyGroups(groupIds, type, updateData, editAble);
-    const formattedData = updatedGroups.map(group => {
-      return group.timeline
-        .filter(timeline => timeline.type === type)
-        .map(timeline => ({
-          _id: timeline._id,
-          title: timeline.title,
-          description: timeline.description,
-          startDate: timeline.startDate,
-          endDate: timeline.endDate,
-          editAble: timeline.editAble,
-          status: timeline.status,
-          updatedAt: timeline.updatedAt,
-          type: timeline.type
-        }));
-    }).flat();
+    const updatedGroups = await GroupRepository.editTimelineForManyGroups(
+      groupIds,
+      type,
+      updateData,
+      editAble
+    );
+    const formattedData = updatedGroups
+      .map((group) => {
+        return group.timeline
+          .filter((timeline) => timeline.type === type)
+          .map((timeline) => ({
+            _id: timeline._id,
+            title: timeline.title,
+            description: timeline.description,
+            startDate: timeline.startDate,
+            endDate: timeline.endDate,
+            editAble: timeline.editAble,
+            status: timeline.status,
+            updatedAt: timeline.updatedAt,
+            type: timeline.type,
+          }));
+      })
+      .flat();
     res.status(200).json({
       message: "Update outcome successfully",
-      data: formattedData
+      data: formattedData,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -386,7 +408,12 @@ const getAllGroupsNoClass = async (req, res) => {
       countGroupNotHaveClass,
       totalItems,
       maxPages,
-    } = await GroupRepository.getAllGroupsNoClass(GroupName, tag, parseInt(page), parseInt(limit));
+    } = await GroupRepository.getAllGroupsNoClass(
+      GroupName,
+      tag,
+      parseInt(page),
+      parseInt(limit)
+    );
     const isLastPage = pageIndex >= maxPages;
     return res.status(200).json({
       data: {
@@ -412,12 +439,17 @@ const addGroupToClass = async (req, res) => {
       return res.status(400).json({ message: "Class ID must be provided." });
     }
     if (!Array.isArray(groupIds) || groupIds.length === 0) {
-      return res.status(400).json({ message: "Group IDs must be provided as an array." });
+      return res
+        .status(400)
+        .json({ message: "Group IDs must be provided as an array." });
     }
-    const result = await GroupRepository.addGroupAndStudentsToClass(groupIds, classId);
+    const result = await GroupRepository.addGroupAndStudentsToClass(
+      groupIds,
+      classId
+    );
     return res.status(200).json({
       message: `${result.groups.length} group(s)have been successfully added to the class.`,
-      data: { groups: result.groups, students: result.students }
+      data: { groups: result.groups, students: result.students },
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -448,5 +480,5 @@ export default {
   getAllGroupByClassId,
   editTimelineForManyGroups,
   getAllGroupsNoClass,
-  addGroupToClass
+  addGroupToClass,
 };
