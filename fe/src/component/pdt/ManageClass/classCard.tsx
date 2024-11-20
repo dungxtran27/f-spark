@@ -13,8 +13,8 @@ interface ClassCardProps {
   groups?: number;
   isSponsorship?: number;
   totalMembers?: number;
-  
-  icon: ReactNode;
+
+  icon?: ReactNode;
   role: string;
   onClick?: () => void;
   isSelected?: boolean; // New prop to track selected card
