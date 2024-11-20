@@ -14,7 +14,7 @@ requestRouter.patch(
   "/voteGroup",
   verifyToken,
   authorization.checkGroupAccess,
-  RequestController.voteOutGroup
+  RequestController.voteGroup
 );
 requestRouter.post(
   "/createRequest",
