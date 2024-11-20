@@ -14,6 +14,7 @@ interface ClassCardProps {
   isSponsorship?: number;
   totalMembers?: number;
   onClick?: () => void;
+  isSelected?: boolean; // New prop to track selected card
 }
 
 const ClassCard: React.FC<ClassCardProps> = ({
@@ -23,6 +24,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
   groups = 0,
   totalMembers = 0,
   onClick,
+  isSelected = false, // Default value is false
 }) => {
   const getCardColor = () => {
     if (groups >= 5 && totalMembers >= 30) {
@@ -34,7 +36,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
   return (
     <div
-      className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer"
+      className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer ${isSelected ? 'border-2 border-purple-400' : ''}`}
       onClick={onClick}
     >
       <div className={`${getCardColor()} opacity-100 p-4 text-white`}>

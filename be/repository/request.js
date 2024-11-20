@@ -187,8 +187,6 @@ const getProcessedLeaveClassRequest = async () => {
 };
 const createLeaveClassRequest = async ({ studentId, toClass }) => {
   try {
-    console.log(studentId);
-
     const foundStudent = await Student.findById(studentId);
     const foundClass = await Class.findById(toClass);
     if (!foundClass) {
