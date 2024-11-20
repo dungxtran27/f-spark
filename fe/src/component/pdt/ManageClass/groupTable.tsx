@@ -82,9 +82,6 @@ const Group = () => {
       tagNames: group.tag.map((t: Tag) => t.name),
       tagId: group.tag.map((t: Tag) => t._id),
     })) || [];
-
-  console.log("Group API Response:", groupData);
-
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };

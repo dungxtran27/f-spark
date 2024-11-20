@@ -24,6 +24,7 @@ import { Admin } from "../../../../api/manageAccoount";
 const { Option } = Select;
 
 interface Teacher {
+  _id: any;
   id: number;
   name: string;
   salutation: string;
@@ -104,7 +105,7 @@ const Teacher: React.FC = () => {
       key: "name",
       render: (_, record) => (
         <Link
-          to={`/teacherProfile/${record.id}`}
+          to={`/teacherProfile/${record._id}`}
           style={{ fontWeight: "bold" }}
         >
           {`${record.salutation}. ${record.name}`}

@@ -1,66 +1,44 @@
 import { BookOutlined, TeamOutlined, UsergroupAddOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Typography, Space, Divider, Button } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Admin } from "../../../../api/manageAccoount";
 import { QUERY_KEY } from "../../../../utils/const";
+import { AxiosResponse } from "axios";
 
 const { Title, Text } = Typography;
-// interface ClassDetails {
-//     classCode: string;
-//     backgroundImage: string;
-//     studentCount: number;
-//     groupCount: number;
-//   }
-  
-//   interface TeacherInfo {
-//     teacherId:tr
-//     salutation: string;
-//     name: string;
-//     phoneNumber: string;
-//     email: string;
-//     classes: ClassDetails[];
-//   }
+interface ClassDetails {
+    classCode: string;
+    backgroundImage: string;
+    studentCount: number;
+    groupCount: number;
+}
+
+interface TeacherInfo {
+    profilePicture: string;
+    teacherId: string,
+    salutation: string;
+    name: string;
+    phoneNumber: string;
+    email: string;
+    classes: ClassDetails[];
+}
 const TeacherProfileWrapper = () => {
+    const { id } = useParams();
+    const teacherId = id;
     const navigate = useNavigate();
-    // const { data: teacherData, } = useQuery<TeacherInfo>({
-    //     queryKey: [QUERY_KEY.TEACHERINFO, teacherId],
-    //     queryFn: () => Admin.getTeacherInfo(teacherId),
-    //   });
+    const { data, isLoading, error } = useQuery<AxiosResponse>({
+        queryKey: [QUERY_KEY.TEACHERINFO, teacherId],
+        queryFn: () => Admin.getTeacherInfo(teacherId),
+        enabled: !!teacherId,
+    });
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
+    const teacherInfo: TeacherInfo | null = data?.data?.data || null;
 
-    const teacher = {
-        salutation: "Mr.",
-        name: "Nguyễn Văn A",
-        phoneNumber: "0123 456 789",
-        email: "nguyenvana@example.com",
-    };
-
-    const classes = [
-        {
-            classCode: "CS101",
-            name: "Introduction to Computer Science",
-            studentCount: 30,
-            groupCount: 5,
-        },
-        {
-            classCode: "CS102",
-            name: "Data Structures and Algorithms",
-            studentCount: 25,
-            groupCount: 4,
-        },
-        {
-            classCode: "CS103",
-            name: "Web Development",
-            studentCount: 20,
-            groupCount: 3,
-        },
-        {
-            classCode: "CS104",
-            name: "Database Management Systems",
-            studentCount: 22,
-            groupCount: 4,
-        },
-    ];
+    if (!teacherInfo) {
+        return <div>No teacher information found.</div>;
+    }
 
     return (
         <div className="w-full overflow-x-hidden">
@@ -72,13 +50,14 @@ const TeacherProfileWrapper = () => {
                     </div>
                     <div className="flex items-start space-x-4 mb-4">
                         <img
-                            src="https://via.placeholder.com/150"
+                            src={teacherInfo.profilePicture || "https://via.placeholder.com/150"}
                             alt="Teacher Avatar"
                             className="rounded-full w-32 h-32"
                         />
+
                         <div className="flex-1">
                             <div className="flex items-center justify-between">
-                                <Title level={2}>{teacher.salutation} {teacher.name}</Title>
+                                <Title level={2}>{teacherInfo.salutation} {teacherInfo.name}</Title>
                                 <Button
                                     type="primary"
                                     onClick={() => alert('Assigning to teacher')}
@@ -90,15 +69,15 @@ const TeacherProfileWrapper = () => {
                                 Giáo viên với nhiều năm kinh nghiệm, chuyên dạy các lớp lập trình.
                             </Text>
                             <Space className="mb-2">
-                                <Text>SĐT: {teacher.phoneNumber}</Text>
-                                <Text>Email: {teacher.email}</Text>
+                                <Text>SĐT: {teacherInfo.phoneNumber}</Text>
+                                <Text>Email: {teacherInfo.email}</Text>
                             </Space>
                         </div>
                     </div>
 
-                    <Divider orientation="left">Classes Assigned - {classes.length} classes</Divider>
+                    <Divider orientation="left">Classes Assigned - {teacherInfo.classes.length} classes</Divider>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {classes.map((classItem, index) => (
+                        {teacherInfo.classes.map((classItem, index) => (
                             <Card
                                 key={index}
                                 className="rounded-md overflow-hidden shadow-md cursor-pointer mb-4"
@@ -113,7 +92,7 @@ const TeacherProfileWrapper = () => {
                                 </div>
 
                                 <div className="bg-white p-4">
-                                    <Title level={4} className="mb-2">{classItem.name}</Title>
+                                    {/* <Title level={4} className="mb-2">{classItem.name}</Title> */}
                                     <div className="flex items-center mb-2">
                                         <UsergroupAddOutlined className="text-red-500 mr-2" />
                                         <Text>{classItem.studentCount} Students</Text>
