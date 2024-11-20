@@ -4,6 +4,9 @@ export const requestList = {
   getRequest: async (groupId: string) => {
     return await axios.get(`api/request?groupId=${groupId}`);
   },
+  getLeaveClassRequest: async () => {
+    return await axios.get(`api/request/getAllLeaveClassRequest`);
+  },
 
   voteGroup: async (
     groupId: string,
@@ -44,6 +47,18 @@ export const requestList = {
   deleteRequestJoinByStudentId: async (requestId: string) => {
     return await axios.delete(
       `api/request/deleteRequestJoinByStudentId/${requestId}`
+    );
+  },
+  approveLeaveRequest: async (requestBody: any) => {
+    return await axios.post(
+      `/api/request/approvedLeaveClassRequest`,
+      requestBody
+    );
+  },
+  declineLeaveRequest: async (requestBody: any) => {
+    return await axios.post(
+      `/api/request/declinedLeaveClassRequest`,
+      requestBody
     );
   },
 

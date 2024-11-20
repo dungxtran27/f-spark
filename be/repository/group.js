@@ -22,7 +22,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-      updatedGroup.customerJourneyMap.rows.length - 1
+        updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -46,7 +46,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-      updatedGroup.customerJourneyMap.cols.length - 1
+        updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -667,11 +667,11 @@ const findAllSponsorGroupsOfClasses = async (classIds) => {
 const getGroupsByClassId = async (classId) => {
   try {
     const groups = await Group.find({ class: classId })
-      .select('GroupName GroupDescription timeline')
+      .select("GroupName GroupDescription timeline")
       .lean();
     return groups;
   } catch (error) {
-    console.error('Error fetching groups by class:', error.message);
+    console.error("Error fetching groups by class:", error.message);
     throw error;
   }
 };
@@ -680,7 +680,7 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
     const groups = await Group.find({
       _id: { $in: groupIds },
       "timeline.type": type,
-      "timeline.editAble": true
+      "timeline.editAble": true,
     });
     const updateResult = await Group.updateMany(
       { _id: { $in: groupIds }, "timeline.type": type },
@@ -689,18 +689,19 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
           "timeline.$[timelineItem].title": updateData.title,
           "timeline.$[timelineItem].description": updateData.description,
           "timeline.$[timelineItem].endDate": updateData.endDate,
-        }
-      }, {
-      arrayFilters: [{ "timelineItem.type": type }],
-      new: true
-    }
+        },
+      },
+      {
+        arrayFilters: [{ "timelineItem.type": type }],
+        new: true,
+      }
     );
     return await Group.find({
       _id: { $in: groupIds },
-      "timeline.type": type
+      "timeline.type": type,
     }).populate({
       path: "timeline",
-      match: { type }
+      match: { type },
     });
   } catch (error) {
     throw new Error(error.message);
@@ -718,7 +719,7 @@ const findAllGroups = async () => {
     //   path: 'tag',
     //   select: 'name',
     // });
-    const groups = await Group.find({ isSponsorship: false })
+    const groups = await Group.find()
       .select("GroupName leader tag teamMembers isSponsorship")
       .populate({
         path: "teamMembers",
@@ -749,7 +750,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
     const tagIdArray = Array.isArray(tag) ? tag : tag ? [tag] : [];
     if (tagIdArray.length > 0) {
       matchStage.push({
-        "tag": {
+        tag: {
           $in: tagIdArray.map((id) => new mongoose.Types.ObjectId(id)),
         },
       });
@@ -763,45 +764,47 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
     const totalItems = await Group.countDocuments(matchCondition);
     const maxPages = Math.ceil(totalItems / limit);
 
-    const GroupNotHaveClass = await Group.aggregate(
-      [
-        { $match: { $and: [{ class: { $in: [null, undefined] } }, matchCondition] } },
-        { $unwind: "$tag" },
-        {
-          $lookup: {
-            from: "TagMajors",
-            localField: "tag",
-            foreignField: "_id",
-            as: "tag",
-          },
+    const GroupNotHaveClass = await Group.aggregate([
+      {
+        $match: {
+          $and: [{ class: { $in: [null, undefined] } }, matchCondition],
         },
-        {
-          $group: {
-            _id: "$_id",
-            GroupName: { $first: "$GroupName" },
-            isSponsorship: { $first: "$isSponsorship" },
-            tag: { $push: { $arrayElemAt: ["$tag", 0] } },
-            teamMembers: { $first: "$teamMembers" },
-          }
+      },
+      { $unwind: "$tag" },
+      {
+        $lookup: {
+          from: "TagMajors",
+          localField: "tag",
+          foreignField: "_id",
+          as: "tag",
         },
-        {
-          $project: {
-            GroupName: 1,
-            leader: 1,
-            "tag.name": 1,
-            "tag._id": 1,
-            isSponsorship: 1,
-            teamMembers: 1
-          },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          GroupName: { $first: "$GroupName" },
+          isSponsorship: { $first: "$isSponsorship" },
+          tag: { $push: { $arrayElemAt: ["$tag", 0] } },
+          teamMembers: { $first: "$teamMembers" },
         },
-        {
-          $skip: (page - 1) * limit,
+      },
+      {
+        $project: {
+          GroupName: 1,
+          leader: 1,
+          "tag.name": 1,
+          "tag._id": 1,
+          isSponsorship: 1,
+          teamMembers: 1,
         },
-        {
-          $limit: limit,
-        },
-      ]
-    );
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
     const isLastPage = page >= maxPages;
     const group = await Group.find()
       .select("GroupName leader tag teamMembers isSponsorship")
@@ -817,7 +820,8 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
     const totalGroup = await Group.countDocuments(group);
     const countGroupNotHaveClass = await Group.countDocuments({
       class: { $in: [null, undefined] },
-    }); return {
+    });
+    return {
       group,
       totalGroup,
       GroupNotHaveClass,
@@ -841,14 +845,17 @@ const addGroupAndStudentsToClass = async (groupIds, classId) => {
       { _id: { $in: groupIds }, class: { $in: [null, undefined] } },
       { $set: { class: classId } }
     );
-    const groups = await Group.find({ _id: { $in: groupIds } }).populate('teamMembers');
+    const groups = await Group.find({ _id: { $in: groupIds } }).populate(
+      "teamMembers"
+    );
     const studentIds = groups.reduce((acc, group) => {
-      return acc.concat(group.teamMembers.map(member => member._id));
+      return acc.concat(group.teamMembers.map((member) => member._id));
     }, []);
-    const updatedStudents = await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
+    const updatedStudents =
+      await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
     return {
       groups: groups,
-      students: updatedStudents
+      students: updatedStudents,
     };
   } catch (error) {
     throw new Error(error.message);
@@ -881,5 +888,5 @@ export default {
   getGroupsByClassId,
   editTimelineForManyGroups,
   getAllGroupsNoClass,
-  addGroupAndStudentsToClass
+  addGroupAndStudentsToClass,
 };
