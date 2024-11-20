@@ -41,13 +41,15 @@ const ClassCard: React.FC<ClassCardProps> = ({
       } else {
         return "bg-red-500";
       }
-    } else{return "bg-blue-400"}
+    } else {
+      return "bg-blue-400";
+    }
   };
 
   return (
     <div
       className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer"
-      onClick={onClick} // Attach onClick event
+      onClick={onClick}
     >
       <div className={`${getCardColor()} opacity-100 p-4 text-white`}>
         <div className="flex text-lg font-semibold">

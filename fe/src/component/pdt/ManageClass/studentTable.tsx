@@ -79,6 +79,7 @@ const StudentTable = () => {
       ...student,
       color: colorMap[student.major] || "gray",
     })) || [];
+    
   const handleCheckboxChange = (studentId: string) => {
     setSelectedStudentIds((prev) =>
       prev.includes(studentId)

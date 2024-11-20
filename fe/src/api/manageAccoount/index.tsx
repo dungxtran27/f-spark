@@ -10,4 +10,7 @@ export const Admin = {
   getMentor: async (requestBody: any) => {
     return await axios.post(`/api/mentor/getAllAccMentor`, requestBody);
   },
+  getTeacherInfo: async (teacherId: string) => {
+    return await axios.get(`/api/teacher/teacher?teacherId=${teacherId}`);
+  },
 };

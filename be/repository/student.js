@@ -173,7 +173,8 @@ const getAllStudentsNoClass = async ({ name, studentId, email, major }) => {
     const totalStudent = await Student.countDocuments(query);
     const queryNotHaveClass = {
       ...query,
-      $or: [{ classId: null }, { classId: undefined }],
+      classId: { $in: [null, undefined] },
+      group: { $in: [null, undefined] },
     };
     const StudentNotHaveClass = await Student.find(queryNotHaveClass)
       .populate({
@@ -226,17 +227,18 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
   }
 };
 
-const getAllAccStudent = async (page, limit, studentName, mssv, classId, status) => {
+const getAllAccStudent = async (page, limit, searchText, classId, status) => {
   try {
     let filterCondition = { $and: [] };
-    console.log(status);
 
-    if (studentName) {
-      filterCondition.$and.push({ name: { $regex: studentName, $options: "i" } });
-    }
-
-    if (mssv) {
-      filterCondition.$and.push({ studentId: { $regex: mssv, $options: "i" } });
+    if (searchText) {
+      filterCondition.$and.push({
+        $or: [
+          { name: { $regex: searchText, $options: "i" } },
+          { accountEmail: { $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } },
+          { studentId: { $regex: searchText, $options: "i" } }
+        ]
+      });
     }
 
     if (classId) {
@@ -303,9 +305,6 @@ const getAllAccStudent = async (page, limit, studentName, mssv, classId, status)
         },
       },
       {
-        $match: filterCondition,
-      },
-      {
         $project: {
           name: 1,
           studentId: 1,
@@ -320,12 +319,15 @@ const getAllAccStudent = async (page, limit, studentName, mssv, classId, status)
         },
       },
       {
+        $match: filterCondition,
+      },
+      {
         $sort: { isActive: -1, name: 1 },
       },
       {
         $skip: (page - 1) * limit,
       },
-      { $limit: Math.min(limit, totalItems - (page - 1) * limit) },
+      { $limit: limit },
     ]);
 
     const isLastPage = page >= maxPages;
