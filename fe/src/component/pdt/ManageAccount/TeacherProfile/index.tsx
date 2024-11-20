@@ -1,11 +1,32 @@
 import { BookOutlined, TeamOutlined, UsergroupAddOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Card, Typography, Space, Divider, Button } from "antd";
 import { useNavigate } from "react-router-dom";
+import { Admin } from "../../../../api/manageAccoount";
+import { QUERY_KEY } from "../../../../utils/const";
 
 const { Title, Text } = Typography;
-
+// interface ClassDetails {
+//     classCode: string;
+//     backgroundImage: string;
+//     studentCount: number;
+//     groupCount: number;
+//   }
+  
+//   interface TeacherInfo {
+//     teacherId:tr
+//     salutation: string;
+//     name: string;
+//     phoneNumber: string;
+//     email: string;
+//     classes: ClassDetails[];
+//   }
 const TeacherProfileWrapper = () => {
     const navigate = useNavigate();
+    // const { data: teacherData, } = useQuery<TeacherInfo>({
+    //     queryKey: [QUERY_KEY.TEACHERINFO, teacherId],
+    //     queryFn: () => Admin.getTeacherInfo(teacherId),
+    //   });
 
     const teacher = {
         salutation: "Mr.",

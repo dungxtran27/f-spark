@@ -36,6 +36,8 @@ const Group = () => {
   const [tagFilter, setTagFilter] = useState<string[] | null>([]); // Initialize tagFilter as an empty array
   const [semester, setSemester] = useState("SU-24");
   const [search, setSearch] = useState<string>("");
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -81,6 +83,7 @@ const Group = () => {
       tagId: group.tag.map((t: Tag) => t._id),
     })) || [];
 
+  console.log("Group API Response:", groupData);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
@@ -93,7 +96,45 @@ const Group = () => {
   const handleTagChange = (value: string[] | null) => {
     setTagFilter(value);
   };
+  const handleCheckboxChange = (groupId: string) => {
+    setSelectedGroupIds((prev) =>
+      prev.includes(groupId)
+        ? prev.filter((id) => id !== groupId)
+        : [...prev, groupId]
+    );
+  }
+  const isChecked = (groupId: string) => selectedGroupIds.includes(groupId);
+  const handleClassSelect = (classId: string) => {
+    setSelectedClassId(classId);
+  };
+  const handleSave = async () => {
+    if (!selectedClassId || selectedGroupIds.length === 0) {
+      console.warn("Please select a class and at least one student.");
+      return;
+    }
+    try {
+      const response = await groupApi.addGroupToClass({
+        classId: selectedClassId,
+        groupIds: selectedGroupIds,
+      });
 
+      if (response.data.success) {
+        console.log("Success:", response.data.message || "Groups added successfully.");
+        setSelectedGroupIds([]);
+        setSelectedClassId(null);
+        setIsModalVisible(false);
+      } else {
+        console.error("Error:", response.data.message || "Failed to add Groups to the class.");
+      }
+    } catch (error: any) {
+      console.error(
+        "Error:",
+        error.response?.data?.message ||
+        error.message ||
+        "An unexpected error occurred."
+      );
+    }
+  };
   return (
     <div className="bg-white shadow-md rounded-md p-4">
       {/* Search and Filter Section */}
@@ -150,7 +191,20 @@ const Group = () => {
         <thead>
           <tr className="bg-gray-200 text-left">
             <th className="p-2">
-              <Checkbox />
+              <Checkbox
+                indeterminate={
+                  selectedGroupIds.length > 0 &&
+                  selectedGroupIds.length < filteredData.length
+                }
+                checked={selectedGroupIds.length === filteredData.length}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedGroupIds(filteredData.map((s) => s._id));
+                  } else {
+                    setSelectedGroupIds([]);
+                  }
+                }}
+              />
             </th>
             <th className="p-2">Group</th>
             <th className="p-2">TagMajor</th>
@@ -162,7 +216,10 @@ const Group = () => {
           {filteredData.map((group: Group, index: Key) => (
             <tr className="border-b" key={index}>
               <td className="p-2">
-                <Checkbox />
+                <Checkbox
+                  checked={isChecked(group._id)}
+                  onChange={() => handleCheckboxChange(group._id)}
+                />
               </td>
               <td className="p-2">{group.GroupName}</td>
               <td className="p-2">
@@ -246,7 +303,7 @@ const Group = () => {
           <Button key="cancel" onClick={handleCancel}>
             Cancel
           </Button>,
-          <Button key="save" type="primary" onClick={handleCancel}>
+          <Button key="save" type="primary" onClick={handleSave}>
             Save
           </Button>,
         ]}
@@ -269,6 +326,8 @@ const Group = () => {
                 groups={classItem.totalGroups}
                 isSponsorship={sponsorshipCount}
                 totalMembers={classItem.totalStudents}
+                onClick={() => handleClassSelect(classItem._id)}
+
               />
             );
           })}

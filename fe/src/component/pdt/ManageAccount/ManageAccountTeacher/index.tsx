@@ -45,30 +45,15 @@ const Teacher: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const isEmail = (input: string) => {
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(input);
-  };
-
   const [page, setCurrentPage] = useState(1);
   const { data: teachertData } = useQuery({
     queryKey: [QUERY_KEY.TEACHER_OUTCOMES_LIST, page, searchText],
     queryFn: async () => {
-      if (isEmail(searchText)) {
-        return Admin.getTeacher({
-          limit: 10,
-          page: page || 1,
-          teacherName: null,
-          email: searchText || null,
-        });
-      } else {
-        return Admin.getTeacher({
-          limit: 10,
-          page: page || 1,
-          teacherName: searchText || null,
-          email: null,
-        });
-      }
+      return Admin.getTeacher({
+        limit: 10,
+        page: page || 1,
+        searchText: searchText || null,
+      });
     },
   });
 
