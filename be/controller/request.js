@@ -27,6 +27,12 @@ const createRequest = async (req, res) => {
       "leave"
     );
 
+    if (!actionType) {
+      return res.status(400).json({
+        error: "Invalid action type.",
+      });
+    }
+
     if (existingRequest) {
       return res.status(400).json({
         error: "Request already exists for this student and group.",
@@ -60,9 +66,6 @@ const createRequest = async (req, res) => {
       });
     }
 
-    return res.status(400).json({
-      error: "Invalid action type.",
-    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
