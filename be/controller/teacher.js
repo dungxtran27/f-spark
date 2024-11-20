@@ -31,6 +31,7 @@ const getTeacherInfo = async (req, res) => {
         name: teacher.name,
         phoneNumber: teacher.phoneNumber,
         email: teacher.email,
+        profilePicture: teacher.profilePicture,
         classes: Array.isArray(teacher.assignedClasses) && teacher.assignedClasses.length > 0
           ? teacher.assignedClasses.map((assignedClass) => ({
               classCode: assignedClass.classCode,

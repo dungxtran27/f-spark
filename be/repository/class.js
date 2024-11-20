@@ -3,7 +3,7 @@ import Class from "../model/Class.js";
 import teacher from "./teacher.js";
 const getClassesOfTeacher = async (teacherId) => {
   try {
-    
+
     const classes = await Class.aggregate([
       {
         $match: {
@@ -276,6 +276,19 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
         },
       },
       {
+        $lookup: {
+          from: "Students",
+          localField: "_id",
+          foreignField: "classId",
+          as: "students"
+        }
+      },
+      {
+        $addFields: {
+          totalStudents: { $size: "$students" }
+        }
+      },
+      {
         $group: {
           _id: "$_id",
           classCode: { $first: "$classCode" },
@@ -283,8 +296,11 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
           teacherDetails: { $first: "$teacherDetails" },
           pinDetails: { $first: "$pinDetails" },
           groups: { $push: "$groups" },
+          students: { $push: "$students" },
+          totalStudents: { $first: "$totalStudents" }
         },
       },
+
       {
         $project: {
           classCode: 1,
@@ -292,15 +308,7 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
           teacherDetails: { name: 1, email: 1 },
           groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
           totalGroups: { $size: "$groups" },
-          totalStudents: {
-            $sum: {
-              $map: {
-                input: "$groups",
-                as: "group",
-                in: { $size: "$$group.teamMembers" }
-              }
-            }
-          }
+          totalStudents: 1,
         },
       },
       {

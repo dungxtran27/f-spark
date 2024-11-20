@@ -50,13 +50,8 @@ const Router = () => {
         <Route path="/manageClass" element={<ManageClass />} />
         <Route path="/manageRequest" element={<ManageRequest />} />
         <Route path="/manageAccount" element={<AccountManagementPage />} />
-        <Route
-          path="/manageAccount/mentor/profile/:name"
-          element={<MentorProfile />}
-        />
         <Route path="/teacherProfile/:id" element={<TeacherProfile />} />
-
-        <Route path="/mentorProfile" element={<MentorProfile />} />
+        <Route path="/mentorProfile/:id" element={<MentorProfile />} />
       </Routes>
     </BrowserRouter>
   );

@@ -210,12 +210,6 @@ const getAllAccMentor = async (page, limit, searchText, status, tag) => {
         },
       },
       {
-        $unwind: {
-          path: "$tagDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
         $project: {
           name: 1,
           email: 1,
