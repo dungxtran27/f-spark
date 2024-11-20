@@ -315,11 +315,13 @@ const Group = () => {
             const sponsorshipCount = classItem.groups.filter(
               (group: any) => group.isSponsorship === true
             ).length;
+            const isSelected = classItem._id === selectedClassId;
             return (
               <ClassCard
                 key={classItem._id}
                 classCode={classItem.classCode}
                 teacherName={classItem.teacherDetails.name}
+                isSelected={isSelected}
                 groups={classItem.totalGroups}
                 isSponsorship={sponsorshipCount}
                 totalMembers={classItem.totalStudents}
