@@ -24,7 +24,6 @@ const getAllRequest = async ({ groupId }) => {
   }
 };
 const getRequestById = async ({ requestId }) => {
-  
   try {
     const requests = await Request.findById(requestId)
       .populate({
@@ -272,10 +271,23 @@ const getProcessedLeaveClassRequest = async () => {
     throw new Error(error.message);
   }
 };
+const getLeaveClassRequestOfStudent = async ({ studentId }) => {
+  try {
+    const result = await Request.find({
+      typeRequest: "changeClass",
+      createBy: studentId,
+    })
+      .populate({ path: "fromClass", select: " classCode " })
+      .populate({ path: "toClass", select: " classCode " })
+      .populate({ path: "createBy", select: "studentId name major" });
+
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 const createLeaveClassRequest = async ({ studentId, toClass }) => {
   try {
-    console.log(studentId);
-
     const foundStudent = await Student.findById(studentId);
     const foundClass = await Class.findById(toClass);
     if (!foundClass) {
@@ -290,6 +302,9 @@ const createLeaveClassRequest = async ({ studentId, toClass }) => {
     if (!foundStudent.classId) {
       throw new Error("Student is not in any class.");
     }
+    if (foundStudent.classId == toClass) {
+      throw new Error("Student is is already in this class.");
+    }
     const pendingRequest = await Request.findOne({
       createBy: studentId,
       status: "pending",
@@ -297,7 +312,9 @@ const createLeaveClassRequest = async ({ studentId, toClass }) => {
     });
 
     if (pendingRequest) {
-      throw new Error("Your request is processing");
+      throw new Error(
+        "Your request is processing,cannot make change class request"
+      );
     }
 
     const result = await Request.create({
@@ -366,4 +383,5 @@ export default {
   getPendingLeaveClassRequest,
   getProcessedLeaveClassRequest,
   getRequestById,
+  getLeaveClassRequestOfStudent,
 };

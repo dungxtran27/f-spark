@@ -97,6 +97,8 @@ const deleteRequestJoinByStudentId = async (req, res) => {
 const createLeaveClassRequest = async (req, res) => {
   try {
     const { toClass } = req.body;
+    console.log(req.body);
+
     const studentId = req.decodedToken?.role?.id;
     const data = await RequestRepository.createLeaveClassRequest({
       studentId,
@@ -127,11 +129,11 @@ const declineLeaveClassRequest = async (req, res) => {
     if (data) {
       const notificationData = {
         sender: decodedToken?.role?.id,
-        receivers: decodedToken?.role?.id,
+        receivers: foundRequest.createBy?.account._id.toString(),
         type: "System",
         senderType: "Student",
         action: {
-          action: "Your request is declined",
+          action: "Your change class request is declined",
           target: requestId,
           actionType: "LeaveClass",
           extraUrl: `#`,
@@ -173,11 +175,11 @@ const approvedLeaveClassRequest = async (req, res) => {
     if (data) {
       const notificationData = {
         sender: decodedToken?.role?.id,
-        receivers: decodedToken?.role?.id,
+        receivers: foundRequest.createBy?.account._id.toString(),
         type: "System",
         senderType: "Student",
         action: {
-          action: "Your request is approved",
+          action: "Your change class request is approved",
           target: requestId,
           actionType: "LeaveClass",
           extraUrl: `#`,
@@ -224,6 +226,22 @@ const getAllLeaveClassRequest = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getLeaveClassRequestOfStudent = async (req, res) => {
+  try {
+    const decodedToken = req.decodedToken;
+    const studentId = decodedToken?.role?.id;
+
+    const request = await RequestRepository.getLeaveClassRequestOfStudent({
+      studentId,
+    });
+
+    return res.status(200).json({
+      data: request,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getAllRequest,
   voteOutGroup,
@@ -237,4 +255,5 @@ export default {
   approvedLeaveClassRequest,
   cancelLeaveClassRequest,
   getAllLeaveClassRequest,
+  getLeaveClassRequestOfStudent,
 };

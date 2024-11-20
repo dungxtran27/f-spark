@@ -7,6 +7,9 @@ export const requestList = {
   getLeaveClassRequest: async () => {
     return await axios.get(`api/request/getAllLeaveClassRequest`);
   },
+  getLeaveClassRequestOfStudent: async () => {
+    return await axios.get(`api/request/getLeaveClassRequestOfStudent`);
+  },
 
   voteGroup: async (
     groupId: string,
@@ -62,4 +65,10 @@ export const requestList = {
     );
   },
 
+  createLeaveClassRequest: async (requestBody: any) => {
+    return await axios.post(
+      `/api/request/createLeaveClassRequest`,
+      requestBody
+    );
+  },
 };
