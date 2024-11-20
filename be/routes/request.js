@@ -64,5 +64,10 @@ requestRouter.get(
 
   RequestController.getAllLeaveClassRequest
 );
+requestRouter.get(
+  "/getLeaveClassRequestOfStudent",
+  verifyToken,
+  RequestController.getLeaveClassRequestOfStudent
+);
 
 export default requestRouter;

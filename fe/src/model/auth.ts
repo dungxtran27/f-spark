@@ -6,10 +6,11 @@ export interface UserInfo {
   major: string;
   account: Account;
   group: string;
-  role?: string
-};
+  role?: string;
+  classId: string;
+}
 export interface Account {
-    id: string,
-    email: string,
-    profilePicture: string
+  id: string;
+  email: string;
+  profilePicture: string;
 }
