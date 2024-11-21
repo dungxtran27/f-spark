@@ -82,7 +82,7 @@ const ManageClassWrapper = () => {
               toggleGroupTable={toggleGroupTable}
               toggleClass={toggleClass}
               handleClassClick={handleClassClick}
-              totalClasses={classData?.data.totalItems}
+              totalClasses={classData?.data?.totalItems}
               totalClassesMissStudents={classData?.data.classMissStudent}
               totalClassesFullStudents={classData?.data.classFullStudent}
               setCategory={setCategory}
@@ -139,18 +139,28 @@ const ManageClassWrapper = () => {
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4 mb-6">
-                {classData?.data.data.map((classItem: any) => {
-                  const sponsorshipCount = classItem.groups.filter(
-                    (group: any) => group.isSponsorship === true
-                  ).length;
+                {classData?.data?.data?.map((classItem: any) => {
+                  const sponsorshipCount = Array.isArray(classItem.groups)
+                    ? classItem.groups.filter(
+                        (group: any) => group.isSponsorship === true
+                      ).length
+                    : 0;
                   return (
                     <ClassCard
                       key={classItem._id}
                       classCode={classItem.classCode}
-                      teacherName={classItem.teacherDetails.name}
+                      teacherName={classItem?.teacherDetails?.name || "Unknown"}
                       groups={classItem.totalGroups}
                       isSponsorship={sponsorshipCount}
-                      totalMembers={classItem.totalStudents}
+                      totalMembers={
+                        Array.isArray(classData?.data?.data)
+                          ? classData.data.data.reduce(
+                              (acc: any, classItem: any) =>
+                                acc + classItem.totalStudents,
+                              0
+                            )
+                          : 0
+                      }
                     />
                   );
                 })}
