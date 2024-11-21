@@ -88,10 +88,14 @@ const getAllClasses = async (req, res) => {
 const getAllClass = async (req, res) => {
   try {
     const { page, limit, classCode, teacherName, category } = req.body;
-    const data = await ClassRepository.getAllClass(
-      parseInt(page),
-      parseInt(limit), classCode, teacherName, category
-    );
+    const [data, dataMissStudent, dataFullStudent] = await Promise.all([
+      ClassRepository.getAllClass(
+        parseInt(page),
+        parseInt(limit), classCode, teacherName, category
+      ),
+      ClassRepository.getAllClassMissStudent(),
+      ClassRepository.getAllClassFullStudent()
+    ]);
     return res.status(200).json({
       data: data.classes,
       totalItems: data.totalItems,
@@ -99,6 +103,8 @@ const getAllClass = async (req, res) => {
       isLastPage: data.isLastPage,
       pageSize: data.pageSize,
       pageIndex: data.pageIndex,
+      classMissStudent: dataMissStudent.length,
+      classFullStudent: dataFullStudent.length,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

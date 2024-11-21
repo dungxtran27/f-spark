@@ -5,13 +5,12 @@ import StudentTable from "./studentTable";
 import { useState } from "react";
 import ClassDetail from "./classDetail";
 import GroupTable from "./groupTable";
-import RequestTable from "./requestTable";
 import { QUERY_KEY } from "../../../utils/const";
 import { useQuery } from "@tanstack/react-query";
 import { classApi } from "../../../api/Class/class";
+import { SearchOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
-const { Search } = Input;
 
 const ManageClassWrapper = () => {
   const [classCode, setClassCode] = useState("");
@@ -36,8 +35,8 @@ const ManageClassWrapper = () => {
     },
   });
 
-  const handleSearch = (value: string) => {
-    setTeacherName(value);
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTeacherName(event.target.value);
   };
 
   const handleClassChange = (value: any) => {
@@ -47,59 +46,45 @@ const ManageClassWrapper = () => {
   const [showStudentTable, setShowStudentTable] = useState(false);
   const [showGroupTable, setShowGroupTable] = useState(false);
   const [showClass, setShowClass] = useState(true);
-  const [showRequest, setShowRequest] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
 
   const toggleStudentTable = () => {
     setShowStudentTable(true);
     setShowGroupTable(false);
-    setShowRequest(false);
   };
   const toggleGroupTable = () => {
     setShowGroupTable(true);
     setShowStudentTable(false);
-    setShowRequest(false);
   };
   const toggleClass = () => {
     setShowClass(true);
     setShowGroupTable(false);
     setShowStudentTable(false);
-    setShowRequest(false);
   };
   const handleClassClick = (classId: string) => {
     setShowClass(false);
     setShowGroupTable(false);
     setShowStudentTable(false);
-    setShowRequest(false);
     setSelectedClass(classId);
   };
 
-  const toggleRequest = () => {
-    setShowRequest(true);
-    setShowClass(false);
-    setShowGroupTable(false);
-    setShowStudentTable(false);
-  };
-
   return (
-    <div className="m-5 h-screen flex flex-col">
-      <div className="flex items-center justify-between mb-4">
+    <div className="m-5 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-2">
         <div className="text-xl font-bold">Manage Class</div>
       </div>
       <div className="flex flex-grow">
         {/* Total Cards */}
         <div className="w-1/4 pr-6">
-          <button className="w-full p-2 mb-3 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black">
-            Auto create class
-          </button>
           <div className="mb-6 space-y-4">
             <TotalClassCard
               toggleStudentTable={toggleStudentTable}
               toggleGroupTable={toggleGroupTable}
               toggleClass={toggleClass}
               handleClassClick={handleClassClick}
-              toggleRequest={toggleRequest}
               totalClasses={classData?.data.totalItems}
+              totalClassesMissStudents={classData?.data.classMissStudent}
+              totalClassesFullStudents={classData?.data.classFullStudent}
               setCategory={setCategory}
               totalMembers={
                 classData?.data.data.reduce(
@@ -121,8 +106,8 @@ const ManageClassWrapper = () => {
           {/* Bấm bấm*/}
           {!showStudentTable && !showGroupTable && showClass && (
             <>
-              <div className="flex space-x-4 mb-4 justify-end">
-                <div className="flex items-center space-x-2">
+              <div className="flex mb-4 justify-start">
+                <div className="flex items-center space-x-3">
                   <span>Semester:</span>
                   <Select defaultValue="SU-24" className="w-24">
                     <Option value="SU-24">SU-24</Option>
@@ -142,12 +127,16 @@ const ManageClassWrapper = () => {
                       </Option>
                     ))}
                   </Select>
+                  <Input
+                    placeholder="Search Teacher"
+                    className="w-64"
+                    onChange={handleSearch}
+                    suffix={<SearchOutlined />}
+                  />
+                  <button className="p-1 w-36 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black">
+                    Auto create class
+                  </button>
                 </div>
-                <Search
-                  placeholder="Search Teacher"
-                  className="w-64"
-                  onSearch={handleSearch}
-                />
               </div>
               <div className="grid grid-cols-3 gap-4 mb-6">
                 {classData?.data.data.map((classItem: any) => {
@@ -182,7 +171,6 @@ const ManageClassWrapper = () => {
           {!showStudentTable &&
             !showGroupTable &&
             !showClass &&
-            !showRequest &&
             selectedClass && (
               <ClassDetail
                 classId={selectedClass}
@@ -191,10 +179,6 @@ const ManageClassWrapper = () => {
             )}
           {showStudentTable && !showGroupTable && <StudentTable />}
           {!showStudentTable && showGroupTable && <GroupTable />}
-          {!showStudentTable &&
-            !showGroupTable &&
-            !showClass &&
-            showRequest && <RequestTable />}
         </div>
       </div>
     </div>

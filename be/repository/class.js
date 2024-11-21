@@ -228,14 +228,13 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
     if (category === 'full') {
       filterCondition.$and.push(
         { totalGroups: { $gte: 5 } },
-        { totalStudents: { $gte: 10 } }
+        { totalStudents: { $gte: 30 } }
       );
     }
 
     if (category === 'miss') {
       filterCondition.$and.push(
-        { totalStudents: { $lt: 10 } },
-        { totalGroups: { $lte: 5 } }
+        { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] }
       )
     };
 
@@ -300,7 +299,6 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
           totalStudents: { $first: "$totalStudents" }
         },
       },
-
       {
         $project: {
           classCode: 1,
@@ -339,6 +337,172 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
     throw new Error(error.message);
   }
 };
+
+const getAllClassMissStudent = async () => {
+  try {
+    const filterCondition = {
+      $and: [
+        { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] }
+      ]
+    };
+    const classes = await Class.aggregate([
+      {
+        $lookup: {
+          from: "Teachers",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacherDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$teacherDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "_id",
+          foreignField: "class",
+          as: "groups",
+        },
+      },
+      {
+        $unwind: {
+          path: "$groups",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "_id",
+          foreignField: "classId",
+          as: "students"
+        }
+      },
+      {
+        $addFields: {
+          totalStudents: { $size: "$students" }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          classCode: { $first: "$classCode" },
+          isActive: { $first: "$isActive" },
+          teacherDetails: { $first: "$teacherDetails" },
+          pinDetails: { $first: "$pinDetails" },
+          groups: { $push: "$groups" },
+          students: { $push: "$students" },
+          totalStudents: { $first: "$totalStudents" }
+        },
+      },
+      {
+        $project: {
+          classCode: 1,
+          isActive: 1,
+          teacherDetails: { name: 1, email: 1 },
+          groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
+          totalGroups: { $size: "$groups" },
+          totalStudents: 1,
+        },
+      },
+      {
+        $match: filterCondition,
+      }
+    ]
+    );
+    return classes;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getAllClassFullStudent = async () => {
+  try {
+    const filterCondition = {
+      $and: [
+        { totalGroups: { $gte: 5 } },
+        { totalStudents: { $gte: 30 } }
+      ]
+    };
+    const classes = await Class.aggregate([
+      {
+        $lookup: {
+          from: "Teachers",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacherDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$teacherDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "_id",
+          foreignField: "class",
+          as: "groups",
+        },
+      },
+      {
+        $unwind: {
+          path: "$groups",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "_id",
+          foreignField: "classId",
+          as: "students"
+        }
+      },
+      {
+        $addFields: {
+          totalStudents: { $size: "$students" }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          classCode: { $first: "$classCode" },
+          isActive: { $first: "$isActive" },
+          teacherDetails: { $first: "$teacherDetails" },
+          pinDetails: { $first: "$pinDetails" },
+          groups: { $push: "$groups" },
+          students: { $push: "$students" },
+          totalStudents: { $first: "$totalStudents" }
+        },
+      },
+      {
+        $project: {
+          classCode: 1,
+          isActive: 1,
+          teacherDetails: { name: 1, email: 1 },
+          groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
+          totalGroups: { $size: "$groups" },
+          totalStudents: 1,
+        },
+      },
+      {
+        $match: filterCondition,
+      }
+    ]
+    );
+    return classes;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   pinClasswork,
   getClassesOfTeacher,
@@ -346,4 +510,6 @@ export default {
   getAllClasses,
   getAllClass,
   getClassNumberOfTeacher,
+  getAllClassMissStudent,
+  getAllClassFullStudent
 };
