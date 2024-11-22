@@ -148,7 +148,7 @@ const ManageClassWrapper = () => {
                   />
                   <button
                     onClick={showModal}
-                    className="w-full p-2 mb-3 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black"
+                    className=" p-1 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black"
                   >
                     Auto create class
                   </button>
@@ -215,7 +215,7 @@ const ManageClassWrapper = () => {
         footer={null}
         width={1000}
       >
-       <AutoCreateClass handleCancel={handleCancel} />
+        <AutoCreateClass handleCancel={handleCancel} />
       </Modal>
     </div>
   );

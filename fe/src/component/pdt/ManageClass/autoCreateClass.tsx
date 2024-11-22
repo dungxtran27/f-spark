@@ -93,10 +93,7 @@ const AutoCreateClass: React.FC<{ handleCancel: () => void }> = ({ handleCancel 
         setPreviewClasses(classes);
         setIsPreviewVisible(true);
     };
-    const handleCancelInside = () => {
-        setIsPreviewVisible(false);
-        handleCancel();
-    };
+
 
     const { mutateAsync: createClass } = useMutation({
         mutationFn: classApi.createClass,
@@ -104,7 +101,7 @@ const AutoCreateClass: React.FC<{ handleCancel: () => void }> = ({ handleCancel 
 
     const handleSave = async () => {
         try {
-            if (previewClasses.some(cls => cls.groups.length < 3 || cls.students.length < 10)) {
+            if (previewClasses.some(cls => cls.groups.length < 1 || cls.students.length < 2)) {
                 message.error("You must have at least 3 groups (with at least 6 students per group) and at least 10 students in total to create a class.");
                 return;
             }
@@ -214,7 +211,6 @@ const AutoCreateClass: React.FC<{ handleCancel: () => void }> = ({ handleCancel 
                         rowKey={(record) => record.name}
                     />
                     <div className="flex justify-end gap-2 mt-4">
-                        <Button onClick={handleCancelInside}>Cancel</Button>
                         <Button type="primary" onClick={handleSave}>
                             Save
                         </Button>
