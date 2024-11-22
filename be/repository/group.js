@@ -22,7 +22,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -46,7 +46,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -705,33 +705,92 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
     throw new Error(error.message);
   }
 };
-const findAllGroups = async () => {
+
+const findAllGroups = async (page, limit, searchText) => {
   try {
-    // const groups = await Group.find().select("GroupName leader tag teamMembers isSponsorship").populate({
-    //   path: 'teamMembers',
-    //   select: 'major',
-    // }).populate({
-    //   path: 'leader',
-    //   select: 'name',
-    // }).populate({
-    //   path: 'tag',
-    //   select: 'name',
-    // });
-    const groups = await Group.find()
-      .select("GroupName leader tag teamMembers isSponsorship")
-      .populate({
-        path: "teamMembers",
-        select: "major",
-      })
-      .populate({
-        path: "leader",
-        select: "name",
-      })
-      .populate({
-        path: "tag",
-        select: "name",
+    let filterCondition = { $and: [] };
+    if (searchText) {
+      filterCondition.$and.push({
+        $or: [
+          { GroupName: { $regex: searchText, $options: "i" } },
+          { leader: { $regex: searchText, $options: "i" } },
+        ],
       });
-    return groups;
+    }
+
+    if (filterCondition.$and.length === 0) {
+      filterCondition = {};
+    }
+
+    const groups = await Group.aggregate([
+      {
+        $lookup: {
+          from: "Students",
+          localField: "teamMembers",
+          foreignField: "_id",
+          as: "teamMembers",
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "leader",
+          foreignField: "_id",
+          as: "leader",
+        },
+      },
+      {
+        $lookup: {
+          from: "TagMajors",
+          localField: "tag",
+          foreignField: "_id",
+          as: "tag",
+        },
+      },
+      {
+        $unwind: {
+          path: "$leader",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          GroupName: 1,
+          leader: "$leader.name",
+          tag: "$tag.name",
+          teamMembers: "$teamMembers.major",
+          isSponsorship: 1
+        }
+      },
+      {
+        $match: filterCondition
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $sort: {
+          GroupName: 1,
+        },
+      },
+
+    ]);
+
+    const totalItems = searchText ? groups.length : await Group.countDocuments();
+    const maxPages = Math.ceil(totalItems / limit);
+    const isLastPage = page >= maxPages;
+
+    return {
+      groups,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
+    };
   } catch (error) {
     throw new Error(error.message);
   }

@@ -33,8 +33,8 @@ export const requestList = {
     });
   },
 
-  getGroup: async () => {
-    return await axios.get("api/request/findAllGroup");
+  getGroup: async (requestBody: any) => {
+    return await axios.post(`api/request/findAllGroup`, requestBody);
   },
 
   joinGroup: async (groupId: string) => {

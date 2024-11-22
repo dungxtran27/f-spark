@@ -11,6 +11,7 @@ interface ProjectCardProps {
   tags: string[];
   members: number;
   majors: string[];
+  isSponsorship: boolean;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -22,6 +23,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   majors,
 }) => {
   const queryClient = useQueryClient();
+
+  const majorCounts = majors.reduce((acc: Record<string, number>, major) => {
+    acc[major] = (acc[major] || 0) + 1;
+    return acc;
+  }, {});
 
   const [modalStates, setModalStates] = useState<{
     [key: string]: { visible: boolean; type: "accept" | "reject" | null };
@@ -100,7 +106,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <span className="mr-1">Leader:</span>
         <span className="text-md">{leader}</span>
       </div>
-      <div className="mb-2">
+      <div>
+        <span className="mr-1">Major:</span>
+        {Object.entries(majorCounts).map(([major, count]) => (
+          <Tag
+            key={major}
+            color={colorMap[major]}
+            className="mr-2 px-2 py-1 rounded text-sm"
+          >
+            <span className="mr-1 font-semibold">{count}</span>
+            {major}
+          </Tag>
+        ))}
+      </div>
+      <div className="h-20 space-y-2">
         <span className="mr-1">Tags:</span>
         {tags.map((tag) => (
           <Tag
@@ -112,18 +131,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </Tag>
         ))}
       </div>
-      <div className="mb-2">
-        <span className="mr-1">Major:</span>
-        {majors.map((major) => (
-          <Tag
-            key={major}
-            color={colorMap[major]}
-            className="mr-2 px-2 py-1 rounded text-sm"
-          >
-            {major}
-          </Tag>
-        ))}
-      </div>
       <div className="flex justify-end">
         {isPending ? (
           <div className="">
@@ -132,7 +139,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             </Button>
           </div>
         ) : (
-          <Button type="primary" onClick={handleJoinClick}>
+          <Button type="default" onClick={handleJoinClick}>
             Join
           </Button>
         )}
