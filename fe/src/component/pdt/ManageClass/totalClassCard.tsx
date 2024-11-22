@@ -99,8 +99,8 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                     }}
                   >
                     <span className="flex items-center text-red-500">
-                      SE1705 - 2 <MdGroups3 className="ml-1 text-2xl mr-2" /> 4{" "}
-                      <BsPersonXFill className="ml-1 text-xl" />
+                      SE1705 - 12 <MdGroups3 className="ml-2 text-2xl mr-2" /> 4{" "}
+                      <BsPersonXFill className="ml-2 text-xl" />
                     </span>
                   </div>
                   <div
@@ -111,8 +111,8 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                     }}
                   >
                     <span className="flex items-center text-red-500">
-                      SE1706 - 2 <MdGroups3 className="ml-1 text-2xl mr-2" /> 4{" "}
-                      <BsPersonXFill className="ml-1 text-xl" />
+                      SE1706 - 12 <MdGroups3 className="ml-2 text-2xl mr-2" /> 4{" "}
+                      <BsPersonXFill className="ml-2 text-xl" />
                     </span>
                   </div>
                 </div>
