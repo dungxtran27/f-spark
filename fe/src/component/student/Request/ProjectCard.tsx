@@ -4,6 +4,7 @@ import { FaUserGroup } from "react-icons/fa6";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { colorMajorGroup, colorMap, QUERY_KEY } from "../../../utils/const";
 import { requestList } from "../../../api/request/request";
+import { RiMoneyDollarCircleLine } from "react-icons/ri";
 interface ProjectCardProps {
   groupId: string;
   groupName: string;
@@ -21,6 +22,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   tags,
   members,
   majors,
+  isSponsorship
 }) => {
   const queryClient = useQueryClient();
 
@@ -100,6 +102,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <FaUserGroup className="text-xl text-gray-500" />
           </Tooltip>
           <span className="text-gray-600">{members}</span>
+          {isSponsorship ? (
+            <RiMoneyDollarCircleLine className="text-yellow-500 text-xl" />
+          ) : (
+            <div className="p-3"></div>
+          )}
         </div>
       </div>
       <div className="flex items-center space-x-2 mb-2">
