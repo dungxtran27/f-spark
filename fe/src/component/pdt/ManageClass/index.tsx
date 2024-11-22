@@ -106,7 +106,7 @@ const ManageClassWrapper = () => {
           {/* Bấm bấm*/}
           {!showStudentTable && !showGroupTable && showClass && (
             <>
-              <div className="flex mb-4 justify-start">
+              <div className="flex mb-4 justify-between">
                 <div className="flex items-center space-x-3">
                   <span>Semester:</span>
                   <Select defaultValue="SU-24" className="w-24">
@@ -133,10 +133,10 @@ const ManageClassWrapper = () => {
                     onChange={handleSearch}
                     suffix={<SearchOutlined />}
                   />
-                  <button className="p-1 w-36 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black">
-                    Auto create class
-                  </button>
                 </div>
+                <button className="p-1 w-36 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black">
+                  Auto create class
+                </button>
               </div>
               <div className="grid grid-cols-3 gap-4 mb-6">
                 {classData?.data?.data?.map((classItem: any) => {
@@ -152,15 +152,7 @@ const ManageClassWrapper = () => {
                       teacherName={classItem?.teacherDetails?.name || "Unknown"}
                       groups={classItem.totalGroups}
                       isSponsorship={sponsorshipCount}
-                      totalMembers={
-                        Array.isArray(classData?.data?.data)
-                          ? classData.data.data.reduce(
-                              (acc: any, classItem: any) =>
-                                acc + classItem.totalStudents,
-                              0
-                            )
-                          : 0
-                      }
+                      totalMembers={classItem?.totalStudents}
                     />
                   );
                 })}

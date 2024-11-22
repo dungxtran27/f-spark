@@ -5,7 +5,6 @@ import {
   MdExpandMore,
   MdExpandLess,
 } from "react-icons/md";
-import { FaUser } from "react-icons/fa6";
 import { ImNotification } from "react-icons/im";
 import { BsPersonXFill } from "react-icons/bs";
 import { useState } from "react";
@@ -34,14 +33,11 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
   totalClasses,
   totalClassesMissStudents,
   totalClassesFullStudents,
-  totalMembers,
   setCategory,
 }) => {
   const [isClassOpen, setIsClassOpen] = useState(true);
-  const [category, setCategoryState] = useState<string>("");
 
   const handleSetCategory = (newCategory: string) => {
-    setCategoryState(newCategory);
     setCategory(newCategory);
   };
 
@@ -88,17 +84,9 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                 <span className="text-red-500 font-bold text-2xl">
                   {totalClassesMissStudents}
                 </span>
-                <span className="text-sm font-semibold ml-2">
+                <span className="text-md font-semibold ml-2">
                   Class miss student
                 </span>
-                {category === "miss" && (
-                  <div className="flex">
-                    <span className="flex text-red-500 items-center ml-2">
-                      ({totalMembers}/{totalClassesMissStudents * 30}){" "}
-                      <FaUser className="ml-1 text-xl" />
-                    </span>
-                  </div>
-                )}
               </div>
 
               <div className="ml-4">
@@ -140,17 +128,9 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                 <span className="text-green-500 font-bold text-2xl">
                   {totalClassesFullStudents}
                 </span>
-                <span className="text-sm font-semibold ml-2">
+                <span className="text-md font-semibold ml-2">
                   Class full student
                 </span>
-                {category == "full" && (
-                  <div className="flex">
-                    <span className="flex text-green-500 items-center ml-2">
-                      ({totalMembers}/{totalClassesFullStudents * 30}){" "}
-                      <FaUser className="ml-1 text-xl" />
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </>
