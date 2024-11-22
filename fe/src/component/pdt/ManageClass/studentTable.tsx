@@ -5,6 +5,7 @@ import {
   Pagination,
   Select,
   Input,
+  message,
 } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import {
@@ -79,30 +80,31 @@ const StudentTable = () => {
       ...student,
       color: colorMap[student.major] || "gray",
     })) || [];
-    
+
   const handleCheckboxChange = (studentId: string) => {
     setSelectedStudentIds((prev) =>
       prev.includes(studentId)
-        ? prev.filter((id) => id !== studentId) 
-        : [...prev, studentId] 
+        ? prev.filter((id) => id !== studentId)
+        : [...prev, studentId]
     );
   }
-  const isChecked = (studentId: string) => selectedStudentIds.includes(studentId); 
+  const isChecked = (studentId: string) => selectedStudentIds.includes(studentId);
 
   const handleClassSelect = (classId: string) => {
     setSelectedClassId(classId);
   };
   const handleSave = async () => {
     if (!selectedClassId || selectedStudentIds.length === 0) {
-      console.warn("Please select a class and at least one student.");
+      message.error("Please select at least one student.");
       return;
     }
+
     try {
       const response = await student.addManyStudentNoClassToClass({
         classId: selectedClassId,
         studentIds: selectedStudentIds,
       });
-  
+
       if (response.data.success) {
         console.log("Success:", response.data.message || "Students added successfully.");
         // Reset state
@@ -116,12 +118,13 @@ const StudentTable = () => {
       console.error(
         "Error:",
         error.response?.data?.message ||
-          error.message ||
-          "An unexpected error occurred."
+        error.message ||
+        "An unexpected error occurred."
       );
     }
   };
-  
+
+
   return (
     <div className="bg-white shadow-md rounded-md p-4">
       {/* Search and Filter Section */}
@@ -206,7 +209,7 @@ const StudentTable = () => {
             <tr className="border-b" key={index}>
               <td className="p-2">
                 <Checkbox
-                  checked={isChecked(student._id)} 
+                  checked={isChecked(student._id)}
                   onChange={() => handleCheckboxChange(student._id)}
                 />
               </td>
@@ -267,7 +270,7 @@ const StudentTable = () => {
               <ClassCard
                 key={classItem._id}
                 classCode={classItem.classCode}
-                teacherName={classItem.teacherDetails.name}
+                teacherName={classItem?.teacherDetails?.name || "Unknown"}
                 isSelected={isSelected}
                 groups={classItem.totalGroups}
                 isSponsorship={sponsorshipCount}

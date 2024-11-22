@@ -22,7 +22,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -46,7 +46,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -778,6 +778,14 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         },
       },
       {
+        $lookup: {
+          from: "Students",
+          localField: "teamMembers",
+          foreignField: "_id",
+          as: "teamMembers",
+        },
+      },
+      {
         $group: {
           _id: "$_id",
           GroupName: { $first: "$GroupName" },
@@ -793,7 +801,11 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
           "tag.name": 1,
           "tag._id": 1,
           isSponsorship: 1,
-          teamMembers: 1,
+          teamMembers: {
+            _id: 1,
+            name: 1,
+            studentId: 1
+          },
         },
       },
       {

@@ -18,7 +18,7 @@ const ClassSchema = new Schema(
     teacher: {
       type: Schema.Types.ObjectId,
       ref: "Teacher",
-      required: true,
+      required: false,
     },
     backgroundImage: {
       type: String,

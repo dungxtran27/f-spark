@@ -1,4 +1,4 @@
-import { Select, Input, Pagination } from "antd";
+import { Select, Input, Pagination, Modal } from "antd";
 import ClassCard from "./classCard";
 import TotalClassCard from "./totalClassCard";
 import StudentTable from "./studentTable";
@@ -9,6 +9,7 @@ import { QUERY_KEY } from "../../../utils/const";
 import { useQuery } from "@tanstack/react-query";
 import { classApi } from "../../../api/Class/class";
 import { SearchOutlined } from "@ant-design/icons";
+import AutoCreateClass from "./autoCreateClass";
 
 const { Option } = Select;
 
@@ -47,6 +48,18 @@ const ManageClassWrapper = () => {
   const [showGroupTable, setShowGroupTable] = useState(false);
   const [showClass, setShowClass] = useState(true);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   const toggleStudentTable = () => {
     setShowStudentTable(true);
@@ -133,7 +146,10 @@ const ManageClassWrapper = () => {
                     onChange={handleSearch}
                     suffix={<SearchOutlined />}
                   />
-                  <button className="p-1 w-36 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black">
+                  <button
+                    onClick={showModal}
+                    className="w-full p-2 mb-3 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black"
+                  >
                     Auto create class
                   </button>
                 </div>
@@ -142,8 +158,8 @@ const ManageClassWrapper = () => {
                 {classData?.data?.data?.map((classItem: any) => {
                   const sponsorshipCount = Array.isArray(classItem.groups)
                     ? classItem.groups.filter(
-                        (group: any) => group.isSponsorship === true
-                      ).length
+                      (group: any) => group.isSponsorship === true
+                    ).length
                     : 0;
                   return (
                     <ClassCard
@@ -155,10 +171,10 @@ const ManageClassWrapper = () => {
                       totalMembers={
                         Array.isArray(classData?.data?.data)
                           ? classData.data.data.reduce(
-                              (acc: any, classItem: any) =>
-                                acc + classItem.totalStudents,
-                              0
-                            )
+                            (acc: any, classItem: any) =>
+                              acc + classItem.totalStudents,
+                            0
+                          )
                           : 0
                       }
                     />
@@ -191,6 +207,16 @@ const ManageClassWrapper = () => {
           {!showStudentTable && showGroupTable && <GroupTable />}
         </div>
       </div>
+      <Modal
+        title="Preview New Class"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={null}
+        width={1000}
+      >
+       <AutoCreateClass handleCancel={handleCancel} />
+      </Modal>
     </div>
   );
 };

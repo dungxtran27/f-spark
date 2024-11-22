@@ -11,5 +11,5 @@ classRouter.get(
   verifyToken,
   ClassController.getTeacherDashboardInfo
 );
-
+classRouter.post("/create", ClassController.createClass);
 export default classRouter;

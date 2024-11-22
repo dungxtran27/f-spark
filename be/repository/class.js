@@ -502,6 +502,26 @@ const getAllClassFullStudent = async () => {
     throw new Error(error.message);
   }
 };
+const createClass = async ({
+  classCode,
+  teacher = null,
+  backgroundImage = "https://blogs.windows.com/wp-content/uploads/prod/sites/2/2021/10/Windows-11-Bloom-Screensaver-Dark-scaled.jpg", // Default background image
+  classInfo = null,
+  isActive = true,
+}) => {
+  try {
+    const result = await Class.create({
+      classCode,
+      teacher,
+      backgroundImage,
+      classInfo,
+      isActive,
+    });
+    return result._doc;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 export default {
   pinClasswork,
@@ -511,5 +531,6 @@ export default {
   getAllClass,
   getClassNumberOfTeacher,
   getAllClassMissStudent,
-  getAllClassFullStudent
+  getAllClassFullStudent,
+  createClass
 };
