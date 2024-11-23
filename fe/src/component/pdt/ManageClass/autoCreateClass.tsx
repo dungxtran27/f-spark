@@ -11,12 +11,17 @@ interface Group {
     _id: string;
     GroupName: string;
     teamMembers: Student[];
+    isSponsorship?: number;
+}
+interface AutoCreateClassProps {
+    onSave: () => void;
 }
 
 interface Class {
     name: string;
     groups: Group[];
     students: Student[];
+
 }
 
 interface Student {
@@ -26,7 +31,7 @@ interface Student {
     color: string;
 }
 
-const AutoCreateClass: React.FC = () => {
+const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
     const [previewClasses, setPreviewClasses] = useState<Class[]>([]);
     const [isPreviewVisible, setIsPreviewVisible] = useState(false);
     const [editingClassCode, setEditingClassCode] = useState<string | null>(null);
@@ -72,7 +77,7 @@ const AutoCreateClass: React.FC = () => {
             const remainingStudents =
                 studentQueue.length + groupQueue.reduce((sum, group) => sum + group.teamMembers.length, 0);
             //neu con duoi 15 hoc sinh chua xep lop thi k tao nua, de add tay
-            if (remainingStudents < 15) {
+            if (remainingStudents < 5) {
                 break;
             }
             const newClass: Class = {
@@ -109,11 +114,12 @@ const AutoCreateClass: React.FC = () => {
 
     const handleSave = async () => {
         try {
+            // Validate classes before proceeding
             if (previewClasses.some(cls => cls.groups.length < 1 || cls.students.length < 2)) {
                 message.error("You must have at least 3 groups (with at least 6 students per group) and at least 10 students in total to create a class.");
                 return;
             }
-            for (const previewClass of previewClasses) {
+            const classPromises = previewClasses.map((previewClass) => {
                 const requestBody = {
                     classCode: previewClass.name,
                     teacher: null,
@@ -123,12 +129,14 @@ const AutoCreateClass: React.FC = () => {
                     classInfo: null,
                     isActive: true,
                 };
-                await createClass(requestBody);
-            }
+                return createClass(requestBody);
+            });
+            await Promise.all(classPromises);
             setIsPreviewVisible(false);
+            onSave();
         } catch (error) {
             console.error("Error creating classes:", error);
-            message.error("Failed to create classes.");
+            message.error("Failed to create some classes.");
         }
     };
 
@@ -138,6 +146,10 @@ const AutoCreateClass: React.FC = () => {
     };
 
     const handleSaveClassCode = () => {
+        if (!newClassCode || newClassCode.length !== 6) {
+            message.error("Class code must be 6 characters!");
+            return;
+        }
         setPreviewClasses((prevClasses) =>
             prevClasses.map((classes) =>
                 classes.name === editingClassCode ? { ...classes, name: newClassCode } : classes
@@ -147,6 +159,7 @@ const AutoCreateClass: React.FC = () => {
         setNewClassCode("");
         message.success("Class code updated successfully!");
     };
+
 
     const sortedClasses = [...previewClasses].sort((a, b) => {
         const isAEnough = a.groups.length >= 2 && a.students.length >= 14;
@@ -173,8 +186,8 @@ const AutoCreateClass: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
                 <div className="flex gap-4">
                     <Tag color="green">Classes Enough Student: {totalEnoughClasses}</Tag>
-                    <Tag color="yellow">Classes Not Enough Student: {totalNotEnoughClasses}</Tag>
-                    <Tag color="red">Remaining: {remainingGroups} Groups, {remainingStudents} Students</Tag>
+                    <Tag color="red">Classes Not Enough Student: {totalNotEnoughClasses}</Tag>
+                    <Tag color="yellow">Remaining: {remainingGroups} Groups, {remainingStudents} Students no class yet </Tag>
                 </div>
             </div>
             {isPreviewVisible && (
@@ -185,13 +198,12 @@ const AutoCreateClass: React.FC = () => {
                                 classCode={cls.name}
                                 groups={cls.groups.length}
                                 teacherName={undefined}
-                                isSponsorship={undefined}
+                                isSponsorship={cls.groups[0]?.isSponsorship || 0}
                                 totalMembers={cls.students.length} icon={undefined} role={""}
                                 isEditing={true}
                                 onEditClick={() => handleEditClassCode(cls.name)}
                             />
                         </div>
-
                     ))}
                 </div>
             )}
@@ -214,5 +226,4 @@ const AutoCreateClass: React.FC = () => {
         </div>
     );
 };
-
 export default AutoCreateClass;

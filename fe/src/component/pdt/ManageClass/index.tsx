@@ -215,7 +215,7 @@ const ManageClassWrapper = () => {
         footer={null}
         width={1000}
       >
-        <AutoCreateClass/>
+        <AutoCreateClass onSave={() => setIsModalOpen(false)} />
       </Modal>
     </div>
   );

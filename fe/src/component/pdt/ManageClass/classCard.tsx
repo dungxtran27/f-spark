@@ -99,7 +99,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
           </div>
           <div className="flex items-center justify-end">
             <span className="text-sm font-medium text-gray-600">
-              {isSponsorship ?? '0'} Sponsorship
+              {isSponsorship} Sponsorship
             </span>
             <RiMoneyDollarCircleLine className="text-yellow-500 text-xl ml-2" />
           </div>
