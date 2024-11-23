@@ -14,7 +14,7 @@ requestRouter.patch(
   "/voteGroup",
   verifyToken,
   authorization.checkGroupAccess,
-  RequestController.voteOutGroup
+  RequestController.voteGroup
 );
 requestRouter.post(
   "/createRequest",
@@ -63,6 +63,11 @@ requestRouter.get(
   authorization.checkRole("ADMIN"),
 
   RequestController.getAllLeaveClassRequest
+);
+requestRouter.get(
+  "/getLeaveClassRequestOfStudent",
+  verifyToken,
+  RequestController.getLeaveClassRequestOfStudent
 );
 
 export default requestRouter;

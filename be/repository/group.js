@@ -353,8 +353,6 @@ const addStundentInGroup = async (groupId, studentId) => {
       _id: groupId,
       // teamMembers: studentId,
     });
-    console.log(group);
-
     const student = await Student.findById(studentId);
     if (!student) {
       throw new Error("Student not found");

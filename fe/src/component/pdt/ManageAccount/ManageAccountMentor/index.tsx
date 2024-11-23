@@ -32,6 +32,7 @@ interface Tag {
   name: string;
 }
 interface Mentor {
+  _id: any;
   id: number;
   name: string;
   email: string;
@@ -111,9 +112,9 @@ const Mentor: React.FC = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text: string) => (
+      render: (text: string, record) => (
         <Link
-          to={`/manageAccount/mentor/profile/${text}`}
+          to={`/mentorProfile/${record._id}`}
           style={{ fontWeight: "bold" }}
         >
           {text}

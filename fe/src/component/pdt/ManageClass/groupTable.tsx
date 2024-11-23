@@ -82,9 +82,6 @@ const Group = () => {
       tagNames: group.tag.map((t: Tag) => t.name),
       tagId: group.tag.map((t: Tag) => t._id),
     })) || [];
-
-  console.log("Group API Response:", groupData);
-
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
   };
@@ -314,11 +311,13 @@ const Group = () => {
             const sponsorshipCount = classItem.groups.filter(
               (group: any) => group.isSponsorship === true
             ).length;
+            const isSelected = classItem._id === selectedClassId;
             return (
               <ClassCard
                 key={classItem._id}
                 classCode={classItem.classCode}
                 teacherName={classItem.teacherDetails.name}
+                isSelected={isSelected}
                 groups={classItem.totalGroups}
                 isSponsorship={sponsorshipCount}
                 totalMembers={classItem.totalStudents}

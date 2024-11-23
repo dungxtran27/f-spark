@@ -21,33 +21,96 @@ const createRequest = async (req, res) => {
     const { actionType } = req.body;
     const studentId = req.decodedToken?.role?.id;
     const groupId = req.groupId.toString();
-    const data = await RequestRepository.createRequest({
-      groupId,
+    const existingRequest = await RequestRepository.findExistingRequest(
       studentId,
-      actionType,
-    });
-    return res.status(200).json({ data: data });
+      groupId,
+      "leave"
+    );
+
+    if (!actionType) {
+      return res.status(400).json({
+        error: "Invalid action type.",
+      });
+    }
+
+    if (existingRequest) {
+      return res.status(400).json({
+        error: "Request already exists for this student and group.",
+      });
+    }
+
+    if (actionType === "leave") {
+      const group = await RequestRepository.findGroupForLeaveRequest(
+        groupId,
+        studentId
+      );
+
+      if (!group) {
+        return res.status(400).json({
+          error: "Student is not part of the specified group.",
+        });
+      }
+
+      await RequestRepository.createLeaveRequest({
+        studentId,
+        groupId,
+        teamMembersCount: group.teamMembers.length,
+      });
+
+      await RequestRepository.updateGroupMembers(groupId, studentId);
+      await RequestRepository.updateStudentGroup(studentId);
+
+      return res.status(200).json({
+        message: "Leave request approved and processed successfully.",
+        group,
+      });
+    }
+
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
 
-const voteOutGroup = async (req, res) => {
+const voteGroup = async (req, res) => {
   try {
     const { voteType, requestId } = req.body;
     const studentId = req.decodedToken?.role?.id;
     const groupId = req.groupId.toString();
-    const data = await RequestRepository.voteOutGroup({
-      requestId,
-      groupId,
-      studentId,
-      voteType,
-    });
-    return res.status(201).json({ data: data });
+
+    const request = await RequestRepository.findRequestById(requestId);
+
+    if (!request) {
+      return res.status(404).json({ error: "Request not found" });
+    }
+
+    await RequestRepository.updateVote(requestId, studentId, voteType);
+
+    const updatedRequest = await RequestRepository.findRequestById(requestId);
+
+    const totalMembers = updatedRequest.group.teamMembers.length;
+    const totalYesVotes = updatedRequest.upVoteYes.length;
+    const totalVotes = updatedRequest.upVoteYes.length + updatedRequest.upVoteNo.length;
+    if (totalVotes === totalMembers && request.actionType === "join") {
+      if (totalYesVotes === totalMembers) {
+        await RequestRepository.approveJoinRequest(
+          groupId,
+          request.createBy,
+          requestId,
+          totalMembers
+        );
+      } else {
+        await RequestRepository.declineRequest(requestId, totalMembers);
+
+      }
+    }
+    const requests = await RequestRepository.getUpdatedRequests(groupId);
+
+    return res.status(200).json({ data: requests });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
+
 
 const getAllGroup = async (req, res) => {
   try {
@@ -97,6 +160,8 @@ const deleteRequestJoinByStudentId = async (req, res) => {
 const createLeaveClassRequest = async (req, res) => {
   try {
     const { toClass } = req.body;
+    console.log(req.body);
+
     const studentId = req.decodedToken?.role?.id;
     const data = await RequestRepository.createLeaveClassRequest({
       studentId,
@@ -127,11 +192,11 @@ const declineLeaveClassRequest = async (req, res) => {
     if (data) {
       const notificationData = {
         sender: decodedToken?.role?.id,
-        receivers: decodedToken?.role?.id,
+        receivers: foundRequest.createBy?.account._id.toString(),
         type: "System",
         senderType: "Student",
         action: {
-          action: "Your request is declined",
+          action: "Your change class request is declined",
           target: requestId,
           actionType: "LeaveClass",
           extraUrl: `#`,
@@ -173,11 +238,11 @@ const approvedLeaveClassRequest = async (req, res) => {
     if (data) {
       const notificationData = {
         sender: decodedToken?.role?.id,
-        receivers: decodedToken?.role?.id,
+        receivers: foundRequest.createBy?.account._id.toString(),
         type: "System",
         senderType: "Student",
         action: {
-          action: "Your request is approved",
+          action: "Your change class request is approved",
           target: requestId,
           actionType: "LeaveClass",
           extraUrl: `#`,
@@ -204,7 +269,9 @@ const cancelLeaveClassRequest = async (req, res) => {
     const data = await RequestRepository.cancelLeaveRequest({
       requestId,
     });
-    return res.status(200).json({ data: data, message: "Success" });
+    return res
+      .status(200)
+      .json({ data: data, message: "Cancel request success" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -224,9 +291,25 @@ const getAllLeaveClassRequest = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getLeaveClassRequestOfStudent = async (req, res) => {
+  try {
+    const decodedToken = req.decodedToken;
+    const studentId = decodedToken?.role?.id;
+
+    const request = await RequestRepository.getLeaveClassRequestOfStudent({
+      studentId,
+    });
+
+    return res.status(200).json({
+      data: request,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getAllRequest,
-  voteOutGroup,
+  voteGroup,
   createRequest,
   getAllGroup,
   joinGroup,
@@ -237,4 +320,5 @@ export default {
   approvedLeaveClassRequest,
   cancelLeaveClassRequest,
   getAllLeaveClassRequest,
+  getLeaveClassRequestOfStudent,
 };
