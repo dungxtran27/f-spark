@@ -805,6 +805,9 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         $limit: limit,
       },
     ]);
+    const GroupNotHaveClass1 = await Group.find({
+      class: { $in: [null, undefined] },
+    });
     const isLastPage = page >= maxPages;
     const group = await Group.find()
       .select("GroupName leader tag teamMembers isSponsorship")
@@ -825,6 +828,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
       group,
       totalGroup,
       GroupNotHaveClass,
+      GroupNotHaveClass1,
       countGroupNotHaveClass,
       totalItems,
       maxPages,

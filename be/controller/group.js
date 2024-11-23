@@ -1,4 +1,4 @@
-import Student from "../model/Student.js";
+
 import {
   ClassRepository,
   GroupRepository,
@@ -405,6 +405,7 @@ const getAllGroupsNoClass = async (req, res) => {
       group,
       totalGroup,
       GroupNotHaveClass,
+      GroupNotHaveClass1,
       countGroupNotHaveClass,
       totalItems,
       maxPages,
@@ -414,12 +415,20 @@ const getAllGroupsNoClass = async (req, res) => {
       parseInt(page),
       parseInt(limit)
     );
+    const mappedNoClassGroups = await Promise.all(
+      GroupNotHaveClass1.map( async(g)=>{
+        const members = await StudentRepository.getStudentsByGroup(g._id);
+        const majors = [...new Set(members?.map((m) => m.major))];
+        return { ...g._doc, members, majors: majors };
+      })
+    )
     const isLastPage = pageIndex >= maxPages;
     return res.status(200).json({
       data: {
         group,
         totalGroup,
         GroupNotHaveClass,
+        mappedNoClassGroups,
         countGroupNotHaveClass,
         totalItems: totalItems,
         maxPages: maxPages,

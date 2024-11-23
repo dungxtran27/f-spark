@@ -1,48 +1,100 @@
-import { useQuery } from "@tanstack/react-query";
-import { Checkbox, Tag } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Modal, Table, Tag } from "antd";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
 import { student } from "../../../api/student/student";
+import { useState } from "react";
 
-const StudentTableNoAction = () => {
+const StudentTableNoAction = ({
+  classId,
+  isOpen,
+  setOpen,
+}: {
+  classId?: string;
+  isOpen: boolean;
+  setOpen: (value: boolean) => void;
+}) => {
+  const queryClient = useQueryClient();
+  const [selectedStudents, setSelectedStudents] = useState([]);
   const { data: studentsData } = useQuery({
-    queryKey: [QUERY_KEY.ALLSTUDENT],
+    queryKey: [QUERY_KEY.NO_CLASS_STUDENT],
     queryFn: async () => {
-      return student.getAllStudentsNoClass()
-    }
+      return student.getAllStudentsNoClass();
+    },
   });
+  const AddStudentMutation = useMutation({
+    mutationKey: [QUERY_KEY.ADD_STUDENT_TO_CLASS],
+    mutationFn: () => {
+      return student.addManyStudentNoClassToClass({
+        studentIds: selectedStudents,
+        classId: classId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.NO_CLASS_STUDENT] });
+    },
+  });
+  const columns = [
+    {
+      title: "Student Id",
+      dataIndex: "studentId",
+    },
+    {
+      title: "Major",
+      dataIndex: "major",
+      render: (text: string) => <Tag color={colorMap[text]}>{text}</Tag>,
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+    },
+  ];
+  const data = studentsData?.data?.data?.StudentNotHaveClass?.map((s: any) => {
+    return {
+      key: s?._id,
+      studentId: s?.studentId,
+      major: s?.major,
+      name: s?.name,
+      email: s?.email,
+    };
+  });
+  const rowSelection = {
+    onChange: (selectedRowKeys: any) => {
+      setSelectedStudents(selectedRowKeys);
+    },
+    getCheckboxProps: (record: any) => ({
+      name: record.name,
+    }),
+  };
   return (
-    <div className="bg-white shadow-md rounded-md p-4">
-      <table className="w-full table-auto">
-        <thead>
-          <tr className="bg-gray-200 text-left">
-            <th className="p-2">
-              <Checkbox />
-            </th>
-            <th className="p-2">Mssv</th>
-            <th className="p-2">Major</th>
-            <th className="p-2">Name</th>
-            <th className="p-2">Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          {studentsData?.data?.data?.StudentNotHaveClass?.map((student: any) => (
-            <tr key={student?._id} className="border-b">
-              <td className="p-2">
-                <Checkbox />
-              </td>
-              <td className="p-2">{student.studentId}</td>
-              <td className="p-2">
-                <Tag color={colorMap[student?.major]}>
-                  {student?.major}
-                </Tag>
-              </td>
-              <td className="p-2">{student.name}</td>
-              <td className="p-2">{student.email}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Modal
+      centered
+      title="Upgrouped Students"
+      open={isOpen}
+      destroyOnClose
+      onCancel={() => {
+        setOpen(false);
+      }}
+      width={900}
+      bodyStyle={{
+        maxHeight: 400,
+        overflowY: "auto",
+      }}
+      onOk={() => {
+        AddStudentMutation.mutate();
+      }}
+    >
+      <div className="bg-white shadow-md rounded-md ">
+        <Table
+          columns={columns}
+          dataSource={data}
+          rowSelection={{ type: "checkbox", ...rowSelection }}
+        />
+      </div>
+    </Modal>
   );
 };
 

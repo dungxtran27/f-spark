@@ -109,7 +109,6 @@ const Group = () => {
   };
   const handleSave = async () => {
     if (!selectedClassId || selectedGroupIds.length === 0) {
-      console.warn("Please select a class and at least one student.");
       return;
     }
     try {
@@ -119,12 +118,9 @@ const Group = () => {
       });
 
       if (response.data.success) {
-        console.log("Success:", response.data.message || "Groups added successfully.");
         setSelectedGroupIds([]);
         setSelectedClassId(null);
         setIsModalVisible(false);
-      } else {
-        console.error("Error:", response.data.message || "Failed to add Groups to the class.");
       }
     } catch (error: any) {
       console.error(

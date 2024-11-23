@@ -32,14 +32,6 @@ const ClassDetailPDT = ({
     setIsModal2(true);
   };
 
-  const cancelModal1 = () => {
-    setIsModal1(false);
-  };
-
-  const cancelModal2 = () => {
-    setIsModal2(false);
-  };
-
   const handleMenuClick = ({ key }: any) => {
     setDropdownVisible(false);
     if (key === "1") {
@@ -56,7 +48,7 @@ const ClassDetailPDT = ({
       <Menu.Item key="2">Add group to class</Menu.Item>
     </Menu>
   );
-  const { data: groupOfClass, loading } = useQuery({
+  const { data: groupOfClass } = useQuery({
     queryKey: [QUERY_KEY.GROUPS_OF_CLASS],
     queryFn: () => {
       return manageClass.getGroupOfClass(classId);
@@ -88,10 +80,10 @@ const ClassDetailPDT = ({
         <div className="mt-4 border-t pt-2 flex items-center">
           <span className="px-2 py-1 text-lg">{g?.majors?.length} major</span>
           <div className="flex items-center">
-            {g?.majors?.map((m: any)=>(
+            {g?.majors?.map((m: any) => (
               <Tag color={colorMap[m]} className="px-2 py-1 font-bold">
-              {m}
-            </Tag>
+                {m}
+              </Tag>
             ))}
           </div>
         </div>
@@ -161,54 +153,16 @@ const ClassDetailPDT = ({
           Cancel
         </button>
       </div>
-      <Modal
-        centered
-        title="Upgrouped Students"
-        open={isModal1}
-        onCancel={cancelModal1}
-        closable={false}
-        footer={[
-          <Button key="cancel" onClick={cancelModal1}>
-            Cancel
-          </Button>,
-          <Button key="save" type="primary" onClick={cancelModal1}>
-            Save
-          </Button>,
-        ]}
-        width={900}
-        bodyStyle={{
-          maxHeight: 400,
-          overflowY: "auto",
-        }}
-      >
-        <div className="w-full">
-          <StudentTableNoAction />
-        </div>
-      </Modal>
-      <Modal
-        centered
-        title="Group not have class"
-        open={isModal2}
-        onCancel={cancelModal2}
-        closable={false}
-        footer={[
-          <Button key="cancel" onClick={cancelModal2}>
-            Cancel
-          </Button>,
-          <Button key="save" type="primary" onClick={cancelModal2}>
-            Save
-          </Button>,
-        ]}
-        width={900}
-        bodyStyle={{
-          maxHeight: 400,
-          overflowY: "auto",
-        }}
-      >
-        <div className="w-full">
-          <GroupTableNoAction />
-        </div>
-      </Modal>
+      <StudentTableNoAction
+        classId={classId}
+        isOpen={isModal1}
+        setOpen={setIsModal1}
+      />
+      <GroupTableNoAction
+        classId={classId}
+        isOpen={isModal2}
+        setIsOpen={setIsModal2}
+      />
     </div>
   );
 };

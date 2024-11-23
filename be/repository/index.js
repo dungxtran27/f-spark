@@ -13,6 +13,8 @@ import TimeBlockRepository from "./timeblock.js";
 import TagMajorRepository from "./tagmajor.js";
 import RequestRepository from "./request.js";
 import NotificationRepository from "./notification.js";
+import TermRepository from "./term.js";
+import OutcomeRepository from "./outcome.js";
 export {
   AuthenticateRepository,
   UserRepository,
@@ -29,5 +31,6 @@ export {
   TagMajorRepository,
   NotificationRepository,
   RequestRepository,
-
+  TermRepository,
+  OutcomeRepository
 };

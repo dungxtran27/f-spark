@@ -250,7 +250,10 @@ export const QUERY_KEY = {
   CLASSCODE: "clasCode",
   GROUP_OF_CLASS: "groupOfClass",
   TEACHERINFO:"teacherInfo",
-  MENTORINFO:"mentorInfo"
+  MENTORINFO:"mentorInfo",
+  NO_CLASS_STUDENT: "noClassStudent",
+  NO_CLASS_GROUPS: "noClassGroups",
+  ADD_STUDENT_TO_CLASS: "addStudentToClass"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
