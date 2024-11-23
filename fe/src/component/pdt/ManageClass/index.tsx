@@ -158,7 +158,7 @@ const ManageClassWrapper = () => {
                     <ClassCard
                       key={classItem._id}
                       classCode={classItem.classCode}
-                      teacherName={classItem.teacherDetails.name}
+                      teacherName={classItem.teacherDetails?.name}
                       groups={classItem.totalGroups}
                       isSponsorship={sponsorshipCount}
                       totalMembers={classItem.totalStudents}

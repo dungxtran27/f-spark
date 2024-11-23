@@ -4,7 +4,7 @@ const RequestSchema = new Schema(
   {
     typeRequest: {
       type: String,
-      enum: ["FPT", "Student", "changeClass"],
+      enum: ["FPT", "Student", "changeClass","deleteFromGroup"],
       required: true,
     },
     createBy: {
@@ -14,7 +14,7 @@ const RequestSchema = new Schema(
     },
     actionType: {
       type: String,
-      enum: ["join", "leave"],
+      enum: ["join", "leave", "delete"],
       required: false,
     },
     title: {
@@ -65,6 +65,11 @@ const RequestSchema = new Schema(
     fromClass: {
       type: Schema.Types.ObjectId,
       ref: "Class",
+      required: false,
+    },
+    studentDeleted: {
+      type: Schema.Types.ObjectId,
+      ref: "Student",
       required: false,
     },
   },

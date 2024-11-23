@@ -3,6 +3,7 @@ import {
   RequestRepository,
   GroupRepository,
   NotificationRepository,
+  StudentRepository,
 } from "../repository/index.js";
 
 const getAllRequest = async (req, res) => {
@@ -24,7 +25,7 @@ const createRequest = async (req, res) => {
     const existingRequest = await RequestRepository.findExistingRequest(
       studentId,
       groupId,
-      "leave"
+      actionType
     );
 
     if (!actionType) {
@@ -65,7 +66,23 @@ const createRequest = async (req, res) => {
         group,
       });
     }
+    if (actionType === "delete") {
+      const request = await RequestRepository.findGroupForLeaveRequest(
+        groupId,
+        studentId
+      );
 
+      if (!group) {
+        return res.status(400).json({
+          error: "Student is not part of the specified group.",
+        });
+      }
+
+      return res.status(200).json({
+        message: "Leave request approved and processed successfully.",
+        group,
+      });
+    }
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -89,7 +106,8 @@ const voteGroup = async (req, res) => {
 
     const totalMembers = updatedRequest.group.teamMembers.length;
     const totalYesVotes = updatedRequest.upVoteYes.length;
-    const totalVotes = updatedRequest.upVoteYes.length + updatedRequest.upVoteNo.length;
+    const totalVotes =
+      updatedRequest.upVoteYes.length + updatedRequest.upVoteNo.length;
     if (totalVotes === totalMembers && request.actionType === "join") {
       if (totalYesVotes === totalMembers) {
         await RequestRepository.approveJoinRequest(
@@ -100,17 +118,15 @@ const voteGroup = async (req, res) => {
         );
       } else {
         await RequestRepository.declineRequest(requestId, totalMembers);
-
       }
     }
     const requests = await RequestRepository.getUpdatedRequests(groupId);
 
-    return res.status(200).json({ data: requests });
+    return res.status(200).json({ data: requests, message: "Voted" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
-
 
 const getAllGroup = async (req, res) => {
   try {
@@ -225,7 +241,8 @@ const approvedLeaveClassRequest = async (req, res) => {
     const { requestId } = req.body;
     const decodedToken = req.decodedToken;
 
-    const foundRequest = RequestRepository.getRequestById({ requestId });
+    const foundRequest = await RequestRepository.getRequestById({ requestId });
+
     if (!foundRequest) {
       return res.status(400).json({ error: "No Request found." });
     }
@@ -307,6 +324,57 @@ const getLeaveClassRequestOfStudent = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const createDeleteStudentFromGroupRequest = async (req, res) => {
+  try {
+    const { actionType, studentDeleted } = req.body;
+    const studentId = req.decodedToken?.role?.id;
+    if (actionType !== "delete" || !studentDeleted || studentDeleted === "") {
+      return res.status(400).json({
+        error: "Invalid input",
+      });
+    }
+    const fStudent = await StudentRepository.findById(studentId);
+    if (!fStudent) {
+      return res.status(400).json({
+        error: "student not found.",
+      });
+    }
+    const groupId = fStudent.group.toString();
+    const existingRequest =
+      await RequestRepository.findExistingDeleteStudentRequest(
+        groupId,
+        actionType,
+        studentDeleted
+      );
+
+    if (existingRequest) {
+      return res.status(400).json({
+        error: "Request already exists for this student and group.",
+      });
+    }
+    const group = await RequestRepository.findGroupForLeaveRequest(
+      groupId,
+      studentId
+    );
+    if (!group) {
+      return res.status(400).json({
+        error: "Group not found.",
+      });
+    }
+    const requestCreated = await RequestRepository.createDeleteStudentRequest({
+      studentId,
+      studentDeleted,
+      groupId,
+      teamMembersCount: group.teamMembers.length,
+    });
+    return res.status(200).json({
+      message: "Your request is processing",
+      requestCreated,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getAllRequest,
   voteGroup,
@@ -321,4 +389,5 @@ export default {
   cancelLeaveClassRequest,
   getAllLeaveClassRequest,
   getLeaveClassRequestOfStudent,
+  createDeleteStudentFromGroupRequest,
 };

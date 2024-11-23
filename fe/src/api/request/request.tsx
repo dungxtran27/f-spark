@@ -77,4 +77,10 @@ export const requestList = {
       requestBody
     );
   },
+  requestDeleteStudentFromGroup: async (requestBody: any) => {
+    return await axios.post(
+      `/api/request/requestDeleteStudentFromGroup`,
+      requestBody
+    );
+  },
 };

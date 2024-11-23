@@ -69,5 +69,9 @@ requestRouter.get(
   verifyToken,
   RequestController.getLeaveClassRequestOfStudent
 );
-
+requestRouter.post(
+  "/requestDeleteStudentFromGroup",
+  verifyToken,
+  RequestController.createDeleteStudentFromGroupRequest
+);
 export default requestRouter;

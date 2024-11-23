@@ -1,9 +1,10 @@
-import { Button, Table, Tabs, TabsProps, Tag } from "antd";
+import { Button, Typography, Table, Tabs, TabsProps, Tag } from "antd";
 import classNames from "classnames";
 import styles from "../../teacher/ClassDetail/styles.module.scss";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { requestList } from "../../../api/request/request";
+const { Text } = Typography;
 const RequestWrapper = () => {
   const { data: reqData } = useQuery({
     queryKey: [QUERY_KEY.REQUEST_LEAVE_CLASS],
@@ -63,8 +64,9 @@ const RequestWrapper = () => {
       render: (record: any) => {
         return (
           <div className="text-center">
-            from <Tag color="green"> {record.fromClass.classCode}</Tag> to{"  "}
-            <Tag color="blue"> {record.toClass.classCode}</Tag>
+            from <Tag color="green"> {record.fromClass?.classCode}</Tag> to
+            {"  "}
+            <Tag color="blue"> {record.toClass?.classCode}</Tag>
           </div>
         );
       },
@@ -122,9 +124,9 @@ const RequestWrapper = () => {
       render: (record: any) => {
         return (
           <div className="text-center">
-            from <Tag color="green"> {record.fromClass.classCode}</Tag> to
-            {"  "}
-            <Tag color="blue"> {record.toClass.classCode}</Tag>
+            from <Tag color="green"> {record.fromClass?.classCode}</Tag> to
+          
+            <Tag color="blue"> {record.toClass?.classCode}</Tag>
           </div>
         );
       },
@@ -132,7 +134,9 @@ const RequestWrapper = () => {
     {
       title: "Status",
       align: "center",
-      render: (record: any) => <Button type="default">{record.status}</Button>,
+      render: (record: any) => {
+        return <Text type={record.status=="approved"?"success":"danger"}>{record.status}</Text>;
+      },
     },
   ];
   const items: TabsProps["items"] = [
