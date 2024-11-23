@@ -6,7 +6,6 @@ import {
   MdExpandLess,
 } from "react-icons/md";
 import { ImNotification } from "react-icons/im";
-import { BsPersonXFill } from "react-icons/bs";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { groupApi } from "../../../api/group/group";
@@ -89,8 +88,8 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                 </span>
               </div>
 
-              <div className="ml-4">
-                <div className="border-l-2 border-gray-500 pl-4 ">
+              <div className="ml-3">
+                <div className="border-l-2 border-gray-500 pl-1">
                   <div
                     className="p-1 rounded-md border-2 border-transparent hover:border-red-500 hover:bg-red-100 hover:shadow-md"
                     onClick={(e) => {
@@ -98,9 +97,10 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                       handleClassClick("SE1705");
                     }}
                   >
-                    <span className="flex items-center text-red-500">
-                      SE1705 - 12 <MdGroups3 className="ml-2 text-2xl mr-2" /> 4{" "}
-                      <BsPersonXFill className="ml-2 text-xl" />
+                    <span className="flex items-center">
+                      <span className="font-semibold">SE1705 -</span>
+                      <span className="ml-1 text-red-500 mr-1">(23/30)</span>
+                      <span>Students</span>
                     </span>
                   </div>
                   <div
@@ -110,9 +110,10 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                       handleClassClick("SE1705");
                     }}
                   >
-                    <span className="flex items-center text-red-500">
-                      SE1706 - 12 <MdGroups3 className="ml-2 text-2xl mr-2" /> 4{" "}
-                      <BsPersonXFill className="ml-2 text-xl" />
+                    <span className="flex items-center">
+                      <span className="font-semibold">SE1705 -</span>
+                      <span className="ml-1 text-red-500 mr-1">(23/30)</span>
+                      <span>Students</span>
                     </span>
                   </div>
                 </div>
