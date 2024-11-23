@@ -13,7 +13,7 @@ interface ClassCardProps {
   groups?: number;
   isSponsorship?: number;
   totalMembers?: number;
-  onClick?: () => void; // Add onClick prop
+  onClick?: () => void;
 }
 
 const ClassCard: React.FC<ClassCardProps> = ({
@@ -22,10 +22,10 @@ const ClassCard: React.FC<ClassCardProps> = ({
   isSponsorship,
   groups = 0,
   totalMembers = 0,
-  onClick, // Destructure onClick
+  onClick,
 }) => {
   const getCardColor = () => {
-    if (groups >= 5 && totalMembers >= 10) {
+    if (groups >= 5 && totalMembers >= 30) {
       return "bg-green-500";
     } else {
       return "bg-red-500";
@@ -35,7 +35,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
   return (
     <div
       className="rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer"
-      onClick={onClick} // Attach onClick event
+      onClick={onClick}
     >
       <div className={`${getCardColor()} opacity-100 p-4 text-white`}>
         <div className="flex text-lg font-semibold">

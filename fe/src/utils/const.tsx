@@ -248,7 +248,9 @@ export const QUERY_KEY = {
   ALLGROUP: "allGroup",
   ALLMAJOR: "allMajor",
   CLASSCODE: "clasCode",
-  GROUP_OF_CLASS: "groupOfClass"
+  GROUP_OF_CLASS: "groupOfClass",
+  TEACHERINFO:"teacherInfo",
+  MENTORINFO:"mentorInfo"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

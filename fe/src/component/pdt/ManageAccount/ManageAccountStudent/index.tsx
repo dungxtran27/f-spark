@@ -8,7 +8,6 @@ import {
   Table,
   Tag,
   Divider,
-  Pagination,
 } from "antd";
 import {
   SearchOutlined,
@@ -50,11 +49,6 @@ const AccountManagement: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const isStudentId = (input: string) => {
-    const studentIdRegex = /^[a-zA-Z]{2}\d{6,}$/;
-    return studentIdRegex.test(input);
-  };
-
   const { data: studentData } = useQuery({
     queryKey: [
       QUERY_KEY.STUDENT_OF_GROUP,
@@ -65,25 +59,13 @@ const AccountManagement: React.FC = () => {
       statusFilter,
     ],
     queryFn: async () => {
-      if (isStudentId(searchText)) {
-        return Admin.getStudent({
-          limit: 10,
-          page: page || 1,
-          studentName: null,
-          mssv: searchText || null,
-          classId: classFilter || null,
-          // status: statusFilter || null,
-        });
-      } else {
-        return Admin.getStudent({
-          limit: 10,
-          page: page || 1,
-          studentName: searchText || null,
-          mssv: null,
-          classId: classFilter || null,
-          // status: statusFilter || null,
-        });
-      }
+      return Admin.getStudent({
+        limit: 10,
+        page: page || 1,
+        searchText: searchText || null,
+        classId: classFilter || null,
+        // status: statusFilter || null,
+      });
     },
   });
 
@@ -116,12 +98,6 @@ const AccountManagement: React.FC = () => {
     setTermFilter(undefined);
     setStatusFilter(true);
   };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const totalItems = studentData?.data?.data?.totalItems || 0;
 
   const columns: ColumnsType<Student> = [
     {
@@ -251,22 +227,7 @@ const AccountManagement: React.FC = () => {
         </Col>
       </Row>
 
-      <Table
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-        rowKey="id"
-      />
-      <div className="flex justify-center mt-4">
-        <Pagination
-          current={page}
-          pageSize={itemsPerPage}
-          total={totalItems}
-          onChange={handlePageChange}
-          showSizeChanger={false}
-          showTotal={(total) => `Total ${total} students`}
-        />
-      </div>
+      <Table columns={columns} dataSource={data} rowKey="id" />
     </div>
   );
 };

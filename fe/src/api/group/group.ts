@@ -22,5 +22,8 @@ export const groupApi = {
   getAllGroupsNoClass: async (filters: any = {}, requestBody: any = {}) => {
     return await axios.post(`/api/group`, { ...filters, ...requestBody });
   },
+  addGroupToClass: async (requestBody: any) => {
+    return await axios.patch(`/api/group/addGroupToClass`, requestBody);
+  },
 
 };
