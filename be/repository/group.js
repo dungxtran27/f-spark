@@ -713,7 +713,8 @@ const findAllGroups = async (page, limit, searchText) => {
       filterCondition.$and.push({
         $or: [
           { GroupName: { $regex: searchText, $options: "i" } },
-          { leader: { $regex: searchText, $options: "i" } },
+          { "leader.name": { $regex: searchText, $options: "i" } },
+          { "leader.studentId": { $regex: searchText, $options: "i" } },
         ],
       });
     }
@@ -756,7 +757,10 @@ const findAllGroups = async (page, limit, searchText) => {
       {
         $project: {
           GroupName: 1,
-          leader: "$leader.name",
+          leader: {
+            name: "$leader.name",
+            studentId: "$leader.studentId"
+          },
           tag: "$tag.name",
           teamMembers: "$teamMembers.major",
           isSponsorship: 1

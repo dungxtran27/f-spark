@@ -27,10 +27,15 @@ import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdCancelPresentation } from "react-icons/md";
 import { SearchOutlined } from "@ant-design/icons";
 
+interface Leader {
+  name: string;
+  studentId: string;
+}
+
 interface Project {
   groupId: string;
   groupName: string;
-  leader: string;
+  leader?: Leader | null;
   tags: string[];
   members: number;
   majors: string[];
@@ -269,7 +274,14 @@ const RequestJoinGroup: React.FC = () => {
                 key={project.groupId || index}
                 groupId={project.groupId}
                 groupName={project.groupName}
-                leader={project.leader}
+                leader={
+                  project.leader
+                    ? {
+                        name: project.leader.name,
+                        studentId: project.leader.studentId,
+                      }
+                    : null
+                }
                 tags={project.tags}
                 members={project.members}
                 majors={project.majors}
