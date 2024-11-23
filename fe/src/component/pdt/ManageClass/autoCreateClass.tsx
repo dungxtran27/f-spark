@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, message, Modal, Input, Tooltip } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { Button, message, Modal, Input, Tag } from "antd";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { groupApi } from "../../../api/group/group";
 import { student } from "../../../api/student/student";
@@ -27,10 +26,10 @@ interface Student {
     color: string;
 }
 
-const AutoCreateClass: React.FC<{ handleCancel: () => void }> = ({ handleCancel }) => {
+const AutoCreateClass: React.FC = () => {
     const [previewClasses, setPreviewClasses] = useState<Class[]>([]);
     const [isPreviewVisible, setIsPreviewVisible] = useState(false);
-    const [editingClass, setEditingClass] = useState<Class | null>(null);
+    const [editingClassCode, setEditingClassCode] = useState<string | null>(null);
     const [newClassCode, setNewClassCode] = useState<string>("");
 
     const { data: groupData } = useQuery({
@@ -64,35 +63,42 @@ const AutoCreateClass: React.FC<{ handleCancel: () => void }> = ({ handleCancel 
     };
 
     const autoCreateClasses = () => {
+
         const classes: Class[] = [];
         const groupQueue = [...groups];
         const studentQueue = [...unassignedStudents];
 
         while (groupQueue.length > 0 || studentQueue.length > 0) {
+            const remainingStudents =
+                studentQueue.length + groupQueue.reduce((sum, group) => sum + group.teamMembers.length, 0);
+            //neu con duoi 15 hoc sinh chua xep lop thi k tao nua, de add tay
+            if (remainingStudents < 15) {
+                break;
+            }
             const newClass: Class = {
                 name: randomClassName(),
                 groups: [],
                 students: [],
             };
-
-            while (newClass.groups.length < 2 && groupQueue.length > 0) {
+            // xep nhom 1 lop, xep het nhom roi moi den hs
+            while (newClass.students.length < 14 && groupQueue.length > 0) {
                 const group = groupQueue[0];
                 const totalStudentsAfterAddingGroup =
                     newClass.students.length + group.teamMembers.length;
-                if (totalStudentsAfterAddingGroup <= 16) {
+
+                if (totalStudentsAfterAddingGroup <= 14) {
                     newClass.groups.push(groupQueue.shift()!);
                     newClass.students.push(...group.teamMembers);
                 } else {
                     break;
                 }
             }
-
-            while (newClass.students.length < 16 && studentQueue.length > 0) {
+            // 1 lop toi da 36 hs
+            while (newClass.students.length < 14 && studentQueue.length > 0) {
                 newClass.students.push(studentQueue.shift()!);
             }
             classes.push(newClass);
         }
-
         setPreviewClasses(classes);
         setIsPreviewVisible(true);
     };
@@ -103,8 +109,8 @@ const AutoCreateClass: React.FC<{ handleCancel: () => void }> = ({ handleCancel 
 
     const handleSave = async () => {
         try {
-            if (previewClasses.some(cls => cls.groups.length < 3 || cls.students.length < 10)) {
-                message.error("You must have at least 2 groups (with at least 6 students per group) and at least 10 students in total to create a class.");
+            if (previewClasses.some(cls => cls.groups.length < 1 || cls.students.length < 2)) {
+                message.error("You must have at least 3 groups (with at least 6 students per group) and at least 10 students in total to create a class.");
                 return;
             }
             for (const previewClass of previewClasses) {
@@ -126,70 +132,86 @@ const AutoCreateClass: React.FC<{ handleCancel: () => void }> = ({ handleCancel 
         }
     };
 
-    const handleEditClassCode = (cls: Class) => {
-        setEditingClass(cls);
-        setNewClassCode(cls.name);
+    const handleEditClassCode = (classCode: string) => {
+        setEditingClassCode(classCode);
+        setNewClassCode(classCode);
     };
 
     const handleSaveClassCode = () => {
-        if (editingClass) {
-            setPreviewClasses((prevClasses) =>
-                prevClasses.map((cls) =>
-                    cls.name === editingClass.name ? { ...cls, name: newClassCode } : cls
-                )
-            );
-            setEditingClass(null);
-            message.success("Class code updated successfully!");
-        }
+        setPreviewClasses((prevClasses) =>
+            prevClasses.map((classes) =>
+                classes.name === editingClassCode ? { ...classes, name: newClassCode } : classes
+            )
+        );
+        setEditingClassCode(null);
+        setNewClassCode("");
+        message.success("Class code updated successfully!");
     };
+
+    const sortedClasses = [...previewClasses].sort((a, b) => {
+        const isAEnough = a.groups.length >= 2 && a.students.length >= 14;
+        const isBEnough = b.groups.length >= 2 && b.students.length >= 14;
+        return Number(isAEnough) - Number(isBEnough);
+    });
+
+    const totalEnoughClasses = sortedClasses.filter(
+        (cls) => cls.groups.length >= 2 && cls.students.length >= 14
+    ).length;
+    const totalNotEnoughClasses = sortedClasses.length - totalEnoughClasses;
+    const remainingGroups = groups.length - previewClasses.reduce((sum, cls) => sum + cls.groups.length, 0);
+
+    const totalStudentsInitial = unassignedStudents.length + groups.reduce((sum, group) => sum + group.teamMembers.length, 0);
+    const totalStudentsInPreview = previewClasses.reduce((sum, cls) => sum + cls.students.length, 0);
+    const remainingStudents = totalStudentsInitial - totalStudentsInPreview;
 
     useEffect(() => {
         autoCreateClasses();
     }, []);
 
     return (
-        <div className="p-4">
-        {isPreviewVisible && (
-            <div className="grid grid-cols-3 gap-4">
-                {previewClasses.map((cls) => (
-                    <div key={cls.name} className="relative flex items-center gap-4">
-                        <ClassCard
-                            classCode={cls.name}
-                            groups={cls.groups.length}
-                            totalMembers={cls.students.length}
-                            icon={undefined}
-                            role={""}
-                        />
-                        <Tooltip title="Edit Class Code">
-                            <Button
-                                type="text"
-                                shape="circle"
-                                icon={<EditOutlined />}
-                                className="absolute top-2  left-1"
-                                onClick={() => handleEditClassCode(cls)}
-                            />
-                        </Tooltip>
-                    </div>
-                ))}
+        <div className="">
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex gap-4">
+                    <Tag color="green">Classes Enough Student: {totalEnoughClasses}</Tag>
+                    <Tag color="yellow">Classes Not Enough Student: {totalNotEnoughClasses}</Tag>
+                    <Tag color="red">Remaining: {remainingGroups} Groups, {remainingStudents} Students</Tag>
+                </div>
             </div>
-        )}
-        <div className="flex justify-end gap-2 mt-4">
-            <Button type="primary" onClick={handleSave}>
-                Save
-            </Button>
+            {isPreviewVisible && (
+                <div className="grid grid-cols-3 gap-4">
+                    {sortedClasses.map((cls) => (
+                        <div key={cls.name} className="relative">
+                            <ClassCard
+                                classCode={cls.name}
+                                groups={cls.groups.length}
+                                teacherName={undefined}
+                                isSponsorship={undefined}
+                                totalMembers={cls.students.length} icon={undefined} role={""}
+                                isEditing={true}
+                                onEditClick={() => handleEditClassCode(cls.name)}
+                            />
+                        </div>
+
+                    ))}
+                </div>
+            )}
+            <div className="flex justify-end gap-2 mt-4">
+                <Button type="primary" onClick={handleSave}>
+                    Save
+                </Button>
+            </div>
+            <Modal
+                title="Edit Class Code"
+                visible={editingClassCode !== null}
+                onOk={handleSaveClassCode}
+                onCancel={() => setEditingClassCode(null)}
+            >
+                <Input
+                    value={newClassCode}
+                    onChange={(e) => setNewClassCode(e.target.value)}
+                />
+            </Modal>
         </div>
-        <Modal
-            title="Edit Class Code"
-            visible={!!editingClass}
-            onOk={handleSaveClassCode}
-            onCancel={() => setEditingClass(null)}
-        >
-            <Input
-                value={newClassCode}
-                onChange={(e) => setNewClassCode(e.target.value)}
-            />
-        </Modal>
-    </div>
     );
 };
 
