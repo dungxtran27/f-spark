@@ -12,6 +12,7 @@ const RequestWrapper = () => {
       return requestList.getLeaveClassRequest();
     },
   });
+
   const queryClient = useQueryClient();
   const approveLeaveReq = useMutation({
     mutationFn: ({ requestId }: any) =>
@@ -59,18 +60,27 @@ const RequestWrapper = () => {
       width: 50,
     },
     {
-      title: "Move",
+      title: "Request Type Specific",
       align: "center",
       render: (record: any) => {
-        return (
-          <div className="text-center">
-            from <Tag color="green"> {record.fromClass?.classCode}</Tag> to
-            {"  "}
-            <Tag color="blue"> {record.toClass?.classCode}</Tag>
-          </div>
-        );
+        if (record.typeRequest === "changeClass") {
+          return (
+            <div className="text-center">
+              from <Tag color="green"> {record.fromClass?.classCode}</Tag> to
+              <Tag color="blue"> {record.toClass?.classCode}</Tag>
+            </div>
+          );
+        } else if (record.typeRequest === "deleteFromGroup") {
+          return (
+            <div className="text-center">
+              remove {record.studentDeleted.name} from group{" "}
+              {record.group.GroupName}
+            </div>
+          );
+        }
       },
     },
+
     {
       title: "Action",
       align: "center",
@@ -119,23 +129,36 @@ const RequestWrapper = () => {
       width: 50,
     },
     {
-      title: "Move",
+      title: "Request Type Specific",
       align: "center",
       render: (record: any) => {
-        return (
-          <div className="text-center">
-            from <Tag color="green"> {record.fromClass?.classCode}</Tag> to
-          
-            <Tag color="blue"> {record.toClass?.classCode}</Tag>
-          </div>
-        );
+        if (record.typeRequest === "changeClass") {
+          return (
+            <div className="text-center">
+              from <Tag color="green"> {record.fromClass?.classCode}</Tag> to
+              <Tag color="blue"> {record.toClass?.classCode}</Tag>
+            </div>
+          );
+        } else if (record.typeRequest === "deleteFromGroup") {
+          return (
+            <div className="text-center">
+              remove {record.studentDeleted.name} from group{" "}
+              {record.group.GroupName}
+            </div>
+          );
+        }
       },
     },
+
     {
       title: "Status",
       align: "center",
       render: (record: any) => {
-        return <Text type={record.status=="approved"?"success":"danger"}>{record.status}</Text>;
+        return (
+          <Text type={record.status == "approved" ? "success" : "danger"}>
+            {record.status}
+          </Text>
+        );
       },
     },
   ];

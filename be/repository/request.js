@@ -17,7 +17,17 @@ const getAllRequest = async ({ groupId }) => {
           path: "account",
           select: "profilePicture",
         },
-      });
+      })
+      .populate({
+        path: "studentDeleted",
+        select: "_id name studentId major",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      })
+      .sort({ createdAt: -1 });
+
     return requests;
   } catch (error) {
     throw new Error(error.message);
@@ -168,11 +178,21 @@ const getPendingLeaveClassRequest = async () => {
   try {
     const result = await Request.find({
       status: "pending",
-      typeRequest: "changeClass",
+      $or: [
+        { typeRequest: "changeClass" },
+        {
+          typeRequest: "deleteFromGroup",
+          $expr: {
+            $eq: [{ $size: "$upVoteYes" }, { $subtract: ["$totalMembers", 1] }],
+          },
+        },
+      ],
     })
-      .populate({ path: "fromClass", select: " classCode " })
-      .populate({ path: "toClass", select: " classCode " })
+      .populate({ path: "fromClass", select: "classCode" })
+      .populate({ path: "toClass", select: "classCode" })
+      .populate({ path: "group", select: "GroupName" })
       .populate({ path: "createBy", select: "studentId name major" })
+      .populate({ path: "studentDeleted", select: "studentId name major" })
       .sort({ createdAt: -1 });
 
     return result;
@@ -184,11 +204,19 @@ const getProcessedLeaveClassRequest = async () => {
   try {
     const result = await Request.find({
       status: { $ne: "pending" },
-      typeRequest: "changeClass",
+      typeRequest: { $in: ["changeClass", "deleteFromGroup"] },
     })
       .populate({ path: "fromClass", select: " classCode " })
       .populate({ path: "toClass", select: " classCode " })
-      .populate({ path: "createBy", select: "studentId name major" })
+      .populate({ path: "group", select: " GroupName " })
+      .populate({
+        path: "createBy",
+        select: "studentId name major group",
+      })
+      .populate({
+        path: "studentDeleted",
+        select: "studentId name major group",
+      })
       .sort({ createdAt: -1 });
 
     return result;
@@ -204,6 +232,7 @@ const getLeaveClassRequestOfStudent = async ({ studentId }) => {
     })
       .populate({ path: "fromClass", select: " classCode " })
       .populate({ path: "toClass", select: " classCode " })
+
       .populate({ path: "createBy", select: "studentId name major" })
       .sort({ createdAt: -1 });
 
@@ -327,6 +356,16 @@ const approveJoinRequest = async (
     { _id: requestId },
     { status: "approved", totalMembers }
   );
+};
+const approveDeleteStudentRequest = async (groupId, studentId, requestId) => {
+  await Group.updateOne(
+    { _id: groupId },
+    { $pull: { teamMembers: studentId } }
+  );
+
+  await Student.updateOne({ _id: studentId }, { group: null });
+
+  return Request.updateOne({ _id: requestId }, { status: "approved" });
 };
 
 const declineRequest = async (requestId, totalMembers) => {
@@ -469,4 +508,5 @@ export default {
   createDeleteStudentRequest,
   findExistingDeleteStudentRequest,
   getRequestDeleteStudentFromGroupByGroupId,
+  approveDeleteStudentRequest,
 };

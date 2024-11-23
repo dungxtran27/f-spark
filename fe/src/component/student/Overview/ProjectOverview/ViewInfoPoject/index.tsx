@@ -20,7 +20,7 @@ const ViewInfoPoject: React.FC = () => {
   const queryClient = useQueryClient();
 
   const groupId = userInfo?.group ?? "";
-  const userId = userInfo?.account._id ?? "";
+  const userId = userInfo?.account?._id ?? "";
 
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
@@ -94,8 +94,9 @@ const ViewInfoPoject: React.FC = () => {
               {data?.teamMembers.map(
                 (member: {
                   _id: React.Key | null | undefined;
-                  account: { profilePicture: string | undefined };
+                  account: { profilePicture: string | undefined; _id: any };
                   name: string | undefined;
+                  studentId: any;
                 }) => (
                   <Col span={12} key={member._id}>
                     <div

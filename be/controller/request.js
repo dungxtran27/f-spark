@@ -240,7 +240,7 @@ const approvedLeaveClassRequest = async (req, res) => {
   try {
     const { requestId } = req.body;
     const decodedToken = req.decodedToken;
-
+    let data;
     const foundRequest = await RequestRepository.getRequestById({ requestId });
 
     if (!foundRequest) {
@@ -249,30 +249,64 @@ const approvedLeaveClassRequest = async (req, res) => {
     if (foundRequest.status !== "pending") {
       return res.status(400).json({ error: "Request is processed" });
     }
-    const data = await RequestRepository.approveLeaveRequest({
-      requestId,
-    });
-    if (data) {
-      const notificationData = {
-        sender: decodedToken?.role?.id,
-        receivers: foundRequest.createBy?.account._id.toString(),
-        type: "System",
-        senderType: "Student",
-        action: {
-          action: "Your change class request is approved",
-          target: requestId,
-          actionType: "LeaveClass",
-          extraUrl: `#`,
-        },
-      };
-      await NotificationRepository.createNotification({
-        data: notificationData,
+    if (foundRequest.typeRequest == "changeClass") {
+      data = await RequestRepository.approveLeaveRequest({
+        requestId,
       });
 
-      const socketIds =
-        userSocketMap[foundRequest.createBy?.account._id.toString()];
-      if (socketIds) {
-        io.to(socketIds).emit("newNotification", `Your request is approved`);
+      if (data) {
+        const notificationData = {
+          sender: decodedToken?.role?.id,
+          receivers: foundRequest.createBy?.account._id.toString(),
+          type: "System",
+          senderType: "Student",
+          action: {
+            action: "Your change class request is approved",
+            target: requestId,
+            actionType: "LeaveClass",
+            extraUrl: `#`,
+          },
+        };
+        await NotificationRepository.createNotification({
+          data: notificationData,
+        });
+
+        const socketIds =
+          userSocketMap[foundRequest.createBy?.account._id.toString()];
+        if (socketIds) {
+          io.to(socketIds).emit("newNotification", `Your request is approved`);
+        }
+      }
+    }
+    if (foundRequest.typeRequest == "deleteFromGroup") {
+      data = await RequestRepository.approveDeleteStudentRequest(
+        foundRequest.group,
+        foundRequest.studentDeleted,
+        requestId
+      );
+
+      if (data) {
+        const notificationData = {
+          sender: decodedToken?.role?.id,
+          receivers: foundRequest.createBy?.account._id.toString(),
+          type: "System",
+          senderType: "Student",
+          action: {
+            action: "Your change class request is approved",
+            target: requestId,
+            actionType: "LeaveClass",
+            extraUrl: `#`,
+          },
+        };
+        await NotificationRepository.createNotification({
+          data: notificationData,
+        });
+
+        const socketIds =
+          userSocketMap[foundRequest.createBy?.account._id.toString()];
+        if (socketIds) {
+          io.to(socketIds).emit("newNotification", `Your request is approved`);
+        }
       }
     }
     return res.status(200).json({ data: data, message: "Approve success" });
