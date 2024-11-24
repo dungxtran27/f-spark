@@ -4,7 +4,9 @@ import {
   GroupRepository,
   NotificationRepository,
   StudentRepository,
+  TermRepository
 } from "../repository/index.js";
+import moment from "moment";
 
 const getAllRequest = async (req, res) => {
   try {
@@ -140,6 +142,16 @@ const getAllGroup = async (req, res) => {
 
 const joinGroup = async (req, res) => {
   try {
+    const activeTerm = await TermRepository.getActiveTerm();
+    const currentTime = moment().toISOString();
+    const endDate = activeTerm.timeLine[0].endDate;
+
+    console.log(endDate);
+
+    if (moment(endDate).isBefore(currentTime)) {
+      return res.status(400).json({ error: "The deadline for requesting to join the group has passed." });
+    }
+
     const studentId = req.decodedToken?.role?.id;
     const { groupId } = req.body;
     const data = await RequestRepository.joinGroup({ groupId, studentId });
@@ -427,6 +439,43 @@ const createDeleteStudentFromGroupRequest = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const updateIsSponsorship = async () => {
+  try {
+    const activeTerm = await TermRepository.getActiveTerm();
+    const currentTime = moment().toISOString();
+    const endDate = activeTerm.timeLine.find((t) => t.type === "sponsorShip").endDate;
+    if (moment(endDate).isBefore(currentTime)) {
+      console.log("zo");
+      
+      const requests = await RequestRepository.findRequestByTypeRequestFPT();
+      const filterRequestByTerm = requests.filter((r) => r.group.term.toString() === activeTerm._id.toString());
+
+      for (const request of filterRequestByTerm) {
+        const totalMembers = request.group.teamMembers.length;
+        const totalYesVotes = request.upVoteYes.length;
+        const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
+        const requestId = request._id;
+        const groupId = request.group._id;
+        if (totalVotes === totalMembers) {
+          if (totalYesVotes === totalMembers) {
+            await RequestRepository.approveRequestIsSponsorship(groupId, requestId);
+          }
+        }
+        else {
+          await RequestRepository.declineRequestIsSponsorship(requestId);
+        }
+      }
+    }
+    else {
+      return;
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
 export default {
   getAllRequest,
   voteGroup,
@@ -442,4 +491,5 @@ export default {
   getAllLeaveClassRequest,
   getLeaveClassRequestOfStudent,
   createDeleteStudentFromGroupRequest,
+  updateIsSponsorship
 };

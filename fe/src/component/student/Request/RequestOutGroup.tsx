@@ -3,11 +3,13 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
 import { requestList } from "../../../api/request/request";
-import { UserInfo } from "../../../model/auth";
+import { Term, UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
 import { useSelector } from "react-redux";
 import classNames from "classnames";
 import styles from "./styles.module.scss";
+import dayjs from "dayjs";
+
 interface Request {
   _id: string;
   typeRequest: string;
@@ -40,8 +42,15 @@ const RequestOutGroup = () => {
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
 
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
   const groupId = userInfo?.group ?? "";
   const userId = userInfo?._id ?? "";
+  const deadlineRequestOutGroup =
+    activeTerm?.timeLine?.find((t) => t.type === "membersTransfer")?.endDate ??
+    "";
 
   const { data: requestData, isLoading } = useQuery<Request[]>({
     queryKey: [QUERY_KEY.REQUESTS, groupId],
@@ -126,13 +135,19 @@ const RequestOutGroup = () => {
         <>
           <div className="flex justify-between items-center mb-4">
             <span className="text-lg font-semibold">Rời nhóm</span>
-            <Button
-              type="primary"
-              className="px-4 py-2 rounded mr-2"
-              onClick={handleOutGroupClick}
-            >
-              Out Group
-            </Button>
+            {!dayjs().isAfter(dayjs(deadlineRequestOutGroup), "day") ? (
+              <Button
+                type="primary"
+                className="px-4 py-2 rounded mr-2"
+                onClick={handleOutGroupClick}
+              >
+                Out Group
+              </Button>
+            ) : (
+              <span className="text-red-500">
+                Membership change deadline has expired
+              </span>
+            )}
           </div>
           <Empty />
         </>
@@ -140,13 +155,19 @@ const RequestOutGroup = () => {
         <>
           <div className="flex justify-between items-center mb-4">
             <span className="text-lg font-semibold">Rời nhóm</span>
-            <Button
-              type="primary"
-              className="px-4 py-2 rounded mr-2"
-              onClick={handleOutGroupClick}
-            >
-              Out Group
-            </Button>
+            {!dayjs().isAfter(dayjs(deadlineRequestOutGroup)) ? (
+              <Button
+                type="primary"
+                className="px-4 py-2 rounded mr-2"
+                onClick={handleOutGroupClick}
+              >
+                Out Group
+              </Button>
+            ) : (
+              <span className="text-red-500">
+                Membership change deadline has expired
+              </span>
+            )}
           </div>
           <div style={{ height: "70vh", overflow: "auto" }}>
             <Table

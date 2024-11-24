@@ -4,7 +4,7 @@ import { FaFileWord, FaCheck, FaTimes } from "react-icons/fa";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../utils/const";
 import { requestList } from "../../../api/request/request";
-import { UserInfo } from "../../../model/auth";
+import { Term, UserInfo } from "../../../model/auth";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { IoPerson } from "react-icons/io5";
@@ -27,8 +27,14 @@ const RequestFPT = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
   const userId = userInfo?._id ?? "";
   const groupId = userInfo?.group ?? "";
+  const deadlineRequestFPT = activeTerm?.timeLine?.find((t) => t.type === "sponsorShip")?.endDate ?? "";
 
   const { data: requestData, isLoading } = useQuery<Request[]>({
     queryKey: [QUERY_KEY.REQUESTS, groupId],
@@ -83,22 +89,26 @@ const RequestFPT = () => {
 
     if (
       upVoteYesCount !== totalMembers &&
-      dayjs().isAfter("2024-11-15", "day")
+      dayjs().isAfter(dayjs(deadlineRequestFPT))
     ) {
       return (
         <div className="flex items-center text-red-500">
-          <span className="text-lg">Your group has decline the sponsorship request</span>
+          <span className="text-lg">
+            Your group has decline the sponsorship request
+          </span>
         </div>
       );
     }
 
     if (
       upVoteYesCount === totalMembers &&
-      dayjs().isAfter("2024-11-15", "day")
+      dayjs().isAfter(dayjs(deadlineRequestFPT))
     ) {
       return (
         <div className="flex items-center text-green-500">
-          <span className="text-lg">Your group has accepted the sponsorship request</span>
+          <span className="text-lg">
+            Your group has accepted the sponsorship request
+          </span>
         </div>
       );
     }
@@ -186,7 +196,7 @@ const RequestFPT = () => {
             </div>
             <div className="flex flex-col items-end mt-4 space-y-2">
               <div className="mt-6 flex flex-row">
-                {!dayjs().isAfter("2024-11-15", "day") && (
+                {!dayjs().isAfter(dayjs(deadlineRequestFPT)) && (
                   <div className="flex space-x-2">
                     <Button
                       className="px-4 py-2 rounded"
