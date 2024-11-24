@@ -14,6 +14,7 @@ const createTerm = async (req, res) => {
   try {
     const { termCode, startTime, endTime } = req.body;
     const outcomes = await OutcomeRepository.getAllOutcome();
+    const startOfTerm = moment(startTime).add(1, "month");
     const timeline = [
       {
         title: "Member Transfer",
@@ -39,8 +40,16 @@ const createTerm = async (req, res) => {
         endDate: moment(startTime).add(1, "months"),
         type: DEADLINE_TYPES.MEMBERS_TRANSFER,
       },
+      {
+        title: "Teacher Lock Group",
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
+        startDate: startOfTerm,
+        endDate: moment(startOfTerm).add(2, "weeks"),
+        type: DEADLINE_TYPES.MEMBERS_TRANSFER,
+      },
     ];
-    const startOfTerm = moment(startTime).add(1, "month");
+
     outcomes.map((o) => {
       timeline.push({
         title: `Outcome ${o?.index}`,
@@ -50,8 +59,6 @@ const createTerm = async (req, res) => {
         type: DEADLINE_TYPES.OUTCOME
       });
     });
-    console.log(outcomes);
-
     const termData = {
       termCode,
       startTime,
@@ -64,7 +71,16 @@ const createTerm = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getActiveTerm = async (req, res) =>{
+  try {
+    const activeTerm = await TermRepository.getActiveTerm();
+    return res.status(200).json({ data: activeTerm });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
 export default {
   createTerm,
   getAllTerms,
+  getActiveTerm
 };

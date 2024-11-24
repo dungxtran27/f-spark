@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import Term from "./Term.js";
 const ClassInfo = new Schema({
   schedule: {
     type: [String],
@@ -37,6 +38,12 @@ const ClassSchema = new Schema(
       ref: "Classwork",
       require: false
     },
+    term: {
+      type: Schema.Types.ObjectId,
+      ref: "Term",
+      require: true
+    },
+    
     timeline:[{
       type: Schema.Types.ObjectId,
       ref: "Timeline",

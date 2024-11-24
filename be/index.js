@@ -75,7 +75,7 @@ app.use("/api/term", TermRouter)
 const port = process.env.PORT || 9999;
 const MONGODB_URI = process.env.MONGODB_URI;
 //for Periodic tasks
-// eventScheduler();
+eventScheduler();
 const userSocketMap = {};
 const io = new Server(server, {
   cors: corsOptions,

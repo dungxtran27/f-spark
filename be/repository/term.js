@@ -1,3 +1,4 @@
+import moment from "moment";
 import Term from "../model/Term.js";
 const getAllTerms = async () => {
   try {
@@ -21,7 +22,21 @@ const createTerms = async (data) => {
     throw new Error(error.message);
   }
 };
+
+const getActiveTerm = async () => {
+  try {
+    const currentTime = moment().toISOString()
+    const activeTerm = await Term.findOne({
+      startTime: { $lt: currentTime },
+      endTime: { $gt: currentTime },
+    });
+    return activeTerm
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   getAllTerms,
   createTerms,
+  getActiveTerm
 };

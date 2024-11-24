@@ -31,5 +31,6 @@ export const DEADLINE_TYPES = {
   SPONSOR_SHIP: "sponsorShip",
   DIVIDING_CLASSES: "dividingClasses",
   OUTCOME: "outcome",
-  START_TERM: "startTerm"
+  START_TERM: "startTerm",
+  TEACHER_LOCK_GROUP: "teacherLockGroup"
 }
