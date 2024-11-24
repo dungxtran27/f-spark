@@ -1,4 +1,4 @@
-import { Select, Input, Pagination, Modal } from "antd";
+import { Select, Input, Pagination, Modal, Button } from "antd";
 import ClassCard from "./classCard";
 import TotalClassCard from "./totalClassCard";
 import StudentTable from "./studentTable";
@@ -49,7 +49,6 @@ const ManageClassWrapper = () => {
   const [showClass, setShowClass] = useState(true);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -146,33 +145,34 @@ const ManageClassWrapper = () => {
                     onChange={handleSearch}
                     suffix={<SearchOutlined />}
                   />
-                  <button
-                    onClick={showModal}
-                    className=" p-1 rounded-md text-white font-medium bg-orange-500 hover:bg-white hover:text-black"
-                  >
-                    Auto create class
-                  </button>
                 </div>
-
+                <Button
+                  onClick={showModal}
+                  type="primary"
+                >
+                  Auto create class
+                </Button>
               </div>
               <div className="grid grid-cols-3 gap-4 mb-6">
                 {classData?.data?.data?.map((classItem: any) => {
                   const sponsorshipCount = Array.isArray(classItem.groups)
                     ? classItem.groups.filter(
-                      (group: any) => group.isSponsorship === true
-                    ).length
+                        (group: any) => group.isSponsorship === true
+                      ).length
                     : 0;
                   return (
                     <ClassCard
                       key={classItem._id}
                       classCode={classItem.classCode}
-                      teacherName={classItem?.teacherDetails?.name || "No teacher"}
+                      teacherName={
+                        classItem?.teacherDetails?.name || "No teacher"
+                      }
                       groups={classItem.totalGroups}
                       isSponsorship={sponsorshipCount}
                       totalMembers={classItem?.totalStudents}
                       onClick={() => {
-                        setSelectedClass(classItem._id)
-                        setShowClass(false)
+                        setSelectedClass(classItem._id);
+                        setShowClass(false);
                       }}
                     />
                   );

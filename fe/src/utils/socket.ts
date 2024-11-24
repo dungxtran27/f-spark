@@ -1,5 +1,4 @@
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
-console.log(SERVER_URL);
 
 import io from "socket.io-client";
 const authData = localStorage.getItem("persist:root");
