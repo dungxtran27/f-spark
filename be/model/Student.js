@@ -34,6 +34,11 @@ const StudentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Class',
     },
+    term: {
+      type: Schema.Types.ObjectId,
+      ref: "Term",
+      required: false,
+    },
   },
   { timestamps: true, collection: 'Students' }
 );
