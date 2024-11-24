@@ -38,8 +38,10 @@ const StudentTable = () => {
   const [search, setSearch] = useState<string>("");
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const { data: classData } = useQuery({
+  const { data: classData, refetch: refetchClasses } = useQuery({
     queryKey: [QUERY_KEY.CLASSES],
     queryFn: async () => {
       return classApi.getClassListPagination({
@@ -48,13 +50,15 @@ const StudentTable = () => {
       });
     },
   });
-  const { data: studentsData } = useQuery({
-    queryKey: [QUERY_KEY.ALLSTUDENT, { semester, majorFilter, search }],
+  const { data: studentsData, refetch: refetchStudent } = useQuery({
+    queryKey: [QUERY_KEY.ALLSTUDENT, { semester, majorFilter, search, currentPage, pageSize }],
     queryFn: async () => {
       return student.getAllStudentsNoClass({
         semester,
         major: majorFilter,
-        name: search
+        name: search,
+        page: currentPage,
+        limit: pageSize,
       });
     },
   });
@@ -74,7 +78,10 @@ const StudentTable = () => {
   const handleSemesterChange = (value: string) => {
     setSemester(value);
   };
-
+  const handlePageChange = (page: number, pageSize: number) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+  };
   const filteredData: Student[] =
     studentsData?.data?.data?.StudentNotHaveClass?.map((student: Student) => ({
       ...student,
@@ -111,6 +118,7 @@ const StudentTable = () => {
         setSelectedStudentIds([]);
         setSelectedClassId(null);
         setIsModalVisible(false);
+        refetchStudent();
       } else {
         console.error("Error:", response.data.message || "Failed to add students to the class.");
       }
@@ -124,6 +132,26 @@ const StudentTable = () => {
     }
   };
 
+  const randomClassName = (): string => {
+    const prefixes = ["SE", "HS", "IB", "GD", "AI", "IA", "KS"];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const middle = Math.floor(Math.random() * (20 - 17 + 1)) + 17;
+    const suffix = String(Math.floor(Math.random() * 16)).padStart(2, "0");
+    return `${prefix}${middle}${suffix}`;
+  };
+
+  const createNewClass = async () => {
+    try {
+      const newClassData = {
+        classCode: randomClassName(),
+        teacherDetails: null,
+      };
+      await classApi.createClass(newClassData);
+      refetchClasses();
+    } catch (error) {
+      message.error("An error occurred while creating the class.");
+    }
+  };
 
   return (
     <div className="bg-white shadow-md rounded-md p-4">
@@ -231,11 +259,10 @@ const StudentTable = () => {
 
       <div className="mt-5 flex justify-center">
         <Pagination
-          defaultCurrent={1}
-          total={filteredData.length}
-          showTotal={(total, range) =>
-            `${range[0]}-${range[1]} of ${total} students`
-          }
+          current={currentPage}
+          pageSize={pageSize}
+          total={studentsData?.data?.countStudentNotHaveClass || 0}
+          onChange={handlePageChange}
         />
       </div>
 
@@ -279,7 +306,9 @@ const StudentTable = () => {
               />
             );
           })}
-          <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-purple-400">
+          <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-purple-400"
+            onClick={createNewClass}
+          >
             <FiPlus className="text-3xl" />
             <span className="mt-1 text-lg">Create new class</span>
           </button>

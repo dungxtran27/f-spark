@@ -74,6 +74,10 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
     // }
 
     const autoCreateClasses = () => {
+        if (groups.length === 0 && unassignedStudents.length === 0) {
+      message.info("No students or groups are available for class creation.");
+      return;
+    }
         const classes: Class[] = [];
         const groupQueue = [...groups];
         const studentQueue = [...unassignedStudents];
@@ -82,7 +86,7 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
             const remainingStudents =
                 studentQueue.length + groupQueue.reduce((sum, group) => sum + group.teamMembers.length, 0);
 
-            if (remainingStudents === 0) {
+            if (remainingStudents < 10) {
                 break;
             }
 
@@ -120,11 +124,11 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
 
     const handleSave = async () => {
         try {
-            // // Validate classes before proceeding
-            // if (previewClasses.some(cls => cls.groups.length < 1 || cls.students.length < 5)) {
-            //     message.error("You must have at least 3 groups (with at least 6 students per group) and at least 10 students in total to create a class.");
-            //     return;
-            // }
+            // Validate classes before proceeding
+            if (previewClasses.some(cls => cls.students.length < 10)) {
+                message.error("You must have at least 15 students in total to create a class.");
+                return;
+            }
             const classPromises = previewClasses.map((previewClass) => {
                 const requestBody = {
                     classCode: previewClass.name,

@@ -43,12 +43,6 @@ const ClassSchema = new Schema(
       ref: "Term",
       require: true
     },
-    
-    timeline:[{
-      type: Schema.Types.ObjectId,
-      ref: "Timeline",
-      require: false
-    }]
   },
   { timestamps: true, collection: "Classes" }
 );

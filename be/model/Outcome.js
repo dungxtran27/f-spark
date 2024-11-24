@@ -1,5 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
+const GradingCriteriaSchema = new Schema({
+  description: {
+    type: String,
+    required: false,
+  }
+}, { _id: true });
 const OutcomeSchema = new Schema(
   {
     title: {
@@ -13,10 +19,15 @@ const OutcomeSchema = new Schema(
       type: String,
       required: true,
     },
-    gradingCriteria: {
-      type: [String],
-      default: [],
-    },
+    // gradingCriteria: {
+    //   type: [String],
+    //   default: [],
+    // },
+    GradingCriteria: [
+      {
+        type: GradingCriteriaSchema,
+      },
+    ],
   },
   {
     collection: "Outcome",

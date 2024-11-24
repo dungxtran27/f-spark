@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import Class from "../model/Class.js";
 import teacher from "./teacher.js";
+import Term from "../model/Term.js";
+import Classwork from "../model/ClassWork.js";
+import { TermRepository } from "./index.js";
+import Outcome from "../model/Outcome.js";
 const getClassesOfTeacher = async (teacherId) => {
   try {
 
@@ -510,18 +514,41 @@ const createClass = async ({
   isActive = true,
 }) => {
   try {
+    const matchingTerm = await TermRepository.getActiveTerm();
+
+    if (!matchingTerm) {
+      throw new Error("No matching term found for the current date.");
+    }
     const result = await Class.create({
       classCode,
       teacher,
       backgroundImage,
       classInfo,
       isActive,
+      term: matchingTerm._id,
     });
+    const outcomeDeadlines = matchingTerm.timeLine?.filter(
+      (deadline) => deadline.type === "outcome"
+    ) || [];
+    for (const deadline of outcomeDeadlines) {
+      const outcome = await Outcome.findById(deadline.outcome);
+      await Classwork.create({
+        name: deadline.title || null,
+        description: deadline.description || null,
+        startDate: deadline.startDate || null,
+        dueDate: deadline.endDate || null,
+        GradingCriteria: outcome?.GradingCriteria || [],
+        type: "outcome",
+        classId: result._id,
+      });
+    }
     return result._doc;
   } catch (error) {
+    console.error("Error creating class:", error.message);
     throw new Error(error.message);
   }
 };
+
 
 export default {
   pinClasswork,

@@ -38,6 +38,7 @@ const Group = () => {
   const [search, setSearch] = useState<string>("");
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [page, setPage] = useState(1); // Initialize page with a default value
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -47,13 +48,15 @@ const Group = () => {
     setIsModalVisible(false);
   };
 
-  const { data: groupData } = useQuery({
-    queryKey: [QUERY_KEY.ALLGROUP, { semester, tagFilter, search }],
+  const { data: groupData, refetch: refetchGroups } = useQuery({
+    queryKey: [QUERY_KEY.ALLGROUP, { semester, tagFilter, search, page }],
     queryFn: async () => {
       return groupApi.getAllGroupsNoClass({
         semester,
         tag: tagFilter,
         GroupName: search,
+        page,
+        limit: 10
       });
     },
   });
@@ -63,7 +66,7 @@ const Group = () => {
       return tagMajorApi.getAllMajor();
     },
   });
-  const { data: classData } = useQuery({
+  const { data: classData, refetch: refetchClasses } = useQuery({
     queryKey: [QUERY_KEY.CLASSES],
     queryFn: async () => {
       return classApi.getClassListPagination({
@@ -92,6 +95,9 @@ const Group = () => {
 
   const handleTagChange = (value: string[] | null) => {
     setTagFilter(value);
+  };
+  const handlePageChange = (page: number) => {
+    setPage(page); 
   };
   const handleCheckboxChange = (groupId: string) => {
     setSelectedGroupIds((prev) =>
@@ -127,6 +133,26 @@ const Group = () => {
         error.message ||
         "An unexpected error occurred."
       );
+    }
+  };
+  const randomClassName = (): string => {
+    const prefixes = ["SE", "HS", "IB", "GD", "AI", "IA", "KS"];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const middle = Math.floor(Math.random() * (20 - 17 + 1)) + 17;
+    const suffix = String(Math.floor(Math.random() * 16)).padStart(2, "0");
+    return `${prefix}${middle}${suffix}`;
+  };
+
+  const createNewClass = async () => {
+    try {
+      const newClassData = {
+        classCode: randomClassName(),
+        teacherDetails: null,
+      };
+      await classApi.createClass(newClassData);
+      refetchClasses();
+    } catch (error) {
+      message.error("An error occurred while creating the class.");
     }
   };
   return (
@@ -278,11 +304,11 @@ const Group = () => {
       {/* Pagination */}
       <div className="mt-5 flex justify-center">
         <Pagination
-          defaultCurrent={1}
-          total={filteredData.length}
-          showTotal={(total, range) =>
-            `${range[0]}-${range[1]} of ${total} groups`
-          }
+          current={page}
+          pageSize={10}
+          total={groupData?.data?.data?.totalItems}
+          onChange={handlePageChange}
+
         />
       </div>
 
@@ -317,7 +343,7 @@ const Group = () => {
               <ClassCard
                 key={classItem._id}
                 classCode={classItem.classCode}
-                teacherName={classItem?.teacherDetails?.name  || "Unknown"}
+                teacherName={classItem?.teacherDetails?.name || "Unknown"}
                 isSelected={isSelected}
                 groups={classItem.totalGroups}
                 isSponsorship={sponsorshipCount}
@@ -327,7 +353,9 @@ const Group = () => {
               />
             );
           })}
-          <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-primary/30">
+          <button
+            onClick={createNewClass}
+            className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-primary/30">
             <FiPlus className="text-3xl" />
             <span className="mt-1 text-lg">Create new class</span>
           </button>

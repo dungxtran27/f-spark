@@ -46,7 +46,7 @@ const createTerm = async (req, res) => {
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
         startDate: startOfTerm,
         endDate: moment(startOfTerm).add(2, "weeks"),
-        type: DEADLINE_TYPES.MEMBERS_TRANSFER,
+        type: DEADLINE_TYPES.TEACHER_LOCK_GROUP,
       },
     ];
 
@@ -56,7 +56,8 @@ const createTerm = async (req, res) => {
         description: o?.description,
         startDate: moment(startOfTerm).add(2 * (o?.index - 1), "weeks"),
         endDate: moment(startOfTerm).add(2 * o?.index, "weeks"),
-        type: DEADLINE_TYPES.OUTCOME
+        type: DEADLINE_TYPES.OUTCOME,
+        outcome: o?._id
       });
     });
     const termData = {
@@ -71,7 +72,7 @@ const createTerm = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-const getActiveTerm = async (req, res) =>{
+const getActiveTerm = async (req, res) => {
   try {
     const activeTerm = await TermRepository.getActiveTerm();
     return res.status(200).json({ data: activeTerm });

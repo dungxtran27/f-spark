@@ -822,7 +822,10 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
       });
     }
     const matchCondition = matchStage.length > 0 ? { $or: matchStage } : {};
-    const totalItems = await Group.countDocuments(matchCondition);
+    const totalItems = await Group.countDocuments({
+      class: { $in: [null, undefined] },
+      ...matchCondition,
+    });
     const maxPages = Math.ceil(totalItems / limit);
 
     const GroupNotHaveClass = await Group.aggregate([
@@ -849,9 +852,19 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         },
       },
       {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails",
+        },
+      },
+      {
         $group: {
           _id: "$_id",
           GroupName: { $first: "$GroupName" },
+          term: { $first: "$term" },
+          termDetails: { $first: "$termDetails" },
           isSponsorship: { $first: "$isSponsorship" },
           tag: { $push: { $arrayElemAt: ["$tag", 0] } },
           teamMembers: { $first: "$teamMembers" },
@@ -869,6 +882,16 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
             name: 1,
             studentId: 1
           },
+          term: 1,
+          termCode: {
+            $arrayElemAt: ["$termDetails.termCode", 0],
+          },
+          teamMemberCount: { $size: "$teamMembers" },
+        },
+      },
+      {
+        $sort: {
+          teamMemberCount: 1,
         },
       },
       {
@@ -883,7 +906,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
     });
     const isLastPage = page >= maxPages;
     const group = await Group.find()
-      .select("GroupName leader tag teamMembers isSponsorship")
+      .select("GroupName leader tag teamMembers isSponsorship term")
       .populate({
         path: "teamMembers",
         select: "name",

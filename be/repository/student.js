@@ -180,7 +180,10 @@ const getAllStudentsNoClass = async ({ name, studentId, email, major }) => {
     const StudentNotHaveClass = await Student.find(queryNotHaveClass).populate({
       path: "account",
       select: "email",
-    });
+    }).populate({
+      path: "term",
+      select: "termCode", 
+    });;
 
     const formattedStudentsNoClass = StudentNotHaveClass.map((student) => ({
       _id: student._id,
@@ -189,6 +192,8 @@ const getAllStudentsNoClass = async ({ name, studentId, email, major }) => {
       major: student.major,
       email: student.account?.email,
       group: student.group?.GroupName,
+       termId: student.term?._id,  // Include termId for students without class
+      termCode: student.term?.termCode,
       classId: student.classId?.classCode,
       updatedAt: student.updatedAt,
     }));
