@@ -1,0 +1,11 @@
+.stdCard {
+  &:hover {
+    .deletebtn_container {
+      visibility: visible;
+    }
+  }
+
+  .deletebtn_container {
+    visibility: hidden;
+  }
+}

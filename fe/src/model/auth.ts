@@ -11,6 +11,7 @@ export interface UserInfo {
 }
 export interface Account {
   id: string;
+  _id: string;
   email: string;
   profilePicture: string;
 }
