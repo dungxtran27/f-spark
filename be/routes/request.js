@@ -74,4 +74,5 @@ requestRouter.post(
   verifyToken,
   RequestController.createDeleteStudentFromGroupRequest
 );
+requestRouter.patch("/updateIsSponsorship", RequestController.updateIsSponsorship)
 export default requestRouter;

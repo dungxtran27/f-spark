@@ -21,7 +21,7 @@ import ClassCard from "../../pdt/ManageClass/classCard";
 import { HiOutlineLogin } from "react-icons/hi";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { UserInfo } from "../../../model/auth";
+import { Term, UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
 import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdCancelPresentation } from "react-icons/md";
@@ -59,6 +59,14 @@ const RequestJoinGroup: React.FC = () => {
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
   const queryClient = useQueryClient();
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const deadlineRequestJoinGroup =
+    activeTerm?.timeLine?.find((t) => t.type === "membersTransfer")?.endDate ??
+    "";
 
   const [itemsPerPage] = useState(8);
   const [page, setCurrentPage] = useState(1);
@@ -175,7 +183,7 @@ const RequestJoinGroup: React.FC = () => {
       render: (c: any) => <p>{dayjs(c).format("HH:m DD/MM/YYYY")}</p>,
     },
   ];
-  
+
   const content = <Table dataSource={requestData} columns={column} />;
   const totalItems = dataGroup?.totalItems || 0;
   return (
@@ -268,41 +276,55 @@ const RequestJoinGroup: React.FC = () => {
         <Skeleton active />
       ) : (
         <>
-          <h2 className="text-xl font-semibold mb-4">Join Group</h2>
-          <div className="flex flex-row mb-2 space-x-2 justify-end">
-            <Input
-              placeholder="Search group"
-              className="w-96"
-              onChange={handleInputChange}
-              suffix={<SearchOutlined />}
-            />
-            <Button type="primary" onClick={handleSearchClick}>
-              Search
-            </Button>
-          </div>
-          <div className="grid grid-cols-4 gap-4">
-            {projects.map((project, index) => (
-              <ProjectCard
-                key={project.groupId || index}
-                groupId={project.groupId}
-                groupName={project.groupName}
-                leader={
-                  project.leader
-                    ? {
-                        name: project.leader.name,
-                        studentId: project.leader.studentId,
-                      }
-                    : null
-                }
-                tags={project.tags}
-                members={project.members}
-                majors={project.majors}
-                isSponsorship={project.isSponsorship}
-              />
-            ))}
-          </div>
+          {dayjs().isAfter(dayjs(deadlineRequestJoinGroup)) ? (
+            <div className="p-4 bg-white rounded shadow-md">
+              <h2 className="text-2xl font-bold text-red-600">
+                Deadline Passed
+              </h2>
+              <p className="mt-2 text-gray-700">
+                The deadline for requesting to join the group has passed.
+              </p>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold mb-4">Join Group</h2>
+              <div className="flex flex-row mb-2 space-x-2 justify-end">
+                <Input
+                  placeholder="Search group"
+                  className="w-96"
+                  onChange={handleInputChange}
+                  suffix={<SearchOutlined />}
+                />
+                <Button type="primary" onClick={handleSearchClick}>
+                  Search
+                </Button>
+              </div>
+              <div className="grid grid-cols-4 gap-4">
+                {projects.map((project, index) => (
+                  <ProjectCard
+                    key={project.groupId || index}
+                    groupId={project.groupId}
+                    groupName={project.groupName}
+                    leader={
+                      project.leader
+                        ? {
+                            name: project.leader.name,
+                            studentId: project.leader.studentId,
+                          }
+                        : null
+                    }
+                    tags={project.tags}
+                    members={project.members}
+                    majors={project.majors}
+                    isSponsorship={project.isSponsorship}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
+
       <div className="flex justify-center mt-4">
         <Pagination
           current={page}

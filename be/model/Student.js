@@ -37,7 +37,7 @@ const StudentSchema = new Schema(
     term: {
       type: Schema.Types.ObjectId,
       ref: "Term",
-      require: true
+      required: false,
     },
   },
   { timestamps: true, collection: 'Students' }
