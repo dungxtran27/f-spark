@@ -66,9 +66,14 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
         const suffix = String(Math.floor(Math.random() * 16)).padStart(2, "0");
         return `${prefix}${middle}${suffix}`;
     };
+    // const remainingStudents =
+    //     studentQueue.length + groupQueue.reduce((sum, group) => sum + group.teamMembers.length, 0);
+    // //neu con duoi 15 hoc sinh chua xep lop thi k tao nua, de add tay
+    // if (remainingStudents < 2) {
+    //     break;
+    // }
 
     const autoCreateClasses = () => {
-
         const classes: Class[] = [];
         const groupQueue = [...groups];
         const studentQueue = [...unassignedStudents];
@@ -76,34 +81,35 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
         while (groupQueue.length > 0 || studentQueue.length > 0) {
             const remainingStudents =
                 studentQueue.length + groupQueue.reduce((sum, group) => sum + group.teamMembers.length, 0);
-            //neu con duoi 15 hoc sinh chua xep lop thi k tao nua, de add tay
-            if (remainingStudents < 5) {
+
+            if (remainingStudents === 0) {
                 break;
             }
+
             const newClass: Class = {
                 name: randomClassName(),
                 groups: [],
                 students: [],
             };
-            // xep nhom 1 lop, xep het nhom roi moi den hs
-            while (newClass.students.length < 14 && groupQueue.length > 0) {
+
+            while (newClass.students.length < 36 && groupQueue.length > 0) {
                 const group = groupQueue[0];
                 const totalStudentsAfterAddingGroup =
                     newClass.students.length + group.teamMembers.length;
 
-                if (totalStudentsAfterAddingGroup <= 14) {
+                if (totalStudentsAfterAddingGroup <= 36) {
                     newClass.groups.push(groupQueue.shift()!);
                     newClass.students.push(...group.teamMembers);
                 } else {
                     break;
                 }
             }
-            // 1 lop toi da 36 hs
-            while (newClass.students.length < 14 && studentQueue.length > 0) {
+            while (newClass.students.length < 36 && studentQueue.length > 0) {
                 newClass.students.push(studentQueue.shift()!);
             }
             classes.push(newClass);
         }
+
         setPreviewClasses(classes);
         setIsPreviewVisible(true);
     };
@@ -114,11 +120,11 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
 
     const handleSave = async () => {
         try {
-            // Validate classes before proceeding
-            if (previewClasses.some(cls => cls.groups.length < 1 || cls.students.length < 2)) {
-                message.error("You must have at least 3 groups (with at least 6 students per group) and at least 10 students in total to create a class.");
-                return;
-            }
+            // // Validate classes before proceeding
+            // if (previewClasses.some(cls => cls.groups.length < 1 || cls.students.length < 5)) {
+            //     message.error("You must have at least 3 groups (with at least 6 students per group) and at least 10 students in total to create a class.");
+            //     return;
+            // }
             const classPromises = previewClasses.map((previewClass) => {
                 const requestBody = {
                     classCode: previewClass.name,
@@ -162,13 +168,13 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
 
 
     const sortedClasses = [...previewClasses].sort((a, b) => {
-        const isAEnough = a.groups.length >= 2 && a.students.length >= 14;
-        const isBEnough = b.groups.length >= 2 && b.students.length >= 14;
+        const isAEnough = a.groups.length >= 5 && a.students.length >= 36;
+        const isBEnough = b.groups.length >= 5 && b.students.length >= 36;
         return Number(isAEnough) - Number(isBEnough);
     });
 
     const totalEnoughClasses = sortedClasses.filter(
-        (cls) => cls.groups.length >= 2 && cls.students.length >= 14
+        (cls) => cls.groups.length >= 5 && cls.students.length >= 36
     ).length;
     const totalNotEnoughClasses = sortedClasses.length - totalEnoughClasses;
     const remainingGroups = groups.length - previewClasses.reduce((sum, cls) => sum + cls.groups.length, 0);
