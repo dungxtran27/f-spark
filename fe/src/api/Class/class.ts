@@ -78,4 +78,8 @@ export const classApi = {
   getClassListPagination: async (requestBody: any) => {
     return await axios.post(`api/class/getAllClass`, requestBody);
   },
+  createClass: async (requestBody: any) => {
+    return await axios.post(`api/class/create`, requestBody);
+  },
+
 };

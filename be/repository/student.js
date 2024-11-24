@@ -355,7 +355,6 @@ export default {
   findStudentByAccountId,
   getStudentsByGroup,
   getTeacherByStudentId,
-  getStudentsByGroup,
   getAllStudentByClassId,
   getAllStudentUngroupByClassId,
   findById,

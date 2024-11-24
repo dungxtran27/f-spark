@@ -130,7 +130,8 @@ const voteGroup = async (req, res) => {
 
 const getAllGroup = async (req, res) => {
   try {
-    const data = await GroupRepository.findAllGroups();
+    const { page, limit, searchText } = req.body;
+    const data = await GroupRepository.findAllGroups(page, limit, searchText);
     return res.status(200).json({ data: data });
   } catch (error) {
     return res.status(500).json({ error: error.message });

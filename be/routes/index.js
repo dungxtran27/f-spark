@@ -13,6 +13,7 @@ import TimeBlockRouter from "./timeblock.js";
 import TagMajorRouter from "./tagmajor.js";
 import RequestRouter from "./request.js";
 import NotificationRouter from "./notification.js";
+import TermRouter from "./term.js"
 export {
   AuthenticationRouter,
   UserRouter,
@@ -28,5 +29,6 @@ export {
   TimeBlockRouter,
   TagMajorRouter,
   RequestRouter,
-  NotificationRouter
+  NotificationRouter,
+  TermRouter
 };
