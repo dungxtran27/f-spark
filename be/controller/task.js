@@ -180,14 +180,11 @@ export const updateTask = async (req, res) => {
       },
     };
     await NotificationRepository.createNotification({ data: notiData });
-    console.log({
-      user: decodedToken?.role?.id,
-      assignee: task?.assignee,
-    });
-    console.log(decodedToken);
     
     if (decodedToken?.role?.id !== task?.assignee?._id.toString()) {
       const socketIds = userSocketMap[task?.assignee?.account?._id.toString()];
+      // console.log(userSocketMap, socketIds);
+      
       io.to(socketIds).emit(
         "newNotification",
         `Your task ${task?.taskName} has been updated. Check it out !`

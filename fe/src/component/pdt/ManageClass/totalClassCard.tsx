@@ -142,7 +142,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
       <div className="bg-white p-4 shadow-md rounded-md border-2 border-transparent hover:border-orange-400">
         <div className="flex justify-between items-center mb-2">
           <div className="text-lg font-semibold">
-            Total students: {studentsData?.data?.data.totalStudent} students
+          Total students: {studentsData?.data?.data.totalStudent}
           </div>
           <span className="-ml-12"></span>
           <Tooltip title="Group Information">

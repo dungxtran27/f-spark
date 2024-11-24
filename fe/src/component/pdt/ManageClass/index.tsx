@@ -169,7 +169,12 @@ const ManageClassWrapper = () => {
                       teacherName={classItem?.teacherDetails?.name || "No teacher"}
                       groups={classItem.totalGroups}
                       isSponsorship={sponsorshipCount}
-                      totalMembers={classItem?.totalStudents} icon={undefined} role={""} />
+                      totalMembers={classItem?.totalStudents}
+                      onClick={() => {
+                        setSelectedClass(classItem._id)
+                        setShowClass(false)
+                      }}
+                    />
                   );
                 })}
               </div>
