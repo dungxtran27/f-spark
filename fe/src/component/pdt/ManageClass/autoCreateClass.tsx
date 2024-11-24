@@ -141,7 +141,6 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
             setIsPreviewVisible(false);
             onSave();
         } catch (error) {
-            console.error("Error creating classes:", error);
             message.error("Failed to create some classes.");
         }
     };
@@ -205,7 +204,7 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
                                 groups={cls.groups.length}
                                 teacherName={undefined}
                                 isSponsorship={cls.groups[0]?.isSponsorship || 0}
-                                totalMembers={cls.students.length} icon={undefined} role={""}
+                                totalMembers={cls.students.length} icon={undefined} role={"admin"}
                                 isEditing={true}
                                 onEditClick={() => handleEditClassCode(cls.name)}
                             />
