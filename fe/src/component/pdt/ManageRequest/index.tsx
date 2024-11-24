@@ -1,9 +1,10 @@
-import { Button, Table, Tabs, TabsProps, Tag } from "antd";
+import { Button, Typography, Table, Tabs, TabsProps, Tag } from "antd";
 import classNames from "classnames";
 import styles from "../../teacher/ClassDetail/styles.module.scss";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { requestList } from "../../../api/request/request";
+const { Text } = Typography;
 const RequestWrapper = () => {
   const { data: reqData } = useQuery({
     queryKey: [QUERY_KEY.REQUEST_LEAVE_CLASS],
@@ -11,6 +12,7 @@ const RequestWrapper = () => {
       return requestList.getLeaveClassRequest();
     },
   });
+
   const queryClient = useQueryClient();
   const approveLeaveReq = useMutation({
     mutationFn: ({ requestId }: any) =>
@@ -58,17 +60,34 @@ const RequestWrapper = () => {
       width: 50,
     },
     {
-      title: "Move",
+      title: "Request Type Specific",
       align: "center",
       render: (record: any) => {
-        return (
-          <div className="text-center">
-            from <Tag color="green"> {record.fromClass.classCode}</Tag> to{"  "}
-            <Tag color="blue"> {record.toClass.classCode}</Tag>
-          </div>
-        );
+        if (record.typeRequest === "changeClass") {
+          return (
+            <div className="text-center">
+              from <Tag color="green"> {record.fromClass?.classCode}</Tag>
+              <span>&#8594;</span>
+              <Tag color="blue" className=" ml-1">
+                {record.toClass?.classCode}
+              </Tag>
+            </div>
+          );
+        } else if (record.typeRequest === "deleteFromGroup") {
+          return (
+            <div className="text-center">
+              remove{" "}
+              <span className="text-primaryBlue font-semibold px-1">
+                {" "}
+                {record.studentDeleted.name}
+              </span>{" "}
+              from group {record.group.GroupName}
+            </div>
+          );
+        }
       },
     },
+
     {
       title: "Action",
       align: "center",
@@ -117,22 +136,44 @@ const RequestWrapper = () => {
       width: 50,
     },
     {
-      title: "Move",
+      title: "Request Type Specific",
       align: "center",
       render: (record: any) => {
-        return (
-          <div className="text-center">
-            from <Tag color="green"> {record.fromClass.classCode}</Tag> to
-            {"  "}
-            <Tag color="blue"> {record.toClass.classCode}</Tag>
-          </div>
-        );
+        if (record.typeRequest === "changeClass") {
+          return (
+            <div className="text-center">
+               <Tag color="green"> {record.fromClass?.classCode}</Tag>
+              <span>&#8594;</span>
+              <Tag color="blue" className=" ml-1">
+                {" "}
+                {record.toClass?.classCode}
+              </Tag>
+            </div>
+          );
+        } else if (record.typeRequest === "deleteFromGroup") {
+          return (
+            <div className="text-center">
+              remove
+              <span className="text-primaryBlue font-semibold px-1">
+                {record.studentDeleted.name}
+              </span>
+              from group {record.group.GroupName}
+            </div>
+          );
+        }
       },
     },
+
     {
       title: "Status",
       align: "center",
-      render: (record: any) => <Button type="default">{record.status}</Button>,
+      render: (record: any) => {
+        return (
+          <Text type={record.status == "approved" ? "success" : "danger"}>
+            {record.status}
+          </Text>
+        );
+      },
     },
   ];
   const items: TabsProps["items"] = [

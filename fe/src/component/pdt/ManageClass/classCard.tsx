@@ -15,8 +15,8 @@ interface ClassCardProps {
   isSponsorship?: number;
   totalMembers?: number;
 
-  icon: ReactNode;
-  role: string;
+  icon?: ReactNode;
+  role?: string;
   onClick?: () => void;
   isSelected?: boolean; // New prop to track selected card
   isEditing?: boolean;
@@ -41,10 +41,9 @@ const ClassCard: React.FC<ClassCardProps> = ({
   onEditClick,
   onClick,
   isSelected = false,
-
 }) => {
   const getCardColor = () => {
-    if (role == "teacher"|| "admin") {
+    if (role == "teacher" || role == "admin") {
       if (groups >= 5 && totalMembers >= 30) {
         return "bg-green-500";
       } else {
@@ -57,8 +56,9 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
   return (
     <div
-      className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer ${isSelected ? "border-2 border-purple-400" : ""
-        }`}
+      className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer ${
+        isSelected ? "border-2 border-purple-400" : ""
+      }`}
       onClick={onClick}
     >
       <div className={`${getCardColor()} opacity-100 p-4 text-white`}>
@@ -75,9 +75,8 @@ const ClassCard: React.FC<ClassCardProps> = ({
               />
             )}
           </div>
-
         </div>
-        <div className="text-sm">Teacher: {teacherName ?? 'N/A'}</div>
+        <div className="text-sm">Teacher: {teacherName ?? "N/A"}</div>
       </div>
       <div className="bg-white p-4">
         <div className="grid grid-cols-2 gap-4">

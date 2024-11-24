@@ -25,6 +25,7 @@ import { UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
 import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdCancelPresentation } from "react-icons/md";
+import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
 
 interface Leader {
@@ -137,12 +138,12 @@ const RequestJoinGroup: React.FC = () => {
     {
       title: "From Class",
       dataIndex: "fromClass",
-      render: (c: any) => <Tag color="green">{c.classCode}</Tag>,
+      render: (c: any) => <Tag color="green">{c?.classCode}</Tag>,
     },
     {
       title: "To Class",
       dataIndex: "toClass",
-      render: (c: any) => <Tag color="blue">{c.classCode}</Tag>,
+      render: (c: any) => <Tag color="blue">{c?.classCode}</Tag>,
     },
     {
       title: "Status",
@@ -163,7 +164,18 @@ const RequestJoinGroup: React.FC = () => {
         );
       },
     },
+    {
+      title: "Create At",
+      dataIndex: "createdAt",
+      render: (c: any) => <p>{dayjs(c).format("HH:m DD/MM/YYYY")}</p>,
+    },
+    {
+      title: "Processed At",
+      dataIndex: "updatedAt",
+      render: (c: any) => <p>{dayjs(c).format("HH:m DD/MM/YYYY")}</p>,
+    },
   ];
+  
   const content = <Table dataSource={requestData} columns={column} />;
   const totalItems = dataGroup?.totalItems || 0;
   return (
@@ -179,8 +191,8 @@ const RequestJoinGroup: React.FC = () => {
                 {classData.map((c: any, index: number) => (
                   <ClassCard
                     key={index}
-                    classCode={c.classCode}
-                    className={c.classCode}
+                    classCode={c?.classCode}
+                    className={c?.classCode}
                     teacherName={c.teacherName}
                     totalMembers={c.studentCount}
                     groups={c.groupCount}
