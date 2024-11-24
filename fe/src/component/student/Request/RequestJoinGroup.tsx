@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Modal, Skeleton, Tag, Empty, Table } from "antd";
+import {  Button, Modal, Skeleton, Tag, Empty, Table } from "antd";
 import { IoPerson } from "react-icons/io5";
 import { requestList } from "../../../api/request/request";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
@@ -47,9 +47,9 @@ const [modalType, setModalType] = useState<"accept" | "reject" | null>(null);
     queryFn: async () => (await requestList.getRequest(groupId)).data.data,
   });
 
-  const [modalStates, setModalStates] = useState<{
-    [key: string]: { visible: boolean; type: "accept" | "reject" | null };
-  }>({});
+  // const [modalStates, setModalStates] = useState<{
+  //   [key: string]: { visible: boolean; type: "accept" | "reject" | null };
+  // }>({});
 
   const voteMutation = useMutation({
     mutationFn: async ({
@@ -227,7 +227,14 @@ const handleConfirm = () => {
           <div className="flex justify-between items-center mb-5">
             <span className="text-lg font-semibold">Request in group</span>
           </div>
-          <Table dataSource={filteredRequests} columns={columnRequest} />
+          <div style={{ height: "70vh", overflow: "auto" }}>
+            <Table
+              dataSource={filteredRequests}
+              columns={columnRequest}
+              pagination={false}
+              // scroll={{ y: "50vh" }}
+            />
+          </div>
           {/* {filteredRequests.map((request) => (
             <div key={request._id} className="border-t-2 py-2 border-gray-300">
               <div className="flex items-center justify-between space-x-4">
