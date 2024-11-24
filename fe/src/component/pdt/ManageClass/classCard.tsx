@@ -44,8 +44,8 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
 }) => {
   const getCardColor = () => {
-    if (role == "teacher" || "admin") {
-      if (groups >= 5 && totalMembers >= 10) {
+    if (role == "teacher"|| "admin") {
+      if (groups >= 5 && totalMembers >= 30) {
         return "bg-green-500";
       } else {
         return "bg-red-500";
@@ -93,7 +93,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
           </div>
           <div className="flex items-center">
             <span className="text-sm font-medium text-gray-600">
-              {groups} Group
+              {groups} Groups
             </span>
             <FaUserGroup className="ml-2 text-gray-600" />
           </div>

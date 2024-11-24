@@ -119,7 +119,7 @@ const ManageClassWrapper = () => {
           {/* Bấm bấm*/}
           {!showStudentTable && !showGroupTable && showClass && (
             <>
-              <div className="flex mb-4 justify-start">
+              <div className="flex mb-4 justify-between">
                 <div className="flex items-center space-x-3">
                   <span>Semester:</span>
                   <Select defaultValue="SU-24" className="w-24">
@@ -153,6 +153,7 @@ const ManageClassWrapper = () => {
                     Auto create class
                   </button>
                 </div>
+
               </div>
               <div className="grid grid-cols-3 gap-4 mb-6">
                 {classData?.data?.data?.map((classItem: any) => {
@@ -165,19 +166,10 @@ const ManageClassWrapper = () => {
                     <ClassCard
                       key={classItem._id}
                       classCode={classItem.classCode}
-                      teacherName={classItem?.teacherDetails?.name || "Unknown"}
+                      teacherName={classItem?.teacherDetails?.name || "No teacher"}
                       groups={classItem.totalGroups}
                       isSponsorship={sponsorshipCount}
-                      totalMembers={
-                        Array.isArray(classData?.data?.data)
-                          ? classData.data.data.reduce(
-                            (acc: any, classItem: any) =>
-                              acc + classItem.totalStudents,
-                            0
-                          )
-                          : 0
-                      }
-                    />
+                      totalMembers={classItem?.totalStudents} icon={undefined} role={""} />
                   );
                 })}
               </div>

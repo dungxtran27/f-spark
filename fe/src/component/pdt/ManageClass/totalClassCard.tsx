@@ -5,9 +5,7 @@ import {
   MdExpandMore,
   MdExpandLess,
 } from "react-icons/md";
-import { FaUser } from "react-icons/fa6";
 import { ImNotification } from "react-icons/im";
-import { BsPersonXFill } from "react-icons/bs";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { groupApi } from "../../../api/group/group";
@@ -34,14 +32,11 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
   totalClasses,
   totalClassesMissStudents,
   totalClassesFullStudents,
-  totalMembers,
   setCategory,
 }) => {
   const [isClassOpen, setIsClassOpen] = useState(true);
-  const [category, setCategoryState] = useState<string>("");
 
   const handleSetCategory = (newCategory: string) => {
-    setCategoryState(newCategory);
     setCategory(newCategory);
   };
 
@@ -88,21 +83,13 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                 <span className="text-red-500 font-bold text-2xl">
                   {totalClassesMissStudents}
                 </span>
-                <span className="text-sm font-semibold ml-2">
+                <span className="text-md font-semibold ml-2">
                   Class miss student
                 </span>
-                {category === "miss" && (
-                  <div className="flex">
-                    <span className="flex text-red-500 items-center ml-2">
-                      ({totalMembers}/{totalClassesMissStudents * 30}){" "}
-                      <FaUser className="ml-1 text-xl" />
-                    </span>
-                  </div>
-                )}
               </div>
 
-              <div className="ml-4">
-                <div className="border-l-2 border-gray-500 pl-4 ">
+              <div className="ml-3">
+                <div className="border-l-2 border-gray-500 pl-1">
                   <div
                     className="p-1 rounded-md border-2 border-transparent hover:border-red-500 hover:bg-red-100 hover:shadow-md"
                     onClick={(e) => {
@@ -110,9 +97,10 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                       handleClassClick("SE1705");
                     }}
                   >
-                    <span className="flex items-center text-red-500">
-                      SE1705 - 2 <MdGroups3 className="ml-1 text-2xl mr-2" /> 4{" "}
-                      <BsPersonXFill className="ml-1 text-xl" />
+                    <span className="flex items-center">
+                      <span className="font-semibold">SE1705 -</span>
+                      <span className="ml-1 text-red-500 mr-1">(23/30)</span>
+                      <span>Students</span>
                     </span>
                   </div>
                   <div
@@ -122,9 +110,10 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                       handleClassClick("SE1705");
                     }}
                   >
-                    <span className="flex items-center text-red-500">
-                      SE1706 - 2 <MdGroups3 className="ml-1 text-2xl mr-2" /> 4{" "}
-                      <BsPersonXFill className="ml-1 text-xl" />
+                    <span className="flex items-center">
+                      <span className="font-semibold">SE1705 -</span>
+                      <span className="ml-1 text-red-500 mr-1">(23/30)</span>
+                      <span>Students</span>
                     </span>
                   </div>
                 </div>
@@ -140,17 +129,9 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                 <span className="text-green-500 font-bold text-2xl">
                   {totalClassesFullStudents}
                 </span>
-                <span className="text-sm font-semibold ml-2">
+                <span className="text-md font-semibold ml-2">
                   Class full student
                 </span>
-                {category == "full" && (
-                  <div className="flex">
-                    <span className="flex text-green-500 items-center ml-2">
-                      ({totalMembers}/{totalClassesFullStudents * 30}){" "}
-                      <FaUser className="ml-1 text-xl" />
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </>
