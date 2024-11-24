@@ -22,6 +22,7 @@ import type { AutoCompleteProps } from "antd/es/auto-complete";
 import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../utils/const";
 import { Admin } from "../../../../api/manageAccoount";
+import { assign } from "lodash";
 
 const { Option } = Select;
 
@@ -69,6 +70,18 @@ const AccountManagement: React.FC = () => {
       });
     },
   });
+
+  const {data: terms} = useQuery({
+    queryKey: [
+      QUERY_KEY.TERM_LIST
+      
+    ],
+    queryFn: async () =>{
+      return Admin.getAllTerms()
+    }
+  })
+  console.log(terms);
+  
   const totalItems = studentData?.data?.data?.totalItems || 0;
 
   const data: Student[] = Array.isArray(studentData?.data?.data?.students)
