@@ -6,7 +6,9 @@ import {
   Badge,
   Button,
   Divider,
+  Input,
   Modal,
+  Pagination,
   Popover,
   Skeleton,
   Table,
@@ -23,14 +25,21 @@ import { UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
 import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdCancelPresentation } from "react-icons/md";
+import { SearchOutlined } from "@ant-design/icons";
+
+interface Leader {
+  name: string;
+  studentId: string;
+}
 
 interface Project {
   groupId: string;
   groupName: string;
-  leader: string;
+  leader?: Leader | null;
   tags: string[];
   members: number;
   majors: string[];
+  isSponsorship: boolean;
 }
 
 const RequestJoinGroup: React.FC = () => {
@@ -50,9 +59,33 @@ const RequestJoinGroup: React.FC = () => {
   ) as UserInfo | null;
   const queryClient = useQueryClient();
 
+  const [itemsPerPage] = useState(8);
+  const [page, setCurrentPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
+  const [pendingSearchText, setPendingSearchText] = useState("");
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPendingSearchText(event.target.value);
+  };
+
+  const handleSearchClick = () => {
+    setSearchText(pendingSearchText);
+    setPendingSearchText("");
+  };
+
   const { data: dataGroup, isLoading } = useQuery({
-    queryKey: [QUERY_KEY.GROUPS_OF_CLASS],
-    queryFn: async () => (await requestList.getGroup()).data.data,
+    queryKey: [QUERY_KEY.GROUPS_OF_CLASS, page, searchText],
+    queryFn: async () =>
+      (
+        await requestList.getGroup({
+          limit: 8,
+          page: page || 1,
+          searchText: searchText || null,
+        })
+      ).data.data,
   });
   const { data: requestData } = useQuery({
     queryKey: [QUERY_KEY.REQUEST_LEAVE_CLASS],
@@ -87,15 +120,16 @@ const RequestJoinGroup: React.FC = () => {
       });
     },
   });
-  const projects: Project[] = dataGroup
-    ? dataGroup.map((group: any) => ({
+
+  const projects: Project[] = dataGroup?.groups
+    ? dataGroup.groups.map((group: any) => ({
         groupId: group._id,
         groupName: group.GroupName,
-        leader: group?.leader?.name,
-        tags: group?.tag.map((tag: any) => tag.name),
-        members: group?.teamMembers.length,
-        majors: group?.teamMembers.map((member: any) => member.major),
-        isSponsorship: group.isSponsorship,
+        leader: group.leader || "Unknown",
+        tags: group.tag || [],
+        members: group.teamMembers?.length || 0,
+        majors: group.teamMembers,
+        isSponsorship: group.isSponsorship || false,
       }))
     : [];
 
@@ -131,6 +165,7 @@ const RequestJoinGroup: React.FC = () => {
     },
   ];
   const content = <Table dataSource={requestData} columns={column} />;
+  const totalItems = dataGroup?.totalItems || 0;
   return (
     <div className="p-6">
       {userInfo?.classId && (
@@ -170,7 +205,7 @@ const RequestJoinGroup: React.FC = () => {
               </div>
               <Badge
                 count={
-                  requestData.filter((c: any) => c.status == "pending").length
+                  requestData?.filter((c: any) => c.status == "pending").length
                 }
               >
                 <Popover
@@ -217,24 +252,54 @@ const RequestJoinGroup: React.FC = () => {
         </>
       )}
 
-      <h2 className="text-xl font-semibold mb-4">Xin vào nhóm</h2>
       {isLoading ? (
         <Skeleton active />
       ) : (
-        <div className="grid grid-cols-4 gap-4">
-          {projects.map((project, index) => (
-            <ProjectCard
-              key={index}
-              groupId={project.groupId}
-              groupName={project.groupName}
-              leader={project.leader}
-              tags={project.tags}
-              members={project.members}
-              majors={project.majors}
+        <>
+          <h2 className="text-xl font-semibold mb-4">Join Group</h2>
+          <div className="flex flex-row mb-2 space-x-2 justify-end">
+            <Input
+              placeholder="Search group"
+              className="w-96"
+              onChange={handleInputChange}
+              suffix={<SearchOutlined />}
             />
-          ))}
-        </div>
+            <Button type="primary" onClick={handleSearchClick}>
+              Search
+            </Button>
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            {projects.map((project, index) => (
+              <ProjectCard
+                key={project.groupId || index}
+                groupId={project.groupId}
+                groupName={project.groupName}
+                leader={
+                  project.leader
+                    ? {
+                        name: project.leader.name,
+                        studentId: project.leader.studentId,
+                      }
+                    : null
+                }
+                tags={project.tags}
+                members={project.members}
+                majors={project.majors}
+                isSponsorship={project.isSponsorship}
+              />
+            ))}
+          </div>
+        </>
       )}
+      <div className="flex justify-center mt-4">
+        <Pagination
+          current={page}
+          pageSize={itemsPerPage}
+          total={totalItems}
+          onChange={handlePageChange}
+          showTotal={(total) => `Total ${total} group`}
+        />
+      </div>
     </div>
   );
 };
