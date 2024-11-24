@@ -1,4 +1,4 @@
-import { Button, Checkbox, Modal, Pagination, Input, Select, Tag, Tooltip } from "antd";
+import { Button, Checkbox, Modal, Pagination, Input, Select, Tag, Tooltip, message } from "antd";
 import { Key, useState } from "react";
 import ClassCard from "./classCard";
 import { FiPlus } from "react-icons/fi";
@@ -106,7 +106,7 @@ const Group = () => {
   };
   const handleSave = async () => {
     if (!selectedClassId || selectedGroupIds.length === 0) {
-      console.warn("Please select a class and at least one student.");
+      message.error("Please select at least one group.");
       return;
     }
     try {
@@ -320,7 +320,7 @@ const Group = () => {
               <ClassCard
                 key={classItem._id}
                 classCode={classItem.classCode}
-                teacherName={classItem.teacherDetails.name}
+                teacherName={classItem?.teacherDetails?.name  || "Unknown"}
                 isSelected={isSelected}
                 groups={classItem.totalGroups}
                 isSponsorship={sponsorshipCount}
