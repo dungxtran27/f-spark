@@ -27,11 +27,11 @@ const TimelineSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["isSponsorship","lockgroup","outcome1", "outcome2", "outcome3",],
+      enum: ["isSponsorship", "lockgroup", "outcome1", "outcome2", "outcome3",],
     },
-    classworkId:{
+    classworkId: {
       type: Schema.Types.ObjectId,
-      ref:"Classwork",
+      ref: "Classwork",
       required: true,
     },
   },
@@ -242,6 +242,11 @@ const GroupSchema = new Schema(
       required: false,
     },
     timeline: [TimelineSchema],
+    term: {
+      type: Schema.Types.ObjectId,
+      ref: "Term",
+      required: false,
+    },
   },
   { timestamps: true, collection: "Groups" }
 );

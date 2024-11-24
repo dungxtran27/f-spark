@@ -3,7 +3,7 @@ import axios from "../utils/axiosUtil";
 interface loginProps {
   email: string;
   password: string;
-  role: string|undefined;
+  role: string | undefined;
 }
 export const authApi = {
   login: async (credential: loginProps) => {
@@ -17,5 +17,8 @@ export const authApi = {
   },
   googleLogin: async (token: string) => {
     return await axios.post("api/auth/googleLogin", { token });
+  },
+  getActiveTerm: async () => {
+    return await axios.post("api/term/active");
   },
 };
