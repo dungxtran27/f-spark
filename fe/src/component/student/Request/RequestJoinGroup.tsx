@@ -170,7 +170,7 @@ const handleConfirm = () => {
         return createBy?.name === userInfo?.name ? (
           <p className="">You</p>
         ) : (
-          <p className="text-center">{createBy.name}</p>
+          <p className="">{createBy.name}</p>
         );
       },
     },

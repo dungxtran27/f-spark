@@ -66,15 +66,22 @@ const RequestWrapper = () => {
         if (record.typeRequest === "changeClass") {
           return (
             <div className="text-center">
-              from <Tag color="green"> {record.fromClass?.classCode}</Tag> to
-              <Tag color="blue"> {record.toClass?.classCode}</Tag>
+              from <Tag color="green"> {record.fromClass?.classCode}</Tag>
+              <span>&#8594;</span>
+              <Tag color="blue" className=" ml-1">
+                {record.toClass?.classCode}
+              </Tag>
             </div>
           );
         } else if (record.typeRequest === "deleteFromGroup") {
           return (
             <div className="text-center">
-              remove {record.studentDeleted.name} from group{" "}
-              {record.group.GroupName}
+              remove{" "}
+              <span className="text-primaryBlue font-semibold px-1">
+                {" "}
+                {record.studentDeleted.name}
+              </span>{" "}
+              from group {record.group.GroupName}
             </div>
           );
         }
@@ -135,15 +142,22 @@ const RequestWrapper = () => {
         if (record.typeRequest === "changeClass") {
           return (
             <div className="text-center">
-              from <Tag color="green"> {record.fromClass?.classCode}</Tag> to
-              <Tag color="blue"> {record.toClass?.classCode}</Tag>
+               <Tag color="green"> {record.fromClass?.classCode}</Tag>
+              <span>&#8594;</span>
+              <Tag color="blue" className=" ml-1">
+                {" "}
+                {record.toClass?.classCode}
+              </Tag>
             </div>
           );
         } else if (record.typeRequest === "deleteFromGroup") {
           return (
             <div className="text-center">
-              remove {record.studentDeleted.name} from group{" "}
-              {record.group.GroupName}
+              remove
+              <span className="text-primaryBlue font-semibold px-1">
+                {record.studentDeleted.name}
+              </span>
+              from group {record.group.GroupName}
             </div>
           );
         }
