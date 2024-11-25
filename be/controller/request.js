@@ -215,6 +215,12 @@ const declineLeaveClassRequest = async (req, res) => {
     if (foundRequest.status !== "pending") {
       return res.status(400).json({ error: "Request is declined" });
     }
+    const groupId = foundRequest.group;
+    const group = await GroupRepository.findGroupById({ groupId });
+    if (!group) {
+      return res.status(400).json({ error: "No group found." });
+    }
+    const groupStudent = group.teamMembers;
     const data = await RequestRepository.declineLeaveRequest({
       requestId,
     });
@@ -235,14 +241,15 @@ const declineLeaveClassRequest = async (req, res) => {
         data: notificationData,
       });
 
-      const socketIds =
-        userSocketMap[foundRequest.createBy?.account._id.toString()];
-      if (socketIds) {
-        io.to(socketIds).emit(
-          "newNotification",
-          `Your request has been declined`
-        );
-      }
+      groupStudent.forEach((s) => {
+        const socketIds = userSocketMap[s?.account?._id.toString()];
+        if (socketIds) {
+          io.to(socketIds).emit(
+            "newNotification",
+            `Your group request has been declined`
+          );
+        }
+      });
     }
     return res.status(200).json({ data: data, message: "Success" });
   } catch (error) {
@@ -259,6 +266,12 @@ const approvedLeaveClassRequest = async (req, res) => {
     if (!foundRequest) {
       return res.status(400).json({ error: "No Request found." });
     }
+    const groupId = foundRequest.group;
+    const group = await GroupRepository.findGroupById({ groupId });
+    if (!group) {
+      return res.status(400).json({ error: "No group found." });
+    }
+    const groupStudent = group.teamMembers;
     if (foundRequest.status !== "pending") {
       return res.status(400).json({ error: "Request is processed" });
     }
@@ -315,11 +328,15 @@ const approvedLeaveClassRequest = async (req, res) => {
           data: notificationData,
         });
 
-        const socketIds =
-          userSocketMap[foundRequest.createBy?.account._id.toString()];
-        if (socketIds) {
-          io.to(socketIds).emit("newNotification", `Your request is approved`);
-        }
+        groupStudent.forEach((s) => {
+          const socketIds = userSocketMap[s?.account?._id.toString()];
+          if (socketIds) {
+            io.to(socketIds).emit(
+              "newNotification",
+              `Your group request has been approved`
+            );
+          }
+        });
       }
     }
     return res.status(200).json({ data: data, message: "Approve success" });

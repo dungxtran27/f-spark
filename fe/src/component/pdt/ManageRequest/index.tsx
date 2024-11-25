@@ -4,6 +4,7 @@ import styles from "../../teacher/ClassDetail/styles.module.scss";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { requestList } from "../../../api/request/request";
+import { ColumnsType } from "antd/es/table";
 const { Text } = Typography;
 const RequestWrapper = () => {
   const { data: reqData } = useQuery({
@@ -38,7 +39,7 @@ const RequestWrapper = () => {
       });
     },
   });
-  const columnsReqPending = [
+  const columnsReqPending: ColumnsType<any> = [
     {
       title: "MSSV",
       dataIndex: "createBy",
@@ -114,7 +115,7 @@ const RequestWrapper = () => {
       ),
     },
   ];
-  const columnsReqProcessed = [
+  const columnsReqProcessed: ColumnsType<any> = [
     {
       title: "MSSV",
       dataIndex: "createBy",
@@ -142,7 +143,7 @@ const RequestWrapper = () => {
         if (record.typeRequest === "changeClass") {
           return (
             <div className="text-center">
-               <Tag color="green"> {record.fromClass?.classCode}</Tag>
+              <Tag color="green"> {record.fromClass?.classCode}</Tag>
               <span>&#8594;</span>
               <Tag color="blue" className=" ml-1">
                 {" "}
@@ -182,6 +183,8 @@ const RequestWrapper = () => {
       label: "Pending",
       children: (
         <Table
+          // pagination={}
+          // scroll={{ y: 1000 }}
           dataSource={reqData?.data.pendingRequest}
           columns={columnsReqPending}
         />
