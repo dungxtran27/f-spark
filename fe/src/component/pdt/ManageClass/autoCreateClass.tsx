@@ -36,6 +36,8 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
     const [isPreviewVisible, setIsPreviewVisible] = useState(false);
     const [editingClassCode, setEditingClassCode] = useState<string | null>(null);
     const [newClassCode, setNewClassCode] = useState<string>("");
+    const [page] = useState(1);
+    const [searchText] = useState("");
 
     const { data: groupData } = useQuery({
         queryKey: [QUERY_KEY.ALLGROUP],
@@ -49,9 +51,12 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
         : [];
 
     const { data: studentsData } = useQuery({
-        queryKey: [QUERY_KEY.ALLSTUDENT],
+        queryKey: [QUERY_KEY.ALLSTUDENT, page, searchText],
         queryFn: async () => {
-            return student.getAllStudentsNoClass();
+            return student.getAllStudentsNoClass({
+                limit: 10,
+                page: page || 1,
+            });
         },
     });
 
@@ -66,18 +71,11 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
         const suffix = String(Math.floor(Math.random() * 16)).padStart(2, "0");
         return `${prefix}${middle}${suffix}`;
     };
-    // const remainingStudents =
-    //     studentQueue.length + groupQueue.reduce((sum, group) => sum + group.teamMembers.length, 0);
-    // //neu con duoi 15 hoc sinh chua xep lop thi k tao nua, de add tay
-    // if (remainingStudents < 2) {
-    //     break;
-    // }
-
     const autoCreateClasses = () => {
         if (groups.length === 0 && unassignedStudents.length === 0) {
-      message.info("No students or groups are available for class creation.");
-      return;
-    }
+            message.info("No students or groups are available for class creation.");
+            return;
+        }
         const classes: Class[] = [];
         const groupQueue = [...groups];
         const studentQueue = [...unassignedStudents];
@@ -89,13 +87,11 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
             if (remainingStudents < 10) {
                 break;
             }
-
             const newClass: Class = {
                 name: randomClassName(),
                 groups: [],
                 students: [],
             };
-
             while (newClass.students.length < 36 && groupQueue.length > 0) {
                 const group = groupQueue[0];
                 const totalStudentsAfterAddingGroup =
@@ -126,7 +122,7 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
         try {
             // Validate classes before proceeding
             if (previewClasses.some(cls => cls.students.length < 10)) {
-                message.error("You must have at least 15 students in total to create a class.");
+                message.error("You must have at least 10 students in total to create a class.");
                 return;
             }
             const classPromises = previewClasses.map((previewClass) => {
@@ -169,7 +165,6 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
         message.success("Class code updated successfully!");
     };
 
-
     const sortedClasses = [...previewClasses].sort((a, b) => {
         const isAEnough = a.groups.length >= 5 && a.students.length >= 36;
         const isBEnough = b.groups.length >= 5 && b.students.length >= 36;
@@ -182,7 +177,7 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
     const totalNotEnoughClasses = sortedClasses.length - totalEnoughClasses;
     const remainingGroups = groups.length - previewClasses.reduce((sum, cls) => sum + cls.groups.length, 0);
 
-    const totalStudentsInitial = unassignedStudents.length + groups.reduce((sum, group) => sum + group.teamMembers.length, 0);
+    const totalStudentsInitial = unassignedStudents.length;
     const totalStudentsInPreview = previewClasses.reduce((sum, cls) => sum + cls.students.length, 0);
     const remainingStudents = totalStudentsInitial - totalStudentsInPreview;
 
@@ -193,12 +188,22 @@ const AutoCreateClass: React.FC<AutoCreateClassProps> = ({ onSave }) => {
     return (
         <div className="">
             <div className="flex justify-between items-center mb-4">
-                <div className="flex gap-4">
-                    <Tag color="green">Classes Enough Student: {totalEnoughClasses}</Tag>
-                    <Tag color="red">Classes Not Enough Student: {totalNotEnoughClasses}</Tag>
-                    <Tag color="yellow">Remaining: {remainingGroups} Groups, {remainingStudents} Students no class yet </Tag>
+                <div className="flex gap-2">
+                    <Tag className="font-bold" color="green">
+                        Classes Enough Student: {totalEnoughClasses}
+                    </Tag>
+                    <Tag className="font-bold" color="red">
+                        Classes Not Enough Student: {totalNotEnoughClasses}
+                    </Tag>
+                    <Tag
+                        className="font-bold border-1 border-yellow-400 text-yellow-600"
+                        style={{ backgroundColor: "#fff3cd" }}
+                    >
+                        Remaining: {remainingGroups} Groups, {remainingStudents} Students no class yet
+                    </Tag>
                 </div>
             </div>
+
             {isPreviewVisible && (
                 <div className="grid grid-cols-3 gap-4">
                     {sortedClasses.map((cls) => (

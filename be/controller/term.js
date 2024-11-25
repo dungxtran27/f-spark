@@ -80,8 +80,18 @@ const getActiveTerm = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 }
+
+const getAllTermsToFilter = async (req, res) => {
+  try {
+    const terms = await TermRepository.getAllTerms();
+    return res.status(200).json({ data: terms });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   createTerm,
   getAllTerms,
-  getActiveTerm
+  getActiveTerm,
+  getAllTermsToFilter
 };

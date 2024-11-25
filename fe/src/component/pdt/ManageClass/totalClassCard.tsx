@@ -40,11 +40,19 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
     setCategory(newCategory);
   };
 
-  const { data: studentsData } = useQuery({
-    queryKey: [QUERY_KEY.ALLSTUDENT],
-    queryFn: async () => student.getAllStudentsNoClass(),
-  });
+  const [page] = useState(1);
+  const [searchText] = useState("");
 
+  const { data: studentsData } = useQuery({
+    queryKey: [QUERY_KEY.ALLSTUDENT, page, searchText],
+    queryFn: async () => student.getAllStudentsNoClass(
+      {
+        limit: 8,
+        page: page || 1,
+        searchText: searchText || null,
+      }
+    ),
+  });
   const { data: groupsData } = useQuery({
     queryKey: [QUERY_KEY.ALLGROUP],
     queryFn: async () => groupApi.getAllGroupsNoClass(),
@@ -142,7 +150,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
       <div className="bg-white p-4 shadow-md rounded-md border-2 border-transparent hover:border-orange-400">
         <div className="flex justify-between items-center mb-2">
           <div className="text-lg font-semibold">
-          Total students: {studentsData?.data?.data.totalStudent}
+            Total students: {studentsData?.data?.data.totalStudent}
           </div>
           <span className="-ml-12"></span>
           <Tooltip title="Group Information">

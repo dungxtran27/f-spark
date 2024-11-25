@@ -7,9 +7,9 @@ import {
   Input,
   message,
 } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
 import {
   Key,
+  useEffect,
   useState,
 } from "react";
 import ClassCard from "./classCard";
@@ -19,6 +19,8 @@ import { useQuery } from "@tanstack/react-query";
 import { student } from "../../../api/student/student";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
 import { classApi } from "../../../api/Class/class";
+import { term } from "../../../api/term/term";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 
@@ -30,16 +32,33 @@ interface Student {
   email: string;
   color: string;
 }
+interface Term {
+  _id: string;
+  termCode: string;
+}
 
 const StudentTable = () => {
+
+  const { data: termData } = useQuery({
+    queryKey: [QUERY_KEY.TERM],
+    queryFn: async () => {
+      return term.getAllTermsToFilter();
+    },
+  });
+  const activeTerm = termData?.data?.data?.find((t : any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime))
+
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [semester, setSemester] = useState("SU-24");
+  const [semester, setSemester] = useState(activeTerm.termCode);
   const [majorFilter, setMajorFilter] = useState<string[] | null>([]);
-  const [search, setSearch] = useState<string>("");
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const [itemsPerPage] = useState(10);
+  const [page, setCurrentPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
+  const [pendingSearchText, setPendingSearchText] = useState("");
+
 
   const { data: classData, refetch: refetchClasses } = useQuery({
     queryKey: [QUERY_KEY.CLASSES],
@@ -51,21 +70,17 @@ const StudentTable = () => {
     },
   });
   const { data: studentsData, refetch: refetchStudent } = useQuery({
-    queryKey: [QUERY_KEY.ALLSTUDENT, { semester, majorFilter, search, currentPage, pageSize }],
+    queryKey: [QUERY_KEY.ALLSTUDENT, page, searchText, pageSize, majorFilter, semester],
     queryFn: async () => {
       return student.getAllStudentsNoClass({
-        semester,
-        major: majorFilter,
-        name: search,
-        page: currentPage,
-        limit: pageSize,
+        limit: itemsPerPage,
+        page: page || 1,
+        searchText: searchText || "",
+        major: majorFilter?.length ? majorFilter : null,
+        termCode: semester,
       });
     },
   });
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(event.target.value);
-  };
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -81,12 +96,15 @@ const StudentTable = () => {
   const handlePageChange = (page: number, pageSize: number) => {
     setCurrentPage(page);
     setPageSize(pageSize);
+    refetchStudent();
   };
   const filteredData: Student[] =
     studentsData?.data?.data?.StudentNotHaveClass?.map((student: Student) => ({
       ...student,
       color: colorMap[student.major] || "gray",
     })) || [];
+
+  const totalItems = studentsData?.data?.data?.countStudentNotHaveClass || 0;
 
   const handleCheckboxChange = (studentId: string) => {
     setSelectedStudentIds((prev) =>
@@ -99,6 +117,9 @@ const StudentTable = () => {
 
   const handleClassSelect = (classId: string) => {
     setSelectedClassId(classId);
+  };
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPendingSearchText(event.target.value);
   };
   const handleSave = async () => {
     if (!selectedClassId || selectedStudentIds.length === 0) {
@@ -152,30 +173,35 @@ const StudentTable = () => {
       message.error("An error occurred while creating the class.");
     }
   };
-
+  const handleSearchClick = () => {
+    setSearchText(pendingSearchText.trim());
+    setPendingSearchText("");
+  };
+  useEffect(() => {
+    refetchStudent();
+  }, [searchText, refetchStudent]);
   return (
     <div className="bg-white shadow-md rounded-md p-4">
       {/* Search and Filter Section */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex space-x-4">
-          <div className="flex items-center space-x-2">
-            <Select
-              value={semester}
-              onChange={handleSemesterChange}
-              className="w-24"
-            >
-              <Option value="SU-24">SU-24</Option>
-              <Option value="FA-24">FA-24</Option>
-              <Option value="SP-24">SP-24</Option>
-            </Select>
-          </div>
+          <Select
+            value={semester}
+            onChange={handleSemesterChange}
+            className="w-24"
+          >
+            {termData?.data?.data.map((term: Term) => (
+              <Option key={term.termCode} value={term.termCode}>
+                {term.termCode} {/* Display termCode */}
+              </Option>
+            ))}
+          </Select>
+
           <div className="flex items-center space-x-2">
             <Select
               mode="multiple"
               value={majorFilter}
-              onChange={(value) => {
-                setMajorFilter(value);
-              }}
+              onChange={(value) => setMajorFilter(value)}
               placeholder="Select Majors"
               className="w-36"
             >
@@ -188,11 +214,12 @@ const StudentTable = () => {
           </div>
           <Input
             placeholder="Search by name"
-            className="w-64"
-            suffix={<SearchOutlined />}
-            value={search}
-            onChange={handleSearch}
+            className="w-50"
+            onChange={handleInputChange}
           />
+          <Button type="primary" onClick={handleSearchClick}>
+            Search
+          </Button>
         </div>
 
         {/* Add to Class Button */}
@@ -259,10 +286,11 @@ const StudentTable = () => {
 
       <div className="mt-5 flex justify-center">
         <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={studentsData?.data?.countStudentNotHaveClass || 0}
+          current={page}
+          pageSize={itemsPerPage}
+          total={totalItems}
           onChange={handlePageChange}
+          showTotal={(total) => `Total ${total} student`}
         />
       </div>
 

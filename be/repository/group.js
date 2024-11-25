@@ -800,7 +800,7 @@ const findAllGroups = async (page, limit, searchText) => {
   }
 };
 
-const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
+const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCode) => {
   try {
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -821,13 +821,25 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         GroupName: { $regex: GroupName, $options: "i" },
       });
     }
+    let filterCondition = { $and: [] };
+
+    if (termCode) {
+      filterCondition.$and.push({
+        $or: [
+          { termCode: { $regex: termCode, $options: "i" } },
+        ],
+      });
+    }
+    if (filterCondition.$and.length === 0) {
+      filterCondition = {};
+    }
     const matchCondition = matchStage.length > 0 ? { $or: matchStage } : {};
     const totalItems = await Group.countDocuments({
       class: { $in: [null, undefined] },
       ...matchCondition,
     });
     const maxPages = Math.ceil(totalItems / limit);
-
+    console.log(matchCondition);
     const GroupNotHaveClass = await Group.aggregate([
       {
         $match: {
@@ -860,11 +872,20 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         },
       },
       {
+        $unwind: {
+          path: "$termDetails",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
         $group: {
           _id: "$_id",
           GroupName: { $first: "$GroupName" },
           term: { $first: "$term" },
           termDetails: { $first: "$termDetails" },
+          termCode: {
+            $first: "$termDetails.termCode"
+          },
           isSponsorship: { $first: "$isSponsorship" },
           tag: { $push: { $arrayElemAt: ["$tag", 0] } },
           teamMembers: { $first: "$teamMembers" },
@@ -883,11 +904,12 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
             studentId: 1
           },
           term: 1,
-          termCode: {
-            $arrayElemAt: ["$termDetails.termCode", 0],
-          },
+          termCode: 1,
           teamMemberCount: { $size: "$teamMembers" },
         },
+      },
+      {
+        $match: filterCondition 
       },
       {
         $sort: {

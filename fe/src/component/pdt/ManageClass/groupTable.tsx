@@ -6,9 +6,11 @@ import { MdGroupAdd } from "react-icons/md";
 import { colorMajorGroup, QUERY_KEY } from "../../../utils/const";
 import { groupApi } from "../../../api/group/group";
 import { useQuery } from "@tanstack/react-query";
-import { FaStar } from "react-icons/fa"; // Importing star icon
+import { FaStar } from "react-icons/fa";
 import { tagMajorApi } from "../../../api/tagMajors/tagMajor";
 import { classApi } from "../../../api/Class/class";
+import { term } from "../../../api/term/term";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 
@@ -30,15 +32,27 @@ interface Tag {
   name: string;
   _id: string;
 }
-
+interface Term {
+  _id: string;
+  termCode: string;
+}
 const Group = () => {
+  
+  const { data: termData } = useQuery({
+    queryKey: [QUERY_KEY.TERM],
+    queryFn: async () => {
+      return term.getAllTermsToFilter();
+    },
+  });
+
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [tagFilter, setTagFilter] = useState<string[] | null>([]); // Initialize tagFilter as an empty array
-  const [semester, setSemester] = useState("SU-24");
+  const [tagFilter, setTagFilter] = useState<string[] | null>([]);
+  const activeTerm =  termData?.data?.data?.find((t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime))
+  const [semester, setSemester] = useState(activeTerm.termCode);
   const [search, setSearch] = useState<string>("");
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
-  const [page, setPage] = useState(1); // Initialize page with a default value
+  const [page, setPage] = useState(1);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -49,14 +63,15 @@ const Group = () => {
   };
 
   const { data: groupData, refetch: refetchGroups } = useQuery({
-    queryKey: [QUERY_KEY.ALLGROUP, { semester, tagFilter, search, page }],
+    queryKey: [QUERY_KEY.ALLGROUP, { tagFilter, search, page, semester }],
     queryFn: async () => {
       return groupApi.getAllGroupsNoClass({
         semester,
         tag: tagFilter,
         GroupName: search,
         page,
-        limit: 10
+        limit: 10,
+        termCode: semester,
       });
     },
   });
@@ -97,7 +112,8 @@ const Group = () => {
     setTagFilter(value);
   };
   const handlePageChange = (page: number) => {
-    setPage(page); 
+    setPage(page);
+    refetchGroups();
   };
   const handleCheckboxChange = (groupId: string) => {
     setSelectedGroupIds((prev) =>
@@ -161,38 +177,42 @@ const Group = () => {
       <div className="mb-4 flex gap-4 items-center justify-between">
 
         <div className="flex gap-4">
-          <Input
-            placeholder="Search by group name"
-            value={search}
-            onChange={handleSearch}
-            style={{ width: 250 }}
-          />
+
           <div className="flex items-center space-x-2">
             <Select
               value={semester}
               onChange={handleSemesterChange}
               className="w-24"
             >
-              <Option value="SU-24">SU-24</Option>
-              <Option value="FA-24">FA-24</Option>
-              <Option value="SP-24">SP-24</Option>
-            </Select>
-          </div>
-          <Select
-            mode="multiple"
-            placeholder="Filter by major"
-            value={tagFilter}
-            onChange={handleTagChange}
-            style={{ width: 250 }}
-          >
-            {majorData?.data?.data.map((major: { _id: Key | null | undefined; name: any; }) => {
-              return (
-                <Option key={major._id} value={major._id}>
-                  {major.name || "Unknown Major"}
+              {termData?.data?.data.map((term: Term) => (
+                <Option key={term.termCode} value={term.termCode}>
+                  {term.termCode} {/* Display termCode */}
                 </Option>
-              );
-            })}
-          </Select>
+              ))}
+            </Select>
+            <Select
+              mode="multiple"
+              placeholder="Filter by major"
+              value={tagFilter}
+              onChange={handleTagChange}
+              style={{ width: 250 }}
+            >
+              {majorData?.data?.data.map((major: { _id: Key | null | undefined; name: any; }) => {
+                return (
+                  <Option key={major._id} value={major._id}>
+                    {major.name || "Unknown Major"}
+                  </Option>
+                );
+              })}
+            </Select>
+            <Input
+              placeholder="Search by group name"
+              value={search}
+              onChange={handleSearch}
+              style={{ width: 250 }}
+            />
+          </div>
+
         </div>
 
         {/* Add To Class Button */}
