@@ -351,7 +351,16 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
   }
 };
 
+const bulkCreateStudentsFromExcel = async (studentsData) => {
+  try {
+    const result = await Student.insertMany(studentsData, { ordered: false });
+    return result
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
+  bulkCreateStudentsFromExcel,
   findStudentByAccountId,
   getStudentsByGroup,
   getTeacherByStudentId,

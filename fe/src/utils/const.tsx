@@ -220,6 +220,7 @@ export const NOTIFICATION_READ_STATUS = [
 ];
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
+  STUDENT_OF_TERM: "studentOfTerm",
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",

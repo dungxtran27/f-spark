@@ -22,7 +22,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-      updatedGroup.customerJourneyMap.rows.length - 1
+        updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -46,7 +46,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-      updatedGroup.customerJourneyMap.cols.length - 1
+        updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -751,23 +751,23 @@ const findAllGroups = async (page, limit, searchText) => {
       {
         $unwind: {
           path: "$leader",
-          preserveNullAndEmptyArrays: true
-        }
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $project: {
           GroupName: 1,
           leader: {
             name: "$leader.name",
-            studentId: "$leader.studentId"
+            studentId: "$leader.studentId",
           },
           tag: "$tag.name",
           teamMembers: "$teamMembers.major",
-          isSponsorship: 1
-        }
+          isSponsorship: 1,
+        },
       },
       {
-        $match: filterCondition
+        $match: filterCondition,
       },
       {
         $skip: (page - 1) * limit,
@@ -780,10 +780,11 @@ const findAllGroups = async (page, limit, searchText) => {
           GroupName: 1,
         },
       },
-
     ]);
 
-    const totalItems = searchText ? groups.length : await Group.countDocuments();
+    const totalItems = searchText
+      ? groups.length
+      : await Group.countDocuments();
     const maxPages = Math.ceil(totalItems / limit);
     const isLastPage = page >= maxPages;
 
@@ -867,7 +868,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
           teamMembers: {
             _id: 1,
             name: 1,
-            studentId: 1
+            studentId: 1,
           },
         },
       },
@@ -939,6 +940,15 @@ const addGroupAndStudentsToClass = async (groupIds, classId) => {
   }
 };
 
+const createGroupsFromExcel = async (groupData) => {
+  try {
+    const result = await Group.insertMany(groupData, { ordered: false });
+    return result
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -966,4 +976,5 @@ export default {
   editTimelineForManyGroups,
   getAllGroupsNoClass,
   addGroupAndStudentsToClass,
+  createGroupsFromExcel
 };

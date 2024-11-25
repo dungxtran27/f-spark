@@ -16,4 +16,11 @@ export const Admin = {
   getAllTerms: async () => {
     return await axios.get(`/api/term`);
   },
+  importStudent: async (formData: FormData) => {
+    return await axios.post("/api/student/import", formData,  {
+      headers: {
+        Accept: "application/json; charset=UTF-8", 
+      },
+    });
+  },
 };
