@@ -1,6 +1,7 @@
 import {
   NotificationRepository,
   StudentRepository,
+  TeacherRepository
 } from "../repository/index.js";
 
 const getGroupNotification = async (req, res) => {
@@ -90,10 +91,27 @@ const getDetailClassNotification = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getTeacherClassNotification = async (req, res) => {
+  try {
+    const teacherId = req.decodedToken.account;
+    console.log(teacherId);
+    
+    const teacher = await TeacherRepository.findByAccountId(teacherId);
+    const classNotification = await NotificationRepository.getTeacherClassNotification(teacher?._id)
+    return res.status(200).json({
+      data: {
+        classNotification: classNotification?.length,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupNotification,
   getTaskRecordOfChanges,
   getStudentNotificationStatisTic,
   getDetailGroupNotification,
-  getDetailClassNotification
+  getDetailClassNotification,
+  getTeacherClassNotification
 };

@@ -30,4 +30,9 @@ notificationRouter.get(
   verifyToken,
   NotificationController.getDetailClassNotification
 )
+notificationRouter.get(
+  "/teacher/statistic",
+  verifyToken,
+  NotificationController.getTeacherClassNotification
+);
 export default notificationRouter;

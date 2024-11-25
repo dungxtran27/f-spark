@@ -8,5 +8,8 @@ export const notificationApi = {
   },
   getClassNotificationDetail: async () =>{
     return await axios.get("/api/notification/student/classNotification");
-  }
+  },
+  getTeacherNotificationStatistic: async () => {
+    return await axios.get("/api/notification/teacher/statistic");
+  },
 };

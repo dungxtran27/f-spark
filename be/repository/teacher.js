@@ -4,6 +4,15 @@ import Student from "../model/Student.js";
 import Teacher from "../model/Teacher.js";
 import mongoose from "mongoose";
 
+const getTeacherAccountByClassId = async (classId) => {
+  try {
+    const classDoc = await Class.findById(classId);
+    const teacher = await Teacher.findById(new mongoose.Types.ObjectId(classDoc.teacher))
+    return teacher
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 const getTeacherByClassId = async (classId) => {
   try {
     const classDoc = await Class.findById(classId);
@@ -209,5 +218,6 @@ export default {
   getTeacherByClassId,
   findByAccountId,
   getAllAccTeacher,
-  getTeacherWithClasses
+  getTeacherWithClasses,
+  getTeacherAccountByClassId
 };

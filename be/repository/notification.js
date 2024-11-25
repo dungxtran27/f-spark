@@ -1,5 +1,5 @@
 import Notification from "../model/Notification.js";
-import { NOTIFICATION_TYPE } from "../utils/const.js";
+import { NOTIFICATION_TYPE, SENDER_TYPE } from "../utils/const.js";
 import Task from "../model/Task.js";
 import mongoose from "mongoose";
 import Student from "../model/Student.js";
@@ -149,6 +149,29 @@ const getStudentClassNotification = async (classId) => {
     throw new Error(error.message);
   }
 };
+const getTeacherClassNotification = async (teacherId) => {
+  try {
+    const classNotification = await Notification.find({
+      type: NOTIFICATION_TYPE.CLASS,
+      senderType: SENDER_TYPE.STUDENT,
+      receivers: {
+        $in: [new mongoose.Types.ObjectId(teacherId)],
+      },
+    })
+      .populate({
+        path: "sender",
+        populate: { path: "account", select: "-password" },
+      })
+      .populate({
+        path: "class",
+        select: "_id classCode",
+      })
+      .sort({ createdAt: -1 });
+    return classNotification;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   createNotification,
   getGroupNotification,
@@ -156,4 +179,5 @@ export default {
   getStudentNotificationStatisTic,
   getStudentGroupNotification,
   getStudentClassNotification,
+  getTeacherClassNotification
 };

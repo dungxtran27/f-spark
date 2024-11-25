@@ -25,4 +25,10 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",
   CREATE_ASSIGNMENT: "CreateAssignment",
   GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
+  CREATE_SUBMISSION: "CreateSubmission",
+  REQUEST_DEADLINE: "RequestDeadline"
 };
+export const SENDER_TYPE = {
+  STUDENT: "Student",
+  TEACHER: "Teacher"
+}
