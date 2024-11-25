@@ -1,14 +1,17 @@
 import dayjs from "dayjs";
 import { CiEdit } from "react-icons/ci";
-import { DATE_FORMAT, ROLE } from "../../../../../utils/const";
-import { Checkbox, Divider, Form, Modal, Tooltip } from "antd";
+import { MdOutlineMoreTime } from "react-icons/md";
+import { DATE_FORMAT, ROLE, CREATE_REQUEST_DEADLINE } from "../../../../../utils/const";
+import { Checkbox, Divider, Form, Modal, Tooltip, DatePicker, Input } from "antd";
 import Submissions from "../../../../teacher/ClassDetail/Outcomes/Submissions";
 import { useState } from "react";
 import GradingSubmission from "../../../../teacher/ClassDetail/Outcomes/GradingSubmission";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
 import { UserInfo } from "../../../../../model/auth";
-
+import FormItem from "antd/es/form/FormItem";
+import { useMutation } from "@tanstack/react-query";
+import { requestDeadlineApi } from "../../../../../api/requestDeadline/requestDeadline";
 const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
@@ -16,6 +19,29 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   const isTeacher = userInfo?.role === ROLE.teacher;
   const [submission, setSubmission] = useState(null);
   const [form] = Form.useForm();
+  const { TextArea } = Input;
+
+  const [isModalOpenRequest, setIsModalOpenRequest] = useState(false);
+  const showModalRequestDeadline = () => {
+    setIsModalOpenRequest(true);
+  };
+  const handleOk = () => {
+    const values = form.getFieldsValue();
+    const data = {
+      reason: values.reason,
+      newDate: dayjs(values.newDate),
+      ClassworkId: o._id,
+      ClassworkName: o.title,
+      dueDate: dayjs(o?.dueDate),
+      classId: o.classId
+    }
+    requestDeadlineApi.createRequestDeadline(data)
+    form.resetFields()
+    setIsModalOpenRequest(false);
+  };
+  const handleCancel = () => {
+    setIsModalOpenRequest(false);
+  };
   return (
     <div className="w-full bg-white rounded-md min-h-[500px] mb-5">
       <div className="flex items-center justify-between">
@@ -23,11 +49,17 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
           {dayjs(o?.startDate).format(DATE_FORMAT.withoutYear)} -{" "}
           {dayjs(o?.dueDate).format(DATE_FORMAT.withYear)}
         </span>
+
         <div className="flex items-center gap-3">
           {/* <span className="font-medium text-[18px]">{o.title}</span> */}
+          {isTeacher ? 
           <Tooltip title={"edit"}>
             <CiEdit className="text-primaryBlue cursor-pointer" size={23} />
+          </Tooltip> : 
+          <Tooltip title={"Request deadline"}>
+            <MdOutlineMoreTime onClick={showModalRequestDeadline} className="text-primaryBlue cursor-pointer" size={23}/>
           </Tooltip>
+          }
         </div>
       </div>
       <div className="py-5 flex-col flex">
@@ -75,6 +107,51 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
           />
         </Modal>
       )}
+      <Modal 
+        title="Request additional end date time" 
+        open={isModalOpenRequest} onOk={handleOk} 
+        onCancel={handleCancel}>
+        <Form
+          form={form}
+          layout="vertical">
+            <div className="flex items-center justify-between">
+              <FormItem label={"Due date"}>
+                <DatePicker
+                  value={o?.dueDate ? dayjs(o?.dueDate) : null}
+                  format="DD/MM/YYYY"
+                  className="w-56 mr-4"
+                  disabled={true}
+                  placeholder="Select Date"
+                />
+              </FormItem>
+              <FormItem name={CREATE_REQUEST_DEADLINE.newDate} label={"Request due date"}>
+                <DatePicker 
+                  style={{ width: 232 }} 
+                  showTime={{ format: "HH:mm" }} 
+                  onChange={(value) =>
+                    form.setFieldsValue({
+                      [CREATE_REQUEST_DEADLINE.newDate]: value,
+                    })
+                  } 
+                />
+              </FormItem>
+            </div>
+            <div className="items-center justify-between">
+              <FormItem name={CREATE_REQUEST_DEADLINE.reason} label={"Reason"} labelCol={{ span: 3 }} wrapperCol={{ span: 24 }}>
+                <TextArea
+                  className="w-full"
+                  placeholder="Controlled autosize"
+                  autoSize={{ minRows: 3, maxRows: 5 }}
+                  onChange={(e) =>
+                    form.setFieldsValue({
+                      [CREATE_REQUEST_DEADLINE.reason]: e.target.value,
+                    })
+                  }
+                />
+              </FormItem>
+            </div>
+          </Form>
+      </Modal>
     </div>
   );
 };

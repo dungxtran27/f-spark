@@ -290,3 +290,7 @@ export const NOTIFICATION_TYPE = {
   GROUP: "group",
   SYSTEM: "system",
 };
+export const CREATE_REQUEST_DEADLINE = {
+  newDate: "newDate",
+  reason: "reason",
+};

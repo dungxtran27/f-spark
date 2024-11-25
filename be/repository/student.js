@@ -7,7 +7,7 @@ const findStudentByAccountId = async (accountId) => {
   try {
     const student = await Student.findOne({
       account: accountId,
-    }).populate("account", "-password");
+    }).populate("account group classId", "-password");
     return student;
   } catch (error) {
     throw new Error(error.message);
