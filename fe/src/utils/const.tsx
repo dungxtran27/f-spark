@@ -220,6 +220,7 @@ export const NOTIFICATION_READ_STATUS = [
 ];
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
+  STUDENT_OF_TERM: "studentOfTerm",
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
@@ -255,7 +256,8 @@ export const QUERY_KEY = {
   NO_CLASS_GROUPS: "noClassGroups",
   ADD_STUDENT_TO_CLASS: "addStudentToClass",
   TERM:"term",
-  TERMACTIVE:"termActive"
+  TERMACTIVE:"termActive",
+  TERM_LIST: "termList"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

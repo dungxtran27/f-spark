@@ -985,6 +985,15 @@ const addGroupAndStudentsToClass = async (groupIds, classId) => {
   }
 };
 
+const createGroupsFromExcel = async (groupData) => {
+  try {
+    const result = await Group.insertMany(groupData, { ordered: false });
+    return result
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -1012,4 +1021,5 @@ export default {
   editTimelineForManyGroups,
   getAllGroupsNoClass,
   addGroupAndStudentsToClass,
+  createGroupsFromExcel
 };

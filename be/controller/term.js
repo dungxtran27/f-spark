@@ -4,7 +4,7 @@ import { DEADLINE_TYPES } from "../utils/const.js";
 
 const getAllTerms = async (req, res) => {
   try {
-    const terms = await TermNotification.getAllTerms();
+    const terms = await TermRepository.getAllTerms();
     return res.status(200).json({ data: terms });
   } catch (error) {
     return res.status(500).json({ error: error.message });
