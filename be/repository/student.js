@@ -7,7 +7,7 @@ const findStudentByAccountId = async (accountId) => {
   try {
     const student = await Student.findOne({
       account: accountId,
-    }).populate("account group classId", "-password");
+    }).populate("account", "-password");
     return student;
   } catch (error) {
     throw new Error(error.message);
@@ -350,6 +350,23 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
     throw new Error(error.message);
   }
 };
+const findStudentDetailByAccountId = async (accountId) => {
+  try {
+    const student = await Student.findOne({
+      account: accountId,
+    }).populate({
+      path: "group",
+      select: "_id GroupName", 
+    })
+    .populate({
+      path: "classId",
+      select: "_id teacher", 
+    });
+    return student;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 export default {
   findStudentByAccountId,
@@ -362,4 +379,5 @@ export default {
   addManyStudentNoClassToClass,
   getAllAccStudent,
   getAllStudentUngroupByClassIds,
+  findStudentDetailByAccountId
 };
