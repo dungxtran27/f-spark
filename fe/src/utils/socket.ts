@@ -1,4 +1,5 @@
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
 import io from "socket.io-client";
 const authData = localStorage.getItem("persist:root");
 let account = null;

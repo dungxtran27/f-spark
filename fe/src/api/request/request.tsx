@@ -33,8 +33,8 @@ export const requestList = {
     });
   },
 
-  getGroup: async () => {
-    return await axios.get("api/request/findAllGroup");
+  getGroup: async (requestBody: any) => {
+    return await axios.post(`api/request/findAllGroup`, requestBody);
   },
 
   joinGroup: async (groupId: string) => {
@@ -74,6 +74,12 @@ export const requestList = {
   cancelLeaveClassRequest: async (requestBody: any) => {
     return await axios.post(
       `/api/request/cancelLeaveClassRequest`,
+      requestBody
+    );
+  },
+  requestDeleteStudentFromGroup: async (requestBody: any) => {
+    return await axios.post(
+      `/api/request/requestDeleteStudentFromGroup`,
       requestBody
     );
   },

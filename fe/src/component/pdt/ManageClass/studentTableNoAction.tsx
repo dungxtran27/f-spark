@@ -1,78 +1,100 @@
-import { Checkbox } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Modal, Table, Tag } from "antd";
+import { colorMap, QUERY_KEY } from "../../../utils/const";
+import { student } from "../../../api/student/student";
+import { useState } from "react";
 
-const StudentTableNoAction = () => {
-  const students = [
+const StudentTableNoAction = ({
+  classId,
+  isOpen,
+  setOpen,
+}: {
+  classId?: string;
+  isOpen: boolean;
+  setOpen: (value: boolean) => void;
+}) => {
+  const queryClient = useQueryClient();
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const { data: studentsData } = useQuery({
+    queryKey: [QUERY_KEY.NO_CLASS_STUDENT],
+    queryFn: async () => {
+      return student.getAllStudentsNoClass();
+    },
+  });
+  const AddStudentMutation = useMutation({
+    mutationKey: [QUERY_KEY.ADD_STUDENT_TO_CLASS],
+    mutationFn: () => {
+      return student.addManyStudentNoClassToClass({
+        studentIds: selectedStudents,
+        classId: classId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.NO_CLASS_STUDENT] });
+    },
+  });
+  const columns = [
     {
-      id: "HE170019",
-      major: "HS",
-      name: "Trần Văn Anh Vũ",
-      email: "hieunthe163894@fpt.edu.vn",
+      title: "Student Id",
+      dataIndex: "studentId",
     },
     {
-      id: "HE170020",
-      major: "HS",
-      name: "Nguyễn Văn A",
-      email: "nguyenvana@fpt.edu.vn",
+      title: "Major",
+      dataIndex: "major",
+      render: (text: string) => <Tag color={colorMap[text]}>{text}</Tag>,
     },
     {
-      id: "HE170021",
-      major: "SE",
-      name: "Lê Thị B",
-      email: "lethib@fpt.edu.vn",
+      title: "Name",
+      dataIndex: "name",
     },
     {
-      id: "HE170022",
-      major: "GD",
-      name: "Phạm Văn C",
-      email: "phamvanc@fpt.edu.vn",
+      title: "Email",
+      dataIndex: "email",
     },
   ];
-
+  const data = studentsData?.data?.data?.StudentNotHaveClass?.map((s: any) => {
+    return {
+      key: s?._id,
+      studentId: s?.studentId,
+      major: s?.major,
+      name: s?.name,
+      email: s?.email,
+    };
+  });
+  const rowSelection = {
+    onChange: (selectedRowKeys: any) => {
+      setSelectedStudents(selectedRowKeys);
+    },
+    getCheckboxProps: (record: any) => ({
+      name: record.name,
+    }),
+  };
   return (
-    <div className="bg-white shadow-md rounded-md p-4">
-      <table className="w-full table-auto">
-        <thead>
-          <tr className="bg-gray-200 text-left">
-            <th className="p-2">
-              <Checkbox />
-            </th>
-            <th className="p-2">Mssv</th>
-            <th className="p-2">Major</th>
-            <th className="p-2">Name</th>
-            <th className="p-2">Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((student, index) => (
-            <tr key={index} className="border-b">
-              <td className="p-2">
-                <Checkbox />
-              </td>
-              <td className="p-2">{student.id}</td>
-              <td className="p-2">
-                <span
-                  className="mr-2 px-2 py-1 text-white rounded-lg text-sm"
-                  style={{
-                    backgroundColor:
-                      student.major === "HS"
-                        ? "#7D4AEA"
-                        : student.major === "SE"
-                        ? "#1E90FF"
-                        : student.major === "GD"
-                        ? "#FF4500"
-                        : "#B0B0B0",
-                  }}
-                >
-                  {student.major}
-                </span>
-              </td>
-              <td className="p-2">{student.name}</td>
-              <td className="p-2">{student.email}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Modal
+      centered
+      title="Upgrouped Students"
+      open={isOpen}
+      destroyOnClose
+      onCancel={() => {
+        setOpen(false);
+      }}
+      width={900}
+      bodyStyle={{
+        maxHeight: 400,
+        overflowY: "auto",
+      }}
+      onOk={() => {
+        AddStudentMutation.mutate();
+      }}
+    >
+      <div className="bg-white shadow-md rounded-md ">
+        <Table
+          columns={columns}
+          dataSource={data}
+          rowSelection={{ type: "checkbox", ...rowSelection }}
+        />
+      </div>
+    </Modal>
   );
 };
 

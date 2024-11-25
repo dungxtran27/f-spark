@@ -22,7 +22,7 @@ requestRouter.post(
   authorization.checkGroupAccess,
   RequestController.createRequest
 );
-requestRouter.get("/findAllGroup", RequestController.getAllGroup);
+requestRouter.post("/findAllGroup", RequestController.getAllGroup);
 requestRouter.post("/joinGroup", verifyToken, RequestController.joinGroup);
 requestRouter.get(
   "/findRequestJoinByStudentId",
@@ -69,5 +69,10 @@ requestRouter.get(
   verifyToken,
   RequestController.getLeaveClassRequestOfStudent
 );
-
+requestRouter.post(
+  "/requestDeleteStudentFromGroup",
+  verifyToken,
+  RequestController.createDeleteStudentFromGroupRequest
+);
+requestRouter.patch("/updateIsSponsorship", RequestController.updateIsSponsorship)
 export default requestRouter;

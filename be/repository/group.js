@@ -82,7 +82,7 @@ const findGroupById = async ({ groupId }) => {
         select: "_id name gen major studentId account",
         populate: {
           path: "account",
-          select: "profilePicture",
+          select: "profilePicture _id",
         },
       })
       .populate({
@@ -665,7 +665,7 @@ const findAllSponsorGroupsOfClasses = async (classIds) => {
 const getGroupsByClassId = async (classId) => {
   try {
     const groups = await Group.find({ class: classId })
-      .select("GroupName GroupDescription timeline")
+      .select("GroupName GroupDescription timeline isSponsorship")
       .lean();
     return groups;
   } catch (error) {
@@ -705,33 +705,97 @@ const editTimelineForManyGroups = async (groupIds, type, updateData) => {
     throw new Error(error.message);
   }
 };
-const findAllGroups = async () => {
+
+const findAllGroups = async (page, limit, searchText) => {
   try {
-    // const groups = await Group.find().select("GroupName leader tag teamMembers isSponsorship").populate({
-    //   path: 'teamMembers',
-    //   select: 'major',
-    // }).populate({
-    //   path: 'leader',
-    //   select: 'name',
-    // }).populate({
-    //   path: 'tag',
-    //   select: 'name',
-    // });
-    const groups = await Group.find()
-      .select("GroupName leader tag teamMembers isSponsorship")
-      .populate({
-        path: "teamMembers",
-        select: "major",
-      })
-      .populate({
-        path: "leader",
-        select: "name",
-      })
-      .populate({
-        path: "tag",
-        select: "name",
+    let filterCondition = { $and: [] };
+    if (searchText) {
+      filterCondition.$and.push({
+        $or: [
+          { GroupName: { $regex: searchText, $options: "i" } },
+          { "leader.name": { $regex: searchText, $options: "i" } },
+          { "leader.studentId": { $regex: searchText, $options: "i" } },
+        ],
       });
-    return groups;
+    }
+
+    if (filterCondition.$and.length === 0) {
+      filterCondition = {};
+    }
+
+    const groups = await Group.aggregate([
+      {
+        $lookup: {
+          from: "Students",
+          localField: "teamMembers",
+          foreignField: "_id",
+          as: "teamMembers",
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "leader",
+          foreignField: "_id",
+          as: "leader",
+        },
+      },
+      {
+        $lookup: {
+          from: "TagMajors",
+          localField: "tag",
+          foreignField: "_id",
+          as: "tag",
+        },
+      },
+      {
+        $unwind: {
+          path: "$leader",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          GroupName: 1,
+          leader: {
+            name: "$leader.name",
+            studentId: "$leader.studentId",
+          },
+          tag: "$tag.name",
+          teamMembers: "$teamMembers.major",
+          isSponsorship: 1,
+        },
+      },
+      {
+        $match: filterCondition,
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
+      },
+      {
+        $sort: {
+          GroupName: 1,
+        },
+      },
+    ]);
+
+    const totalItems = searchText
+      ? groups.length
+      : await Group.countDocuments();
+    const maxPages = Math.ceil(totalItems / limit);
+    const isLastPage = page >= maxPages;
+
+    return {
+      groups,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
+    };
   } catch (error) {
     throw new Error(error.message);
   }
@@ -778,6 +842,14 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         },
       },
       {
+        $lookup: {
+          from: "Students",
+          localField: "teamMembers",
+          foreignField: "_id",
+          as: "teamMembers",
+        },
+      },
+      {
         $group: {
           _id: "$_id",
           GroupName: { $first: "$GroupName" },
@@ -793,7 +865,11 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
           "tag.name": 1,
           "tag._id": 1,
           isSponsorship: 1,
-          teamMembers: 1,
+          teamMembers: {
+            _id: 1,
+            name: 1,
+            studentId: 1,
+          },
         },
       },
       {
@@ -803,6 +879,9 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         $limit: limit,
       },
     ]);
+    const GroupNotHaveClass1 = await Group.find({
+      class: { $in: [null, undefined] },
+    });
     const isLastPage = page >= maxPages;
     const group = await Group.find()
       .select("GroupName leader tag teamMembers isSponsorship")
@@ -823,6 +902,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
       group,
       totalGroup,
       GroupNotHaveClass,
+      GroupNotHaveClass1,
       countGroupNotHaveClass,
       totalItems,
       maxPages,
