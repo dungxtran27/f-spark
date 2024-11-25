@@ -4,7 +4,9 @@ import {
   GroupRepository,
   NotificationRepository,
   StudentRepository,
+  TermRepository
 } from "../repository/index.js";
+import moment from "moment";
 
 const getAllRequest = async (req, res) => {
   try {
@@ -140,6 +142,16 @@ const getAllGroup = async (req, res) => {
 
 const joinGroup = async (req, res) => {
   try {
+    const activeTerm = await TermRepository.getActiveTerm();
+    const currentTime = moment().toISOString();
+    const endDate = activeTerm.timeLine[0].endDate;
+
+    console.log(endDate);
+
+    if (moment(endDate).isBefore(currentTime)) {
+      return res.status(400).json({ error: "The deadline for requesting to join the group has passed." });
+    }
+
     const studentId = req.decodedToken?.role?.id;
     const { groupId } = req.body;
     const data = await RequestRepository.joinGroup({ groupId, studentId });
@@ -203,6 +215,12 @@ const declineLeaveClassRequest = async (req, res) => {
     if (foundRequest.status !== "pending") {
       return res.status(400).json({ error: "Request is declined" });
     }
+    const groupId = foundRequest.group;
+    const group = await GroupRepository.findGroupById({ groupId });
+    if (!group) {
+      return res.status(400).json({ error: "No group found." });
+    }
+    const groupStudent = group.teamMembers;
     const data = await RequestRepository.declineLeaveRequest({
       requestId,
     });
@@ -223,14 +241,15 @@ const declineLeaveClassRequest = async (req, res) => {
         data: notificationData,
       });
 
-      const socketIds =
-        userSocketMap[foundRequest.createBy?.account._id.toString()];
-      if (socketIds) {
-        io.to(socketIds).emit(
-          "newNotification",
-          `Your request has been declined`
-        );
-      }
+      groupStudent.forEach((s) => {
+        const socketIds = userSocketMap[s?.account?._id.toString()];
+        if (socketIds) {
+          io.to(socketIds).emit(
+            "newNotification",
+            `Your group request has been declined`
+          );
+        }
+      });
     }
     return res.status(200).json({ data: data, message: "Success" });
   } catch (error) {
@@ -247,6 +266,12 @@ const approvedLeaveClassRequest = async (req, res) => {
     if (!foundRequest) {
       return res.status(400).json({ error: "No Request found." });
     }
+    const groupId = foundRequest.group;
+    const group = await GroupRepository.findGroupById({ groupId });
+    if (!group) {
+      return res.status(400).json({ error: "No group found." });
+    }
+    const groupStudent = group.teamMembers;
     if (foundRequest.status !== "pending") {
       return res.status(400).json({ error: "Request is processed" });
     }
@@ -303,11 +328,15 @@ const approvedLeaveClassRequest = async (req, res) => {
           data: notificationData,
         });
 
-        const socketIds =
-          userSocketMap[foundRequest.createBy?.account._id.toString()];
-        if (socketIds) {
-          io.to(socketIds).emit("newNotification", `Your request is approved`);
-        }
+        groupStudent.forEach((s) => {
+          const socketIds = userSocketMap[s?.account?._id.toString()];
+          if (socketIds) {
+            io.to(socketIds).emit(
+              "newNotification",
+              `Your group request has been approved`
+            );
+          }
+        });
       }
     }
     return res.status(200).json({ data: data, message: "Approve success" });
@@ -410,6 +439,43 @@ const createDeleteStudentFromGroupRequest = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const updateIsSponsorship = async () => {
+  try {
+    const activeTerm = await TermRepository.getActiveTerm();
+    const currentTime = moment().toISOString();
+    const endDate = activeTerm.timeLine.find((t) => t.type === "sponsorShip").endDate;
+    if (moment(endDate).isBefore(currentTime)) {
+      console.log("zo");
+      
+      const requests = await RequestRepository.findRequestByTypeRequestFPT();
+      const filterRequestByTerm = requests.filter((r) => r.group.term.toString() === activeTerm._id.toString());
+
+      for (const request of filterRequestByTerm) {
+        const totalMembers = request.group.teamMembers.length;
+        const totalYesVotes = request.upVoteYes.length;
+        const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
+        const requestId = request._id;
+        const groupId = request.group._id;
+        if (totalVotes === totalMembers) {
+          if (totalYesVotes === totalMembers) {
+            await RequestRepository.approveRequestIsSponsorship(groupId, requestId);
+          }
+        }
+        else {
+          await RequestRepository.declineRequestIsSponsorship(requestId);
+        }
+      }
+    }
+    else {
+      return;
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
 export default {
   getAllRequest,
   voteGroup,
@@ -425,4 +491,5 @@ export default {
   getAllLeaveClassRequest,
   getLeaveClassRequestOfStudent,
   createDeleteStudentFromGroupRequest,
+  updateIsSponsorship
 };

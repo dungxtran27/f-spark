@@ -82,7 +82,7 @@ const findGroupById = async ({ groupId }) => {
         select: "_id name gen major studentId account",
         populate: {
           path: "account",
-          select: "profilePicture",
+          select: "profilePicture _id",
         },
       })
       .populate({

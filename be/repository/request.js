@@ -357,6 +357,26 @@ const approveJoinRequest = async (
     { status: "approved", totalMembers }
   );
 };
+
+const approveRequestIsSponsorship = async (groupId, requestId) => {
+  await Group.updateOne(
+    { _id: groupId },
+    { isSponsorship: true }
+  );
+
+  return Request.updateOne(
+    { _id: requestId },
+    { status: "approved" }
+  );
+};
+
+const declineRequestIsSponsorship = async (requestId) => {
+  return Request.updateOne(
+    { _id: requestId },
+    { status: "declined" }
+  );
+};
+
 const approveDeleteStudentRequest = async (groupId, studentId, requestId) => {
   await Group.updateOne(
     { _id: groupId },
@@ -389,6 +409,13 @@ const getUpdatedRequests = async (groupId) => {
         select: "profilePicture",
       },
     });
+};
+
+const findRequestByTypeRequestFPT = async () => {
+  return Request.find({ typeRequest: "FPT" }).populate({
+    path: "group",
+    select: "teamMembers term",
+  });
 };
 
 const findRequestById = async (requestId) => {
@@ -509,4 +536,7 @@ export default {
   findExistingDeleteStudentRequest,
   getRequestDeleteStudentFromGroupByGroupId,
   approveDeleteStudentRequest,
+  findRequestByTypeRequestFPT,
+  approveRequestIsSponsorship,
+  declineRequestIsSponsorship
 };
