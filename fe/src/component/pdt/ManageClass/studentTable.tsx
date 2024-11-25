@@ -38,6 +38,17 @@ interface Term {
 }
 
 const StudentTable = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [majorFilter, setMajorFilter] = useState<string[] | null>([]);
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useState(10);
+  const [semester, setSemester] = useState<string | null>(null);
+
+  const [itemsPerPage] = useState(10);
+  const [page, setCurrentPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
+  const [pendingSearchText, setPendingSearchText] = useState("");
 
   const { data: termData } = useQuery({
     queryKey: [QUERY_KEY.TERM],
@@ -45,20 +56,14 @@ const StudentTable = () => {
       return term.getAllTermsToFilter();
     },
   });
-  const activeTerm = termData?.data?.data?.find((t : any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime))
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [semester, setSemester] = useState(activeTerm.termCode);
-  const [majorFilter, setMajorFilter] = useState<string[] | null>([]);
-  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  const [pageSize, setPageSize] = useState(10);
-
-  const [itemsPerPage] = useState(10);
-  const [page, setCurrentPage] = useState(1);
-  const [searchText, setSearchText] = useState("");
-  const [pendingSearchText, setPendingSearchText] = useState("");
-
+  const activeTerm = termData?.data?.data?.find(
+    (t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
+  );
+  useEffect(() => {
+    if (activeTerm?.termCode) {
+      setSemester(activeTerm.termCode);
+    }
+  }, [activeTerm]);
 
   const { data: classData, refetch: refetchClasses } = useQuery({
     queryKey: [QUERY_KEY.CLASSES],

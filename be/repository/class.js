@@ -215,7 +215,7 @@ const getAllClasses = async () => {
     throw new Error(error.message);
   }
 };
-const getAllClass = async (page, limit, classCode, teacherName, category) => {
+const getAllClass = async (page, limit, classCode, teacherName, category, termCode) => {
   try {
     let filterCondition = {
       $and: []
@@ -241,7 +241,13 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
         { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] }
       )
     };
-
+    if (termCode) {
+      filterCondition.$and.push({
+        $or: [
+          { termCode: { $regex: termCode, $options: "i" } },
+        ],
+      });
+    }
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
@@ -292,6 +298,20 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
         }
       },
       {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails"
+        }
+      },
+      {
+        $unwind: {
+          path: "$termDetails",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
         $group: {
           _id: "$_id",
           classCode: { $first: "$classCode" },
@@ -300,13 +320,20 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
           pinDetails: { $first: "$pinDetails" },
           groups: { $push: "$groups" },
           students: { $push: "$students" },
-          totalStudents: { $first: "$totalStudents" }
+          totalStudents: { $first: "$totalStudents" },
+          term: { $first: "$term" },
+          termDetails: { $first: "$termDetails" },
+          termCode: {
+            $first: "$termDetails.termCode"
+          },
         },
       },
       {
         $project: {
           classCode: 1,
           isActive: 1,
+          term: 1,
+          termCode: 1,
           teacherDetails: { name: 1, email: 1 },
           groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
           totalGroups: { $size: "$groups" },

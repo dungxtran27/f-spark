@@ -87,11 +87,11 @@ const getAllClasses = async (req, res) => {
 };
 const getAllClass = async (req, res) => {
   try {
-    const { page, limit, classCode, teacherName, category } = req.body;
+    const { page, limit, classCode, teacherName, category, termCode } = req.body;
     const [data, dataMissStudent, dataFullStudent] = await Promise.all([
       ClassRepository.getAllClass(
         parseInt(page),
-        parseInt(limit), classCode, teacherName, category
+        parseInt(limit), classCode, teacherName, category, termCode
       ),
       ClassRepository.getAllClassMissStudent(),
       ClassRepository.getAllClassFullStudent()
