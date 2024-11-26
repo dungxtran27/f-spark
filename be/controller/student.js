@@ -77,27 +77,27 @@ const getAllAccStudent = async (req, res) => {
 };
 
 const getAllStudentsNoClass = async (req, res) => {
-  try {
-    const filters = req.body;
-    const {
-      students,
-      totalStudent,
-      StudentNotHaveClass,
-      countStudentNotHaveClass,
-      uniqueMajors,
-    } = await StudentRepository.getAllStudentsNoClass(filters);
-    return res.status(200).json({
-      data: {
-        students,
-        totalStudent,
-        StudentNotHaveClass,
-        countStudentNotHaveClass,
-        uniqueMajors,
-      },
-    });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
+    try {
+        const { page, limit, searchText, termCode,major } = req.body;
+        const {
+            students,
+            totalStudent,
+            StudentNotHaveClass,
+            countStudentNotHaveClass,
+            uniqueMajors,
+        } = await StudentRepository.getAllStudentsNoClass(page, limit, searchText, termCode, major);
+        return res.status(200).json({
+            data: {
+                students,
+                totalStudent,
+                StudentNotHaveClass,
+                countStudentNotHaveClass,
+                uniqueMajors
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
 };
 const addManyStudentNoClassToClass = async (req, res) => {
   try {

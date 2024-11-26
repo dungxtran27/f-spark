@@ -233,9 +233,12 @@ const GroupSchema = new Schema(
       type: Number,
       required: false,
     },
-    timeline: {
-      type: [TimelineSchema],
+    term: {
+      type: Schema.Types.ObjectId,
+      ref: "Term",
+      require: true
     },
+    timeline: [TimelineSchema],
     term: {
       type: Schema.Types.ObjectId,
       ref: "Term",

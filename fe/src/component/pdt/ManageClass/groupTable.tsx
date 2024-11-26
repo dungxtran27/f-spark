@@ -1,14 +1,16 @@
 import { Button, Checkbox, Modal, Pagination, Input, Select, Tag, Tooltip, message } from "antd";
-import { Key, useState } from "react";
+import { Key, useEffect, useState } from "react";
 import ClassCard from "./classCard";
 import { FiPlus } from "react-icons/fi";
 import { MdGroupAdd } from "react-icons/md";
 import { colorMajorGroup, QUERY_KEY } from "../../../utils/const";
 import { groupApi } from "../../../api/group/group";
 import { useQuery } from "@tanstack/react-query";
-import { FaStar } from "react-icons/fa"; // Importing star icon
+import { FaStar } from "react-icons/fa"; 
 import { tagMajorApi } from "../../../api/tagMajors/tagMajor";
 import { classApi } from "../../../api/Class/class";
+import { term } from "../../../api/term/term";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 
@@ -30,14 +32,18 @@ interface Tag {
   name: string;
   _id: string;
 }
-
+interface Term {
+  _id: string;
+  termCode: string; 
+}
 const Group = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [tagFilter, setTagFilter] = useState<string[] | null>([]); // Initialize tagFilter as an empty array
-  const [semester, setSemester] = useState("SU-24");
+  const [tagFilter, setTagFilter] = useState<string[] | null>([]);
+  const [semester, setSemester] = useState<string | null>(null);
   const [search, setSearch] = useState<string>("");
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -47,13 +53,31 @@ const Group = () => {
     setIsModalVisible(false);
   };
 
-  const { data: groupData } = useQuery({
-    queryKey: [QUERY_KEY.ALLGROUP, { semester, tagFilter, search }],
+  const { data: termData } = useQuery({
+    queryKey: [QUERY_KEY.TERM],
+    queryFn: async () => {
+      return term.getAllTermsToFilter();
+    },
+  });
+  const activeTerm = termData?.data?.data?.find(
+    (t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
+  );
+  useEffect(() => {
+    if (activeTerm?.termCode) {
+      setSemester(activeTerm.termCode);
+    }
+  }, [activeTerm]);
+  
+  const { data: groupData, refetch: refetchGroups } = useQuery({
+    queryKey: [QUERY_KEY.ALLGROUP, { tagFilter, search, page, semester }],
     queryFn: async () => {
       return groupApi.getAllGroupsNoClass({
         semester,
         tag: tagFilter,
         GroupName: search,
+        page,
+        limit: 10,
+        termCode: semester,
       });
     },
   });
@@ -63,7 +87,7 @@ const Group = () => {
       return tagMajorApi.getAllMajor();
     },
   });
-  const { data: classData } = useQuery({
+  const { data: classData, refetch: refetchClasses } = useQuery({
     queryKey: [QUERY_KEY.CLASSES],
     queryFn: async () => {
       return classApi.getClassListPagination({
@@ -92,6 +116,10 @@ const Group = () => {
 
   const handleTagChange = (value: string[] | null) => {
     setTagFilter(value);
+  };
+  const handlePageChange = (page: number) => {
+    setPage(page); 
+    refetchGroups();
   };
   const handleCheckboxChange = (groupId: string) => {
     setSelectedGroupIds((prev) =>
@@ -129,29 +157,45 @@ const Group = () => {
       );
     }
   };
+  const randomClassName = (): string => {
+    const prefixes = ["SE", "HS", "IB", "GD", "AI", "IA", "KS"];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const middle = Math.floor(Math.random() * (20 - 17 + 1)) + 17;
+    const suffix = String(Math.floor(Math.random() * 16)).padStart(2, "0");
+    return `${prefix}${middle}${suffix}`;
+  };
+
+  const createNewClass = async () => {
+    try {
+      const newClassData = {
+        classCode: randomClassName(),
+        teacherDetails: null,
+      };
+      await classApi.createClass(newClassData);
+      refetchClasses();
+    } catch (error) {
+      message.error("An error occurred while creating the class.");
+    }
+  };
   return (
     <div className="bg-white shadow-md rounded-md p-4">
       {/* Search and Filter Section */}
       <div className="mb-4 flex gap-4 items-center justify-between">
 
         <div className="flex gap-4">
-          <Input
-            placeholder="Search by group name"
-            value={search}
-            onChange={handleSearch}
-            style={{ width: 250 }}
-          />
+          
           <div className="flex items-center space-x-2">
-            <Select
-              value={semester}
-              onChange={handleSemesterChange}
-              className="w-24"
-            >
-              <Option value="SU-24">SU-24</Option>
-              <Option value="FA-24">FA-24</Option>
-              <Option value="SP-24">SP-24</Option>
-            </Select>
-          </div>
+          <Select
+            value={semester}
+            onChange={handleSemesterChange}
+            className="w-24"
+          >
+            {termData?.data?.data.map((term: Term) => (
+              <Option key={term.termCode} value={term.termCode}>
+                {term.termCode} {/* Display termCode */}
+              </Option>
+            ))}
+          </Select>
           <Select
             mode="multiple"
             placeholder="Filter by major"
@@ -167,6 +211,14 @@ const Group = () => {
               );
             })}
           </Select>
+          <Input
+            placeholder="Search by group name"
+            value={search}
+            onChange={handleSearch}
+            style={{ width: 250 }}
+          />
+          </div>
+          
         </div>
 
         {/* Add To Class Button */}
@@ -278,11 +330,11 @@ const Group = () => {
       {/* Pagination */}
       <div className="mt-5 flex justify-center">
         <Pagination
-          defaultCurrent={1}
-          total={filteredData.length}
-          showTotal={(total, range) =>
-            `${range[0]}-${range[1]} of ${total} groups`
-          }
+          current={page}
+          pageSize={10}
+          total={groupData?.data?.data?.totalItems}
+          onChange={handlePageChange}
+
         />
       </div>
 
@@ -317,7 +369,7 @@ const Group = () => {
               <ClassCard
                 key={classItem._id}
                 classCode={classItem.classCode}
-                teacherName={classItem?.teacherDetails?.name  || "Unknown"}
+                teacherName={classItem?.teacherDetails?.name || "Unknown"}
                 isSelected={isSelected}
                 groups={classItem.totalGroups}
                 isSponsorship={sponsorshipCount}
@@ -327,7 +379,9 @@ const Group = () => {
               />
             );
           })}
-          <button className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-primary/30">
+          <button
+            onClick={createNewClass}
+            className="bg-gray-100 border-2 border-gray-300 rounded-lg p-5 flex flex-col justify-center items-center cursor-pointer shadow-md hover:bg-primary/30">
             <FiPlus className="text-3xl" />
             <span className="mt-1 text-lg">Create new class</span>
           </button>
