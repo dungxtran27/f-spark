@@ -360,14 +360,23 @@ const findStudentDetailByAccountId = async (accountId) => {
     })
     .populate({
       path: "classId",
-      select: "_id teacher", 
+      select: "_id teacher classCode", 
     });
     return student;
   } catch (error) {
     throw new Error(error.message);
   }
 };
-
+const getAllStudentByGroupId = async (groupId) => {
+  try {
+    const students = await Student.find({ group: groupId }).select(
+      "_id name studentId account"
+    );
+    return students;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   findStudentByAccountId,
   getStudentsByGroup,
@@ -379,5 +388,6 @@ export default {
   addManyStudentNoClassToClass,
   getAllAccStudent,
   getAllStudentUngroupByClassIds,
-  findStudentDetailByAccountId
+  findStudentDetailByAccountId,
+  getAllStudentByGroupId
 };

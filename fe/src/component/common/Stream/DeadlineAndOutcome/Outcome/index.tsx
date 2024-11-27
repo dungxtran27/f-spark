@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineMoreTime } from "react-icons/md";
 import { DATE_FORMAT, ROLE, CREATE_REQUEST_DEADLINE } from "../../../../../utils/const";
-import { Checkbox, Divider, Form, Modal, Tooltip, DatePicker, Input } from "antd";
+import { Checkbox, Divider, Form, Modal, Tooltip, DatePicker, Input, message } from "antd";
 import Submissions from "../../../../teacher/ClassDetail/Outcomes/Submissions";
 import { useState } from "react";
 import GradingSubmission from "../../../../teacher/ClassDetail/Outcomes/GradingSubmission";
@@ -27,11 +27,46 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   };
   const handleOk = () => {
     const values = form.getFieldsValue();
+    const newDate = dayjs(values.newDate);
+    const currentDate = dayjs();
+
+    if(!values.reason){
+      message.error("Reason is required.");
+      form.setFields([
+        {
+          name: CREATE_REQUEST_DEADLINE.reason,
+          errors: [""],
+        },
+      ]);
+      return;
+    }
+
+    if (!newDate.isAfter(currentDate)) {
+      message.error("Request due date must be in the future.");
+      form.setFields([
+        {
+          name: CREATE_REQUEST_DEADLINE.newDate,
+          errors: [""],
+        },
+      ]);
+      return;
+    }
+
+    if (!newDate.isAfter(dayjs(o?.dueDate))) {
+      message.error("Request due date must be after the original due date.");
+      form.setFields([
+        {
+          name: CREATE_REQUEST_DEADLINE.newDate,
+          errors: [""],
+        },
+      ]);
+      return;
+    }
     const data = {
       reason: values.reason,
       newDate: dayjs(values.newDate),
-      ClassworkId: o._id,
-      ClassworkName: o.title,
+      classworkId: o._id,
+      classworkName: o.title,
       dueDate: dayjs(o?.dueDate),
       classId: o.classId
     }
@@ -42,6 +77,14 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   const handleCancel = () => {
     setIsModalOpenRequest(false);
   };
+  const getRemainingTime = (endDate: string) => {
+    const end = dayjs(endDate);
+    const now = dayjs();
+    const timeLeft = end.diff(now);
+    const daysLeft = Math.floor(timeLeft / (1000 * 3600 * 24));
+    const hoursLeft = Math.floor((timeLeft % (1000 * 3600 * 24)) / (1000 * 3600));
+    return { daysLeft, hoursLeft };
+};  
   return (
     <div className="w-full bg-white rounded-md min-h-[500px] mb-5">
       <div className="flex items-center justify-between">
@@ -115,7 +158,16 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
           form={form}
           layout="vertical">
             <div className="flex items-center justify-between">
-              <FormItem label={"Due date"}>
+              <FormItem label={<>
+                                Due date{' '}
+                                <span className="text-red-500 pl-1">
+                                  Left:{' '}
+                                  {getRemainingTime(o?.dueDate).daysLeft <= 0 &&
+                                  getRemainingTime(o?.dueDate).hoursLeft <= 0
+                                    ? '00:00 '
+                                    : `${getRemainingTime(o?.dueDate).daysLeft}d ${getRemainingTime(o?.dueDate).hoursLeft}h`}
+                                </span>
+                              </>}>
                 <DatePicker
                   value={o?.dueDate ? dayjs(o?.dueDate) : null}
                   format="DD/MM/YYYY"

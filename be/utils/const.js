@@ -25,6 +25,8 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",
   CREATE_ASSIGNMENT: "CreateAssignment",
   GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
+  CREATE_REQUEST_DEADLINE: "CreateRequestDeadline",
+  RESPONSE_REQUEST_DEADLINE: "responserRequestDeadline"
 };
 export const DEADLINE_TYPES = {
   MEMBERS_TRANSFER: "membersTransfer",
@@ -33,4 +35,10 @@ export const DEADLINE_TYPES = {
   OUTCOME: "outcome",
   START_TERM: "startTerm",
   TEACHER_LOCK_GROUP: "teacherLockGroup"
+}
+
+export const REQUEST_DEADLINE_STATUS = {
+  DEFAULT_STATUS: "pending",
+  APPROVED_STATUS: "approved",
+  DECLINED_STATUS: "declined"
 }

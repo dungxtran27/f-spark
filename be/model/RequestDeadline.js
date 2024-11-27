@@ -2,41 +2,43 @@ import mongoose, { Schema, SchemaTypes } from "mongoose";
 
 const RequestDeadlineSchema = new Schema(
   {
-    TeacherId: {
+    teacherId: {
       type: Schema.Types.ObjectId,
       ref: 'Teacher',
       required: false,
     },
-    ClassworkId: {
+    classworkId: {
       type: Schema.Types.ObjectId,
       ref: 'Classwork',
-      required: false,
+      required: true,
     },
-    ClassworkName: {
-      type: String,
-      required: false,
-    },
-    GroupId: {
+    groupId: {
       type: Schema.Types.ObjectId,
       ref: 'Group',
       required: false,
     },
-    GroupName: {
-      type: String,
-      required: false,
+    classId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Class',
+      required: true,
     },
-    Reason: {
+    reason: {
       type: String,
-      required: false,
+      required: true,
     },
     dueDate: {
       type: Date,
-      required: false,
+      required: true,
     },
     newDate: {
       type: Date,
-      required: false,
-    } 
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "declined"],
+      default: "pending",
+    },
   },
   { timestamps: true, collection: 'RequestDeadline' }
 );

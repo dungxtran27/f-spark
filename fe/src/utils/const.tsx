@@ -253,7 +253,8 @@ export const QUERY_KEY = {
   MENTORINFO:"mentorInfo",
   NO_CLASS_STUDENT: "noClassStudent",
   NO_CLASS_GROUPS: "noClassGroups",
-  ADD_STUDENT_TO_CLASS: "addStudentToClass"
+  ADD_STUDENT_TO_CLASS: "addStudentToClass",
+  REQUEST_DEADLINE_LIST: "requestDeadlineList"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
