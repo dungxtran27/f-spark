@@ -3,6 +3,7 @@ import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
 import { ROLE } from "../../../utils/const";
 import StudentNotification from "../../student/Notification";
+import TeacherNotification from "../../teacher/Notification";
 
 const NotificationWrapper = () => {
   const userInfo = useSelector(
@@ -12,7 +13,7 @@ const NotificationWrapper = () => {
     case ROLE.student:
       return <StudentNotification/>;
     case ROLE.teacher:
-      return <>Teacher Notification</>;
+      return <TeacherNotification/>;
     default:
       return <>Invalid role value</>;
   }

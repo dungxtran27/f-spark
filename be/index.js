@@ -21,6 +21,7 @@ import {
   RequestRouter,
   NotificationRouter,
   TermRouter,
+  RequestDeadlineRouter
 } from "./routes/index.js";
 import "./utils/google-oauth2.js";
 import path from "path";
@@ -71,6 +72,7 @@ app.use("/api/tagmajor", TagMajorRouter);
 app.use("/api/request", RequestRouter);
 app.use("/api/notification", NotificationRouter)
 app.use("/api/term", TermRouter)
+app.use("/api/requestDeadline", RequestDeadlineRouter)
 
 const port = process.env.PORT || 9999;
 const MONGODB_URI = process.env.MONGODB_URI;

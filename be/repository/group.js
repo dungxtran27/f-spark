@@ -985,6 +985,20 @@ const addGroupAndStudentsToClass = async (groupIds, classId) => {
   }
 };
 
+const updateTimelineForGroup = async ({groupId, classworkId, newDate}) => {
+  try {
+    const updatedGroup = await Group.findOneAndUpdate(
+      { _id: groupId, "timeline.classworkId": classworkId },
+      { $set: { "timeline.$.endDate": newDate } },          
+      { new: true }                                    
+    );
+    
+    const updatedTimeline = updatedGroup.timeline.find(timeline => timeline.classworkId.toString() == classworkId);
+    return updatedTimeline;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 const createGroupsFromExcel = async (groupData) => {
   try {
     const result = await Group.insertMany(groupData, { ordered: false });
@@ -994,6 +1008,17 @@ const createGroupsFromExcel = async (groupData) => {
   }
 };
 
+const getTimelineClassworkOfGroup = async ({groupId, classworkId}) => {
+  try {
+    const group = await Group.findOne(
+      { _id: groupId, "timeline.classworkId": classworkId },
+      { "timeline.$": 1 } 
+    );
+    return group.timeline[0];
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -1021,5 +1046,7 @@ export default {
   editTimelineForManyGroups,
   getAllGroupsNoClass,
   addGroupAndStudentsToClass,
+  updateTimelineForGroup,
+  getTimelineClassworkOfGroup,
   createGroupsFromExcel
 };
