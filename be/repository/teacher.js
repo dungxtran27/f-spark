@@ -264,9 +264,20 @@ const getTeacherWithClasses = async (teacherId) => {
   }
 };
 
+const getTeacherAccountByClassId = async (classId) => {
+  try {
+    const classDoc = await Class.findById(classId);
+    const teacher = await Teacher.findById(new mongoose.Types.ObjectId(classDoc.teacher))
+    return teacher
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
 export default {
   getTeacherByClassId,
   findByAccountId,
   getAllAccTeacher,
   getTeacherWithClasses,
+  getTeacherAccountByClassId
 };

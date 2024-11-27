@@ -256,9 +256,10 @@ export const QUERY_KEY = {
   NO_CLASS_STUDENT: "noClassStudent",
   NO_CLASS_GROUPS: "noClassGroups",
   ADD_STUDENT_TO_CLASS: "addStudentToClass",
-  TERM: "term",
-  TERMACTIVE: "termActive",
-  TERM_LIST: "termList",
+  REQUEST_DEADLINE_LIST: "requestDeadlineList",
+  TERM:"term",
+  TERMACTIVE:"termActive",
+  TERM_LIST: "termList"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -296,4 +297,8 @@ export const NOTIFICATION_TYPE = {
   CLASS: "class",
   GROUP: "group",
   SYSTEM: "system",
+};
+export const CREATE_REQUEST_DEADLINE = {
+  newDate: "newDate",
+  reason: "reason",
 };

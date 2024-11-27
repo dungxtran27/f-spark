@@ -14,6 +14,7 @@ import TagMajorRouter from "./tagmajor.js";
 import RequestRouter from "./request.js";
 import NotificationRouter from "./notification.js";
 import TermRouter from "./term.js"
+import RequestDeadlineRouter from "./requestDeadline.js";
 export {
   AuthenticationRouter,
   UserRouter,
@@ -30,5 +31,6 @@ export {
   TagMajorRouter,
   RequestRouter,
   NotificationRouter,
-  TermRouter
+  TermRouter,
+  RequestDeadlineRouter
 };

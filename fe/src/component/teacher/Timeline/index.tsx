@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { groupApi } from '../../../api/group/group';
 import { QUERY_KEY } from '../../../utils/const';
 import { AxiosResponse } from 'axios';
-
+import TimelineRequest from './TimelineRequest';
 interface Timeline {
     _id: string;
     title: string;
@@ -43,6 +43,9 @@ const TimelineClassWrapper: React.FC = () => {
     return (
         <div>
             <Tabs defaultActiveKey="0" tabPosition="left">
+                    <Tabs.TabPane tab={"Request Deadline"}>
+                        <TimelineRequest/>
+                    </Tabs.TabPane>
                 {groups.map((group: Group, index: number) => (
                     <Tabs.TabPane tab={group.GroupName} key={index.toString()}>
                         {renderTimeline(group)}
