@@ -224,7 +224,7 @@ const ClassGroupListWrapper = () => {
     queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
     queryFn: async () => {
       return mentorList.getMentorListPagination({
-        limit: 27,
+        limit: 100,
         page: 1,
         tagIds: tagSearch,
         name: nameSeacrh,
@@ -257,6 +257,7 @@ const ClassGroupListWrapper = () => {
     },
   });
   // assign mentor to group
+
   const assignMentorToGroup = useMutation({
     mutationFn: ({ mentorId, groupId }: reqBodyAssignMentorToGroup) =>
       student.assignmentorToGroup({
@@ -265,7 +266,8 @@ const ClassGroupListWrapper = () => {
       }),
 
     onSuccess: (data) => {
-      setGroup(data.data.group);
+      setGroup(data?.data.data.group);
+
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
@@ -387,7 +389,7 @@ const ClassGroupListWrapper = () => {
       render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
     },
   ];
-
+  // console.log("c", group);
   return (
     <>
       <div className=" px-0.1">
@@ -457,9 +459,9 @@ const ClassGroupListWrapper = () => {
           <Select
             mode="multiple"
             allowClear
-            defaultValue={group.tag.map((tag) => ({
-              label: tag.name,
-              value: tag._id,
+            defaultValue={group?.tag.map((tag) => ({
+              label: tag?.name,
+              value: tag?._id,
             }))}
             className={classNames(style.search_tag_bar)}
             placeholder="Please select"
@@ -503,13 +505,13 @@ const ClassGroupListWrapper = () => {
           <Button key="back" onClick={handleClosegroupDetailModal}>
             Close
           </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleClosegroupDetailModal}
-          >
-            Save
-          </Button>,
+          // <Button
+          //   key="submit"
+          //   type="primary"
+          //   onClick={handleClosegroupDetailModal}
+          // >
+          //   Save
+          // </Button>,
           <Button
             className={classNames(style.deleteBtn)}
             onClick={() => {
@@ -521,25 +523,25 @@ const ClassGroupListWrapper = () => {
           </Button>,
         ]}
       >
-        {Object.keys(group).length === 0 ? (
+        {group && Object.keys(group).length === 0 ? (
           <>none</>
         ) : (
           <div className="flex">
             <div className="max-w-[50%] min-w-[50%]">
               <div className="flex pb-1">
                 <span className="font-semibold text-[16px] pb-1 ">
-                  {group.GroupName}
+                  {group?.GroupName}
                 </span>
               </div>
               <img
                 src={
-                  group.groupImage ||
+                  group?.groupImage ||
                   "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
                 }
                 className="h-[200px] w-full object-cover mb-2"
                 alt=""
               />
-              {group.mentor == null ? (
+              {group?.mentor == null ? (
                 <>
                   <span>Mentor:</span>
                   <Button
@@ -555,7 +557,7 @@ const ClassGroupListWrapper = () => {
                 <div className="flex self-center items-center">
                   <p>Mentor:</p>
                   <p className="pl-1 font-semibold text-[14px]">
-                    {group.mentor.name}{" "}
+                    {group?.mentor?.name}{" "}
                   </p>
                   <FaEdit
                     size={23}
@@ -566,16 +568,16 @@ const ClassGroupListWrapper = () => {
               )}
               <div className="mt-3">
                 Tags:
-                {group.tag?.map((t) => (
+                {group?.tag?.map((t) => (
                   <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
                 ))}
               </div>
               <div className="line-clamp-[3] mt-2">
-                Description: {group.GroupDescription}
+                Description: {group?.GroupDescription}
               </div>
             </div>
             <div className=" min-w-[50%]  pt-5 pl-5">
-              {group.teamMembers.length > 0 ? (
+              {group?.teamMembers.length > 0 ? (
                 <>
                   {group?.teamMembers.map((s: any) => (
                     <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
@@ -668,30 +670,34 @@ const ClassGroupListWrapper = () => {
               switch (confirmContent) {
                 case "leader":
                   assignLeaderToGroup.mutate({
-                    groupId: group._id,
-                    studentId: studentSelected._id,
+                    groupId: group?._id,
+                    studentId: studentSelected?._id,
                   });
                   handleCloseconfirm();
                   break;
                 case "remove":
                   deleteStudentFromGroup.mutate({
-                    groupId: group._id,
-                    studentId: studentSelected._id,
+                    groupId: group?._id,
+                    studentId: studentSelected?._id,
                   });
                   handleCloseconfirm();
                   break;
                 case "delete":
                   ungroup.mutate({
-                    groupId: group._id,
+                    groupId: group?._id,
                   });
                   handleCloseconfirm();
                   handleClosegroupDetailModal();
                   break;
                 case "mentor":
+                  // console.log("1",group);
+
                   assignMentorToGroup.mutate({
-                    mentorId: mentorSelected._id,
-                    groupId: group._id,
+                    mentorId: mentorSelected?._id,
+                    groupId: group?._id,
                   });
+                  // console.log("2", group);
+
                   handleCloseAddMentorModal();
                   handleCloseconfirm();
                   break;
@@ -708,23 +714,25 @@ const ClassGroupListWrapper = () => {
         {confirmContent == "mentor" && (
           <>
             you want to add {mentorSelected.name} as mentor for group :
-            {group.GroupName}
+            {group?.GroupName}
           </>
         )}
         {confirmContent == "leader" && (
           <>
-            you want to add {studentSelected.name} as leader for group :
-            {group.GroupName}
+            you want to add {studentSelected?.name} as leader for group :
+            {group?.GroupName}
           </>
         )}
         {confirmContent == "remove" && (
           <>
-            You want to remove {studentSelected.name}from group :
-            {group.GroupName}?
+            You want to remove {studentSelected?.name}from group :
+            {group?.GroupName}?
           </>
         )}
         {confirmContent == "delete" && (
-          <>You want to Delete {group.GroupName}? This Action cannot be undo.</>
+          <>
+            You want to Delete {group?.GroupName}? This Action cannot be undo.
+          </>
         )}
       </Modal>
       {/* modal create group */}

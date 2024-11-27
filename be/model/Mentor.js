@@ -22,7 +22,7 @@ const MentorSchema = new Schema(
       {
         id: {
           type: Schema.Types.ObjectId,
-          ref: 'Class',
+          ref: "Class",
           required: true,
         },
         classCode: {
@@ -38,7 +38,7 @@ const MentorSchema = new Schema(
     assignedGroup: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Group',
+        ref: "Group",
         required: false,
       },
     ],
@@ -46,14 +46,14 @@ const MentorSchema = new Schema(
       {
         id: {
           type: Schema.Types.ObjectId,
-          ref: 'TagMajor',
+          ref: "TagMajor",
           required: true,
         },
         name: {
           type: String,
           required: true,
         },
-      }
+      },
     ],
     profilePicture: {
       type: String,
@@ -61,10 +61,10 @@ const MentorSchema = new Schema(
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
-  { timestamps: true, collection: 'Mentors' }
+  { timestamps: true, collection: "Mentors" }
 );
 
 const Mentor = mongoose.model('Mentor', MentorSchema);
