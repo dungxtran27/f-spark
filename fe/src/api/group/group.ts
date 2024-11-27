@@ -25,5 +25,7 @@ export const groupApi = {
   addGroupToClass: async (requestBody: any) => {
     return await axios.patch(`/api/group/addGroupToClass`, requestBody);
   },
-
+  getGroupOfTerm: async (termId: string|undefined) =>{
+    return await axios.get(`/api/group/getGroupsOfTerm/${termId}`)
+  }
 };

@@ -5,6 +5,7 @@ import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
 import { BiSolidDashboard, BiSolidUserAccount } from "react-icons/bi";
 import { RiMailSendFill } from "react-icons/ri";
+import { IoTimerOutline } from "react-icons/io5";
 export const StudentRoutes = [
   {
     route: "/dashboard",
@@ -64,6 +65,11 @@ export const AdminRoutes = [
     route: "/manageRequest",
     page: "Requests",
     icon: <BiSolidUserAccount size={20} />,
+  },
+  {
+    route: "/manageTerms",
+    page: "Terms",
+    icon: <IoTimerOutline size={20} />,
   },
 ];
 

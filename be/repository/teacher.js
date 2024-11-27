@@ -50,15 +50,20 @@ const findByAccountId = async (accountId) => {
   }
 };
 
-const getAllAccTeacher = async (page, limit, searchText, status) => {
+const getAllAccTeacher = async (page, limit, searchText, status, term) => {
   try {
     let filterCondition = { $and: [] };
     if (searchText) {
       filterCondition.$and.push({
         $or: [
           { name: { $regex: searchText, $options: "i" } },
-          { email: { $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } },
-        ]
+          {
+            email: {
+              $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, "\\$&"),
+              $options: "i",
+            },
+          },
+        ],
       });
     }
 
@@ -88,17 +93,73 @@ const getAllAccTeacher = async (page, limit, searchText, status) => {
         },
       },
       {
-        $project: {
-          name: 1,
-          salutation: 1,
-          phoneNumber: 1,
-          email: "$accountDetails.email",
-          isActive: "$accountDetails.isActive",
-          assignedClasses: 1,
-          createdAt: 1,
-          updatedAt: 1,
+        $lookup: {
+          from: "Classes",
+          let: { teacherId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$teacher", "$$teacherId"] },
+                    { $eq: ["$term", new mongoose.Types.ObjectId(term)] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "Students",
+                localField: "_id",
+                foreignField: "classId",
+                as: "students",
+              },
+            },
+            {
+              $addFields: {
+                studentCount: { $size: "$students" },
+              },
+            },
+            {
+              $project: {
+                students: 0,
+              },
+            },
+          ],
+          as: "assigned",
         },
       },
+      {
+        $unwind: {
+          path: "$assigned",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          salutation: { $first: "$salutation" },
+          phoneNumber: { $first: "$phoneNumber" },
+          assigned: { $push: "$assigned" },
+          email: { $first: "$accountDetails.email" },
+          isActive: { $first: "$accountDetails.isActive" },
+        },
+      },
+      // {
+      //   $project: {
+      //     name: 1,
+      //     salutation: 1,
+      //     phoneNumber: 1,
+      //     assigned: "$assigned",
+      //     email: "$accountDetails.email",
+      //     isActive: "$accountDetails.isActive",
+      //     assignedClasses: 1,
+      //     createdAt: 1,
+      //     updatedAt: 1,
+      //   },
+      // },
       {
         $match: filterCondition,
       },
@@ -201,13 +262,11 @@ const getTeacherWithClasses = async (teacherId) => {
   } catch (error) {
     throw new Error(`Error fetching teacher info: ${error.message}`);
   }
-}
-
-
+};
 
 export default {
   getTeacherByClassId,
   findByAccountId,
   getAllAccTeacher,
-  getTeacherWithClasses
+  getTeacherWithClasses,
 };

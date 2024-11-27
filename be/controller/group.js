@@ -1,4 +1,3 @@
-
 import {
   ClassRepository,
   GroupRepository,
@@ -352,12 +351,10 @@ const editTimelineForManyGroups = async (req, res) => {
   try {
     const { groupIds, type, updateData, editAble } = req.body;
     if (!groupIds || !type || !updateData || editAble === undefined) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Group IDs, timeline type, editAble, and new timeline data are required",
-        });
+      return res.status(400).json({
+        message:
+          "Group IDs, timeline type, editAble, and new timeline data are required",
+      });
     }
     if (editAble === false) {
       return res
@@ -422,7 +419,7 @@ const getAllGroupsNoClass = async (req, res) => {
         const majors = [...new Set(members?.map((m) => m.major))];
         return { ...g._doc, members, majors: majors };
       })
-    )
+    );
     const isLastPage = pageIndex >= maxPages;
     return res.status(200).json({
       data: {
@@ -466,7 +463,20 @@ const addGroupToClass = async (req, res) => {
   }
 };
 
+const getGroupsOfTerm = async (req, res) => {
+  try {
+    const { termId } = req.params;
+    console.log(termId);
+    
+    const result = await GroupRepository.getGroupsOfTerm(termId);
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
+  getGroupsOfTerm,
   createJourneyRow,
   createJourneyCol,
   findGroupById,

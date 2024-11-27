@@ -25,7 +25,7 @@ import { QUERY_KEY } from "../../../../utils/const";
 import { Admin } from "../../../../api/manageAccoount";
 import dayjs from "dayjs";
 import axios from "axios";
-
+import AddStudentModal from "./AddStudentModal";
 const { Option } = Select;
 
 interface Student {
@@ -40,6 +40,7 @@ interface Student {
 
 const AccountManagement: React.FC = () => {
   const [page, setCurrentPage] = useState(1);
+  const [openAddStudent, setOpenAddStudent] = useState<boolean>(false);
   const [itemsPerPage] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [classFilter, setClassFilter] = useState<string | undefined>(undefined);
@@ -132,7 +133,7 @@ const AccountManagement: React.FC = () => {
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "MSSV", dataIndex: "studentId", key: "studentId" },
     { title: "Class", dataIndex: "classId", key: "classId" },
-    { title: "Email", dataIndex: "accountEmail", key: "accountEmail" },
+    { title: "Email", dataIndex: "email", key: "email" },
     // { title: "Term", dataIndex: "term", key: "term" },
     {
       title: "Status",
@@ -201,6 +202,7 @@ const AccountManagement: React.FC = () => {
 
   return (
     <div className="max-w-full mx-auto p-4 bg-white rounded-lg shadow-md">
+
       <Row gutter={[16, 16]} className="mb-4" justify="space-between">
         <Col flex="auto">
           <Row gutter={[16, 16]}>
@@ -286,7 +288,14 @@ const AccountManagement: React.FC = () => {
         />
 
         <Col flex="none" className="flex justify-end">
-          <Button type="primary" icon={<PlusOutlined />} className="mr-2">
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            className="mr-2"
+            onClick={() => {
+              setOpenAddStudent(true);
+            }}
+          >
             Add Student
           </Button>
           <Button
@@ -305,7 +314,7 @@ const AccountManagement: React.FC = () => {
         columns={columns}
         dataSource={data}
         pagination={false}
-        rowKey="id"
+        rowKey="_id"
       />
       <input
         ref={fileInputRef}
@@ -323,6 +332,7 @@ const AccountManagement: React.FC = () => {
           showTotal={(total) => `Total ${total} students`}
         />
       </div>
+      <AddStudentModal isOpen={openAddStudent} setIsOpen={setOpenAddStudent} />
     </div>
   );
 };

@@ -434,6 +434,7 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
           name: 1,
           studentId: 1,
           gen: 1,
+          email: 1,
           major: 1,
           group: "$groupDetails.name",
           accountEmail: "$accountDetails.email",

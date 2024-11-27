@@ -1,10 +1,10 @@
 import { Button, Typography, Table, Tabs, TabsProps, Tag } from "antd";
-import classNames from "classnames";
-import styles from "../../teacher/ClassDetail/styles.module.scss";
+import styles from "../ManageAccount/styles.module.scss";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { requestList } from "../../../api/request/request";
 import { ColumnsType } from "antd/es/table";
+import Statistic from "./Statistic";
 const { Text } = Typography;
 const RequestWrapper = () => {
   const { data: reqData } = useQuery({
@@ -182,32 +182,43 @@ const RequestWrapper = () => {
       key: "pending",
       label: "Pending",
       children: (
-        <Table
-          // pagination={}
-          // scroll={{ y: 1000 }}
-          dataSource={reqData?.data.pendingRequest}
-          columns={columnsReqPending}
-        />
+        <div className="bg-white p-3 rounded-md">
+          <Table
+            className="customTable"
+            // pagination={}
+            dataSource={reqData?.data.pendingRequest}
+            columns={columnsReqPending}
+          />
+        </div>
       ),
     },
     {
       key: "approved",
       label: "Processed",
       children: (
-        <Table
-          dataSource={reqData?.data.processedRequest}
-          columns={columnsReqProcessed}
-        />
+        <div className="bg-white p-3 rounded-md">
+          <Table
+            dataSource={reqData?.data.processedRequest}
+            columns={columnsReqProcessed}
+          />
+        </div>
       ),
     },
   ];
 
   return (
-    <>
-      <div className={classNames(styles.customTabs)}>
-        <Tabs items={items} defaultActiveKey="pending" />
+    <div className="p-5">
+      <div className="">
+        <Statistic />
+        <div className="">
+          <Tabs
+            items={items}
+            defaultActiveKey="pending"
+            className={styles.customTab}
+          />
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 export default RequestWrapper;
