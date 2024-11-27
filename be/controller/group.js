@@ -398,7 +398,7 @@ const editTimelineForManyGroups = async (req, res) => {
 
 const getAllGroupsNoClass = async (req, res) => {
   try {
-    const { GroupName, tag, page, limit } = req.body;
+    const { GroupName, tag, page, limit, termCode } = req.body;
     const pageIndex = parseInt(page) || 1;
     const pageSize = parseInt(limit) || 10;
     const {
@@ -413,10 +413,11 @@ const getAllGroupsNoClass = async (req, res) => {
       GroupName,
       tag,
       parseInt(page),
-      parseInt(limit)
+      parseInt(limit),
+      termCode
     );
     const mappedNoClassGroups = await Promise.all(
-      GroupNotHaveClass1.map( async(g)=>{
+      GroupNotHaveClass1.map(async (g) => {
         const members = await StudentRepository.getStudentsByGroup(g._id);
         const majors = [...new Set(members?.map((m) => m.major))];
         return { ...g._doc, members, majors: majors };

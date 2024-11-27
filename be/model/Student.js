@@ -23,7 +23,6 @@ const StudentSchema = new Schema(
     account: {
       type: Schema.Types.ObjectId,
       ref: 'Account',
-      required: true,
     },
     group: {
       type: Schema.Types.ObjectId,
@@ -36,9 +35,12 @@ const StudentSchema = new Schema(
     },
     term: {
       type: Schema.Types.ObjectId,
-      ref: "Term",
-      required: false,
+      ref: 'Term'
     },
+    email: {
+      type: String,
+      required: true
+    }
   },
   { timestamps: true, collection: 'Students' }
 );

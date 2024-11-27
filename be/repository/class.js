@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import Class from "../model/Class.js";
 import teacher from "./teacher.js";
+import Term from "../model/Term.js";
+import Classwork from "../model/ClassWork.js";
+import { TermRepository } from "./index.js";
+import Outcome from "../model/Outcome.js";
 const getClassesOfTeacher = async (teacherId) => {
   try {
 
@@ -211,7 +215,7 @@ const getAllClasses = async () => {
     throw new Error(error.message);
   }
 };
-const getAllClass = async (page, limit, classCode, teacherName, category) => {
+const getAllClass = async (page, limit, classCode, teacherName, category, termCode) => {
   try {
     let filterCondition = {
       $and: []
@@ -237,7 +241,13 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
         { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] }
       )
     };
-
+    if (termCode) {
+      filterCondition.$and.push({
+        $or: [
+          { termCode: { $regex: termCode, $options: "i" } },
+        ],
+      });
+    }
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
@@ -288,6 +298,20 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
         }
       },
       {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails"
+        }
+      },
+      {
+        $unwind: {
+          path: "$termDetails",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
         $group: {
           _id: "$_id",
           classCode: { $first: "$classCode" },
@@ -296,13 +320,20 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
           pinDetails: { $first: "$pinDetails" },
           groups: { $push: "$groups" },
           students: { $push: "$students" },
-          totalStudents: { $first: "$totalStudents" }
+          totalStudents: { $first: "$totalStudents" },
+          term: { $first: "$term" },
+          termDetails: { $first: "$termDetails" },
+          termCode: {
+            $first: "$termDetails.termCode"
+          },
         },
       },
       {
         $project: {
           classCode: 1,
           isActive: 1,
+          term: 1,
+          termCode: 1,
           teacherDetails: { name: 1, email: 1 },
           groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
           totalGroups: { $size: "$groups" },
@@ -510,18 +541,41 @@ const createClass = async ({
   isActive = true,
 }) => {
   try {
+    const matchingTerm = await TermRepository.getActiveTerm();
+
+    if (!matchingTerm) {
+      throw new Error("No matching term found for the current date.");
+    }
     const result = await Class.create({
       classCode,
       teacher,
       backgroundImage,
       classInfo,
       isActive,
+      term: matchingTerm._id,
     });
+    const outcomeDeadlines = matchingTerm.timeLine?.filter(
+      (deadline) => deadline.type === "outcome"
+    ) || [];
+    for (const deadline of outcomeDeadlines) {
+      const outcome = await Outcome.findById(deadline.outcome);
+      await Classwork.create({
+        name: deadline.title || null,
+        description: deadline.description || null,
+        startDate: deadline.startDate || null,
+        dueDate: deadline.endDate || null,
+        GradingCriteria: outcome?.GradingCriteria || [],
+        type: "outcome",
+        classId: result._id,
+      });
+    }
     return result._doc;
   } catch (error) {
+    console.error("Error creating class:", error.message);
     throw new Error(error.message);
   }
 };
+
 
 export default {
   pinClasswork,

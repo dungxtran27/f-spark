@@ -27,7 +27,7 @@ const TimelineSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["isSponsorship", "lockgroup", "outcome1", "outcome2", "outcome3",],
+      enum: ["isSponsorship", "lockgroup", "outcome1", "outcome2", "outcome3"],
     },
     classworkId: {
       type: Schema.Types.ObjectId,
@@ -38,25 +38,23 @@ const TimelineSchema = new Schema(
   { timestamps: true }
 );
 
-const customerPersona = new Schema(
-  {
-    detail: {
-      age: { type: Number, default: null },
-      name: { type: String, default: null },
-      jobTitle: { type: String, default: null },
-      relationshipStatus: {
-        type: String,
-        enum: ["Độc thân", "Đã kết hôn", "Đã ly hôn", "Góa phụ"],
-        default: "Độc thân",
-      },
-      address: { type: String, default: null },
-      income: { type: Number, default: null },
-      image: { type: String, default: null },
+const customerPersona = new Schema({
+  detail: {
+    age: { type: Number, default: null },
+    name: { type: String, default: null },
+    jobTitle: { type: String, default: null },
+    relationshipStatus: {
+      type: String,
+      enum: ["Độc thân", "Đã kết hôn", "Đã ly hôn", "Góa phụ"],
+      default: "Độc thân",
     },
-    bio: { type: String, default: null },
-    needs: [{ type: String, default: null }],
+    address: { type: String, default: null },
+    income: { type: Number, default: null },
+    image: { type: String, default: null },
   },
-);
+  bio: { type: String, default: null },
+  needs: [{ type: String, default: null }],
+});
 
 const ColSchema = new Schema({
   name: {
@@ -134,12 +132,10 @@ const GroupSchema = new Schema(
     },
     GroupDescription: {
       type: String,
-      required: true,
     },
     class: {
       type: Schema.Types.ObjectId,
       ref: "Class",
-      required: true,
     },
     customerJourneyMap: {
       type: CustomerJourneyMapSchema,
@@ -201,13 +197,10 @@ const GroupSchema = new Schema(
         ],
       },
     },
-    customerPersonas: [
-      customerPersona
-    ],
+    customerPersonas: [customerPersona],
     isSponsorship: {
       type: Boolean,
       default: false,
-      require: true,
     },
     teamMembers: [
       {
@@ -220,7 +213,6 @@ const GroupSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "TagMajor",
-        required: true,
       },
     ],
     leader: {
@@ -241,11 +233,16 @@ const GroupSchema = new Schema(
       type: Number,
       required: false,
     },
+    term: {
+      type: Schema.Types.ObjectId,
+      ref: "Term",
+      require: true
+    },
     timeline: [TimelineSchema],
     term: {
       type: Schema.Types.ObjectId,
       ref: "Term",
-      required: false,
+      required: true
     },
   },
   { timestamps: true, collection: "Groups" }
