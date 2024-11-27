@@ -14,6 +14,7 @@ import TagMajorController from "./tagmajor.js";
 import RequestController from "./request.js";
 import NotificationController from "./notification.js";
 import TermController from "./term.js"
+import RequestDeadlineController from "./requestDeadline.js";
 export {
   AuthenticationController,
   UserController,
@@ -30,5 +31,6 @@ export {
   TagMajorController,
   NotificationController,
   RequestController,
-  TermController
+  TermController,
+  RequestDeadlineController
 };

@@ -469,7 +469,33 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
     throw new Error(error.message);
   }
 };
-
+const findStudentDetailByAccountId = async (accountId) => {
+  try {
+    const student = await Student.findOne({
+      account: accountId,
+    }).populate({
+      path: "group",
+      select: "_id GroupName", 
+    })
+    .populate({
+      path: "classId",
+      select: "_id teacher classCode", 
+    });
+    return student;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const getAllStudentByGroupId = async (groupId) => {
+  try {
+    const students = await Student.find({ group: groupId }).select(
+      "_id name studentId account"
+    );
+    return students;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 const bulkCreateStudentsFromExcel = async (studentsData) => {
   try {
     const result = await Student.insertMany(studentsData, { ordered: false });
@@ -490,4 +516,6 @@ export default {
   addManyStudentNoClassToClass,
   getAllAccStudent,
   getAllStudentUngroupByClassIds,
+  findStudentDetailByAccountId,
+  getAllStudentByGroupId
 };

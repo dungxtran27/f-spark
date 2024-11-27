@@ -7,6 +7,10 @@ import { NOTIFICATION_READ_STATUS, QUERY_KEY } from "../../../../utils/const";
 import { useQuery } from "@tanstack/react-query";
 import { notificationApi } from "../../../../api/notification/notification";
 import { Link } from "react-router-dom";
+import { UserInfo } from "../../../../model/auth";
+import { ROLE } from "../../../../utils/const";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/store";
 const Notification = () => {
   const [openNotification, setOpenNotification] = useState<boolean>(false);
   const [readStatusFilter, setReadStatusFilter] = useState("Unread");
@@ -20,13 +24,20 @@ const Notification = () => {
       ))}
     </Menu>
   );
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
+  
   const { data: notificationStatistic, isLoading } = useQuery({
     queryKey: [QUERY_KEY.NOTIFICATION_STATISTIC],
     queryFn: () => {
-      return notificationApi.getStudentNotificationStatistic();
+      if(userInfo?.role == ROLE.student){
+        return notificationApi.getStudentNotificationStatistic();
+      }
     },
     enabled: openNotification,
   });
+
   return (
     <div>
       <Badge count={10} className="cursor-pointer">
@@ -54,11 +65,14 @@ const Notification = () => {
           </div>
         </div>
         <Spin spinning={isLoading}>
+          {userInfo?.role == ROLE.student ? 
           <div className="grid grid-cols-3 gap-3">
-            <Link to={"/notification/system"}>
+          <Link to={"/notification/group"}>
               <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
-                <span className="text-4xl font-semibold">10</span>
-                <span>System</span>
+                <span className="text-4xl font-semibold">
+                  {notificationStatistic?.data?.data?.groupNotification}
+                </span>
+                <span>Group</span>
               </div>
             </Link>
             <Link to={"/notification/class"}>
@@ -69,15 +83,16 @@ const Notification = () => {
                 <span>Class</span>
               </div>
             </Link>
-            <Link to={"/notification/group"}>
+            <Link to={"/notification/system"}>
               <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
-                <span className="text-4xl font-semibold">
-                  {notificationStatistic?.data?.data?.groupNotification}
-                </span>
-                <span>Group</span>
+                <span className="text-4xl font-semibold">10</span>
+                <span>System</span>
               </div>
             </Link>
           </div>
+          : ''
+          }
+          
         </Spin>
       </Modal>
     </div>

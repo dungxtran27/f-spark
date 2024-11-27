@@ -122,7 +122,8 @@ const getStudentGroupNotification = async (groupId, studentId) => {
       })
       .populate({ path: "action.target", model: Task })
       .populate({ path: "action.target.assignee", model: Student })
-      .populate({ path: "action.newVersion.assignee", model: Student });
+      .populate({ path: "action.newVersion.assignee", model: Student })
+      .sort({ createdAt: -1 });
     return groupNotification;
   } catch (error) {
     throw new Error(error.message);
@@ -141,7 +142,8 @@ const getStudentClassNotification = async (classId) => {
       .populate({
         path: "class",
         select: "_id classCode",
-      });
+      })
+      .sort({ createdAt: -1 });
     return classNotification;
   } catch (error) {
     throw new Error(error.message);
