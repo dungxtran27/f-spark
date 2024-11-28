@@ -3,21 +3,24 @@ import { FaUser } from "react-icons/fa";
 import { FaUserGroup } from "react-icons/fa6";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { MdOutlineMessage } from "react-icons/md";
-import { Tooltip } from "antd";
+import { Button, Tooltip } from "antd";
 import { ImNotification } from "react-icons/im";
+import { EditOutlined } from "@ant-design/icons";
 
 interface ClassCardProps {
   className?: string;
   classCode?: string;
-  teacherName?: string;
+  teacherName?: string | null;
   groups?: number;
   isSponsorship?: number;
   totalMembers?: number;
-  
-  icon: ReactNode;
-  role: string;
+
+  icon?: ReactNode;
+  role?: string;
   onClick?: () => void;
   isSelected?: boolean; // New prop to track selected card
+  isEditing?: boolean;
+  onEditClick?: () => void;
 }
 
 const ClassCard: React.FC<ClassCardProps> = ({
@@ -34,13 +37,14 @@ const ClassCard: React.FC<ClassCardProps> = ({
       </span>
     </Tooltip>
   ),
-
+  isEditing = false, // Default value is false
+  onEditClick,
   onClick,
-  isSelected = false, // Default value is false
+  isSelected = false,
 }) => {
   const getCardColor = () => {
-    if (role == "teacher") {
-      if (groups >= 5 && totalMembers >= 10) {
+    if (role == "teacher" || role == "admin") {
+      if (groups >= 5 && totalMembers >= 30) {
         return "bg-green-500";
       } else {
         return "bg-red-500";
@@ -60,9 +64,19 @@ const ClassCard: React.FC<ClassCardProps> = ({
       <div className={`${getCardColor()} opacity-100 p-4 text-white`}>
         <div className="flex text-lg font-semibold">
           {classCode}
-          <div className="ml-auto">{icon}</div>
+          <div className="ml-auto flex items-center">
+            {icon}
+            {isEditing && (
+              <Button
+                type="link"
+                icon={<EditOutlined />}
+                onClick={onEditClick}
+                className="ml-2 text-white"
+              />
+            )}
+          </div>
         </div>
-        <div className="text-sm">Teacher: {teacherName}</div>
+        <div className="text-sm">Teacher: {teacherName ?? "N/A"}</div>
       </div>
       <div className="bg-white p-4">
         <div className="grid grid-cols-2 gap-4">
@@ -78,7 +92,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
           </div>
           <div className="flex items-center">
             <span className="text-sm font-medium text-gray-600">
-              {groups} Group
+              {groups} Groups
             </span>
             <FaUserGroup className="ml-2 text-gray-600" />
           </div>

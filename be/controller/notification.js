@@ -1,8 +1,11 @@
+import moment from "moment";
 import {
   NotificationRepository,
   StudentRepository,
-  TeacherRepository
+  TeacherRepository,
+  TermRepository,
 } from "../repository/index.js";
+import { DEADLINE_TYPES } from "../utils/const.js";
 
 const getGroupNotification = async (req, res) => {
   try {
@@ -126,6 +129,41 @@ const getTeacherClassNotificationByClass = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const remindMemberTransferEnd = async () => {
+  try {
+    const activeTerm = await TermRepository.getActiveTerm();
+    if (!activeTerm) {
+      return;
+    }
+    const deadline = activeTerm.timeLine.find(
+      (d) => d?.type === DEADLINE_TYPES.MEMBERS_TRANSFER
+    );
+
+    if (!deadline) {
+      return;
+    }
+
+    if (
+      Math.abs(moment().diff(moment(deadline?.endDate), "days")) <= 1 &&
+      moment().utc().isBefore(moment(deadline?.endDate))
+    ) {
+      const notificationData = {
+        senderType: "System",
+        type: "System",
+        action: {
+          action:
+            "The member transfer phase will soon come to an end in less than a day. After this deadline, group members will be set and can not be changed by students. ",
+          priorVersion: deadline?.endDate,
+        },
+      };
+      await NotificationRepository.createNotification({data: notificationData})
+      console.log('create');
+      
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupNotification,
   getTaskRecordOfChanges,
@@ -133,5 +171,6 @@ export default {
   getDetailGroupNotification,
   getDetailClassNotification,
   getTeacherClassNotification,
-  getTeacherClassNotificationByClass
+  getTeacherClassNotificationByClass,
+  remindMemberTransferEnd,
 };

@@ -220,6 +220,7 @@ export const NOTIFICATION_READ_STATUS = [
 ];
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
+  STUDENT_OF_TERM: "studentOfTerm",
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
@@ -249,8 +250,16 @@ export const QUERY_KEY = {
   ALLGROUP: "allGroup",
   ALLMAJOR: "allMajor",
   CLASSCODE: "clasCode",
+  GROUP_OF_CLASS: "groupOfClass",
   TEACHERINFO:"teacherInfo",
-  MENTORINFO:"mentorInfo"
+  MENTORINFO:"mentorInfo",
+  NO_CLASS_STUDENT: "noClassStudent",
+  NO_CLASS_GROUPS: "noClassGroups",
+  ADD_STUDENT_TO_CLASS: "addStudentToClass",
+  REQUEST_DEADLINE_LIST: "requestDeadlineList",
+  TERM:"term",
+  TERMACTIVE:"termActive",
+  TERM_LIST: "termList"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -275,17 +284,23 @@ export const NOTIFICATION_ACTION_TYPE = {
   CREATE_TASK: "TaskCreation",
   UPDATE_TASK_STATUS: "UpdateTaskStatus",
   UPDATE_TASK: "UpdateTask",
-  DELETE_TASK: "DeleteTask"
+  DELETE_TASK: "DeleteTask",
+  RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline"
 };
 export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",
   CREATE_ASSIGNMENT: "CreateAssignment",
   GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
   CREATE_SUBMISSION: "CreateSubmission",
-  REQUEST_DEADLINE: "RequestDeadline"
+  REQUEST_DEADLINE: "RequestDeadline",
+  CREATE_REQUEST_DEADLINE: "CreateRequestDeadline"
 };
 export const NOTIFICATION_TYPE = {
   CLASS: "class",
   GROUP: "group",
   SYSTEM: "system",
+};
+export const CREATE_REQUEST_DEADLINE = {
+  newDate: "newDate",
+  reason: "reason",
 };

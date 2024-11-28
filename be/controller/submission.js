@@ -50,7 +50,7 @@ const createSubmission = async (req, res) => {
           actionType: CLASS_NOTIFICATION_ACTION_TYPE.CREATE_SUBMISSION,
           newVersion: classwork,
           priorVersion: createSubmiss,
-          extraUrl: `/class/${classworkId}`
+          extraUrl: `/class/${student.classId}`
         }
       }
       await NotificationRepository.createNotification({

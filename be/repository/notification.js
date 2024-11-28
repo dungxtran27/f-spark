@@ -134,6 +134,7 @@ const getStudentClassNotification = async (classId) => {
     const classNotification = await Notification.find({
       type: NOTIFICATION_TYPE.CLASS,
       class: new mongoose.Types.ObjectId(classId),
+      senderType: { $ne: "Student" }
     })
       .populate({
         path: "sender",
@@ -160,7 +161,7 @@ const getTeacherClassNotification = async (teacherId) => {
     })
       .populate({
         path: "sender",
-        populate: { path: "account", select: "-password" },
+        populate: { path: "account group", select: "-password" },
       })
       .populate({
         path: "class",

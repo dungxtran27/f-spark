@@ -26,9 +26,26 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ASSIGNMENT: "CreateAssignment",
   GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
   CREATE_SUBMISSION: "CreateSubmission",
-  REQUEST_DEADLINE: "RequestDeadline"
+  REQUEST_DEADLINE: "RequestDeadline",
+  CREATE_REQUEST_DEADLINE: "CreateRequestDeadline",
+  RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline"
 };
 export const SENDER_TYPE = {
   STUDENT: "Student",
   TEACHER: "Teacher"
+}
+
+export const DEADLINE_TYPES = {
+  MEMBERS_TRANSFER: "membersTransfer",
+  SPONSOR_SHIP: "sponsorShip",
+  DIVIDING_CLASSES: "dividingClasses",
+  OUTCOME: "outcome",
+  START_TERM: "startTerm",
+  TEACHER_LOCK_GROUP: "teacherLockGroup"
+}
+
+export const REQUEST_DEADLINE_STATUS = {
+  DEFAULT_STATUS: "pending",
+  APPROVED_STATUS: "approved",
+  DECLINED_STATUS: "declined"
 }

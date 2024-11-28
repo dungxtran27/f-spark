@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { notificationApi } from "../../../../api/notification/notification";
 import AssignmentNoti from "../../../common/Stream/AssignmentNoti";
+import OutcomeNoti from "../../../common/Stream/OutcomeNoti";
 const { Panel } = Collapse;
 
 const Class = () => {
@@ -42,22 +43,26 @@ const Class = () => {
     return (
       <div className="flex-grow pt-3 flex flex-col gap-3">
         <span>
+        {n?.action?.actionType === CLASS_NOTIFICATION_ACTION_TYPE.CREATE_REQUEST_DEADLINE ? <>
+        <Link
+        className="text-primaryBlue hover:underline font-bold"
+        to={`${n?.action?.extraUrl}`}
+      >
+        {n?.sender?.group?.GroupName}
+      </Link> {' '}</>
+        : ''}
           {(n?.action?.action)}&nbsp;
           <Link
             className="text-primaryBlue hover:underline font-bold"
             to={`${n?.action?.extraUrl}`}
           >
-            {n?.action?.newVersion?.name}
+            {n?.action?.priorVersion?.title}
           </Link>
         </span>
         <div>
           {n?.action?.actionType ===
-          CLASS_NOTIFICATION_ACTION_TYPE.REQUEST_DEADLINE ? (
-            <Announcement
-              post={n?.action?.newVersion}
-              userInfo={userInfo}
-              upvoteAnnouncement={upvoteAnnouncement}
-            />
+          CLASS_NOTIFICATION_ACTION_TYPE.CREATE_REQUEST_DEADLINE ? (
+            <OutcomeNoti sen={n?.sender} sub={n?.action?.priorVersion} post={n?.action?.newVersion} userInfo={userInfo} />
           ) : (
             <AssignmentNoti sen={n?.sender} sub={n?.action?.priorVersion} post={n?.action?.newVersion} userInfo={userInfo} />
           )}
@@ -69,8 +74,8 @@ const Class = () => {
     switch (n?.action?.actionType) {
       case CLASS_NOTIFICATION_ACTION_TYPE.CREATE_SUBMISSION:
         return classworkNotification(n);
-      case "CreateRequestDeadline":
-        return <></>;
+      case CLASS_NOTIFICATION_ACTION_TYPE.CREATE_REQUEST_DEADLINE:
+        return classworkNotification(n);
       default:
         return <></>;
     }

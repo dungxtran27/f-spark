@@ -51,8 +51,9 @@ const getTeacherByStudentId = async (userId) => {
 const getStudentsByGroup = async (groupId) => {
   try {
     const students = await Student.find({ group: groupId }).select(
-      "_id name studentId account"
+      "_id name studentId account major"
     );
+    // .populate({ path: "account", select: "profilePicture" });
     return students;
   } catch (error) {
     throw new Error(error.message);
@@ -131,23 +132,10 @@ const findById = async (studentId) => {
   } catch (error) {
     throw new Error(error.message);
   }
-}
-const getAllStudentsNoClass = async ({ name, studentId, email, major }) => {
+};
+const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) => {
   try {
-    const query = {};
-    if (name) {
-      query.name = { $regex: name, $options: "i" };
-    }
-    if (studentId) {
-      query.studentId = { $regex: studentId, $options: "i" };
-    }
-    if (email) {
-      query["account.email"] = { $regex: email, $options: "i" };
-    }
-    if (major && major.length > 0) {
-      query.major = { $in: major };
-    }
-    const students = await Student.find(query)
+    const students = await Student.find()
       .populate({
         path: "account",
         select: "email",
@@ -170,17 +158,141 @@ const getAllStudentsNoClass = async ({ name, studentId, email, major }) => {
       classId: student.classId?.classCode,
       updatedAt: student.updatedAt,
     }));
-    const totalStudent = await Student.countDocuments(query);
+    const totalStudent = await Student.countDocuments(students);
     const queryNotHaveClass = {
-      ...query,
       classId: { $in: [null, undefined] },
       group: { $in: [null, undefined] },
+
     };
-    const StudentNotHaveClass = await Student.find(queryNotHaveClass)
-      .populate({
-        path: "account",
-        select: "email",
+    let filterCondition = { $and: [] };
+    if (searchText) {
+      filterCondition.$and.push({
+        $or: [
+          { name: { $regex: searchText, $options: "i" } },
+          { studentId: { $regex: searchText, $options: "i" } },
+        ],
       });
+    }
+    if (termCode) {
+      filterCondition.$and.push({
+        $or: [
+          { termCode: { $regex: termCode, $options: "i" } },
+        ],
+      });
+    }
+    if (major && Array.isArray(major)) {
+      filterCondition.$and.push({
+        major: { $in: major },
+      });
+    } else if (major) {
+      filterCondition.$and.push({
+        major: { $regex: major, $options: "i" },
+      });
+    }
+    if (filterCondition.$and.length === 0) {
+      filterCondition = {};
+    }
+    const StudentNotHaveClass = await Student.aggregate([
+      [
+        {
+          $match: {
+            $and: [
+              { classId: { $in: [null, undefined] } },
+              { group: { $in: [null, undefined] } },
+            ]
+          }
+        },
+        {
+          $lookup: {
+            from: "Accounts",
+            localField: "account",
+            foreignField: "_id",
+            as: "accountDetails"
+          }
+        },
+        {
+          $unwind: {
+            path: "$accountDetails",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: "Groups",
+            localField: "group",
+            foreignField: "_id",
+            as: "groupDetails"
+          }
+        },
+        {
+          $unwind: {
+            path: "$groupDetails",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: "Classes",
+            localField: "classId",
+            foreignField: "_id",
+            as: "classDetails"
+          }
+        },
+        {
+          $unwind: {
+            path: "$classDetails",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $lookup: {
+            from: "Term",
+            localField: "term",
+            foreignField: "_id",
+            as: "termDetails"
+          }
+        },
+        {
+          $unwind: {
+            path: "$termDetails",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            studentId: 1,
+            gen: 1,
+            major: 1,
+            group: "$groupDetails.name",
+            email: "$accountDetails.email",
+            classId: "$classDetails.classCode",
+            termId: "$termDetails._id",
+            termCode: "$termDetails.termCode",
+            isActive: 1,
+            createdAt: 1,
+            updatedAt: 1
+          }
+        },
+        {
+          $match: filterCondition // Apply the search text filter to the data
+        },
+        {
+          $skip: (page - 1) * limit,
+        },
+        {
+          $limit: limit,
+        },
+        {
+          $sort: {
+            name: 1,
+          },
+        },
+      ]
+    ])
+    const totalItems = searchText ? StudentNotHaveClass.length : await Student.countDocuments(StudentNotHaveClass);
+    const maxPages = Math.ceil(totalItems / limit);
+    const isLastPage = page >= maxPages;
 
     const formattedStudentsNoClass = StudentNotHaveClass.map((student) => ({
       _id: student._id,
@@ -189,17 +301,26 @@ const getAllStudentsNoClass = async ({ name, studentId, email, major }) => {
       major: student.major,
       email: student.account?.email,
       group: student.group?.GroupName,
+      termId: student._id,
+      termCode: student.termCode,
       classId: student.classId?.classCode,
       updatedAt: student.updatedAt,
     }));
-    const countStudentNotHaveClass = await Student.countDocuments(queryNotHaveClass);
+    const countStudentNotHaveClass = await Student.countDocuments(
+      queryNotHaveClass
+    );
     const uniqueMajors = await Student.distinct("major");
     return {
       students: formattedStudents,
       totalStudent,
       StudentNotHaveClass: formattedStudentsNoClass,
       countStudentNotHaveClass,
-      uniqueMajors
+      uniqueMajors,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
     };
   } catch (error) {
     throw new Error(error.message);
@@ -219,8 +340,7 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
     const updatedStudents = await Student.find({
       _id: { $in: studentIds },
       classId: classId,
-    })
-      .select("_id name gen major studentId account classId group")
+    }).select("_id name gen major studentId account classId group");
     return updatedStudents;
   } catch (error) {
     throw new Error(error.message);
@@ -235,9 +355,14 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
       filterCondition.$and.push({
         $or: [
           { name: { $regex: searchText, $options: "i" } },
-          { accountEmail: { $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } },
-          { studentId: { $regex: searchText, $options: "i" } }
-        ]
+          {
+            accountEmail: {
+              $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, "\\$&"),
+              $options: "i",
+            },
+          },
+          { studentId: { $regex: searchText, $options: "i" } },
+        ],
       });
     }
 
@@ -344,13 +469,46 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
     throw new Error(error.message);
   }
 };
-
-
+const findStudentDetailByAccountId = async (accountId) => {
+  try {
+    const student = await Student.findOne({
+      account: accountId,
+    }).populate({
+      path: "group",
+      select: "_id GroupName", 
+    })
+    .populate({
+      path: "classId",
+      select: "_id teacher classCode", 
+    });
+    return student;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const getAllStudentByGroupId = async (groupId) => {
+  try {
+    const students = await Student.find({ group: groupId }).select(
+      "_id name studentId account"
+    );
+    return students;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const bulkCreateStudentsFromExcel = async (studentsData) => {
+  try {
+    const result = await Student.insertMany(studentsData, { ordered: false });
+    return result
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
+  bulkCreateStudentsFromExcel,
   findStudentByAccountId,
   getStudentsByGroup,
   getTeacherByStudentId,
-  getStudentsByGroup,
   getAllStudentByClassId,
   getAllStudentUngroupByClassId,
   findById,
@@ -358,4 +516,6 @@ export default {
   addManyStudentNoClassToClass,
   getAllAccStudent,
   getAllStudentUngroupByClassIds,
+  findStudentDetailByAccountId,
+  getAllStudentByGroupId
 };

@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import Class from "../model/Class.js";
 import teacher from "./teacher.js";
+import Term from "../model/Term.js";
+import Classwork from "../model/ClassWork.js";
+import { TermRepository } from "./index.js";
+import Outcome from "../model/Outcome.js";
 const getClassesOfTeacher = async (teacherId) => {
   try {
 
@@ -211,7 +215,7 @@ const getAllClasses = async () => {
     throw new Error(error.message);
   }
 };
-const getAllClass = async (page, limit, classCode, teacherName, category) => {
+const getAllClass = async (page, limit, classCode, teacherName, category, termCode) => {
   try {
     let filterCondition = {
       $and: []
@@ -228,17 +232,22 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
     if (category === 'full') {
       filterCondition.$and.push(
         { totalGroups: { $gte: 5 } },
-        { totalStudents: { $gte: 10 } }
+        { totalStudents: { $gte: 30 } }
       );
     }
 
     if (category === 'miss') {
       filterCondition.$and.push(
-        { totalStudents: { $lt: 10 } },
-        { totalGroups: { $lte: 5 } }
+        { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] }
       )
     };
-
+    if (termCode) {
+      filterCondition.$and.push({
+        $or: [
+          { termCode: { $regex: termCode, $options: "i" } },
+        ],
+      });
+    }
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
@@ -246,6 +255,127 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
     const totalItems = await Class.countDocuments();
     const maxPages = Math.ceil(totalItems / limit);
 
+    const classes = await Class.aggregate([
+      {
+        $lookup: {
+          from: "Teachers",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacherDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$teacherDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "_id",
+          foreignField: "class",
+          as: "groups",
+        },
+      },
+      {
+        $unwind: {
+          path: "$groups",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "_id",
+          foreignField: "classId",
+          as: "students"
+        }
+      },
+      {
+        $addFields: {
+          totalStudents: { $size: "$students" }
+        }
+      },
+      {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails"
+        }
+      },
+      {
+        $unwind: {
+          path: "$termDetails",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          classCode: { $first: "$classCode" },
+          isActive: { $first: "$isActive" },
+          teacherDetails: { $first: "$teacherDetails" },
+          pinDetails: { $first: "$pinDetails" },
+          groups: { $push: "$groups" },
+          students: { $push: "$students" },
+          totalStudents: { $first: "$totalStudents" },
+          term: { $first: "$term" },
+          termDetails: { $first: "$termDetails" },
+          termCode: {
+            $first: "$termDetails.termCode"
+          },
+        },
+      },
+      {
+        $project: {
+          classCode: 1,
+          isActive: 1,
+          term: 1,
+          termCode: 1,
+          teacherDetails: { name: 1, email: 1 },
+          groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
+          totalGroups: { $size: "$groups" },
+          totalStudents: 1,
+        },
+      },
+      {
+        $match: filterCondition,
+      },
+      {
+        $sort: { classCode: 1 },
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
+      },
+    ]
+    );
+
+    const isLastPage = page >= maxPages;
+    return {
+      classes,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getAllClassMissStudent = async () => {
+  try {
+    const filterCondition = {
+      $and: [
+        { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] }
+      ]
+    };
     const classes = await Class.aggregate([
       {
         $lookup: {
@@ -300,7 +430,6 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
           totalStudents: { $first: "$totalStudents" }
         },
       },
-
       {
         $project: {
           classCode: 1,
@@ -313,32 +442,141 @@ const getAllClass = async (page, limit, classCode, teacherName, category) => {
       },
       {
         $match: filterCondition,
-      },
-      {
-        $sort: { classCode: 1 },
-      },
-      {
-        $skip: (page - 1) * limit,
-      },
-      {
-        $limit: limit,
-      },
+      }
     ]
     );
-
-    const isLastPage = page >= maxPages;
-    return {
-      classes,
-      totalItems,
-      maxPages,
-      isLastPage,
-      pageSize: limit,
-      pageIndex: page,
-    };
+    return classes;
   } catch (error) {
     throw new Error(error.message);
   }
 };
+
+const getAllClassFullStudent = async () => {
+  try {
+    const filterCondition = {
+      $and: [
+        { totalGroups: { $gte: 5 } },
+        { totalStudents: { $gte: 30 } }
+      ]
+    };
+    const classes = await Class.aggregate([
+      {
+        $lookup: {
+          from: "Teachers",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacherDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$teacherDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "_id",
+          foreignField: "class",
+          as: "groups",
+        },
+      },
+      {
+        $unwind: {
+          path: "$groups",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "_id",
+          foreignField: "classId",
+          as: "students"
+        }
+      },
+      {
+        $addFields: {
+          totalStudents: { $size: "$students" }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          classCode: { $first: "$classCode" },
+          isActive: { $first: "$isActive" },
+          teacherDetails: { $first: "$teacherDetails" },
+          pinDetails: { $first: "$pinDetails" },
+          groups: { $push: "$groups" },
+          students: { $push: "$students" },
+          totalStudents: { $first: "$totalStudents" }
+        },
+      },
+      {
+        $project: {
+          classCode: 1,
+          isActive: 1,
+          teacherDetails: { name: 1, email: 1 },
+          groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
+          totalGroups: { $size: "$groups" },
+          totalStudents: 1,
+        },
+      },
+      {
+        $match: filterCondition,
+      }
+    ]
+    );
+    return classes;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const createClass = async ({
+  classCode,
+  teacher = null,
+  backgroundImage = "https://blogs.windows.com/wp-content/uploads/prod/sites/2/2021/10/Windows-11-Bloom-Screensaver-Dark-scaled.jpg", // Default background image
+  classInfo = null,
+  isActive = true,
+}) => {
+  try {
+    const matchingTerm = await TermRepository.getActiveTerm();
+
+    if (!matchingTerm) {
+      throw new Error("No matching term found for the current date.");
+    }
+    const result = await Class.create({
+      classCode,
+      teacher,
+      backgroundImage,
+      classInfo,
+      isActive,
+      term: matchingTerm._id,
+    });
+    const outcomeDeadlines = matchingTerm.timeLine?.filter(
+      (deadline) => deadline.type === "outcome"
+    ) || [];
+    for (const deadline of outcomeDeadlines) {
+      const outcome = await Outcome.findById(deadline.outcome);
+      await Classwork.create({
+        name: deadline.title || null,
+        description: deadline.description || null,
+        startDate: deadline.startDate || null,
+        dueDate: deadline.endDate || null,
+        GradingCriteria: outcome?.GradingCriteria || [],
+        type: "outcome",
+        classId: result._id,
+      });
+    }
+    return result._doc;
+  } catch (error) {
+    console.error("Error creating class:", error.message);
+    throw new Error(error.message);
+  }
+};
+
+
 export default {
   pinClasswork,
   getClassesOfTeacher,
@@ -346,4 +584,7 @@ export default {
   getAllClasses,
   getAllClass,
   getClassNumberOfTeacher,
+  getAllClassMissStudent,
+  getAllClassFullStudent,
+  createClass
 };
