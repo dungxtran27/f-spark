@@ -243,6 +243,7 @@ export const QUERY_KEY = {
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
   NOTIFICATION_STATISTIC: "notificationStatistic",
+  NOTIFICATION_DETAIL_STATISTIC: "notificationDetailStatistic",
   REQUEST_LEAVE_CLASS: "requestLeaveClass",
   ALLSTUDENT: "allStudent",
   ALLGROUP: "allGroup",

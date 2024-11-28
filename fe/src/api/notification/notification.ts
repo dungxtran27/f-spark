@@ -12,4 +12,7 @@ export const notificationApi = {
   getTeacherNotificationStatistic: async () => {
     return await axios.get("/api/notification/teacher/statistic");
   },
+  getTeacherClassNotificationByClass: async () => {
+    return await axios.get("/api/notification/teacher/getTeacherClassNotificationByClass");
+  },
 };

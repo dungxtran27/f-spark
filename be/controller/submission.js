@@ -45,7 +45,7 @@ const createSubmission = async (req, res) => {
         senderType: "Student",
         type: "Class",
         action: {
-          action: `created new Submission in`,
+          action: `Created new Submission`,
           target: classworkId,
           actionType: CLASS_NOTIFICATION_ACTION_TYPE.CREATE_SUBMISSION,
           newVersion: classwork,
