@@ -1,8 +1,8 @@
-
 import {
   ClassRepository,
   GroupRepository,
   StudentRepository,
+  TermRepository,
 } from "../repository/index.js";
 const createJourneyRow = async (req, res) => {
   try {
@@ -283,10 +283,13 @@ const createGroup = async (req, res) => {
         .status(400)
         .json({ error: "Please fill in all required fields" });
     }
+    const currTerm = await TermRepository.getActiveTerm();
+    const termId = currTerm._id;
     const data = await GroupRepository.createGroup(
       groupName,
       classId,
-      groupDescription
+      groupDescription,
+      termId
     );
     return res.status(200).json(data);
   } catch (error) {
@@ -352,12 +355,10 @@ const editTimelineForManyGroups = async (req, res) => {
   try {
     const { groupIds, type, updateData, editAble } = req.body;
     if (!groupIds || !type || !updateData || editAble === undefined) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Group IDs, timeline type, editAble, and new timeline data are required",
-        });
+      return res.status(400).json({
+        message:
+          "Group IDs, timeline type, editAble, and new timeline data are required",
+      });
     }
     if (editAble === false) {
       return res
@@ -416,12 +417,12 @@ const getAllGroupsNoClass = async (req, res) => {
       parseInt(limit)
     );
     const mappedNoClassGroups = await Promise.all(
-      GroupNotHaveClass1.map( async(g)=>{
+      GroupNotHaveClass1.map(async (g) => {
         const members = await StudentRepository.getStudentsByGroup(g._id);
         const majors = [...new Set(members?.map((m) => m.major))];
         return { ...g._doc, members, majors: majors };
       })
-    )
+    );
     const isLastPage = pageIndex >= maxPages;
     return res.status(200).json({
       data: {

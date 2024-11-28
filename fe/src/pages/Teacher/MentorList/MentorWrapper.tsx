@@ -101,12 +101,12 @@ const MentorListWrapper = () => {
         <div className="ml-2">
           <p>Order</p>
           <Select
-            defaultValue="down"
+            defaultValue="up"
             style={{ width: 140 }}
             onChange={setOrder}
             options={[
-              { value: "down", label: "Most group" },
-              { value: "up", label: "Least group" },
+              { value: "down", label: "Least group" },
+              { value: "up", label: "Most group" },
             ]}
           />
         </div>
@@ -125,12 +125,14 @@ const MentorListWrapper = () => {
           </Button>
         </Tooltip>
       </div>
-      <p className="ml-4 mb-4">Total mentor found: {mentorData?.data.totalItems}</p>
+      <p className="ml-4 mb-4">
+        Total mentor found: {mentorData?.data.totalItems}
+      </p>
       <div className="mentor_wrapper flex flex-wrap w-10/12 ml-2">
         {mentorData?.data.data.map((md: any) => (
           <div key={md._id} className="w-full sm:w-1/2 lg:w-1/3 px-2 mb-2">
             <MentorCard
-            term={currentSemester}
+              term={currentSemester}
               // groupNumber={md.assignedGroup.length}
               {...md}
             />
@@ -139,7 +141,7 @@ const MentorListWrapper = () => {
       </div>
       <div className="justify-items-center py-4 max-w-full">
         <Pagination
-          defaultCurrent={page}
+          defaultCurrent={page} pageSize={9}
           onChange={onChangePage}
           total={mentorData?.data.totalItems}
           showTotal={(total, range) =>

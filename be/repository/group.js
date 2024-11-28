@@ -457,7 +457,7 @@ const assignLeader = async (groupId, studentId) => {
     throw new Error(error.message);
   }
 };
-const createGroup = async (groupName, classID, GroupDescription) => {
+const createGroup = async (groupName, classID, GroupDescription, termId) => {
   try {
     const classfound = await Class.findById(classID);
     if (!classfound) {
@@ -470,6 +470,7 @@ const createGroup = async (groupName, classID, GroupDescription) => {
       class: classID,
       leader: null,
       mentor: null,
+      term: termId,
     });
     return {
       message: "Create new group successfully",

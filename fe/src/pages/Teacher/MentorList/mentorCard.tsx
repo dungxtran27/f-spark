@@ -44,7 +44,7 @@ const MentorCard = ({
               </Tag>
             ))}
           </div>
-          <div> thứ 5 anh rảnh nhé</div>
+          {/* <div> </div> */}
         </div>
         <div className="mentor_card_avatar  w-1/5 pr-3 relative">
           <img
