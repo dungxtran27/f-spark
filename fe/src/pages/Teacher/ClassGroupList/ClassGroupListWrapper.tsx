@@ -365,7 +365,10 @@ const ClassGroupListWrapper = () => {
       render: (rc: any) => (
         <>
           <span>
-            <span className="text-blue-600 font-medium">{rc.assignedGroupLength}</span> groups:{" "}
+            <span className="text-blue-600 font-medium">
+              {rc.assignedGroupLength}
+            </span>{" "}
+            groups:{" "}
           </span>
           {rc.groups.map((g: any) => (
             <span className="shadow p-1 bg-slate-50 rounded-sm leading-8 ml-1">
@@ -492,7 +495,7 @@ const ClassGroupListWrapper = () => {
               allowClear
               className={classNames(style.search_tag_bar)}
               placeholder="Select major"
-              maxTagCount={3}
+              maxTagCount={"responsive"}
               onChange={handleChange}
               options={options}
             />

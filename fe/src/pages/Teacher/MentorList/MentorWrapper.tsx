@@ -72,7 +72,7 @@ const MentorListWrapper = () => {
             allowClear
             className={classNames(style.search_tag_bar)}
             placeholder="Select major"
-            maxTagCount={3}
+            maxTagCount={"responsive"}
             onChange={handleChange}
             options={options}
           />
