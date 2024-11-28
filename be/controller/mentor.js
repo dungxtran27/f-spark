@@ -8,7 +8,7 @@ export const viewAllMentors = async (req, res) => {
     const currentTerm = await TermRepository.getActiveTerm();
     if (term == "curr") {
       term = currentTerm._id;
-    }
+    } else term = null;
     const mentorsData = await MentorRepository.getAllMentors(
       tagIds,
       name,

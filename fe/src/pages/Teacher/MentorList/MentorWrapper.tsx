@@ -87,10 +87,10 @@ const MentorListWrapper = () => {
           />
         </div>
         <div className="ml-2">
-          <p>Filter by</p>
+          <p>Groups supporting</p>
           <Select
             defaultValue="curr"
-            style={{ width: 140 }}
+            style={{ width: 150 }}
             onChange={handleChangefilter}
             options={[
               { value: "curr", label: "This semester" },
@@ -105,8 +105,8 @@ const MentorListWrapper = () => {
             style={{ width: 140 }}
             onChange={setOrder}
             options={[
-              { value: "down", label: "Ascending" },
-              { value: "up", label: "Descending" },
+              { value: "down", label: "Most group" },
+              { value: "up", label: "Least group" },
             ]}
           />
         </div>
@@ -130,6 +130,7 @@ const MentorListWrapper = () => {
         {mentorData?.data.data.map((md: any) => (
           <div key={md._id} className="w-full sm:w-1/2 lg:w-1/3 px-2 mb-2">
             <MentorCard
+            term={currentSemester}
               // groupNumber={md.assignedGroup.length}
               {...md}
             />

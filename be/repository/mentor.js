@@ -7,10 +7,12 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
   try {
     const tagIdArray = Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : [];
     const sortDirection = order === "down" ? 1 : -1;
+    console.log(term);
 
     const mentors = await Mentor.aggregate([
       {
-        $match: {// find by tagid and name
+        $match: {
+          // find by tagid and name
           $and: [
             ...(tagIdArray.length > 0
               ? [
@@ -34,7 +36,8 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
           ],
         },
       },
-      {//populate tagid
+      {
+        //populate tagid
         $lookup: {
           from: "TagMajors",
           localField: "tag.id",
@@ -43,7 +46,8 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
         },
       },
       {
-        $lookup: {//populate group
+        $lookup: {
+          //populate group
           from: "Groups",
           localField: "assignedGroup",
           foreignField: "_id",
@@ -51,8 +55,8 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
         },
       },
       {
-        $addFields: {// add filed grouplength, filter data of group(term)
-          assignedGroupLength: { $size: { $ifNull: ["$assignedGroup", []] } },
+        $addFields: {
+          // Process the groups by filtering and then mapping to choose specific fields
           groups: {
             $let: {
               vars: {
@@ -62,8 +66,8 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
                     as: "group",
                     cond: {
                       $or: [
-                        { $eq: [term, null] }, 
-                        { $eq: ["$$group.term", term] }, 
+                        { $eq: [term, null] }, // Either term is null
+                        { $eq: ["$$group.term", term] }, // Or group.term matches the specified term
                       ],
                     },
                   },
@@ -71,14 +75,36 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
               },
               in: {
                 $map: {
-                  input: "$$filteredGroups",
+                  input: "$$filteredGroups", // Operate on the filtered groups
                   as: "group",
                   in: {
                     _id: "$$group._id",
                     term: "$$group.term",
-           
+                    groupName: "$$group.GroupName",
                   },
                 },
+              },
+            },
+          },
+          // Use the filtered groups to calculate the length
+          assignedGroupLength: {
+            $size: {
+              $let: {
+                vars: {
+                  filteredGroups: {
+                    $filter: {
+                      input: "$groups",
+                      as: "group",
+                      cond: {
+                        $or: [
+                          { $eq: [term, null] },
+                          { $eq: ["$$group.term", term] },
+                        ],
+                      },
+                    },
+                  },
+                },
+                in: "$$filteredGroups",
               },
             },
           },
@@ -176,13 +202,24 @@ const assignMentor = async ({ groupId, mentorId }) => {
     }
     const group = await Group.findOne({
       _id: groupId,
-      mentor: mentorId,
     });
-
-    if (group) {
-      throw new Error("Mentor already exists in the group ");
+    if (!group) {
+      throw new Error("Group not found ");
     }
-    const updateMentor = await Mentor.findByIdAndUpdate(
+    if (group.mentor) {
+      if (group.mentor.toString() == mentorId.toString()) {
+        throw new Error("Mentor already exists in the group ");
+      }
+      const updateOldMentor = await Mentor.findByIdAndUpdate(
+        group.mentor.toString(),
+        {
+          $pull: { assignedGroup: groupId },
+        },
+        { new: true }
+      );
+    }
+
+    const updateNewMentor = await Mentor.findByIdAndUpdate(
       mentorId,
       {
         $addToSet: { assignedGroup: groupId },

@@ -3,7 +3,7 @@ import {
   Modal,
   Tag,
   Select,
-  Space,
+  // Space,
   Input,
   Table,
   Tooltip,
@@ -46,6 +46,7 @@ import {
 } from "@dnd-kit/core";
 
 import { CSS } from "@dnd-kit/utilities";
+import { MdOutlineFilterListOff } from "react-icons/md";
 
 interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   "data-row-key": string;
@@ -173,6 +174,8 @@ const ClassGroupListWrapper = () => {
 
   const [tagSearch, setTagSearch] = useState([]);
   const [nameSeacrh, setNameSeacrh] = useState("");
+  const [currentSemester, setNameCurrentSemester] = useState("curr");
+  const [order, setOrder] = useState("up");
   const handleChange = (value: any) => {
     setTagSearch(value);
   };
@@ -221,13 +224,21 @@ const ClassGroupListWrapper = () => {
     })
   );
   const { data: mentorData } = useQuery({
-    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
+    queryKey: [
+      QUERY_KEY.MENTORLIST,
+      tagSearch,
+      nameSeacrh,
+      currentSemester,
+      order,
+    ],
     queryFn: async () => {
       return mentorList.getMentorListPagination({
-        limit: 100,
+        limit: 20,
         page: 1,
         tagIds: tagSearch,
         name: nameSeacrh,
+        term: currentSemester,
+        order: order,
       });
     },
   });
@@ -321,6 +332,7 @@ const ClassGroupListWrapper = () => {
       });
     },
   });
+
   const columnsMentor = [
     {
       title: "image",
@@ -346,8 +358,22 @@ const ClassGroupListWrapper = () => {
       width: 300,
     },
     {
-      title: "Group supporting",
-      dataIndex: "groupNumber",
+      title: `Group support ${
+        currentSemester == "curr" ? " this semester" : "all semesters"
+      }`,
+      // dataIndex: "groupNumber",
+      render: (rc: any) => (
+        <>
+          <span>
+            <span className="text-blue-600 font-medium">{rc.assignedGroupLength}</span> groups:{" "}
+          </span>
+          {rc.groups.map((g: any) => (
+            <span className="shadow p-1 bg-slate-50 rounded-sm leading-8 ml-1">
+              {g.groupName}
+            </span>
+          ))}
+        </>
+      ),
     },
   ];
   const sensors = useSensors(
@@ -390,6 +416,7 @@ const ClassGroupListWrapper = () => {
     },
   ];
   // console.log("c", group);
+
   return (
     <>
       <div className=" px-0.1">
@@ -416,6 +443,7 @@ const ClassGroupListWrapper = () => {
                   handleOpenAddMentorModal={handleOpenAddMentorModal}
                   handleOpengroupDetailModal={handleOpengroupDetailModal}
                   setGroup={setGroup}
+                  setTagSearch={setTagSearch}
                   role={userInfo?.role}
                 />
               ))}
@@ -443,57 +471,101 @@ const ClassGroupListWrapper = () => {
         className="z-40"
         open={AddMentorModal}
         onCancel={handleCloseAddMentorModal}
-        width={1000}
+        width={1200}
         footer={[
           <Button key="back" onClick={handleCloseAddMentorModal}>
             Close
           </Button>,
         ]}
       >
-        <Space
+        {/* <Space
           className={classNames(style.filter_bar)}
           style={{ width: "100%" }}
           direction="horizontal"
-        >
-          <p>Major</p>
-          <Select
-            mode="multiple"
-            allowClear
-            defaultValue={group?.tag.map((tag) => ({
-              label: tag?.name,
-              value: tag?._id,
-            }))}
-            className={classNames(style.search_tag_bar)}
-            placeholder="Please select"
-            maxTagCount={3}
-            onChange={handleChange}
-            options={options}
+        > */}
+        <div className={classNames(style.filter_bar)}>
+          <div>
+            <p>Major</p>
+            <Select
+              mode="multiple"
+              defaultValue={tagSearch}
+              allowClear
+              className={classNames(style.search_tag_bar)}
+              placeholder="Select major"
+              maxTagCount={3}
+              onChange={handleChange}
+              options={options}
+            />
+          </div>
+          <div>
+            <p className="pl-3">Search</p>
+            <Search
+              className={classNames(style.search_name_bar)}
+              placeholder="Enter mentor name here"
+              onSearch={onSearch}
+              enterButton
+            />
+          </div>
+          <div className="ml-2">
+            <p>Filter by</p>
+            <Select
+              defaultValue="curr"
+              style={{ width: 140 }}
+              onChange={setNameCurrentSemester}
+              options={[
+                { value: "curr", label: "This semester" },
+                { value: "all", label: "All Semester" },
+              ]}
+            />
+          </div>
+          <div className="ml-2">
+            <p>Order</p>
+            <Select
+              defaultValue="down"
+              style={{ width: 140 }}
+              onChange={setOrder}
+              options={[
+                { value: "down", label: "Ascending" },
+                { value: "up", label: "Descending" },
+              ]}
+            />
+          </div>
+          <Tooltip title={"clear all filter"}>
+            <Button
+              className="ml-2 self-end"
+              onClick={() => {
+                setTagSearch([]);
+                setNameSeacrh("");
+                setOrder("up");
+                setNameCurrentSemester("curr");
+                // setPage(1);
+              }}
+            >
+              <MdOutlineFilterListOff />
+            </Button>
+          </Tooltip>
+        </div>
+        {mentorData?.data.data.length > 0 ? (
+          <Table
+            dataSource={mentorData?.data.data}
+            columns={columnsMentor}
+            onRow={(record: MentorData) => {
+              return {
+                onClick: () => {
+                  setmentorSelected(record);
+                  setConfirmContent("mentor");
+                  handleOpenconfirm();
+                },
+              };
+            }}
+            pagination={{
+              pageSize: 4,
+              total: mentorData?.data.data.length, // Set the total number of rows
+            }}
           />
-          <p>Search</p>
-          <Search
-            className={classNames(style.search_name_bar)}
-            placeholder="input search text"
-            onSearch={onSearch}
-            enterButton
-          />
-        </Space>
-        <Table
-          dataSource={mentorData?.data.data}
-          columns={columnsMentor}
-          onRow={(record: MentorData) => {
-            return {
-              onClick: () => {
-                setmentorSelected(record);
-                setConfirmContent("mentor");
-                handleOpenconfirm();
-              },
-            };
-          }}
-          pagination={{
-            pageSize: 4,
-            total: mentorData?.data.data.length, // Set the total number of rows
-          }}
-        />
+        ) : (
+          <Empty description={"No matching mentor "} />
+        )}
       </Modal>
       {/* modal group detail */}
       <Modal

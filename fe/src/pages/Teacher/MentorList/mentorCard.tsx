@@ -11,10 +11,11 @@ interface MentorData {
   tags: Tag[];
   profilePicture: string;
   assignedGroupLength: number;
+  term: string;
 }
 const MentorCard = ({
   name,
-  // groupNumber,
+  term,
   assignedGroupLength,
   tags,
   profilePicture,
@@ -24,7 +25,10 @@ const MentorCard = ({
       <div className="mentor_card_header  rounded-t-sm p-2 pb-4 flex justify-between bg-blue-400">
         <div className="mentor_card_info">
           <div className=" text-white text-lg">{name}</div>
-          <div className=" text-white"> {assignedGroupLength} groups</div>
+          <div className=" text-white">
+            {term == "curr" ? "this sememter:" : " total:"} {assignedGroupLength}{" "}
+            groups
+          </div>
         </div>
         <div className="menotr_card_assignbtn">
           <Button>Assign</Button>

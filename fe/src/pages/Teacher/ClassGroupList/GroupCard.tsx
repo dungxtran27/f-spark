@@ -12,6 +12,7 @@ const GroupCard = ({
   handleLock,
   handleOpengroupDetailModal,
   setGroup,
+  setTagSearch,
   role,
 }: any | string) => {
   // const { setNodeRef } = useDroppable({
@@ -29,6 +30,7 @@ const GroupCard = ({
     border: isOver ? "1px solid #22c55e" : undefined,
     boxShadow: isOver ? "0px 5px 15px ##4ade80" : undefined,
   };
+
   const hasAtLeastTwoMajors = (students: any) => {
     const uniqueMajors = new Set();
 
@@ -55,6 +57,7 @@ const GroupCard = ({
             className="font-semibold pr-3 text-[16px] hover:text-purple-600 cursor-pointer"
             onClick={() => {
               setGroup(info);
+              setTagSearch(info?.tag.map((t: any) => t._id));
               handleOpengroupDetailModal();
             }}
           >
