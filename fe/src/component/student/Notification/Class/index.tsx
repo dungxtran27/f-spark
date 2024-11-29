@@ -14,17 +14,20 @@ import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
 import { classApi } from "../../../../api/Class/class";
 import Assignment from "../../../common/Stream/Assignment";
-
+import { useState, useEffect } from "react";
+import { Button} from 'antd';
 const Class = () => {
-  const { data: classNotification } = useQuery({
+  const { data: classNotification, isFetched  } = useQuery({
     queryKey: [QUERY_KEY.CLASS_NOTIFICATION_DETAIL],
     queryFn: () => {
       return notificationApi.getClassNotificationDetail();
     },
   });
+
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
+
   const queryClient = useQueryClient();
   const upvoteAnnouncement = useMutation({
     mutationFn: ({ classWorkId }: { classWorkId: string | undefined }) => {
@@ -34,6 +37,35 @@ const Class = () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.STREAM_CONTENT] });
     },
   });
+
+  const [page, setPage] = useState(1);
+  const [visibleNotifications, setVisibleNotifications] = useState<any[]>([]);
+
+  const loadMoreNotifications = () => {
+    if (classNotification?.data?.data) {
+      const newNotifications = classNotification.data.data.slice(0, page * 8);
+      setVisibleNotifications(newNotifications);
+    }
+  };
+
+  const handleScroll = (e: any) => {
+    //const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
+    //if (scrollTop + clientHeight >= scrollHeight - 5) {
+      setPage((prevPage) => prevPage + 1);
+    //}
+  };
+
+  // useEffect(() => {
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => {
+  //     window.removeEventListener("scroll", handleScroll);
+  //   };
+  // }, []);
+
+  useEffect(() => {
+    loadMoreNotifications(); 
+  }, [page, isFetched]);
+
   const classworkNotification = (n: any) => {
     return (
       <div className="flex-grow pt-3 flex flex-col gap-3">
@@ -61,6 +93,7 @@ const Class = () => {
       </div>
     );
   };
+
   const getNotificationContent = (n: any) => {
     switch (n?.action?.actionType) {
       case CLASS_NOTIFICATION_ACTION_TYPE.CREATE_ANNOUNCEMENT:
@@ -72,9 +105,10 @@ const Class = () => {
         return <></>;
     }
   };
+
   return (
     <div className="flex flex-col gap-5 items-center py-5">
-      {classNotification?.data?.data?.map((n: any) => (
+      {visibleNotifications.map((n: any) => (
         <div
           key={n?._id}
           className="bg-white w-9/12 rounded flex flex-col border border-textSecondary/40 px-5 py-3"
@@ -93,8 +127,17 @@ const Class = () => {
           </div>
           {getNotificationContent(n)}
         </div>
-      ))}
+      ))} 
+      {visibleNotifications.length < classNotification?.data?.data.length ?
+        <Button color="default" variant="outlined" onClick={handleScroll}>
+        Loading more
+        </Button>
+      :
+        ''
+      }
+      
     </div>
   );
 };
+
 export default Class;

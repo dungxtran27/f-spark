@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { DEADLINE_TYPES } from "../utils/const.js";
+import Outcome from "./Outcome.js";
 const { DIVIDING_CLASSES, MEMBERS_TRANSFER, OUTCOME, SPONSOR_SHIP, START_TERM, TEACHER_LOCK_GROUP } =
   DEADLINE_TYPES;
 const DeadlineSchema = new Schema({
@@ -25,6 +26,10 @@ const DeadlineSchema = new Schema({
     required: true,
     enum: [MEMBERS_TRANSFER, DIVIDING_CLASSES, OUTCOME, SPONSOR_SHIP, START_TERM, TEACHER_LOCK_GROUP],
   },
+  outcome:{
+    type: Schema.Types.ObjectId,
+    ref: "Outcome"
+  }
 });
 const TermSchema = new Schema(
   {

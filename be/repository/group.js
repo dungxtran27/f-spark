@@ -801,7 +801,7 @@ const findAllGroups = async (page, limit, searchText) => {
   }
 };
 
-const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
+const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCode) => {
   try {
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -822,10 +822,25 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         GroupName: { $regex: GroupName, $options: "i" },
       });
     }
-    const matchCondition = matchStage.length > 0 ? { $or: matchStage } : {};
-    const totalItems = await Group.countDocuments(matchCondition);
-    const maxPages = Math.ceil(totalItems / limit);
+    let filterCondition = { $and: [] };
 
+    if (termCode) {
+      filterCondition.$and.push({
+        $or: [
+          { termCode: { $regex: termCode, $options: "i" } },
+        ],
+      });
+    }
+    if (filterCondition.$and.length === 0) {
+      filterCondition = {};
+    }
+    const matchCondition = matchStage.length > 0 ? { $or: matchStage } : {};
+    const totalItems = await Group.countDocuments({
+      class: { $in: [null, undefined] },
+      ...matchCondition,
+    });
+    const maxPages = Math.ceil(totalItems / limit);
+    console.log(matchCondition);
     const GroupNotHaveClass = await Group.aggregate([
       {
         $match: {
@@ -850,9 +865,28 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
         },
       },
       {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$termDetails",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
         $group: {
           _id: "$_id",
           GroupName: { $first: "$GroupName" },
+          term: { $first: "$term" },
+          termDetails: { $first: "$termDetails" },
+          termCode: {
+            $first: "$termDetails.termCode"
+          },
           isSponsorship: { $first: "$isSponsorship" },
           tag: { $push: { $arrayElemAt: ["$tag", 0] } },
           teamMembers: { $first: "$teamMembers" },
@@ -870,6 +904,17 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
             name: 1,
             studentId: 1,
           },
+          term: 1,
+          termCode: 1,
+          teamMemberCount: { $size: "$teamMembers" },
+        },
+      },
+      {
+        $match: filterCondition 
+      },
+      {
+        $sort: {
+          teamMemberCount: 1,
         },
       },
       {
@@ -884,7 +929,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10) => {
     });
     const isLastPage = page >= maxPages;
     const group = await Group.find()
-      .select("GroupName leader tag teamMembers isSponsorship")
+      .select("GroupName leader tag teamMembers isSponsorship term")
       .populate({
         path: "teamMembers",
         select: "name",
@@ -991,6 +1036,40 @@ const findAllGroupsOfTeacherbyClassIds = async (
   }
 };
 
+const updateTimelineForGroup = async ({groupId, classworkId, newDate}) => {
+  try {
+    const updatedGroup = await Group.findOneAndUpdate(
+      { _id: groupId, "timeline.classworkId": classworkId },
+      { $set: { "timeline.$.endDate": newDate } },          
+      { new: true }                                    
+    );
+    
+    const updatedTimeline = updatedGroup.timeline.find(timeline => timeline.classworkId.toString() == classworkId);
+    return updatedTimeline;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const createGroupsFromExcel = async (groupData) => {
+  try {
+    const result = await Group.insertMany(groupData, { ordered: false });
+    return result
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getTimelineClassworkOfGroup = async ({groupId, classworkId}) => {
+  try {
+    const group = await Group.findOne(
+      { _id: groupId, "timeline.classworkId": classworkId },
+      { "timeline.$": 1 } 
+    );
+    return group.timeline[0];
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -1019,4 +1098,7 @@ export default {
   getAllGroupsNoClass,
   addGroupAndStudentsToClass,
   findAllGroupsOfTeacherbyClassIds,
+  updateTimelineForGroup,
+  getTimelineClassworkOfGroup,
+  createGroupsFromExcel
 };

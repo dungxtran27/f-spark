@@ -220,6 +220,7 @@ export const NOTIFICATION_READ_STATUS = [
 ];
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
+  STUDENT_OF_TERM: "studentOfTerm",
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
@@ -253,7 +254,11 @@ export const QUERY_KEY = {
   MENTORINFO:"mentorInfo",
   NO_CLASS_STUDENT: "noClassStudent",
   NO_CLASS_GROUPS: "noClassGroups",
-  ADD_STUDENT_TO_CLASS: "addStudentToClass"
+  ADD_STUDENT_TO_CLASS: "addStudentToClass",
+  REQUEST_DEADLINE_LIST: "requestDeadlineList",
+  TERM:"term",
+  TERMACTIVE:"termActive",
+  TERM_LIST: "termList"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -289,4 +294,8 @@ export const NOTIFICATION_TYPE = {
   CLASS: "class",
   GROUP: "group",
   SYSTEM: "system",
+};
+export const CREATE_REQUEST_DEADLINE = {
+  newDate: "newDate",
+  reason: "reason",
 };
