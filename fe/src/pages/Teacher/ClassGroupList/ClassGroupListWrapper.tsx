@@ -62,7 +62,7 @@ const Row: React.FC<Readonly<RowProps>> = (props) => {
     transform: CSS.Translate.toString(transform),
 
     cursor: "move",
-    ...(isDragging ? { position: "absolute", zIndex: "9999" } : {}),
+    ...(isDragging ? { position: "absolute", zIndex: "99" } : {}),
   };
 
   return (
@@ -436,7 +436,7 @@ const ClassGroupListWrapper = () => {
         </div>
         <DndContext sensors={sensors} onDragEnd={onDragEnd}>
           <div className=" flex  justify-between pt-2 ">
-            <div className="flex flex-wrap ">
+            <div className="flex flex-wrap   w-full">
               {classPeople?.data.data.groupStudent.map((s: any) => (
                 <GroupCard
                   info={s}
