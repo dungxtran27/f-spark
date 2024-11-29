@@ -99,8 +99,6 @@ const verifyUser = async (req, res) => {
 const login = async (req, res) => {
   try {
     const role = req.body.role;
-    console.log(role);
-    
     const existingAccount = await AccountRepository.findAccountByEmail(
       req.body.email
     );
@@ -144,6 +142,11 @@ const login = async (req, res) => {
       case ROLE_NAME.startUpDepartment:
         return res.status(404).json({ error: "Unimplemented" });
       case ROLE_NAME.admin:
+        if (req.body.email !== "admin@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
         userDetail.account = existingAccount;
         userDetail.role = ROLE_NAME.admin;
         break
