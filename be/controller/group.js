@@ -197,7 +197,6 @@ const updateCustomerPersona = async (req, res) => {
     }
 
     const updatedPersona = { detail, bio, needs };
-    console.log(updatedPersona);
 
     const updatedGroup = await GroupRepository.updateCustomerPersona({
       groupId: req.groupId,
@@ -465,7 +464,26 @@ const addGroupToClass = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+const getAllGroupsOfTeacherbyClassIds = async (req, res) => {
+  try {
+    const { tagIds, mentorStatus } = req.body;
+    const decodedToken = req.decodedToken;
+    const classes = await ClassRepository.getClassesOfTeacher(
+      decodedToken?.role?.id
+    );
+    const classIds = classes.map((c) => c._id);
 
+    const groups = await GroupRepository.findAllGroupsOfTeacherbyClassIds(
+      classIds,
+      tagIds,
+      mentorStatus
+    );
+
+    res.status(200).json({ data: groups });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 export default {
   createJourneyRow,
   createJourneyCol,
@@ -491,4 +509,5 @@ export default {
   editTimelineForManyGroups,
   getAllGroupsNoClass,
   addGroupToClass,
+  getAllGroupsOfTeacherbyClassIds,
 };

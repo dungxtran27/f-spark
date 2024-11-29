@@ -44,9 +44,7 @@ const addGrade = async (req, res) => {
       submissionId: new mongoose.Types.ObjectId(submissionId),
       grade,
       criteria: criteriaObjectIds,
-    });
-    console.log(updateGrade);
-    
+    });    
     if (updateGrade) {
       const notificationData = {
         group: updateGrade?.group,
@@ -67,9 +65,7 @@ const addGrade = async (req, res) => {
       });
       const studentsOfGroup = await StudentRepository.getStudentsByGroup(
         updateGrade?.group
-      );
-      console.log(studentsOfGroup);
-      
+      );      
       studentsOfGroup.forEach((s) => {
         const socketIds = userSocketMap[s?.account?.toString()];
         if (socketIds) {

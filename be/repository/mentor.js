@@ -7,8 +7,6 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
   try {
     const tagIdArray = Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : [];
     const sortDirection = order === "down" ? 1 : -1;
-    console.log(term);
-
     const mentors = await Mentor.aggregate([
       {
         $match: {

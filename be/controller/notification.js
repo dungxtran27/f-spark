@@ -121,7 +121,6 @@ const remindMemberTransferEnd = async () => {
         },
       };
       await NotificationRepository.createNotification({data: notificationData})
-      console.log('create');
       
     }
   } catch (error) {

@@ -4,6 +4,7 @@ import Student from "../model/Student.js";
 import student from "./student.js";
 import Class from "../model/Class.js";
 import { StudentRepository } from "./index.js";
+import { query } from "express";
 
 const createJourneyRow = async ({ groupId, name }) => {
   try {
@@ -659,7 +660,6 @@ const findAllSponsorGroupsOfClasses = async (classIds) => {
 
     return { groups: Object.values(groupedData), groupNumber: data.length };
   } catch (error) {
-    console.log(error);
     throw new Error(error.message);
   }
 };
@@ -670,7 +670,6 @@ const getGroupsByClassId = async (classId) => {
       .lean();
     return groups;
   } catch (error) {
-    console.error("Error fetching groups by class:", error.message);
     throw error;
   }
 };
@@ -940,6 +939,57 @@ const addGroupAndStudentsToClass = async (groupIds, classId) => {
     throw new Error(error.message);
   }
 };
+const findAllGroupsOfTeacherbyClassIds = async (
+  classIds,
+  tagIds,
+  mentorStatus
+) => {
+  try {
+    const classes = await Class.find({ _id: { $in: classIds } }).select(
+      "classCode"
+    );
+    const groupQuery = {
+      class: { $in: classIds },
+    };
+    if (tagIds !== null && tagIds !== undefined && tagIds.length > 0) {
+      groupQuery.tag = { $all: tagIds };
+    }
+
+    if (mentorStatus === "no") {
+      groupQuery.mentor = null;
+    }
+    if (mentorStatus === "yes") {
+      groupQuery.mentor = { $ne: null };
+    }
+
+    const groups = await Group.find(groupQuery)
+      .select("GroupName isSponsorship mentor class tag")
+      .populate({
+        path: "tag",
+        select: "name",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      });
+
+    const result = classes.reduce((acc, classInfo) => {
+      const matchingGroups = groups.filter((group) =>
+        group.class._id.equals(classInfo._id)
+      );
+      acc[classInfo._id] = {
+        classId: classInfo._id,
+        classCode: classInfo.classCode,
+        groups: matchingGroups,
+      };
+      return acc;
+    }, {});
+
+    return Object.values(result);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 export default {
   createCellsOnUpdate,
@@ -968,4 +1018,5 @@ export default {
   editTimelineForManyGroups,
   getAllGroupsNoClass,
   addGroupAndStudentsToClass,
+  findAllGroupsOfTeacherbyClassIds,
 };
