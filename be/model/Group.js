@@ -236,13 +236,13 @@ const GroupSchema = new Schema(
     term: {
       type: Schema.Types.ObjectId,
       ref: "Term",
-      require: true
+      require: false
     },
     timeline: [TimelineSchema],
     term: {
       type: Schema.Types.ObjectId,
       ref: "Term",
-      required: true
+      required: false
     },
   },
   { timestamps: true, collection: "Groups" }
