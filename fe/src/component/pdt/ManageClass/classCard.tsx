@@ -3,9 +3,9 @@ import { FaUser } from "react-icons/fa";
 import { FaUserGroup } from "react-icons/fa6";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { MdOutlineMessage } from "react-icons/md";
-import { Button, Tooltip } from "antd";
+import { Button, Dropdown, Menu, Tooltip } from "antd";
 import { ImNotification } from "react-icons/im";
-import { EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, EllipsisOutlined, MoreOutlined } from "@ant-design/icons";
 
 interface ClassCardProps {
   className?: string;
@@ -14,13 +14,14 @@ interface ClassCardProps {
   groups?: number;
   isSponsorship?: number;
   totalMembers?: number;
-
   icon?: ReactNode;
   role?: string;
   onClick?: () => void;
-  isSelected?: boolean; // New prop to track selected card
+  isSelected?: boolean;
   isEditing?: boolean;
   onEditClick?: () => void;
+  onDeleteClick: () => void;
+  isMenuVisible?: boolean,
 }
 
 const ClassCard: React.FC<ClassCardProps> = ({
@@ -41,6 +42,8 @@ const ClassCard: React.FC<ClassCardProps> = ({
   onEditClick,
   onClick,
   isSelected = false,
+  onDeleteClick,
+  isMenuVisible = false,
 }) => {
   const getCardColor = () => {
     if (role == "teacher" || role == "admin") {
@@ -53,12 +56,21 @@ const ClassCard: React.FC<ClassCardProps> = ({
       return "bg-blue-400";
     }
   };
+  const menu = (
+    <Menu>
+      <Menu.Item key="edit" icon={<EditOutlined />} onClick={onEditClick}>
+        Edit
+      </Menu.Item>
+      <Menu.Item key="delete" icon={<DeleteOutlined />} onClick={onDeleteClick}>
+        Delete
+      </Menu.Item>
+    </Menu>
+  );
 
   return (
     <div
-      className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer ${
-        isSelected ? "border-2 border-purple-400" : ""
-      }`}
+      className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer ${isSelected ? "border-2 border-purple-400" : ""
+        }`}
       onClick={onClick}
     >
       <div className={`${getCardColor()} opacity-100 p-4 text-white`}>
@@ -66,14 +78,14 @@ const ClassCard: React.FC<ClassCardProps> = ({
           {classCode}
           <div className="ml-auto flex items-center">
             {icon}
-            {isEditing && (
-              <Button
-                type="link"
-                icon={<EditOutlined />}
-                onClick={onEditClick}
-                className="ml-2 text-white"
-              />
+            {isMenuVisible && (
+              <Dropdown overlay={menu} trigger={["click"]}>
+                <button className="text-2xl font-bold text-white-700 p-0.2 hover:text-gray-900">
+                  <MoreOutlined />
+                </button>
+              </Dropdown>
             )}
+
           </div>
         </div>
         <div className="text-sm">Teacher: {teacherName ?? "N/A"}</div>
