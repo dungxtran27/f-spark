@@ -157,6 +157,11 @@ const Phrase1 = () => {
       </Form> */}
       {/* pending */}
       {/* <Result title="Your request is pending, please wait" /> */}
+      {/* success  set defaulActive key => phrase_2*/}
+      {/* <Result
+        title="Your request approve, check your account !!!"
+        status="success"
+      /> */}
     </div>
   );
 };
