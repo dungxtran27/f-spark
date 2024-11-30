@@ -116,6 +116,8 @@ const addManyStudentNoClassToClass = async (req, res) => {
     if (!classId) {
       return res.status(400).json({ message: "Class ID must be provided." });
     }
+    console.log(studentIds, classId);
+
     const updatedStudents =
       await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
     return res.status(200).json({

@@ -17,7 +17,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../utils/const";
 import { Admin } from "../../../../api/manageAccoount";
 const { Option } = Select;
@@ -34,7 +34,7 @@ interface Teacher {
   classes: any;
 }
 
-const Teacher: React.FC = () => {
+const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
   const [itemsPerPage] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [termFilter, setTermFilter] = useState<string | undefined>(undefined);
@@ -58,7 +58,14 @@ const Teacher: React.FC = () => {
       });
     },
   });
-
+  const assignTeacherMutation = useMutation({
+    mutationFn: (teacherId: any) => {
+      return Admin.assignTeacherToClass({
+        classId: classId,
+        teacherId: teacherId,
+      });
+    },
+  });
   const data: Teacher[] = Array.isArray(teachertData?.data?.data?.teachers)
     ? teachertData.data.data.teachers
     : [];
@@ -141,10 +148,13 @@ const Teacher: React.FC = () => {
     {
       title: "Actions",
       key: "actions",
-      render: () => (
+      render: (_, record: any) => (
         <UserDeleteOutlined
           style={{ fontSize: "18px", cursor: "pointer" }}
-          title="Ban Account"
+          title="Assign Class"
+          onClick={() => {
+            assignTeacherMutation.mutate(record?._id);
+          }}
         />
       ),
     },

@@ -17,10 +17,13 @@ export const Admin = {
     return await axios.get(`/api/term`);
   },
   importStudent: async (formData: FormData) => {
-    return await axios.post("/api/student/import", formData,  {
+    return await axios.post("/api/student/import", formData, {
       headers: {
-        Accept: "application/json; charset=UTF-8", 
+        Accept: "application/json; charset=UTF-8",
       },
     });
+  },
+  assignTeacherToClass: async (requestBody: any) => {
+    return await axios.patch("/api/class/assignTeacher", requestBody);
   },
 };

@@ -18,7 +18,7 @@ const StudentTableNoAction = ({
   const { data: studentsData } = useQuery({
     queryKey: [QUERY_KEY.NO_CLASS_STUDENT],
     queryFn: async () => {
-      return student.getAllStudentsNoClass();
+      return student.getAllStudentsNoClass({ page: 1, limit: 10 });
     },
   });
   const AddStudentMutation = useMutation({

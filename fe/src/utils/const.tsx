@@ -259,7 +259,9 @@ export const QUERY_KEY = {
   REQUEST_DEADLINE_LIST: "requestDeadlineList",
   TERM:"term",
   TERMACTIVE:"termActive",
-  TERM_LIST: "termList"
+  TERM_LIST: "termList",
+  CLASS_DETAIL: "classDetail",
+  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

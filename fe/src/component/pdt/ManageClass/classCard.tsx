@@ -56,8 +56,8 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
   return (
     <div
-      className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer ${
-        isSelected ? "border-2 border-purple-400" : ""
+      className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer border-2 ${
+        isSelected ? "border-primary/70 shadow-xl" : ""
       }`}
       onClick={onClick}
     >

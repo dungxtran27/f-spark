@@ -331,7 +331,7 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
     const result = await Student.updateMany(
       {
         _id: { $in: studentIds },
-        classId: { $in: [null, undefined] },
+        // classId: { $in: [null, undefined] },
       },
       {
         $set: { classId: classId },

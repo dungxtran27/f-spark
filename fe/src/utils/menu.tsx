@@ -6,6 +6,7 @@ import { SiGoogleclassroom } from "react-icons/si";
 import { BiSolidDashboard, BiSolidUserAccount } from "react-icons/bi";
 import { RiMailSendFill } from "react-icons/ri";
 import { IoTimerOutline } from "react-icons/io5";
+import { Badge } from "antd";
 export const StudentRoutes = [
   {
     route: "/dashboard",
@@ -64,7 +65,11 @@ export const AdminRoutes = [
   {
     route: "/manageRequest",
     page: "Requests",
-    icon: <BiSolidUserAccount size={20} />,
+    icon: (
+      <Badge count={2}>
+        <BiSolidUserAccount size={20} />
+      </Badge>
+    ),
   },
   {
     route: "/manageTerms",
