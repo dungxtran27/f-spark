@@ -3,9 +3,9 @@ import { FaUser } from "react-icons/fa";
 import { FaUserGroup } from "react-icons/fa6";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { MdOutlineMessage } from "react-icons/md";
-import { Button, Dropdown, Menu, Tooltip } from "antd";
+import { Dropdown, Menu, Tooltip } from "antd";
 import { ImNotification } from "react-icons/im";
-import { DeleteOutlined, EditOutlined, EllipsisOutlined, MoreOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, MoreOutlined } from "@ant-design/icons";
 
 interface ClassCardProps {
   className?: string;
@@ -38,7 +38,6 @@ const ClassCard: React.FC<ClassCardProps> = ({
       </span>
     </Tooltip>
   ),
-  isEditing = false, // Default value is false
   onEditClick,
   onClick,
   isSelected = false,

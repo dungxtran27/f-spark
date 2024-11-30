@@ -801,7 +801,13 @@ const findAllGroups = async (page, limit, searchText) => {
   }
 };
 
-const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCode) => {
+const getAllGroupsNoClass = async (
+  GroupName,
+  tag,
+  page = 1,
+  limit = 10,
+  termCode
+) => {
   try {
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -826,9 +832,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCod
 
     if (termCode) {
       filterCondition.$and.push({
-        $or: [
-          { termCode: { $regex: termCode, $options: "i" } },
-        ],
+        $or: [{ termCode: { $regex: termCode, $options: "i" } }],
       });
     }
     if (filterCondition.$and.length === 0) {
@@ -875,8 +879,8 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCod
       {
         $unwind: {
           path: "$termDetails",
-          preserveNullAndEmptyArrays: true
-        }
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $group: {
@@ -885,7 +889,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCod
           term: { $first: "$term" },
           termDetails: { $first: "$termDetails" },
           termCode: {
-            $first: "$termDetails.termCode"
+            $first: "$termDetails.termCode",
           },
           isSponsorship: { $first: "$isSponsorship" },
           tag: { $push: { $arrayElemAt: ["$tag", 0] } },
@@ -910,7 +914,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCod
         },
       },
       {
-        $match: filterCondition 
+        $match: filterCondition,
       },
       {
         $sort: {
@@ -1053,7 +1057,33 @@ const updateTimelineForGroup = async ({groupId, classworkId, newDate}) => {
 const createGroupsFromExcel = async (groupData) => {
   try {
     const result = await Group.insertMany(groupData, { ordered: false });
-    return result
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getGroupsOfTerm = async (termId) => {
+  try {
+    const result = await Group.find({ term: termId });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const updateMember = async (groupId, studentIds) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $push: {
+          teamMembers: { $each: studentIds },
+        },
+      },
+      { new: true }
+    );
+    return result;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -1080,6 +1110,8 @@ const getMemberOfGroupByGroupId = async (groupId) => {
   }
 }
 export default {
+  updateMember,
+  getGroupsOfTerm,
   createCellsOnUpdate,
   createJourneyRow,
   findGroupById,

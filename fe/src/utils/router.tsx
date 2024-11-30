@@ -21,6 +21,7 @@ import MentorProfile from "../pages/PDT/MentorProfile";
 import TeacherProfile from "../pages/PDT/TeacherProfile";
 import Notification from "../pages/Notification";
 import Requests from "../pages/Student/Request";
+import AccountantPage from "../pages/Accountant";
 const Router = () => {
   return (
     <BrowserRouter>
@@ -52,6 +53,7 @@ const Router = () => {
         <Route path="/manageAccount" element={<AccountManagementPage />} />
         <Route path="/teacherProfile/:id" element={<TeacherProfile />} />
         <Route path="/mentorProfile/:id" element={<MentorProfile />} />
+        <Route path="/accountant" element={<AccountantPage />} />
       </Routes>
     </BrowserRouter>
   );

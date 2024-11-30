@@ -473,7 +473,6 @@ const getAllGroupsOfTeacherbyClassIds = async (req, res) => {
       decodedToken?.role?.id
     );
     const classIds = classes.map((c) => c._id);
-
     const groups = await GroupRepository.findAllGroupsOfTeacherbyClassIds(
       classIds,
       tagIds,
@@ -485,7 +484,20 @@ const getAllGroupsOfTeacherbyClassIds = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+const getGroupsOfTerm = async (req, res) => {
+  try {
+    const { termId } = req.params;
+    console.log(termId);
+    
+    const result = await GroupRepository.getGroupsOfTerm(termId);
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 export default {
+  getGroupsOfTerm,
   createJourneyRow,
   createJourneyCol,
   findGroupById,

@@ -17,10 +17,9 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../utils/const";
 import { Admin } from "../../../../api/manageAccoount";
-
 const { Option } = Select;
 
 interface Teacher {
@@ -31,9 +30,11 @@ interface Teacher {
   email: string;
   phoneNumber: string;
   status: boolean;
+  assigned: any;
+  classes: any;
 }
 
-const Teacher: React.FC = () => {
+const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
   const [itemsPerPage] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [termFilter, setTermFilter] = useState<string | undefined>(undefined);
@@ -57,11 +58,17 @@ const Teacher: React.FC = () => {
       });
     },
   });
-
+  const assignTeacherMutation = useMutation({
+    mutationFn: (teacherId: any) => {
+      return Admin.assignTeacherToClass({
+        classId: classId,
+        teacherId: teacherId,
+      });
+    },
+  });
   const data: Teacher[] = Array.isArray(teachertData?.data?.data?.teachers)
     ? teachertData.data.data.teachers
     : [];
-
   const handleAutoCompleteSearch = (input: string) => {
     const normalizedInput = input.toLowerCase();
     const filteredOptions = data
@@ -108,13 +115,28 @@ const Teacher: React.FC = () => {
           to={`/teacherProfile/${record._id}`}
           style={{ fontWeight: "bold" }}
         >
-          {`${record.salutation} ${record.name}`}
+          {`${record.salutation || ""} ${record.name}`}
         </Link>
       ),
     },
 
     { title: "Email", dataIndex: "email", key: "email" },
     { title: "PhoneNumber", dataIndex: "phoneNumber", key: "phoneNumber" },
+    {
+      title: "Assigned Class",
+      dataIndex: "assigned",
+      key: "assigned",
+      render: (assigned: any) => {
+        const count = assigned?.length;
+        return (
+          <span
+            className={`${count >= 2 && "text-pendingStatus font-semibold"}`}
+          >
+            {count}
+          </span>
+        );
+      },
+    },
     {
       title: "Status",
       dataIndex: "status",
@@ -126,10 +148,13 @@ const Teacher: React.FC = () => {
     {
       title: "Actions",
       key: "actions",
-      render: () => (
+      render: (_, record: any) => (
         <UserDeleteOutlined
           style={{ fontSize: "18px", cursor: "pointer" }}
-          title="Ban Account"
+          title="Assign Class"
+          onClick={() => {
+            assignTeacherMutation.mutate(record?._id);
+          }}
         />
       ),
     },
@@ -197,7 +222,28 @@ const Teacher: React.FC = () => {
         columns={columns}
         dataSource={data}
         pagination={false}
-        rowKey="id"
+        rowKey="_id"
+        expandable={{
+          expandedRowRender: (record) =>
+            record.assigned?.map((c: any) => (
+              <div className="flex pl-[105px] w-[420px] justify-between">
+                <span className="font-semibold text-textSecondary">
+                  {c?.classCode}
+                </span>
+                &nbsp;
+                <span
+                  className={`${
+                    c?.studentCount > 30
+                      ? "text-pendingStatus"
+                      : "text-textSecondary"
+                  }`}
+                >
+                  {c?.studentCount} students
+                </span>
+              </div>
+            )),
+          rowExpandable: (record) => record.assigned?.length > 0,
+        }}
       />
       <div className="flex justify-center mt-4">
         <Pagination
