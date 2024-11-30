@@ -27,5 +27,11 @@ export const groupApi = {
   },
   getGroupOfTerm: async (termId: string|undefined) =>{
     return await axios.get(`/api/group/getGroupsOfTerm/${termId}`)
-  }
+  },
+  getAllGroupOfTeacherByClassIds: async (requestBody: any) => {
+    return await axios.post(
+      `/api/group/getAllGroupsOfTeacherbyClassIds`,
+      requestBody
+    );
+  },
 };

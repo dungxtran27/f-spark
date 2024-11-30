@@ -1,3 +1,4 @@
+import teacher from "../controller/teacher.js";
 import Class from "../model/Class.js";
 import Mentor from "../model/Mentor.js";
 import Student from "../model/Student.js";
@@ -293,5 +294,6 @@ export default {
   getAllAccTeacher,
   getTeacherWithClasses,
   getTeacherAccountByClassId,
-  assignClass
+  assignClass,
+  getClassOfTeacher
 };

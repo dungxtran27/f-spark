@@ -12,6 +12,7 @@ const GroupCard = ({
   handleLock,
   handleOpengroupDetailModal,
   setGroup,
+  setTagSearch,
   role,
 }: any | string) => {
   // const { setNodeRef } = useDroppable({
@@ -29,6 +30,7 @@ const GroupCard = ({
     border: isOver ? "1px solid #22c55e" : undefined,
     boxShadow: isOver ? "0px 5px 15px ##4ade80" : undefined,
   };
+
   const hasAtLeastTwoMajors = (students: any) => {
     const uniqueMajors = new Set();
 
@@ -47,7 +49,7 @@ const GroupCard = ({
       ref={setNodeRef}
       style={style1}
       // className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow"
-      className="flex flex-col bg-white rounded-sm px-2 py-2 mr-2 mb-2 shadow-md w-full max-w-[32%]"
+      className="flex flex-col bg-white rounded-sm px-2 py-2 mr-2 mb-2 shadow-md w-full  max-w-[32%]"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center ">
@@ -55,6 +57,7 @@ const GroupCard = ({
             className="font-semibold pr-3 text-[16px] hover:text-purple-600 cursor-pointer"
             onClick={() => {
               setGroup(info);
+              setTagSearch(info?.tag.map((t: any) => t._id));
               handleOpengroupDetailModal();
             }}
           >

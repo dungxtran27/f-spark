@@ -34,11 +34,12 @@ const GradingSubmission = ({
         criteria: criteria,
       });
     },
-    onSuccess: (response) => {
+    onSuccess: (_response) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.TEACHER_OUTCOMES_LIST, QUERY_KEY.GROUPS_OF_CLASS],
       });
-      setSubmission(response?.data?.data);
+      setSubmission(null);
+      
     },
   });
   return (
@@ -65,6 +66,18 @@ const GradingSubmission = ({
           label="Grade"
           name="grade"
           initialValue={submission?.grade || 0}
+          rules={[
+            {
+              required: true,
+              message: "Grade is required!",
+            },
+            {
+              type: "number",
+              min: 0,
+              max: 10,
+              message: "Grade must be between 0 and 10",
+            },
+          ]}
         >
           <InputNumber size="large" className="w-full" />
         </FormItem>

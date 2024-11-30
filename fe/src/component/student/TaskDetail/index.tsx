@@ -3,6 +3,8 @@ import {
   Breadcrumb,
   Button,
   Empty,
+  message,
+  Modal,
   Progress,
   Spin,
   Tooltip,
@@ -37,7 +39,7 @@ const Attachment = ({ url }: { url: string }) => {
 };
 
 const TaskDetailWrapper = () => {
-  const {  taskId } = useParams();
+  const { taskId } = useParams();
   const [openCreateTask, setOpenCreateTask] = useState({
     isOpen: false,
     mode: 'CREATE'
@@ -45,6 +47,8 @@ const TaskDetailWrapper = () => {
   const [task, setTask] = useState<any>(null);
   const [openChildParentTask, setOpenChildParentTask] = useState(true);
   const lastTaskRef = useRef<HTMLElement>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Trạng thái mở modal
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const navigate = useNavigate();
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
@@ -61,9 +65,28 @@ const TaskDetailWrapper = () => {
       return taskBoard.deleteTask(taskId);
     },
     onSuccess: () => {
+      setIsDeleteModalOpen(false);
       navigate("/tasks", { replace: true });
     },
+    onError: () => {
+      message.error("Failed to delete task.");
+    },
   });
+
+  const handleDeleteClick = (taskId: string) => {
+    setTaskToDelete(taskId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (taskToDelete) {
+      deleteTask.mutate(taskToDelete);
+    }
+  };
+  const handleCancelDelete = () => {
+    setTaskToDelete(null);
+    setIsDeleteModalOpen(false);
+  };
   return (
     <div className="w-full p-3">
       <Breadcrumb
@@ -73,18 +96,18 @@ const TaskDetailWrapper = () => {
           },
           ...(taskDetail?.data?.data?.parentTask
             ? [
-                {
-                  title: (
-                    <Link
-                      to={`/taskDetail/${encodeURIComponent(
-                        taskDetail?.data?.data?.parentTask?.taskName
-                      )}/${taskDetail?.data?.data?.parentTask?._id}`}
-                    >
-                      {taskDetail?.data?.data?.parentTask?.taskName}
-                    </Link>
-                  ),
-                },
-              ]
+              {
+                title: (
+                  <Link
+                    to={`/taskDetail/${encodeURIComponent(
+                      taskDetail?.data?.data?.parentTask?.taskName
+                    )}/${taskDetail?.data?.data?.parentTask?._id}`}
+                  >
+                    {taskDetail?.data?.data?.parentTask?.taskName}
+                  </Link>
+                ),
+              },
+            ]
             : []),
           {
             title: <span className="text-primary">{taskDetail?.data?.data?.taskName}</span>,
@@ -102,9 +125,8 @@ const TaskDetailWrapper = () => {
           </div>
           <div className="flex py-3 bg-white px-3">
             <div
-              className={`${
-                openChildParentTask ? "w-7/12" : "w-full"
-              } flex flex-col gap-5 pr-3`}
+              className={`${openChildParentTask ? "w-7/12" : "w-full"
+                } flex flex-col gap-5 pr-3`}
             >
               <div>
                 <div className="flex items-center justify-between">
@@ -116,7 +138,7 @@ const TaskDetailWrapper = () => {
                       <CiEdit
                         className="cursor-pointer hover:text-primaryBlue"
                         onClick={() => {
-                          setOpenCreateTask({isOpen: true, mode: "UPDATE"});
+                          setOpenCreateTask({ isOpen: true, mode: "UPDATE" });
                           setTask(taskDetail?.data?.data);
                         }}
                         size={23}
@@ -126,9 +148,10 @@ const TaskDetailWrapper = () => {
                       <GoTrash
                         className="cursor-pointer hover:text-red-500"
                         size={20}
-                        onClick={() =>
-                          deleteTask.mutate(taskDetail?.data?.data?._id)
-                        }
+                        // onClick={() =>
+                        //   deleteTask.mutate(taskDetail?.data?.data?._id)
+                        // }
+                        onClick={() => handleDeleteClick(taskDetail?.data?.data?._id)}
                       />
                     </Tooltip>
                   </div>
@@ -163,12 +186,11 @@ const TaskDetailWrapper = () => {
                   <div className="flex items-center gap-5 w-2/5 justify-between ">
                     <span className="text-textSecondary">Task type</span>
                     <span
-                      className={`px-2 ${
-                        taskDetail?.data?.data?.taskType ===
-                        TASK_TYPE.CLASS_WORK
+                      className={`px-2 ${taskDetail?.data?.data?.taskType ===
+                          TASK_TYPE.CLASS_WORK
                           ? "bg-pendingStatus/40"
                           : "bg-primaryBlue/40"
-                      } rounded font-medium`}
+                        } rounded font-medium`}
                     >
                       {taskDetail?.data?.data?.taskType}
                     </span>
@@ -221,7 +243,7 @@ const TaskDetailWrapper = () => {
                             (t: any) => t?.status === "Done"
                           )?.length /
                             taskDetail?.data?.data?.childTasks?.length) *
-                            100
+                          100
                         ) === 100 || !(taskDetail?.data?.data?.childTasks?.length > 0)
                       }
                     />
@@ -241,8 +263,8 @@ const TaskDetailWrapper = () => {
                     <span>
                       {taskDetail?.data?.data?.dueDate
                         ? dayjs(taskDetail?.data?.data?.dueDate).format(
-                            DATE_FORMAT.withYearAndTime
-                          )
+                          DATE_FORMAT.withYearAndTime
+                        )
                         : "None"}
                     </span>
                   </div>
@@ -288,21 +310,20 @@ const TaskDetailWrapper = () => {
                               (t: any) => t?.status === "Done"
                             )?.length /
                               taskDetail?.data?.data?.childTasks?.length) *
-                              100
+                            100
                           )}
                         />
                         <span
-                          className={`${
-                            Math.round(
-                              (taskDetail?.data?.data?.childTasks?.filter(
-                                (t: any) => t?.status === "Done"
-                              )?.length /
-                                taskDetail?.data?.data?.childTasks?.length) *
-                                100
-                            ) === 100
+                          className={`${Math.round(
+                            (taskDetail?.data?.data?.childTasks?.filter(
+                              (t: any) => t?.status === "Done"
+                            )?.length /
+                              taskDetail?.data?.data?.childTasks?.length) *
+                            100
+                          ) === 100
                               ? "text-okStatus"
                               : "text-pendingStatus"
-                          }`}
+                            }`}
                         >
                           Done
                         </span>
@@ -350,10 +371,10 @@ const TaskDetailWrapper = () => {
                 task
                   ? task
                   : {
-                      parentTask: taskId,
-                      taskType: TASK_TYPE.GROUP_WORK,
-                      taskName: `Child task of ${taskDetail?.data?.data?.taskName}`,
-                    }
+                    parentTask: taskId,
+                    taskType: TASK_TYPE.GROUP_WORK,
+                    taskName: `Child task of ${taskDetail?.data?.data?.taskName}`,
+                  }
               }
               lastTaskRef={lastTaskRef}
               mode={openCreateTask.mode}
@@ -361,6 +382,17 @@ const TaskDetailWrapper = () => {
           </div>
         </div>
       )}
+      <Modal
+        title="Confirm Delete"
+        open={isDeleteModalOpen}
+        onOk={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        okText="Delete"
+        okButtonProps={{ danger: true }}
+        cancelText="Cancel"
+      >
+        <p>Are you sure you want to delete this task?</p>
+      </Modal>
     </div>
   );
 };

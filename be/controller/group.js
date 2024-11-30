@@ -2,6 +2,7 @@ import {
   ClassRepository,
   GroupRepository,
   StudentRepository,
+  TermRepository,
 } from "../repository/index.js";
 const createJourneyRow = async (req, res) => {
   try {
@@ -196,7 +197,6 @@ const updateCustomerPersona = async (req, res) => {
     }
 
     const updatedPersona = { detail, bio, needs };
-    console.log(updatedPersona);
 
     const updatedGroup = await GroupRepository.updateCustomerPersona({
       groupId: req.groupId,
@@ -282,10 +282,13 @@ const createGroup = async (req, res) => {
         .status(400)
         .json({ error: "Please fill in all required fields" });
     }
+    const currTerm = await TermRepository.getActiveTerm();
+    const termId = currTerm._id;
     const data = await GroupRepository.createGroup(
       groupName,
       classId,
-      groupDescription
+      groupDescription,
+      termId
     );
     return res.status(200).json(data);
   } catch (error) {
@@ -462,6 +465,25 @@ const addGroupToClass = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+const getAllGroupsOfTeacherbyClassIds = async (req, res) => {
+  try {
+    const { tagIds, mentorStatus } = req.body;
+    const decodedToken = req.decodedToken;
+    const classes = await ClassRepository.getClassesOfTeacher(
+      decodedToken?.role?.id
+    );
+    const classIds = classes.map((c) => c._id);
+    const groups = await GroupRepository.findAllGroupsOfTeacherbyClassIds(
+      classIds,
+      tagIds,
+      mentorStatus
+    );
+
+    res.status(200).json({ data: groups });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 const getGroupsOfTerm = async (req, res) => {
   try {
@@ -474,7 +496,6 @@ const getGroupsOfTerm = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
 export default {
   getGroupsOfTerm,
   createJourneyRow,
@@ -501,4 +522,5 @@ export default {
   editTimelineForManyGroups,
   getAllGroupsNoClass,
   addGroupToClass,
+  getAllGroupsOfTeacherbyClassIds,
 };

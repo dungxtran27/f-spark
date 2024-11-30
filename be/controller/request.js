@@ -145,9 +145,6 @@ const joinGroup = async (req, res) => {
     const activeTerm = await TermRepository.getActiveTerm();
     const currentTime = moment().toISOString();
     const endDate = activeTerm.timeLine[0].endDate;
-
-    console.log(endDate);
-
     if (moment(endDate).isBefore(currentTime)) {
       return res.status(400).json({ error: "The deadline for requesting to join the group has passed." });
     }
@@ -189,8 +186,6 @@ const deleteRequestJoinByStudentId = async (req, res) => {
 const createLeaveClassRequest = async (req, res) => {
   try {
     const { toClass } = req.body;
-    console.log(req.body);
-
     const studentId = req.decodedToken?.role?.id;
     const data = await RequestRepository.createLeaveClassRequest({
       studentId,
@@ -445,9 +440,7 @@ const updateIsSponsorship = async () => {
     const activeTerm = await TermRepository.getActiveTerm();
     const currentTime = moment().toISOString();
     const endDate = activeTerm.timeLine.find((t) => t.type === "sponsorShip").endDate;
-    if (moment(endDate).isBefore(currentTime)) {
-      console.log("zo");
-      
+    if (moment(endDate).isBefore(currentTime)) {      
       const requests = await RequestRepository.findRequestByTypeRequestFPT();
       const filterRequestByTerm = requests.filter((r) => r.group.term.toString() === activeTerm._id.toString());
 
