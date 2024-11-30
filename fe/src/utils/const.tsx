@@ -244,6 +244,7 @@ export const QUERY_KEY = {
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
   NOTIFICATION_STATISTIC: "notificationStatistic",
+  NOTIFICATION_DETAIL_STATISTIC: "notificationDetailStatistic",
   REQUEST_LEAVE_CLASS: "requestLeaveClass",
   ALLSTUDENT: "allStudent",
   ALLGROUP: "allGroup",
@@ -283,12 +284,16 @@ export const NOTIFICATION_ACTION_TYPE = {
   CREATE_TASK: "TaskCreation",
   UPDATE_TASK_STATUS: "UpdateTaskStatus",
   UPDATE_TASK: "UpdateTask",
-  DELETE_TASK: "DeleteTask"
+  DELETE_TASK: "DeleteTask",
+  RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline"
 };
 export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",
   CREATE_ASSIGNMENT: "CreateAssignment",
   GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
+  CREATE_SUBMISSION: "CreateSubmission",
+  REQUEST_DEADLINE: "RequestDeadline",
+  CREATE_REQUEST_DEADLINE: "CreateRequestDeadline"
 };
 export const NOTIFICATION_TYPE = {
   CLASS: "class",

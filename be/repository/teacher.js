@@ -1,3 +1,4 @@
+import teacher from "../controller/teacher.js";
 import Class from "../model/Class.js";
 import Mentor from "../model/Mentor.js";
 import Student from "../model/Student.js";
@@ -202,6 +203,15 @@ const getTeacherWithClasses = async (teacherId) => {
     throw new Error(`Error fetching teacher info: ${error.message}`);
   }
 }
+
+const getClassOfTeacher = async (teacherId) => {
+  try {
+    const classList = await Teacher.findById(teacherId)
+    return classList.assignedClasses
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 const getTeacherAccountByClassId = async (classId) => {
   try {
     const classDoc = await Class.findById(classId);
@@ -217,5 +227,6 @@ export default {
   findByAccountId,
   getAllAccTeacher,
   getTeacherWithClasses,
+  getClassOfTeacher,
   getTeacherAccountByClassId
 };

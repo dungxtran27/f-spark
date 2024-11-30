@@ -14,7 +14,7 @@ const createRequestDeadline = async (req, res) => {
         const data = await RequestDeadlineRepository.createRequestDeadline({
             classworkId, groupId, reason, dueDate, newDate, teacherId,classId
         })
-        
+        const timeline = await GroupRepository.getTimelineClassworkOfGroup({groupId, classworkId})
         const teacher = await TeacherRepository.getTeacherAccountByClassId(
             student.classId._id
         )
@@ -24,13 +24,16 @@ const createRequestDeadline = async (req, res) => {
               class: student.classId._id,
               sender: req.decodedToken.role.id,
               receivers: [teacher._id],
+              group: groupId,
               senderType: "Student",
               type: "Class",
               action: {
                 action: `created request deadline in`,
                 target: classworkId,
+                priorVersion: timeline,
+                newVersion: {endDate: newDate},
                 actionType: CLASS_NOTIFICATION_ACTION_TYPE.CREATE_REQUEST_DEADLINE,
-                extraUrl: `/class/${classworkId}`
+                extraUrl: `/class/${classId}`
               }
             }
             
@@ -61,7 +64,7 @@ const getRequestDeadlineByTeacher = async (req, res) => {
     if(!teacherId){
       return res.status(200).json({ error: "Not fould teacher!" });
     }
-    const requestDeadline = await RequestDeadlineRepository.getRequestDeadlineByTeacher({teacherId, classId, status, page})    
+    const requestDeadline = await RequestDeadlineRepository.getRequestDeadlineByTeacher({teacherId, classId, status, page})       
     return res.status(200).json({ data: requestDeadline, totalItems: requestDeadline.totalItems });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -81,15 +84,17 @@ const updateClassWorkFollowRequestDeadline = async (req, res) => {
 
     const requestDeadline = await RequestDeadlineRepository.updateStatusRequestDeadline({requestDeadlineId, status})
     const newDate = requestDeadline.newDate;
-    const groupId = requestDeadline.groupId
+    const groupId = requestDeadline.groupId;
     const timeline = await GroupRepository.getTimelineClassworkOfGroup({groupId, classworkId})
     let timelineUpdate = {}
     if(statusBoolean){
       timelineUpdate = await GroupRepository.updateTimelineForGroup({groupId, classworkId, newDate})
     }
+    const members = await GroupRepository.getMemberOfGroupByGroupId(groupId)
     if(requestDeadline) {
       const notificationData = {
         class: requestDeadline.classId,
+        receivers: members,
         sender: req.decodedToken.role.id,
         group: requestDeadline.groupId,
         senderType: "Teacher",
@@ -100,7 +105,7 @@ const updateClassWorkFollowRequestDeadline = async (req, res) => {
           priorVersion: timeline,
           newVersion: timelineUpdate,
           actionType: CLASS_NOTIFICATION_ACTION_TYPE.RESPONSE_REQUEST_DEADLINE,
-          extraUrl: `/class/${classworkId}`
+          extraUrl: `/class/${requestDeadline.classId}`
         }
       }
       

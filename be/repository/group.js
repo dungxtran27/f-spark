@@ -1019,6 +1019,15 @@ const getTimelineClassworkOfGroup = async ({groupId, classworkId}) => {
     throw new Error(error.message);
   }
 }
+
+const getMemberOfGroupByGroupId = async (groupId) => {
+  try {
+    const group = await Group.findById(groupId)
+    return group.teamMembers;
+  } catch (error) {
+    throw error;
+  }
+}
 export default {
   createCellsOnUpdate,
   createJourneyRow,
@@ -1048,5 +1057,6 @@ export default {
   addGroupAndStudentsToClass,
   updateTimelineForGroup,
   getTimelineClassworkOfGroup,
-  createGroupsFromExcel
+  createGroupsFromExcel,
+  getMemberOfGroupByGroupId
 };

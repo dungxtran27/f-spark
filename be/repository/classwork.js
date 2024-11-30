@@ -360,6 +360,14 @@ const getLatestAssignmentSubmissionsCount = async (classId) => {
   }
 };
 
+const getClassworkByClassworkId = async (classworkId) => {
+  try {
+    const classwork = await ClassWork.findById(classworkId)
+    return classwork
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 export default {
   getClassWorkByStudent,
   getOutcomes,
@@ -374,4 +382,5 @@ export default {
   getLatestAnnounceOfClassesByTeacher,
   getLatestAssignmentOfClassesByTeacher,
   getOutcomesOfClasses,
+  getClassworkByClassworkId
 };

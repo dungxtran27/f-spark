@@ -33,11 +33,12 @@ const Notification = () => {
     queryFn: () => {
       if(userInfo?.role == ROLE.student){
         return notificationApi.getStudentNotificationStatistic();
+      } else {
+        return notificationApi.getTeacherNotificationStatistic();
       }
     },
     enabled: openNotification,
   });
-
   return (
     <div>
       <Badge count={10} className="cursor-pointer">
@@ -90,7 +91,23 @@ const Notification = () => {
               </div>
             </Link>
           </div>
-          : ''
+          : 
+          <div className="grid grid-cols-2 gap-3">
+            <Link to={"/notification/class"}>
+              <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
+                <span className="text-4xl font-semibold">
+                  {notificationStatistic?.data?.data?.classNotification}
+                </span>
+                <span>Class</span>
+              </div>
+            </Link>
+            <Link to={"/notification/system"}>
+              <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
+                <span className="text-4xl font-semibold">10</span>
+                <span>System</span>
+              </div>
+            </Link>
+          </div>
           }
           
         </Spin>
