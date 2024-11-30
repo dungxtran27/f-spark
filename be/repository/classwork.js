@@ -234,7 +234,6 @@ const getLatestAssignmentOfClassesByTeacher = async (classIds) => {
       };
     });
     const processedData = await Promise.all(newData);
-    console.log(processedData);
     return processedData;
   } catch (error) {
     throw new Error(error.message);
