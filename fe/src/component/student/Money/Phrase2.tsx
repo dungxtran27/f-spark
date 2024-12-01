@@ -6,7 +6,9 @@ const Phrase2 = () => {
   return (
     <div className="flex bg-white h-full ">
       <Evidence />
-      <Divider type="vertical" className="min-h-fit "/>
+      <div className="h-full">
+        <Divider type="vertical" className="" />
+      </div>
       <Response />
     </div>
   );
