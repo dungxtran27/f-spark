@@ -87,14 +87,19 @@ const getAllClasses = async (req, res) => {
 };
 const getAllClass = async (req, res) => {
   try {
-    const { page, limit, classCode, teacherName, category, termCode } = req.body;
+    const { page, limit, classCode, teacherName, category, termCode } =
+      req.body;
     const [data, dataMissStudent, dataFullStudent] = await Promise.all([
       ClassRepository.getAllClass(
         parseInt(page),
-        parseInt(limit), classCode, teacherName, category, termCode
+        parseInt(limit),
+        classCode,
+        teacherName,
+        category,
+        termCode
       ),
       ClassRepository.getAllClassMissStudent(),
-      ClassRepository.getAllClassFullStudent()
+      ClassRepository.getAllClassFullStudent(),
     ]);
     return res.status(200).json({
       data: data.classes,
@@ -112,31 +117,73 @@ const getAllClass = async (req, res) => {
 };
 const createClass = async (req, res) => {
   try {
-    const { classCode, groupIds, studentIds,} = req.body;
+    const { classCode, groupIds, studentIds } = req.body;
     if (!classCode) {
       return res.status(400).json({ message: "Class code is required." });
     }
     const newClass = await ClassRepository.createClass({ classCode });
     if (groupIds && Array.isArray(groupIds) && groupIds.length > 0) {
-      const result = await GroupRepository.addGroupAndStudentsToClass(groupIds, newClass._id);
+      const result = await GroupRepository.addGroupAndStudentsToClass(
+        groupIds,
+        newClass._id
+      );
     }
     if (studentIds && Array.isArray(studentIds) && studentIds.length > 0) {
-      const updatedStudents = await StudentRepository.addManyStudentNoClassToClass(studentIds, newClass._id);
+      const updatedStudents =
+        await StudentRepository.addManyStudentNoClassToClass(
+          studentIds,
+          newClass._id
+        );
     }
     return res.status(201).json({
       message: "Class created successfully",
       data: newClass,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Server error, could not create class." });
+    return res
+      .status(500)
+      .json({ message: "Server error, could not create class." });
   }
 };
 
+const getClassDetail = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const result = await ClassRepository.findClassById(classId);
+    if (!result) {
+      return res.status(404).json({ error: "Class Not found" });
+    }
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const assignTeacher = async (req, res) => {
+  try {
+    const {teacherId, classId} = req.body;
+    console.log(teacherId, classId);
+    
+    const existClass = await ClassRepository.findClassById(classId);
+    if(existClass?.teacher){
+      return res.status(400).json({error: "This class already have a teacher !"})
+    }
+    const [updatedClass, updatedTeacher] = await Promise.all([
+      ClassRepository.assignTeacher(classId, teacherId),
+      TeacherRepository.assignClass(classId, teacherId)
+    ]);
+    return res.status(200).json({ message: "Assigned successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
 export default {
   pinClasswork,
   getClassesOfTeacher,
   getAllClasses,
   getAllClass,
   getTeacherDashboardInfo,
-  createClass
+  createClass,
+  getClassDetail,
+  assignTeacher
 };

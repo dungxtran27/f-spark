@@ -69,7 +69,9 @@ export const classApi = {
     return await axios.patch(`api/classwork/upvoteAnnouncement/${classWorkId}`);
   },
   getSubmissionsByGroup: async (groupId: string | undefined) => {
-    return await axios.get(`api/submission/submissionsByGroup?groupId=${groupId}`);
+    return await axios.get(
+      `api/submission/submissionsByGroup?groupId=${groupId}`
+    );
   },
   getAllClasses: async () => {
     return await axios.get(`api/class/classes`);
@@ -81,5 +83,10 @@ export const classApi = {
   createClass: async (requestBody: any) => {
     return await axios.post(`api/class/create`, requestBody);
   },
-
+  getClassDetail: async (classId: any) => {
+    return await axios.get(`api/class/${classId}`);
+  },
+  getUnGroupStudentOfClass: async (classId: any) =>{
+    return await axios.get(`api/student/${classId}`)
+  }
 };

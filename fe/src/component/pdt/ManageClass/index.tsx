@@ -140,7 +140,7 @@ const ManageClassWrapper = () => {
         <div className="w-3/4 flex flex-col">
           {/* Bấm bấm*/}
           {!showStudentTable && !showGroupTable && showClass && (
-            <>
+            <div>
               <div className="flex mb-4 justify-between">
                 <div className="flex items-center space-x-3">
                   <span>Semester:</span>
@@ -161,9 +161,10 @@ const ManageClassWrapper = () => {
                     className="w-36"
                     onChange={handleClassChange}
                     allowClear
+                    showSearch
                   >
                     {classData?.data?.data.map((option: any) => (
-                      <Option key={option._id} value={option.classCode}>
+                      <Option key={option._id} value={option.classCode} >
                         {option.classCode}
                       </Option>
                     ))}
@@ -175,50 +176,47 @@ const ManageClassWrapper = () => {
                     suffix={<SearchOutlined />}
                   />
                 </div>
-                <Button
-                  onClick={showModal}
-                  type="primary"
-                >
-                  Auto create class
-                </Button>
+                <Button onClick={showModal}>Auto create class</Button>
               </div>
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                {classData?.data?.data?.map((classItem: any) => {
-                  const sponsorshipCount = Array.isArray(classItem.groups)
-                    ? classItem.groups.filter(
-                      (group: any) => group.isSponsorship === true
-                    ).length
-                    : 0;
-                  return (
-                    <ClassCard
-                      key={classItem._id}
-                      classCode={classItem.classCode}
-                      teacherName={
-                        classItem?.teacherDetails?.name || "No teacher"
-                      }
-                      groups={classItem.totalGroups}
-                      isSponsorship={sponsorshipCount}
-                      totalMembers={classItem?.totalStudents}
-                      onClick={() => {
-                        setSelectedClass(classItem._id);
-                        setShowClass(false);
-                      }}
-                    />
-                  );
-                })}
-              </div>
+              <div className="h-full flex flex-col">
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  {classData?.data?.data?.map((classItem: any) => {
+                    const sponsorshipCount = Array.isArray(classItem.groups)
+                      ? classItem.groups.filter(
+                          (group: any) => group.isSponsorship === true
+                        ).length
+                      : 0;
+                    return (
+                      <ClassCard
+                        key={classItem._id}
+                        classCode={classItem.classCode}
+                        teacherName={
+                          classItem?.teacherDetails?.name || "No teacher"
+                        }
+                        groups={classItem.totalGroups}
+                        isSponsorship={sponsorshipCount}
+                        totalMembers={classItem?.totalStudents}
+                        onClick={() => {
+                          setSelectedClass(classItem._id);
+                          setShowClass(false);
+                        }}
+                      />
+                    );
+                  })}
+                </div>
 
-              <div className="w-full mt-5 flex justify-center">
-                <Pagination
-                  defaultCurrent={page}
-                  onChange={onChangePage}
-                  total={classData?.data.totalItems}
-                  showTotal={(total, range) =>
-                    `${range[0]}-${range[1]} of ${total} classes`
-                  }
-                />
+                <div className="w-full mt-5 flex justify-center">
+                  <Pagination
+                    defaultCurrent={page}
+                    onChange={onChangePage}
+                    total={classData?.data.totalItems}
+                    showTotal={(total, range) =>
+                      `${range[0]}-${range[1]} of ${total} classes`
+                    }
+                  />
+                </div>
               </div>
-            </>
+            </div>
           )}
           {!showStudentTable &&
             !showGroupTable &&

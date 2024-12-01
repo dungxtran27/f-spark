@@ -277,8 +277,8 @@ const RequestJoinGroup: React.FC = () => {
       ) : (
         <>
           {dayjs().isAfter(dayjs(deadlineRequestJoinGroup)) ? (
-            <div className="p-4 bg-white rounded shadow-md">
-              <h2 className="text-2xl font-bold text-red-600">
+            <div className="p-4 bg-white rounded shadow-md border border-red-500/50 bg-red-500/15">
+              <h2 className="text-2xl font-bold text-red-500">
                 Deadline Passed
               </h2>
               <p className="mt-2 text-gray-700">
