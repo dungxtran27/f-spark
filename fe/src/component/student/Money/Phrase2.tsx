@@ -4,9 +4,9 @@ import Response from "./ResponseFromAccountant";
 
 const Phrase2 = () => {
   return (
-    <div className="flex bg-white">
+    <div className="flex bg-white h-full ">
       <Evidence />
-      <Divider type="vertical"/>
+      <Divider type="vertical" className="min-h-fit "/>
       <Response />
     </div>
   );

@@ -67,9 +67,39 @@ const Evidence = () => {
         },
       ],
     },
+    {
+      date: "thursday.21/12/2024",
+      evidences: [
+        {
+          image:
+            "https://5.imimg.com/data5/SELLER/Default/2023/12/369509261/AN/RY/YS/844696/a4-size-bill-book-500x500.jpg",
+          money: 99,
+        },
+        {
+          image:
+            "https://5.imimg.com/data5/SELLER/Default/2023/12/369509261/AN/RY/YS/844696/a4-size-bill-book-500x500.jpg",
+          money: 1000,
+        },
+      ],
+    },
+    {
+      date: "thursday.21/12/2024",
+      evidences: [
+        {
+          image:
+            "https://5.imimg.com/data5/SELLER/Default/2023/12/369509261/AN/RY/YS/844696/a4-size-bill-book-500x500.jpg",
+          money: 99,
+        },
+        {
+          image:
+            "https://5.imimg.com/data5/SELLER/Default/2023/12/369509261/AN/RY/YS/844696/a4-size-bill-book-500x500.jpg",
+          money: 1000,
+        },
+      ],
+    },
   ];
   return (
-    <div className="w-[70%] ">
+    <div className="w-[70%]  ">
       <Button type="default" className="relative left-[80%] top-6" onClick={()=>{setOpen(true)}}>
         Add Evidence <FaPlus />
       </Button>
