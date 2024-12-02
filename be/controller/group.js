@@ -488,10 +488,18 @@ const getAllGroupsOfTeacherbyClassIds = async (req, res) => {
 const getGroupsOfTerm = async (req, res) => {
   try {
     const { termId } = req.params;
-    console.log(termId);
-    
     const result = await GroupRepository.getGroupsOfTerm(termId);
     return res.status(200).json({ data: result });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+const addImageToGroupGallery = async (req, res) => {
+  try {
+    const { filePath } = req.body;
+    console.log(req.body);
+
+    return res.status(200).json({});
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -523,4 +531,5 @@ export default {
   getAllGroupsNoClass,
   addGroupToClass,
   getAllGroupsOfTeacherbyClassIds,
+  addImageToGroupGallery,
 };

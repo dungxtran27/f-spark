@@ -119,6 +119,16 @@ const CanvasCellsSchema = new Schema({
     default: "default content",
   },
 });
+const GallerySchema = new Schema({
+  type: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    default: "Product image",
+  },
+});
 const GroupSchema = new Schema(
   {
     GroupName: {
@@ -233,16 +243,15 @@ const GroupSchema = new Schema(
       type: Number,
       required: false,
     },
-    term: {
-      type: Schema.Types.ObjectId,
-      ref: "Term",
-      require: true
-    },
     timeline: [TimelineSchema],
     term: {
       type: Schema.Types.ObjectId,
       ref: "Term",
-      required: true
+      required: true,
+    },
+    gallery: {
+      type: [GallerySchema],
+      default: [],
     },
   },
   { timestamps: true, collection: "Groups" }

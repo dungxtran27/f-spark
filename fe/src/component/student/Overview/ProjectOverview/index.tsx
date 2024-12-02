@@ -6,6 +6,7 @@ import BusinessModelCanvas from "./BusinessModelCanvas";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
+import ImageUpload from "../../../common/UpLoad";
 
 const ProjectOverviewWrapper: React.FC = () => {
   const userInfo = useSelector(
@@ -19,6 +20,7 @@ const ProjectOverviewWrapper: React.FC = () => {
   return (
     <div className="p-2 space-y-2 bg-gray-200 rounded-lg">
       <ViewInfoPoject />
+      <ImageUpload/>
       <CustomerJourneyMap />
       <CustomerPersonas />
       <BusinessModelCanvas />
