@@ -4,6 +4,7 @@ import Student from "../model/Student.js";
 import student from "./student.js";
 import Class from "../model/Class.js";
 import { StudentRepository } from "./index.js";
+import { query } from "express";
 
 const createJourneyRow = async ({ groupId, name }) => {
   try {
@@ -457,7 +458,7 @@ const assignLeader = async (groupId, studentId) => {
     throw new Error(error.message);
   }
 };
-const createGroup = async (groupName, classID, GroupDescription) => {
+const createGroup = async (groupName, classID, GroupDescription, termId) => {
   try {
     const classfound = await Class.findById(classID);
     if (!classfound) {
@@ -470,6 +471,7 @@ const createGroup = async (groupName, classID, GroupDescription) => {
       class: classID,
       leader: null,
       mentor: null,
+      term: termId,
     });
     return {
       message: "Create new group successfully",
@@ -658,7 +660,6 @@ const findAllSponsorGroupsOfClasses = async (classIds) => {
 
     return { groups: Object.values(groupedData), groupNumber: data.length };
   } catch (error) {
-    console.log(error);
     throw new Error(error.message);
   }
 };
@@ -669,7 +670,6 @@ const getGroupsByClassId = async (classId) => {
       .lean();
     return groups;
   } catch (error) {
-    console.error("Error fetching groups by class:", error.message);
     throw error;
   }
 };
@@ -801,7 +801,13 @@ const findAllGroups = async (page, limit, searchText) => {
   }
 };
 
-const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCode) => {
+const getAllGroupsNoClass = async (
+  GroupName,
+  tag,
+  page = 1,
+  limit = 10,
+  termCode
+) => {
   try {
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -826,9 +832,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCod
 
     if (termCode) {
       filterCondition.$and.push({
-        $or: [
-          { termCode: { $regex: termCode, $options: "i" } },
-        ],
+        $or: [{ termCode: { $regex: termCode, $options: "i" } }],
       });
     }
     if (filterCondition.$and.length === 0) {
@@ -875,8 +879,8 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCod
       {
         $unwind: {
           path: "$termDetails",
-          preserveNullAndEmptyArrays: true
-        }
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $group: {
@@ -885,7 +889,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCod
           term: { $first: "$term" },
           termDetails: { $first: "$termDetails" },
           termCode: {
-            $first: "$termDetails.termCode"
+            $first: "$termDetails.termCode",
           },
           isSponsorship: { $first: "$isSponsorship" },
           tag: { $push: { $arrayElemAt: ["$tag", 0] } },
@@ -910,7 +914,7 @@ const getAllGroupsNoClass = async (GroupName, tag, page = 1, limit = 10, termCod
         },
       },
       {
-        $match: filterCondition 
+        $match: filterCondition,
       },
       {
         $sort: {
@@ -984,6 +988,57 @@ const addGroupAndStudentsToClass = async (groupIds, classId) => {
     throw new Error(error.message);
   }
 };
+const findAllGroupsOfTeacherbyClassIds = async (
+  classIds,
+  tagIds,
+  mentorStatus
+) => {
+  try {
+    const classes = await Class.find({ _id: { $in: classIds } }).select(
+      "classCode"
+    );
+    const groupQuery = {
+      class: { $in: classIds },
+    };
+    if (tagIds !== null && tagIds !== undefined && tagIds.length > 0) {
+      groupQuery.tag = { $all: tagIds };
+    }
+
+    if (mentorStatus === "no") {
+      groupQuery.mentor = null;
+    }
+    if (mentorStatus === "yes") {
+      groupQuery.mentor = { $ne: null };
+    }
+
+    const groups = await Group.find(groupQuery)
+      .select("GroupName isSponsorship mentor class tag")
+      .populate({
+        path: "tag",
+        select: "name",
+      })
+      .populate({
+        path: "mentor",
+        select: "name profilePicture",
+      });
+
+    const result = classes.reduce((acc, classInfo) => {
+      const matchingGroups = groups.filter((group) =>
+        group.class._id.equals(classInfo._id)
+      );
+      acc[classInfo._id] = {
+        classId: classInfo._id,
+        classCode: classInfo.classCode,
+        groups: matchingGroups,
+      };
+      return acc;
+    }, {});
+
+    return Object.values(result);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 const updateTimelineForGroup = async ({groupId, classworkId, newDate}) => {
   try {
@@ -1002,7 +1057,33 @@ const updateTimelineForGroup = async ({groupId, classworkId, newDate}) => {
 const createGroupsFromExcel = async (groupData) => {
   try {
     const result = await Group.insertMany(groupData, { ordered: false });
-    return result
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getGroupsOfTerm = async (termId) => {
+  try {
+    const result = await Group.find({ term: termId });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const updateMember = async (groupId, studentIds) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $push: {
+          teamMembers: { $each: studentIds },
+        },
+      },
+      { new: true }
+    );
+    return result;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -1019,7 +1100,18 @@ const getTimelineClassworkOfGroup = async ({groupId, classworkId}) => {
     throw new Error(error.message);
   }
 }
+
+const getMemberOfGroupByGroupId = async (groupId) => {
+  try {
+    const group = await Group.findById(groupId)
+    return group.teamMembers;
+  } catch (error) {
+    throw error;
+  }
+}
 export default {
+  updateMember,
+  getGroupsOfTerm,
   createCellsOnUpdate,
   createJourneyRow,
   findGroupById,
@@ -1046,7 +1138,9 @@ export default {
   editTimelineForManyGroups,
   getAllGroupsNoClass,
   addGroupAndStudentsToClass,
+  findAllGroupsOfTeacherbyClassIds,
   updateTimelineForGroup,
   getTimelineClassworkOfGroup,
-  createGroupsFromExcel
+  createGroupsFromExcel,
+  getMemberOfGroupByGroupId
 };

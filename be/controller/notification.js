@@ -2,6 +2,7 @@ import moment from "moment";
 import {
   NotificationRepository,
   StudentRepository,
+  TeacherRepository,
   TermRepository,
 } from "../repository/index.js";
 import { DEADLINE_TYPES } from "../utils/const.js";
@@ -93,6 +94,41 @@ const getDetailClassNotification = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getTeacherClassNotification = async (req, res) => {
+  try {
+    const teacherId = req.decodedToken.account;
+    console.log(teacherId);
+    
+    const teacher = await TeacherRepository.findByAccountId(teacherId);
+    const classNotification = await NotificationRepository.getTeacherClassNotification(teacher?._id)
+    return res.status(200).json({
+      data: {
+        classNotification: classNotification?.length,
+        data: classNotification
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const getTeacherClassNotificationByClass = async (req, res) => {
+  try {
+    const teacherId = req.decodedToken.account;
+    
+    const teacher = await TeacherRepository.findByAccountId(teacherId);
+    const classNotification = await NotificationRepository.getTeacherClassNotification(teacher?._id)
+    const classList = await TeacherRepository.getClassOfTeacher(teacher?._id)
+    console.log(classNotification);
+    
+    return res.status(200).json({
+      classList: classList,
+      data: classNotification,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 const remindMemberTransferEnd = async () => {
   try {
     const activeTerm = await TermRepository.getActiveTerm();
@@ -121,7 +157,6 @@ const remindMemberTransferEnd = async () => {
         },
       };
       await NotificationRepository.createNotification({data: notificationData})
-      console.log('create');
       
     }
   } catch (error) {
@@ -134,5 +169,7 @@ export default {
   getStudentNotificationStatisTic,
   getDetailGroupNotification,
   getDetailClassNotification,
+  getTeacherClassNotification,
+  getTeacherClassNotificationByClass,
   remindMemberTransferEnd,
 };

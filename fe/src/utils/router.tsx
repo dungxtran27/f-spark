@@ -21,6 +21,8 @@ import MentorProfile from "../pages/PDT/MentorProfile";
 import TeacherProfile from "../pages/PDT/TeacherProfile";
 import Notification from "../pages/Notification";
 import Requests from "../pages/Student/Request";
+import Money from "../pages/Student/Money";
+import AccountantPage from "../pages/Accountant";
 const Router = () => {
   return (
     <BrowserRouter>
@@ -35,8 +37,9 @@ const Router = () => {
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/request" element={<Requests />} />
         <Route path="/taskDetail/:taskName/:taskId" element={<TaskDetail />} />
-        <Route path="/notification/:type" element={<Notification/>}/>
-        <Route path="/notification" element={<Notification/>}/>
+        <Route path="/notification/:type" element={<Notification />} />
+        <Route path="/notification" element={<Notification />} />
+        <Route path="/money" element={<Money/>} />
         {/* teacher */}
         <Route path="/:role/login" element={<Login />} />
         <Route path="/mentorlist" element={<MentorList />} />
@@ -45,13 +48,14 @@ const Router = () => {
         <Route path="/class/:classId" element={<ClassDetail />} />
         <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
         <Route path="/timelineTeacher" element={<TimelineTeacher />} />
-        
+
         {/* PDT */}
         <Route path="/manageClass" element={<ManageClass />} />
         <Route path="/manageRequest" element={<ManageRequest />} />
         <Route path="/manageAccount" element={<AccountManagementPage />} />
         <Route path="/teacherProfile/:id" element={<TeacherProfile />} />
         <Route path="/mentorProfile/:id" element={<MentorProfile />} />
+        <Route path="/accountant" element={<AccountantPage />} />
       </Routes>
     </BrowserRouter>
   );

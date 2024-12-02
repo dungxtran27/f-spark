@@ -1,7 +1,9 @@
 import {
+  ClassworkRepository,
   NotificationRepository,
   StudentRepository,
   SubmissionRepository,
+  TeacherRepository,
 } from "../repository/index.js";
 import mongoose from "mongoose";
 import { CLASS_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
@@ -25,6 +27,44 @@ const createSubmission = async (req, res) => {
       content,
     });
 
+    const classwork = await ClassworkRepository.getClassworkByClassworkId(
+      new mongoose.Types.ObjectId(classworkId)
+    )
+    const student = await StudentRepository.findStudentByAccountId(
+      new mongoose.Types.ObjectId(req.decodedToken.account)
+    )
+    const teacher = await TeacherRepository.getTeacherAccountByClassId(
+      new mongoose.Types.ObjectId(student.classId)
+    )
+    
+    if(createSubmiss) {
+      const notificationData = {
+        class: student.classId,
+        sender: studentId,
+        receivers: [teacher._id],
+        senderType: "Student",
+        type: "Class",
+        action: {
+          action: `Created new Submission`,
+          target: classworkId,
+          actionType: CLASS_NOTIFICATION_ACTION_TYPE.CREATE_SUBMISSION,
+          newVersion: classwork,
+          priorVersion: createSubmiss,
+          extraUrl: `/class/${student.classId}`
+        }
+      }
+      await NotificationRepository.createNotification({
+        data: notificationData,
+      })
+      const socketIds = userSocketMap[teacher?.account.toString()];
+        if (socketIds) {
+          io.to(socketIds).emit(
+            "newNotification",
+            `Assignment ${classwork?.title} has a new submission`
+          );
+        }
+    }    
+
     return res
       .status(201)
       .json({ data: createSubmiss, message: "Submitted successfully" });
@@ -44,9 +84,7 @@ const addGrade = async (req, res) => {
       submissionId: new mongoose.Types.ObjectId(submissionId),
       grade,
       criteria: criteriaObjectIds,
-    });
-    console.log(updateGrade);
-    
+    });    
     if (updateGrade) {
       const notificationData = {
         group: updateGrade?.group,
@@ -67,9 +105,7 @@ const addGrade = async (req, res) => {
       });
       const studentsOfGroup = await StudentRepository.getStudentsByGroup(
         updateGrade?.group
-      );
-      console.log(studentsOfGroup);
-      
+      );      
       studentsOfGroup.forEach((s) => {
         const socketIds = userSocketMap[s?.account?.toString()];
         if (socketIds) {

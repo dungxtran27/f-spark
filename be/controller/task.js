@@ -278,8 +278,6 @@ const deleteTask = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized !" });
     }
     const result = await TaskRepository.deleteTask(taskId);
-    console.log(result);
-
     const notiData = {
       sender: decodedToken?.role?.id,
       receivers: [],

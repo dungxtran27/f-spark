@@ -3,7 +3,7 @@ import {
   Modal,
   Tag,
   Select,
-  Space,
+  // Space,
   Input,
   Table,
   Tooltip,
@@ -46,6 +46,7 @@ import {
 } from "@dnd-kit/core";
 
 import { CSS } from "@dnd-kit/utilities";
+import { MdOutlineFilterListOff } from "react-icons/md";
 
 interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   "data-row-key": string;
@@ -61,7 +62,7 @@ const Row: React.FC<Readonly<RowProps>> = (props) => {
     transform: CSS.Translate.toString(transform),
 
     cursor: "move",
-    ...(isDragging ? { position: "absolute", zIndex: "9999" } : {}),
+    ...(isDragging ? { position: "absolute", zIndex: "99" } : {}),
   };
 
   return (
@@ -173,6 +174,8 @@ const ClassGroupListWrapper = () => {
 
   const [tagSearch, setTagSearch] = useState([]);
   const [nameSeacrh, setNameSeacrh] = useState("");
+  const [currentSemester, setNameCurrentSemester] = useState("curr");
+  const [order, setOrder] = useState("up");
   const handleChange = (value: any) => {
     setTagSearch(value);
   };
@@ -221,13 +224,21 @@ const ClassGroupListWrapper = () => {
     })
   );
   const { data: mentorData } = useQuery({
-    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
+    queryKey: [
+      QUERY_KEY.MENTORLIST,
+      tagSearch,
+      nameSeacrh,
+      currentSemester,
+      order,
+    ],
     queryFn: async () => {
       return mentorList.getMentorListPagination({
-        limit: 27,
+        limit: 20,
         page: 1,
         tagIds: tagSearch,
         name: nameSeacrh,
+        term: currentSemester,
+        order: order,
       });
     },
   });
@@ -257,6 +268,7 @@ const ClassGroupListWrapper = () => {
     },
   });
   // assign mentor to group
+
   const assignMentorToGroup = useMutation({
     mutationFn: ({ mentorId, groupId }: reqBodyAssignMentorToGroup) =>
       student.assignmentorToGroup({
@@ -265,7 +277,8 @@ const ClassGroupListWrapper = () => {
       }),
 
     onSuccess: (data) => {
-      setGroup(data.data.group);
+      setGroup(data?.data.data.group);
+
       queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
@@ -319,6 +332,7 @@ const ClassGroupListWrapper = () => {
       });
     },
   });
+
   const columnsMentor = [
     {
       title: "image",
@@ -344,8 +358,25 @@ const ClassGroupListWrapper = () => {
       width: 300,
     },
     {
-      title: "Group supporting",
-      dataIndex: "groupNumber",
+      title: `Group support ${
+        currentSemester == "curr" ? " this semester" : "all semesters"
+      }`,
+      // dataIndex: "groupNumber",
+      render: (rc: any) => (
+        <>
+          <span>
+            <span className="text-blue-600 font-medium">
+              {rc.assignedGroupLength}
+            </span>{" "}
+            groups:{" "}
+          </span>
+          {rc.groups.map((g: any) => (
+            <span className="shadow p-1 bg-slate-50 rounded-sm leading-8 ml-1">
+              {g.groupName}
+            </span>
+          ))}
+        </>
+      ),
     },
   ];
   const sensors = useSensors(
@@ -387,6 +418,7 @@ const ClassGroupListWrapper = () => {
       render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
     },
   ];
+  // console.log("c", group);
 
   return (
     <>
@@ -404,7 +436,7 @@ const ClassGroupListWrapper = () => {
         </div>
         <DndContext sensors={sensors} onDragEnd={onDragEnd}>
           <div className=" flex  justify-between pt-2 ">
-            <div className="flex flex-wrap ">
+            <div className="flex flex-wrap   w-full">
               {classPeople?.data.data.groupStudent.map((s: any) => (
                 <GroupCard
                   info={s}
@@ -414,6 +446,7 @@ const ClassGroupListWrapper = () => {
                   handleOpenAddMentorModal={handleOpenAddMentorModal}
                   handleOpengroupDetailModal={handleOpengroupDetailModal}
                   setGroup={setGroup}
+                  setTagSearch={setTagSearch}
                   role={userInfo?.role}
                 />
               ))}
@@ -441,57 +474,101 @@ const ClassGroupListWrapper = () => {
         className="z-40"
         open={AddMentorModal}
         onCancel={handleCloseAddMentorModal}
-        width={1000}
+        width={1200}
         footer={[
           <Button key="back" onClick={handleCloseAddMentorModal}>
             Close
           </Button>,
         ]}
       >
-        <Space
+        {/* <Space
           className={classNames(style.filter_bar)}
           style={{ width: "100%" }}
           direction="horizontal"
-        >
-          <p>Major</p>
-          <Select
-            mode="multiple"
-            allowClear
-            defaultValue={group.tag.map((tag) => ({
-              label: tag.name,
-              value: tag._id,
-            }))}
-            className={classNames(style.search_tag_bar)}
-            placeholder="Please select"
-            maxTagCount={3}
-            onChange={handleChange}
-            options={options}
+        > */}
+        <div className={classNames(style.filter_bar)}>
+          <div>
+            <p>Major</p>
+            <Select
+              mode="multiple"
+              defaultValue={tagSearch}
+              allowClear
+              className={classNames(style.search_tag_bar)}
+              placeholder="Select major"
+              maxTagCount={"responsive"}
+              onChange={handleChange}
+              options={options}
+            />
+          </div>
+          <div>
+            <p className="pl-3">Search</p>
+            <Search
+              className={classNames(style.search_name_bar)}
+              placeholder="Enter mentor name here"
+              onSearch={onSearch}
+              enterButton
+            />
+          </div>
+          <div className="ml-2">
+            <p>Filter by</p>
+            <Select
+              defaultValue="curr"
+              style={{ width: 140 }}
+              onChange={setNameCurrentSemester}
+              options={[
+                { value: "curr", label: "This semester" },
+                { value: "all", label: "All Semester" },
+              ]}
+            />
+          </div>
+          <div className="ml-2">
+            <p>Order</p>
+            <Select
+              defaultValue="down"
+              style={{ width: 140 }}
+              onChange={setOrder}
+              options={[
+                { value: "down", label: "Ascending" },
+                { value: "up", label: "Descending" },
+              ]}
+            />
+          </div>
+          <Tooltip title={"clear all filter"}>
+            <Button
+              className="ml-2 self-end"
+              onClick={() => {
+                setTagSearch([]);
+                setNameSeacrh("");
+                setOrder("up");
+                setNameCurrentSemester("curr");
+                // setPage(1);
+              }}
+            >
+              <MdOutlineFilterListOff />
+            </Button>
+          </Tooltip>
+        </div>
+        {mentorData?.data.data.length > 0 ? (
+          <Table
+            dataSource={mentorData?.data.data}
+            columns={columnsMentor}
+            onRow={(record: MentorData) => {
+              return {
+                onClick: () => {
+                  setmentorSelected(record);
+                  setConfirmContent("mentor");
+                  handleOpenconfirm();
+                },
+              };
+            }}
+            pagination={{
+              pageSize: 4,
+              total: mentorData?.data.data.length, // Set the total number of rows
+            }}
           />
-          <p>Search</p>
-          <Search
-            className={classNames(style.search_name_bar)}
-            placeholder="input search text"
-            onSearch={onSearch}
-            enterButton
-          />
-        </Space>
-        <Table
-          dataSource={mentorData?.data.data}
-          columns={columnsMentor}
-          onRow={(record: MentorData) => {
-            return {
-              onClick: () => {
-                setmentorSelected(record);
-                setConfirmContent("mentor");
-                handleOpenconfirm();
-              },
-            };
-          }}
-          pagination={{
-            pageSize: 4,
-            total: mentorData?.data.data.length, // Set the total number of rows
-          }}
-        />
+        ) : (
+          <Empty description={"No matching mentor "} />
+        )}
       </Modal>
       {/* modal group detail */}
       <Modal
@@ -503,13 +580,13 @@ const ClassGroupListWrapper = () => {
           <Button key="back" onClick={handleClosegroupDetailModal}>
             Close
           </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            onClick={handleClosegroupDetailModal}
-          >
-            Save
-          </Button>,
+          // <Button
+          //   key="submit"
+          //   type="primary"
+          //   onClick={handleClosegroupDetailModal}
+          // >
+          //   Save
+          // </Button>,
           <Button
             className={classNames(style.deleteBtn)}
             onClick={() => {
@@ -521,25 +598,25 @@ const ClassGroupListWrapper = () => {
           </Button>,
         ]}
       >
-        {Object.keys(group).length === 0 ? (
+        {group && Object.keys(group).length === 0 ? (
           <>none</>
         ) : (
           <div className="flex">
             <div className="max-w-[50%] min-w-[50%]">
               <div className="flex pb-1">
                 <span className="font-semibold text-[16px] pb-1 ">
-                  {group.GroupName}
+                  {group?.GroupName}
                 </span>
               </div>
               <img
                 src={
-                  group.groupImage ||
+                  group?.groupImage ||
                   "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
                 }
                 className="h-[200px] w-full object-cover mb-2"
                 alt=""
               />
-              {group.mentor == null ? (
+              {group?.mentor == null ? (
                 <>
                   <span>Mentor:</span>
                   <Button
@@ -555,7 +632,7 @@ const ClassGroupListWrapper = () => {
                 <div className="flex self-center items-center">
                   <p>Mentor:</p>
                   <p className="pl-1 font-semibold text-[14px]">
-                    {group.mentor.name}{" "}
+                    {group?.mentor?.name}{" "}
                   </p>
                   <FaEdit
                     size={23}
@@ -566,16 +643,16 @@ const ClassGroupListWrapper = () => {
               )}
               <div className="mt-3">
                 Tags:
-                {group.tag?.map((t) => (
+                {group?.tag?.map((t) => (
                   <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
                 ))}
               </div>
               <div className="line-clamp-[3] mt-2">
-                Description: {group.GroupDescription}
+                Description: {group?.GroupDescription}
               </div>
             </div>
             <div className=" min-w-[50%]  pt-5 pl-5">
-              {group.teamMembers.length > 0 ? (
+              {group?.teamMembers.length > 0 ? (
                 <>
                   {group?.teamMembers.map((s: any) => (
                     <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
@@ -668,30 +745,34 @@ const ClassGroupListWrapper = () => {
               switch (confirmContent) {
                 case "leader":
                   assignLeaderToGroup.mutate({
-                    groupId: group._id,
-                    studentId: studentSelected._id,
+                    groupId: group?._id,
+                    studentId: studentSelected?._id,
                   });
                   handleCloseconfirm();
                   break;
                 case "remove":
                   deleteStudentFromGroup.mutate({
-                    groupId: group._id,
-                    studentId: studentSelected._id,
+                    groupId: group?._id,
+                    studentId: studentSelected?._id,
                   });
                   handleCloseconfirm();
                   break;
                 case "delete":
                   ungroup.mutate({
-                    groupId: group._id,
+                    groupId: group?._id,
                   });
                   handleCloseconfirm();
                   handleClosegroupDetailModal();
                   break;
                 case "mentor":
+                  // console.log("1",group);
+
                   assignMentorToGroup.mutate({
-                    mentorId: mentorSelected._id,
-                    groupId: group._id,
+                    mentorId: mentorSelected?._id,
+                    groupId: group?._id,
                   });
+                  // console.log("2", group);
+
                   handleCloseAddMentorModal();
                   handleCloseconfirm();
                   break;
@@ -708,23 +789,25 @@ const ClassGroupListWrapper = () => {
         {confirmContent == "mentor" && (
           <>
             you want to add {mentorSelected.name} as mentor for group :
-            {group.GroupName}
+            {group?.GroupName}
           </>
         )}
         {confirmContent == "leader" && (
           <>
-            you want to add {studentSelected.name} as leader for group :
-            {group.GroupName}
+            you want to add {studentSelected?.name} as leader for group :
+            {group?.GroupName}
           </>
         )}
         {confirmContent == "remove" && (
           <>
-            You want to remove {studentSelected.name}from group :
-            {group.GroupName}?
+            You want to remove {studentSelected?.name}from group :
+            {group?.GroupName}?
           </>
         )}
         {confirmContent == "delete" && (
-          <>You want to Delete {group.GroupName}? This Action cannot be undo.</>
+          <>
+            You want to Delete {group?.GroupName}? This Action cannot be undo.
+          </>
         )}
       </Modal>
       {/* modal create group */}

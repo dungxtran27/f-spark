@@ -100,8 +100,14 @@ groupRouter.post(
 groupRouter.post("/lockOrUnlockGroup", GroupController.lockOrUnlockGroup);
 groupRouter.post("/ungroup", GroupController.ungroup);
 groupRouter.get("/:classId", GroupController.getAllGroupByClassId);
-groupRouter.put("/update",GroupController.editTimelineForManyGroups);
+groupRouter.put("/update", GroupController.editTimelineForManyGroups);
 groupRouter.post("/", GroupController.getAllGroupsNoClass);
 groupRouter.patch('/addGroupToClass', GroupController.addGroupToClass);
+groupRouter.get("/getGroupsOfTerm/:termId", GroupController.getGroupsOfTerm)
+groupRouter.post(
+  "/getAllGroupsOfTeacherbyClassIds",
+  verifyToken,
+  GroupController.getAllGroupsOfTeacherbyClassIds
+);
 
 export default groupRouter;

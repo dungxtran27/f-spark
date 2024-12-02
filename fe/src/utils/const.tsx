@@ -9,6 +9,8 @@ import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStude
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
 import TimelineClassWrapper from "../component/teacher/Timeline";
+import Phrase1 from "../component/student/Money/Phrase1";
+import Phrase2 from "../component/student/Money/Phrase2";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -87,7 +89,7 @@ export const STUDENT_FILTERS = {
   studentId: "studentId",
   email: "email",
   major: "major",
-  searchKey: 'searchKey',
+  searchKey: "searchKey",
 };
 
 export const GROUP_FILTERS = {
@@ -119,7 +121,7 @@ export const CREATE_TASK_FILTER = {
   timeBlock: "timeBlock",
   parentTask: "parentTask",
   priority: "priority",
-  status: "status"
+  status: "status",
 };
 export const TASK_PRIORITY = [
   {
@@ -221,6 +223,7 @@ export const NOTIFICATION_READ_STATUS = [
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
   STUDENT_OF_TERM: "studentOfTerm",
+  GROUPS_OF_TERM: 'groupsOfTerm',
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
@@ -244,21 +247,24 @@ export const QUERY_KEY = {
   GROUP_NOTIFICATION_DETAIL: "groupNotificationDetail",
   CLASS_NOTIFICATION_DETAIL: "classNotificationDetail",
   NOTIFICATION_STATISTIC: "notificationStatistic",
+  NOTIFICATION_DETAIL_STATISTIC: "notificationDetailStatistic",
   REQUEST_LEAVE_CLASS: "requestLeaveClass",
   ALLSTUDENT: "allStudent",
   ALLGROUP: "allGroup",
   ALLMAJOR: "allMajor",
   CLASSCODE: "clasCode",
   GROUP_OF_CLASS: "groupOfClass",
-  TEACHERINFO:"teacherInfo",
-  MENTORINFO:"mentorInfo",
+  TEACHERINFO: "teacherInfo",
+  MENTORINFO: "mentorInfo",
   NO_CLASS_STUDENT: "noClassStudent",
   NO_CLASS_GROUPS: "noClassGroups",
   ADD_STUDENT_TO_CLASS: "addStudentToClass",
   REQUEST_DEADLINE_LIST: "requestDeadlineList",
   TERM:"term",
   TERMACTIVE:"termActive",
-  TERM_LIST: "termList"
+  TERM_LIST: "termList",
+  CLASS_DETAIL: "classDetail",
+  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -267,6 +273,8 @@ export const colorMap: Record<string, string> = {
   GD: "green",
   HS: "orange",
 };
+export const majors = ["SE", "HS", "GD", "IB"];
+
 export const colorMajorGroup: Record<string, string> = {
   "Ky Thuat": "orange",
   "Kinh Te": "green",
@@ -283,12 +291,16 @@ export const NOTIFICATION_ACTION_TYPE = {
   CREATE_TASK: "TaskCreation",
   UPDATE_TASK_STATUS: "UpdateTaskStatus",
   UPDATE_TASK: "UpdateTask",
-  DELETE_TASK: "DeleteTask"
+  DELETE_TASK: "DeleteTask",
+  RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline"
 };
 export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",
   CREATE_ASSIGNMENT: "CreateAssignment",
   GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
+  CREATE_SUBMISSION: "CreateSubmission",
+  REQUEST_DEADLINE: "RequestDeadline",
+  CREATE_REQUEST_DEADLINE: "CreateRequestDeadline"
 };
 export const NOTIFICATION_TYPE = {
   CLASS: "class",
@@ -298,4 +310,7 @@ export const NOTIFICATION_TYPE = {
 export const CREATE_REQUEST_DEADLINE = {
   newDate: "newDate",
   reason: "reason",
-};
+};export const PHRASE_TAB = [
+  { key: "phrase_1", label: "Phrase 1", children: <Phrase1 /> },
+  { key: "phrase_2", label: "Phrase 2", children: <Phrase2 /> },
+];

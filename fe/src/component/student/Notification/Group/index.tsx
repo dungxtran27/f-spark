@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import TaskCard from "../../TaskDetail/TaskCard";
 import { useState, useEffect } from "react";
 import { Button} from 'antd';
+import OutcomeNoti from "../../../common/Stream/OutcomeNoti";
 const Group = () => {
   const { data: groupNotification, isFetched } = useQuery({
     queryKey: [QUERY_KEY.GROUP_NOTIFICATION_DETAIL],
@@ -86,9 +87,36 @@ const Group = () => {
       </div>
     );
   };
+  const classworkNotification = (n: any) => {
+    const priorDueDate = new Date(n?.action?.priorVersion?.endDate);
+    const newDueDate = new Date(n?.action?.newVersion?.endDate);
+    return (
+      <div className="flex-grow pt-3 flex flex-col gap-3">
+        <span>
+          Your group's deadline request has been{' '}
+          {newDueDate > priorDueDate ? (
+            <span className="text-green-600 font-bold">approved</span>
+          ) : (
+            <span className="text-red-600 font-bold">denied</span>
+          )}{' '}
+          for{' '}
+          <Link
+            className="text-primaryBlue hover:underline font-bold"
+            to={`${n?.action?.extraUrl}`}
+          >
+            {n?.action?.priorVersion?.title}
+          </Link>
+        </span>
+        <div>
+            <OutcomeNoti sen={n?.sender} sub={n?.action?.priorVersion} post={n?.action?.newVersion}/>
+        </div>
+      </div>
+    );
+  };
   const getNotificationContent = (n: any) => {
     switch (n?.action?.actionType) {
-      case NOTIFICATION_ACTION_TYPE.CREATE_TASK:
+      case NOTIFICATION_ACTION_TYPE.RESPONSE_REQUEST_DEADLINE:
+        return classworkNotification(n)
       case NOTIFICATION_ACTION_TYPE.CHILD_TASK_CREATION:
         return taskCreateNotification(n);
       case NOTIFICATION_ACTION_TYPE.UPDATE_TASK:

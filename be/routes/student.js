@@ -13,5 +13,6 @@ studentRouter.post("/getAllStudentsNoClass", StudentController.getAllStudentsNoC
 studentRouter.patch("/addStudentToClass", StudentController.addManyStudentNoClassToClass);
 studentRouter.post('/', StudentController.getAllAccStudent);
 studentRouter.post('/import', upload.single('file'), StudentController.importStudent);
+// studentRouter.get('/noGroupStudents/:classId', StudentController.getAllStudentUnGroupByClassId)
 export default studentRouter;
 
