@@ -50,16 +50,17 @@ const createTerm = async (req, res) => {
       },
     ];
 
-    outcomes.map((o) => {
+    outcomes.sort((a, b) => a.index - b.index).forEach((o) => {
       timeline.push({
         title: `Outcome ${o?.index}`,
         description: o?.description,
-        startDate: moment(startOfTerm).add(2 * (o?.index - 1), "weeks"),
-        endDate: moment(startOfTerm).add(2 * o?.index, "weeks"),
+        startDate: moment(startOfTerm).add(4 * (o?.index - 1), "weeks"),
+        endDate: moment(startOfTerm).add(4 * o?.index, "weeks"),
         type: DEADLINE_TYPES.OUTCOME,
         outcome: o?._id
       });
     });
+
     const termData = {
       termCode,
       startTime,
@@ -89,9 +90,20 @@ const getAllTermsToFilter = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const getFillterTerm = async (req, res) => {
+  try {
+    const { termCode } = req.body;
+    const terms = await TermRepository.getFillterTerm({ termCode });
+    return res.status(200).json({ data: terms });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   createTerm,
   getAllTerms,
   getActiveTerm,
-  getAllTermsToFilter
+  getAllTermsToFilter,
+  getFillterTerm
 };

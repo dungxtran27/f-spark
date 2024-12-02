@@ -295,5 +295,5 @@ export default {
   getTeacherWithClasses,
   getTeacherAccountByClassId,
   assignClass,
-  getClassOfTeacher
+  // getClassOfTeacher
 };

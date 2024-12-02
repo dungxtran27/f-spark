@@ -23,6 +23,7 @@ import Notification from "../pages/Notification";
 import Requests from "../pages/Student/Request";
 import Money from "../pages/Student/Money";
 import AccountantPage from "../pages/Accountant";
+import ManageTerm from "../pages/PDT/ManageTerm";
 const Router = () => {
   return (
     <BrowserRouter>
@@ -39,7 +40,7 @@ const Router = () => {
         <Route path="/taskDetail/:taskName/:taskId" element={<TaskDetail />} />
         <Route path="/notification/:type" element={<Notification />} />
         <Route path="/notification" element={<Notification />} />
-        <Route path="/money" element={<Money/>} />
+        <Route path="/money" element={<Money />} />
         {/* teacher */}
         <Route path="/:role/login" element={<Login />} />
         <Route path="/mentorlist" element={<MentorList />} />
@@ -56,8 +57,9 @@ const Router = () => {
         <Route path="/teacherProfile/:id" element={<TeacherProfile />} />
         <Route path="/mentorProfile/:id" element={<MentorProfile />} />
         <Route path="/accountant" element={<AccountantPage />} />
+        <Route path="/manageTerms" element={<ManageTerm />} />
       </Routes>
     </BrowserRouter>
   );
 };
-export default Router
+export default Router;

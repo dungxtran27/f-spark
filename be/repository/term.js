@@ -35,8 +35,18 @@ const getActiveTerm = async () => {
     throw new Error(error.message);
   }
 };
+
+const getFillterTerm = async ({ termCode }) => {
+  try {
+    const terms = await Term.findOne({ termCode: termCode });
+    return terms;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   getAllTerms,
   createTerms,
-  getActiveTerm
+  getActiveTerm,
+  getFillterTerm
 };
