@@ -1,12 +1,16 @@
 import moment from "moment";
 import {
+  ClassworkRepository,
+  GroupRepository,
   NotificationRepository,
   StudentRepository,
   TeacherRepository,
   TermRepository,
 } from "../repository/index.js";
+import mongoose from "mongoose";
 import { DEADLINE_TYPES } from "../utils/const.js";
-
+import { CLASS_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
+import { io, userSocketMap } from "../index.js";
 const getGroupNotification = async (req, res) => {
   try {
     const groupId = req.groupId;
@@ -68,6 +72,8 @@ const getDetailGroupNotification = async (req, res) => {
       existingStudent?.group,
       existingStudent?._id
     );
+    console.log(result);
+    
     return res.status(200).json({
       data: result,
     });
@@ -119,7 +125,6 @@ const getTeacherClassNotificationByClass = async (req, res) => {
     const teacher = await TeacherRepository.findByAccountId(teacherId);
     const classNotification = await NotificationRepository.getTeacherClassNotification(teacher?._id)
     const classList = await TeacherRepository.getClassOfTeacher(teacher?._id)
-    console.log(classNotification);
     
     return res.status(200).json({
       classList: classList,
@@ -164,6 +169,57 @@ const remindMemberTransferEnd = async () => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const remindGroupSubmitOutcome = async (req, res) => {
+  try {
+    const {groupId, classworkId} = req.body;
+    const classwork = await ClassworkRepository.getClassworkByClassworkId(
+    new mongoose.Types.ObjectId(classworkId)
+  )
+  console.log(groupId);
+  
+  const members = await GroupRepository.getMemberOfGroupByGroupId(
+    new mongoose.Types.ObjectId(groupId))
+    if(groupId) {
+      const notificationData = {
+        class: classwork.classId,
+        receivers: members,
+        sender: req.decodedToken.role.id,
+        group: groupId,
+        senderType: "Teacher",
+        type: "Group",
+        action: {
+          action: `remind group submit outcome`,
+          target: classworkId,
+          newVersion: classwork,
+          actionType: CLASS_NOTIFICATION_ACTION_TYPE.REMIND_GROUP_SUBMIT,
+          extraUrl: `/class/${classwork.classId}`
+        }
+      }
+      
+      await NotificationRepository.createNotification({
+        data: notificationData,
+      })
+      const studentsOfGroup = await StudentRepository.getAllStudentByGroupId(
+        new mongoose.Types.ObjectId(groupId)
+      );
+      console.log(studentsOfGroup[0].account?.toString());
+      
+      studentsOfGroup.forEach((s) => {
+        const socketIds = userSocketMap[s?.account?.toString()];
+        if (socketIds) {
+          io.to(socketIds).emit(
+            "newNotification",
+            `Your group has been reminded about submitting assignments.`
+          );
+        }
+      });
+    }  
+    return res.status(200).json({ data: classwork, message: `Reminder sent to group` });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
 export default {
   getGroupNotification,
   getTaskRecordOfChanges,
@@ -173,4 +229,5 @@ export default {
   getTeacherClassNotification,
   getTeacherClassNotificationByClass,
   remindMemberTransferEnd,
+  remindGroupSubmitOutcome
 };

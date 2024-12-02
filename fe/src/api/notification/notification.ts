@@ -15,4 +15,7 @@ export const notificationApi = {
   getTeacherClassNotificationByClass: async () => {
     return await axios.get("/api/notification/teacher/getTeacherClassNotificationByClass");
   },
+  remindGroupSubmitOutcome: async (requestBody: any) => {
+    return await axios.post("/api/notification/teacher/remindGroupSubmitOutcome", requestBody)
+  }
 };

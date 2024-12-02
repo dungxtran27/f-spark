@@ -80,14 +80,15 @@ const TimelineRequest = () => {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-md p-3">
-      <div className="mb-3 flex items-center space-x-2 justify-end">
+    <div className="bg-white shadow-md rounded-md p-4 mt-3 mr-5">
+      <div className="mb-3 flex items-center space-x-2">
+      <span className="font-semibold">Request Deadline from groups</span>
         <Select
           value={status}
           onChange={(value) => {
             setStatus(value);
           }}
-          className="w-28"
+          className="w-28 mr-0"
         >
           <Option value="pending">Pending</Option>
           <Option value="processed">Processed</Option>
@@ -97,18 +98,18 @@ const TimelineRequest = () => {
         <thead>
           <tr className="bg-gray-200">
             <th className="p-2 w-1/12 text-left">Outcome</th>
-            <th className="p-2 w-1/12 text-left">Group Name</th>
+            <th className="p-2 w-2/12 text-left">Group Name</th>
             <th className="p-2 w-2/12 text-left">Reason</th>
-            <th className="p-2 w-4/12 text-left">Date End</th>
+            <th className="p-2 w-3/12 text-left">Date End</th>
             <th className="p-2 w-1/12 text-left">Action</th>
           </tr>
         </thead>
         <tbody>
           {requestDeadlineList?.data.data.map((r: any) => (
             <tr className="border-b" key={r._id}>
-              <td className="p-2">{r.classworkId.title}</td>
-              <td className="p-2">{r.groupId.GroupName}</td>
-              <td className="p-2">{r.reason}</td>
+              <td className="p-1">{r.classworkId.title}</td>
+              <td className="p-1">{r.groupId.GroupName}</td>
+              <td className="p-1">{r.reason}</td>
               <td
                 className="p-2"
                 style={{
@@ -147,13 +148,13 @@ const TimelineRequest = () => {
                         showModalConfirm(r?._id, r?.classworkId._id)
                       }
                       type="primary"
-                      className="px-1 py-0 mr-1"
+                      className="px-1 py-0 mr-1 w-14" 
                     >
                       Accept
                     </Button>
                     <Button
                       onClick={() => showModalReject(r?._id, r?.classworkId._id)}
-                      className="p-1"
+                      className="p-1 w-14"
                     >
                       Reject
                     </Button>
