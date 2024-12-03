@@ -5,6 +5,7 @@ import Term from "../model/Term.js";
 import Classwork from "../model/ClassWork.js";
 import { TermRepository } from "./index.js";
 import Outcome from "../model/Outcome.js";
+import Group from "../model/Group.js";
 const getClassesOfTeacher = async (teacherId) => {
   try {
 
@@ -576,6 +577,16 @@ const createClass = async ({
   }
 };
 
+const getClassByTermCode = async (termId) => {
+  try {
+    const groups = Class.find({
+      term: termId
+    })
+    return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 
 export default {
   pinClasswork,
@@ -586,5 +597,6 @@ export default {
   getClassNumberOfTeacher,
   getAllClassMissStudent,
   getAllClassFullStudent,
-  createClass
+  createClass,
+  getClassByTermCode
 };

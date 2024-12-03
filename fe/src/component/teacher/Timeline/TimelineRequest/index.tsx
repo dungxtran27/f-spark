@@ -1,4 +1,4 @@
-import { Button, Modal, Pagination, Select, Typography } from "antd";
+import { Button, Empty, Modal, Pagination, Select, Typography } from "antd";
 import { colorMajorGroup, QUERY_KEY } from "../../../../utils/const";
 import { GrFormNextLink } from "react-icons/gr";
 import dayjs from "dayjs";
@@ -100,10 +100,13 @@ const TimelineRequest = () => {
             <th className="p-2 w-1/12 text-left">Outcome</th>
             <th className="p-2 w-2/12 text-left">Group Name</th>
             <th className="p-2 w-2/12 text-left">Reason</th>
-            <th className="p-2 w-3/12 text-left">Date End</th>
+            <th className="p-2 w-4/12 text-left">Date End</th>
             <th className="p-2 w-1/12 text-left">Action</th>
           </tr>
         </thead>
+        {requestDeadlineList?.data.data.length > 0
+        ?
+        (
         <tbody>
           {requestDeadlineList?.data.data.map((r: any) => (
             <tr className="border-b" key={r._id}>
@@ -144,17 +147,18 @@ const TimelineRequest = () => {
                 {r.status === "pending" ? (
                   <>
                     <Button
+                      size="small"
                       onClick={() =>
                         showModalConfirm(r?._id, r?.classworkId._id)
                       }
                       type="primary"
-                      className="px-1 py-0 mr-1 w-14" 
+                      className="mr-1" 
                     >
                       Accept
                     </Button>
                     <Button
+                      size="small"
                       onClick={() => showModalReject(r?._id, r?.classworkId._id)}
-                      className="p-1 w-14"
                     >
                       Reject
                     </Button>
@@ -170,6 +174,15 @@ const TimelineRequest = () => {
             </tr>
           ))}
         </tbody>
+        ) : (
+          <tbody>
+            <tr>
+              <td colSpan={5} className="text-center">
+                <Empty description={"No request yet"} />
+              </td>
+            </tr>
+          </tbody>
+        )}
       </table>
       {/* Pagination */}
       <div className="mt-5 flex justify-center">

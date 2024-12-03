@@ -103,5 +103,14 @@ groupRouter.get("/:classId", GroupController.getAllGroupByClassId);
 groupRouter.put("/update",GroupController.editTimelineForManyGroups);
 groupRouter.post("/", GroupController.getAllGroupsNoClass);
 groupRouter.patch('/addGroupToClass', GroupController.addGroupToClass);
-
+groupRouter.get(
+  "/getGroupClassByTermCode/:termId",
+  GroupController.getGroupClassByTermCode
+);
+groupRouter.get(
+  "/getGroupByClass/:classId",
+  GroupController.getGroupByClassId
+);
+groupRouter.post('/groupStatistic', GroupController.getGroupStatistic);
+groupRouter.post("/updateGroupSponsorStatus",verifyToken, GroupController.updateGroupSponsorStatus);
 export default groupRouter;

@@ -33,6 +33,7 @@ export const ROLE = {
   student: "STUDENT",
   startUpDepartment: "START_UP_DEPARTMENT",
   admin: "ADMIN",
+  headOfSubject: "HEAD_OF_SUBJECT"
 };
 export const DASHBOARD_TABS = [
   { key: "task", label: "Task", children: <Task /> },
@@ -259,7 +260,12 @@ export const QUERY_KEY = {
   REQUEST_DEADLINE_LIST: "requestDeadlineList",
   TERM:"term",
   TERMACTIVE:"termActive",
-  TERM_LIST: "termList"
+  TERM_LIST: "termList",
+  GROUP_CLASS_OF_TERM: "groupClassByTerm",
+  GROUP_LIST_BY_CLASS: "groupListByClass",
+  GROUP_OF_TERM: "groupOfTerm",
+  TERM_TIMELINE: "timelineOfTerm"
+
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

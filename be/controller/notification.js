@@ -176,7 +176,6 @@ const remindGroupSubmitOutcome = async (req, res) => {
     const classwork = await ClassworkRepository.getClassworkByClassworkId(
     new mongoose.Types.ObjectId(classworkId)
   )
-  console.log(groupId);
   
   const members = await GroupRepository.getMemberOfGroupByGroupId(
     new mongoose.Types.ObjectId(groupId))

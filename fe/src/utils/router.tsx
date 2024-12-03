@@ -21,6 +21,8 @@ import MentorProfile from "../pages/PDT/MentorProfile";
 import TeacherProfile from "../pages/PDT/TeacherProfile";
 import Notification from "../pages/Notification";
 import Requests from "../pages/Student/Request";
+import ManageClassTM from "../pages/TM/group";
+import DashboardTM from "../pages/TM/DashBoard";
 const Router = () => {
   return (
     <BrowserRouter>
@@ -52,6 +54,10 @@ const Router = () => {
         <Route path="/manageAccount" element={<AccountManagementPage />} />
         <Route path="/teacherProfile/:id" element={<TeacherProfile />} />
         <Route path="/mentorProfile/:id" element={<MentorProfile />} />
+        {/* TM */}
+        <Route path="/hos/dashboard" element={<DashboardTM/>} />
+        <Route path="/hos/groups" element={<ManageClassTM/>} />
+        <Route path="/hos/mentors" element={<></>} />
       </Routes>
     </BrowserRouter>
   );

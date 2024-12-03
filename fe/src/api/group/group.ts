@@ -25,5 +25,16 @@ export const groupApi = {
   addGroupToClass: async (requestBody: any) => {
     return await axios.patch(`/api/group/addGroupToClass`, requestBody);
   },
-
+  getGroupByTM: async (requestBody: any) => {
+    return await axios.post(`/api/group/groupStatistic`, requestBody);
+  },
+  getGroupClassByTerm: async (termId: string | undefined) => {
+    return await axios.get(`/api/group/getGroupClassByTermCode/${termId}`);
+  },
+  getGroupByClass: async (classId: string | undefined) => {
+    return await axios.get(`/api/group/getGroupByClass/${classId}`);
+  },
+  updateGroupSponsorStatus: async (requestBody: any) => {
+    return await axios.post(`/api/group/updateGroupSponsorStatus`, requestBody);
+  },
 };
