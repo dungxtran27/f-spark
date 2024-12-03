@@ -151,6 +151,9 @@ const login = async (req, res) => {
         userDetail.account = existingAccount;
         userDetail.role = ROLE_NAME.admin;
         break
+      case ROLE_NAME.headOfSubject:
+        userDetail.role = ROLE_NAME.headOfSubject;
+        userDetail.account = existingAccount;
       default:
         return res.status(500).json({ error: "Bad request" });
     }

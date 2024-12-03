@@ -43,15 +43,13 @@ const TimelineClassWrapper: React.FC = () => {
     return (
         <div>
             <Tabs defaultActiveKey="0" tabPosition="left">
-                    <Tabs.TabPane tab={"Request Deadline"}>
-                        <TimelineRequest/>
-                    </Tabs.TabPane>
                 {groups.map((group: Group, index: number) => (
                     <Tabs.TabPane tab={group.GroupName} key={index.toString()}>
                         {renderTimeline(group)}
                     </Tabs.TabPane>
                 ))}
             </Tabs>
+            <TimelineRequest/>
         </div>
     );
     

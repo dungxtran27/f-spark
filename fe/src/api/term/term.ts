@@ -14,6 +14,20 @@ export const term = {
     return await axios.post(`/api/term/`, newTerm);
   },
   deleteTermIncoming: async (termCode: any) => {
-    return await axios.delete(`/api/term/deleteTermIncoming?termCode=${termCode}`);
+    return await axios.delete(
+      `/api/term/deleteTermIncoming?termCode=${termCode}`
+    );
+  },
+  getTimelineOfTerm: async (termId: string | undefined) => {
+    return await axios.get(`/api/term/getTimelineOfTerm/${termId}`);
+  },
+  createTimelineOfTerm: async (requestBody: any) => {
+    return await axios.post(`/api/term/createTimelineOfTerm`, requestBody);
+  },
+  deleteTimelineOfTerm: async (requestBody: any) => {
+    return await axios.post(`/api/term/deleteTimelineOfTerm`, requestBody);
+  },
+  updateTimelineOfTerm: async (requestBody: any) => {
+    return await axios.post(`/api/term/updateTimelineOfTerm`, requestBody);
   },
 };

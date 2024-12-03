@@ -47,6 +47,15 @@ const getFillterTerm = async ({ termCode }) => {
   }
 };
 
+const getTimelineOfTerm = async (termId) => {
+  try {
+    const term = await Term.findById(termId)
+    return term.timeLine
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 const getTotalClassByTerm = async ({ termCode }) => {
   try {
     const classes = await Class.find({ term: termCode });
@@ -91,6 +100,67 @@ const deleteTerm = async ({ termCode }) => {
   return Term.deleteOne({ _id: termCode });
 };
 
+const createTimelineOfTerm = async ({title, type, description, startDate, endDate, termObjectId}) => {
+  try {
+    const newDeadline = {
+      title,
+      description,
+      startDate,
+      endDate,
+      type,
+    };
+
+    const termUpdate = await Term.findByIdAndUpdate(
+      termObjectId,
+      {
+        $push: { timeLine: newDeadline },
+      },
+      { new: true }
+    )
+    return termUpdate;
+  } catch (error) {
+    return new Error(error);
+  }
+}
+const deleteTimelineOfTerm = async ({tId, termObjectId}) => {
+  try {
+    const termUpdate = await Term.findByIdAndUpdate(
+      termObjectId,
+      {
+        $pull: { timeLine: { _id: tId } },
+      },
+      { new: true }
+    )
+    return termUpdate;
+  } catch (error) {
+    return new Error(error);
+  }
+}
+
+const updateTimelineOfTerm = async ({title, type, description, startDate, endDate, termObjectId, tId}) => {
+  try {
+    const updatedTimeline = {
+      title,
+      description,
+      startDate,
+      endDate,
+      type,
+    };
+
+    const termUpdate = await Term.findOneAndUpdate(
+      { _id: termObjectId, "timeLine._id": tId },
+      {
+        $set: {
+          "timeLine.$": updatedTimeline,
+        },
+      },
+      { new: true }
+    )
+    return termUpdate;
+  } catch (error) {
+    return new Error(error);
+  }
+}
 export default {
   getAllTerms,
   createTerms,
@@ -101,5 +171,9 @@ export default {
   getTotalTeacherByTerm,
   getTotalMentorByTerm,
   getLatestTerm,
-  deleteTerm
+  deleteTerm,
+  getTimelineOfTerm,
+  createTimelineOfTerm,
+  deleteTimelineOfTerm,
+  updateTimelineOfTerm
 };

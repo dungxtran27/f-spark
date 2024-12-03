@@ -55,6 +55,16 @@ export const TeacherRoutes = [
     page: "Mentors",
     icon: <FaPeopleGroup size={20} />,
   },
+  {
+    route: "hos/groups",
+    page: "Groups",
+    icon: <FaTasks size={20} />,
+  },
+  {
+    route: "hos/dashboard",
+    page: "Dashboard",
+    icon: <FaChartPie size={20} />,
+  },
 ];
 export const AdminRoutes = [
   {
@@ -100,4 +110,21 @@ export const SecondaryMenu = [
   //   icon: <SlBell size={20} />,
   //   badge: <Badge count={10} />,
   // },
+];
+export const HeadOfSubjectRouter = [
+  {
+    route: "hos/dashboard",
+    page: "Dashboard",
+    icon: <FaChartPie size={20} />,
+  },
+  {
+    route: "hos/groups",
+    page: "Groups",
+    icon: <FaTasks size={20} />,
+  },
+  {
+    route: "hos/mentors",
+    page: "Requests",
+    icon: <FaPeopleGroup size={20} />,
+  },
 ];

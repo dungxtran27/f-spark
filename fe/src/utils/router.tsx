@@ -21,6 +21,8 @@ import MentorProfile from "../pages/PDT/MentorProfile";
 import TeacherProfile from "../pages/PDT/TeacherProfile";
 import Notification from "../pages/Notification";
 import Requests from "../pages/Student/Request";
+import ManageClassTM from "../pages/TM/group";
+import DashboardTM from "../pages/TM/DashBoard";
 import Money from "../pages/Student/Money";
 import AccountantPage from "../pages/Accountant";
 import ManageTerm from "../pages/PDT/ManageTerm";
@@ -58,6 +60,10 @@ const Router = () => {
         <Route path="/mentorProfile/:id" element={<MentorProfile />} />
         <Route path="/accountant" element={<AccountantPage />} />
         <Route path="/manageTerms" element={<ManageTerm />} />
+        {/* TM */}
+        <Route path="/hos/dashboard" element={<DashboardTM/>} />
+        <Route path="/hos/groups" element={<ManageClassTM/>} />
+        <Route path="/hos/mentors" element={<></>} />
       </Routes>
     </BrowserRouter>
   );

@@ -3,6 +3,7 @@ export const ROLE_NAME = {
   student: "STUDENT",
   startUpDepartment: "START_UP_DEPARTMENT",
   admin: "ADMIN",
+  headOfSubject: "HEAD_OF_SUBJECT"
 };
 export const Priority = {
   High: 100,
@@ -28,7 +29,9 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_SUBMISSION: "CreateSubmission",
   REQUEST_DEADLINE: "RequestDeadline",
   CREATE_REQUEST_DEADLINE: "CreateRequestDeadline",
-  RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline"
+  RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline",
+  REMIND_GROUP_SUBMIT: "RemindGroupSubmit",
+  RESPONSE_REQUEST_SPONSOR: "ResponseRequestSponsor"
 };
 export const SENDER_TYPE = {
   STUDENT: "Student",

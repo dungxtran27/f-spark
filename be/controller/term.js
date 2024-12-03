@@ -1,7 +1,7 @@
 import moment from "moment";
 import { OutcomeRepository, TermRepository } from "../repository/index.js";
 import { DEADLINE_TYPES } from "../utils/const.js";
-
+import mongoose from "mongoose";
 const getAllTerms = async (req, res) => {
   try {
     const terms = await TermRepository.getAllTerms();
@@ -131,11 +131,61 @@ const deleteTermIncoming = async (req, res) => {
   }
 };
 
+const getTimelineOfTerm = async (req,res) => {
+  try {
+    const termId = req.params.termId;
+    const term = await TermRepository.getTimelineOfTerm(new mongoose.Types.ObjectId(termId));
+    
+    return res.status(200).json({ data: term });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+const createTimelineOfTerm = async (req, res) => {
+  try {
+    const {title, type, description, startDate, endDate, termId} = req.body;
+    const termObjectId = new mongoose.Types.ObjectId(termId)
+    const result = await TermRepository.createTimelineOfTerm({title, type, description, startDate, endDate, termObjectId})
+    return res.status(201).json({ data: result, message: "Create Timeline Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+const deleteTimelineOfTerm = async (req, res) => {
+  try {
+    const {timelineId, termId} = req.body;
+    console.log(timelineId);
+    
+    const tId = new mongoose.Types.ObjectId(timelineId)
+    const termObjectId = new mongoose.Types.ObjectId(termId)
+    const result = await TermRepository.deleteTimelineOfTerm({tId, termObjectId})
+    return res.status(201).json({ data: result, message: "Delete Timeline Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+const updateTimelineOfTerm = async (req, res) => {
+  try {
+    const {title, type, description, startDate, endDate, termId, timelineId} = req.body;
+    const termObjectId = new mongoose.Types.ObjectId(termId)
+    const tId = new mongoose.Types.ObjectId(timelineId)
+    const result = await TermRepository.updateTimelineOfTerm({title, type, description, startDate, endDate, termObjectId, tId})
+    return res.status(201).json({ data: result, message: "Update Timeline Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
 export default {
   createTerm,
   getAllTerms,
   getActiveTerm,
   getAllTermsToFilter,
   getFillterTerm,
-  deleteTermIncoming
+  deleteTermIncoming,
+  getTimelineOfTerm,
+  createTimelineOfTerm,
+  deleteTimelineOfTerm,
+  updateTimelineOfTerm
 };
