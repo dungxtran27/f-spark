@@ -13,4 +13,7 @@ export const term = {
   createTerm: async (newTerm: any) => {
     return await axios.post(`/api/term/`, newTerm);
   },
+  deleteTermIncoming: async (termCode: any) => {
+    return await axios.delete(`/api/term/deleteTermIncoming?termCode=${termCode}`);
+  },
 };

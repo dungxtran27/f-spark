@@ -6,4 +6,5 @@ termRouter.get("/getAll", TermController.getAllTermsToFilter);
 termRouter.get("/", TermController.getAllTerms)
 termRouter.post("/active", TermController.getActiveTerm);
 termRouter.post("/getbyCodeTerm", TermController.getFillterTerm)
+termRouter.delete("/deleteTermIncoming", TermController.deleteTermIncoming)
 export default termRouter

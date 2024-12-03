@@ -10,10 +10,17 @@ const getAllTerms = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 const createTerm = async (req, res) => {
   try {
     const { termCode, startTime, endTime } = req.body;
     const outcomes = await OutcomeRepository.getAllOutcome();
+    const latestTerm = await TermRepository.getLatestTerm();
+
+    if (latestTerm && moment(startTime).isBefore(latestTerm.endTime)) {
+      return res.status(400).json({ error: "The new term cannot begin before the old term ends" });
+    }
+
     const startOfTerm = moment(startTime).add(1, "month");
     const timeline = [
       {
@@ -73,6 +80,7 @@ const createTerm = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 const getActiveTerm = async (req, res) => {
   try {
     const activeTerm = await TermRepository.getActiveTerm();
@@ -94,16 +102,40 @@ const getAllTermsToFilter = async (req, res) => {
 const getFillterTerm = async (req, res) => {
   try {
     const { termCode } = req.body;
-    const terms = await TermRepository.getFillterTerm({ termCode });
-    return res.status(200).json({ data: terms });
+    const [terms, classes, students, teachers, mentors] = await Promise.all([
+      TermRepository.getFillterTerm({ termCode }),
+      TermRepository.getTotalClassByTerm({ termCode }),
+      TermRepository.getTotalStudentByTerm({ termCode }),
+      TermRepository.getTotalTeacherByTerm({ termCode }),
+      TermRepository.getTotalMentorByTerm({ termCode }),
+    ]);
+    return res.status(200).json({
+      data: terms,
+      totalClasses: classes.length,
+      totalStudents: students.length,
+      totalTeachers: teachers.length,
+      totalMentors: mentors.length,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const deleteTermIncoming = async (req, res) => {
+  try {
+    const { termCode } = req.query;
+    await TermRepository.deleteTerm({ termCode });
+    return res.status(200).json({ message: "The term has been successfully deleted" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   createTerm,
   getAllTerms,
   getActiveTerm,
   getAllTermsToFilter,
-  getFillterTerm
+  getFillterTerm,
+  deleteTermIncoming
 };
