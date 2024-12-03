@@ -3,20 +3,20 @@ import { FaTasks } from "react-icons/fa";
 import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
-import { BiSolidDashboard, BiSolidUserAccount } from "react-icons/bi";
+import { BiMoneyWithdraw, BiSolidDashboard, BiSolidUserAccount } from "react-icons/bi";
 import { RiMailSendFill } from "react-icons/ri";
 import { IoTimerOutline } from "react-icons/io5";
 import { Badge } from "antd";
 export const StudentRoutes = [
   {
-    route: "/dashboard",
-    page: "DashBoard",
-    icon: <BiSolidDashboard size={20} />,
-  },
-  {
     route: "/projectOverview",
     page: "Project Overview",
     icon: <FaChartPie size={20} />,
+  },
+  {
+    route: "/dashboard",
+    page: "DashBoard",
+    icon: <BiSolidDashboard size={20} />,
   },
   {
     route: "/tasks",
@@ -32,6 +32,11 @@ export const StudentRoutes = [
     route: "/request",
     page: "Request",
     icon: <RiMailSendFill size={20} />,
+  },
+  {
+    route: "/money",
+    page: "Money",
+    icon: <BiMoneyWithdraw  size={20} />,
   },
 ];
 export const TeacherRoutes = [
@@ -49,6 +54,16 @@ export const TeacherRoutes = [
     route: "/mentorlist",
     page: "Mentors",
     icon: <FaPeopleGroup size={20} />,
+  },
+  {
+    route: "hos/groups",
+    page: "Groups",
+    icon: <FaTasks size={20} />,
+  },
+  {
+    route: "hos/dashboard",
+    page: "Dashboard",
+    icon: <FaChartPie size={20} />,
   },
 ];
 export const AdminRoutes = [
@@ -95,4 +110,21 @@ export const SecondaryMenu = [
   //   icon: <SlBell size={20} />,
   //   badge: <Badge count={10} />,
   // },
+];
+export const HeadOfSubjectRouter = [
+  {
+    route: "hos/dashboard",
+    page: "Dashboard",
+    icon: <FaChartPie size={20} />,
+  },
+  {
+    route: "hos/groups",
+    page: "Groups",
+    icon: <FaTasks size={20} />,
+  },
+  {
+    route: "hos/mentors",
+    page: "Requests",
+    icon: <FaPeopleGroup size={20} />,
+  },
 ];

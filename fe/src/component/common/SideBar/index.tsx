@@ -4,6 +4,7 @@ import {
   StudentRoutes,
   TeacherRoutes,
   AdminRoutes,
+  HeadOfSubjectRouter
 } from "../../../utils/menu";
 import SideBarItem from "./SideBarItem";
 import { useSelector } from "react-redux";
@@ -51,6 +52,8 @@ const SideBar: React.FC<HeaderProps> = () => {
         return TeacherRoutes;
       case ROLE.admin:
         return AdminRoutes;
+      case ROLE.headOfSubject:
+        return HeadOfSubjectRouter;
       default:
         break;
     }

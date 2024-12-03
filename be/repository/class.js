@@ -5,6 +5,7 @@ import Term from "../model/Term.js";
 import Classwork from "../model/ClassWork.js";
 import { TermRepository } from "./index.js";
 import Outcome from "../model/Outcome.js";
+import Group from "../model/Group.js";
 const getClassesOfTeacher = async (teacherId) => {
   try {
     const classes = await Class.aggregate([
@@ -577,6 +578,17 @@ const createClass = async ({
   }
 };
 
+const getClassByTermCode = async (termId) => {
+  try {
+    const groups = Class.find({
+      term: termId
+    })
+    return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
 const assignTeacher = async (classId, teacherId) => {
   try {
     const result = await Class?.findByIdAndUpdate(classId, {
@@ -601,5 +613,6 @@ export default {
   getAllClassMissStudent,
   getAllClassFullStudent,
   createClass,
+  getClassByTermCode,
   assignTeacher
 };

@@ -1,0 +1,32 @@
+@use "../../../styles/variable" as var;
+.customTab {
+  :global {
+    .ant-tabs-tab-btn {
+      font-size: 16px;
+    }
+  }
+  :global {
+    .ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: var.$primary-color !important;
+      text-shadow: none; 
+    }
+  }
+  :global {
+    .ant-tabs .ant-tabs-tab.ant-tabs-tab-active {
+      border-bottom: solid 1px var.$primary-color;
+      border-radius: 1px;
+    }
+    .ant-table-tbody {
+      min-height: calc(8 * 54.8px);
+    }
+    .ant-table-wrapper .ant-table-container table > thead > tr .ant-table-cell {
+      border-bottom: 1px solid rgba($color: var.$primary-color, $alpha: 0.5);
+      background-color: #f8f8f8;
+    }
+  }
+}
+
+
+
+
+

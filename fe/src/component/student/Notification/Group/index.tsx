@@ -10,7 +10,9 @@ import { Link } from "react-router-dom";
 import TaskCard from "../../TaskDetail/TaskCard";
 import { useState, useEffect } from "react";
 import { Button} from 'antd';
-import OutcomeNoti from "../../../common/Stream/OutcomeNoti";
+import OutcomeNoti from "../../../common/Notification/OutcomeNoti";
+import AssignmentNoti from "../../../common/Notification/AssignmentNoti";
+
 const Group = () => {
   const { data: groupNotification, isFetched } = useQuery({
     queryKey: [QUERY_KEY.GROUP_NOTIFICATION_DETAIL],
@@ -113,6 +115,24 @@ const Group = () => {
       </div>
     );
   };
+  const remindNotification = (n: any) => {
+    return (
+      <div className="flex-grow pt-3 flex flex-col gap-3">
+        <span>
+          Your group has been reminded about submitting assignments for{' '}
+          <Link
+            className="text-primaryBlue hover:underline font-bold"
+            to={`${n?.action?.extraUrl}`}
+          >
+            {n?.action?.newVersion?.title}
+          </Link>
+        </span>
+        <div>
+            <AssignmentNoti post={n?.action?.newVersion} sender={n?.sender} />
+        </div>
+      </div>
+    );
+  };
   const getNotificationContent = (n: any) => {
     switch (n?.action?.actionType) {
       case NOTIFICATION_ACTION_TYPE.RESPONSE_REQUEST_DEADLINE:
@@ -121,6 +141,10 @@ const Group = () => {
         return taskCreateNotification(n);
       case NOTIFICATION_ACTION_TYPE.UPDATE_TASK:
         return taskUpdateNotification(n);
+      case NOTIFICATION_ACTION_TYPE.CREATE_TASK:
+        return taskCreateNotification(n);
+      case NOTIFICATION_ACTION_TYPE.REMIND_GROUP_SUBMIT:
+        return remindNotification(n);
       default:
         return <></>;
     }

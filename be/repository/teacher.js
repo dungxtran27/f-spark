@@ -392,4 +392,5 @@ export default {
   getTeacherAccountByClassId,
   assignClass,
   getTotalTeachers
+  // getClassOfTeacher
 };
