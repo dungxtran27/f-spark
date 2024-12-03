@@ -13,9 +13,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
 import { classApi } from "../../../../api/Class/class";
-import Assignment from "../../../common/Stream/Assignment";
 import { useState, useEffect } from "react";
 import { Button} from 'antd';
+import AssignmentNoti from "../../../common/Notification/AssignmentNoti";
 const Class = () => {
   const { data: classNotification, isFetched  } = useQuery({
     queryKey: [QUERY_KEY.CLASS_NOTIFICATION_DETAIL],
@@ -85,9 +85,10 @@ const Class = () => {
               post={n?.action?.newVersion}
               userInfo={userInfo}
               upvoteAnnouncement={upvoteAnnouncement}
+              sender={n?.sender}
             />
           ) : (
-            <Assignment post={n?.action?.newVersion} userInfo={userInfo} />
+            <AssignmentNoti post={n?.action?.newVersion} sender={n?.sender} userInfo={userInfo} />
           )}
         </div>
       </div>

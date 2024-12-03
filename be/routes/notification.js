@@ -40,4 +40,9 @@ notificationRouter.get(
   verifyToken,
   NotificationController.getTeacherClassNotificationByClass
 );
+notificationRouter.post(
+  "/teacher/remindGroupSubmitOutcome",
+  verifyToken,
+  NotificationController.remindGroupSubmitOutcome
+)
 export default notificationRouter;

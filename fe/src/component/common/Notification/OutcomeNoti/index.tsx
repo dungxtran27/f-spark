@@ -1,14 +1,5 @@
 import dayjs from "dayjs";
 import { DATE_FORMAT, ROLE } from "../../../../utils/const";
-import { Empty, Input } from "antd";
-import { CiEdit } from "react-icons/ci";
-import { FaRegTrashCan, FaStar } from "react-icons/fa6";
-import { IoEllipsisHorizontal } from "react-icons/io5";
-import classNames from "classnames";
-import styles from "../style.module.scss";
-import DOMPurify from "dompurify";
-import { TiAttachment } from "react-icons/ti";
-import { RiCalendarScheduleFill } from "react-icons/ri";
 import { MdMoreTime } from "react-icons/md";
 import { IoTimeOutline } from "react-icons/io5";
 interface Props {
