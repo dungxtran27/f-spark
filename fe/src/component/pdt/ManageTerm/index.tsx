@@ -296,11 +296,11 @@ const TermWrapper: React.FC = () => {
             <p className="text-lg">{data.totalStudents}</p>
           </div>
           <div className="text-gray-700 flex flex-col items-center">
-            <p className="text-lg font-semibold">Mentor </p>
+            <p className="text-lg font-semibold">Mentor participant</p>
             <p className="text-lg">{data.totalMentors}</p>
           </div>
           <div className="text-gray-700 flex flex-col items-center">
-            <p className="text-lg font-semibold">Total Teacher </p>
+            <p className="text-lg font-semibold">Teacher participant</p>
             <p className="text-lg">{data.totalTeachers}</p>
           </div>
         </div>
@@ -326,12 +326,21 @@ const TermWrapper: React.FC = () => {
                   key={step._id}
                   className="flex flex-col items-center relative w-full"
                 >
-                  <div className="rounded-full text-xl w-16 h-16 flex items-center justify-center text-white bg-purple-500">
-                    {data?.data?.timeLine.indexOf(step) + 1}
-                  </div>
-                  {data?.data?.timeLine.indexOf(step) <
-                    data?.data?.timeLine.length - 1 && (
-                    <div className="absolute top-8 transform left-24 w-full h-0.5 bg-purple-500"></div>
+                  {step.description && (
+                    <Popover
+                      content={<div className="h-[50px] w-[500px]">{step.description}</div>} 
+                      title="Description"
+                      trigger="click"
+                      placement="top"
+                    >
+                      <div className="rounded-full text-xl w-16 h-16 flex items-center justify-center text-white bg-purple-500 hover:bg-purple-400">
+                        {data?.data?.timeLine.indexOf(step) + 1}
+                      </div>
+                      {data?.data?.timeLine.indexOf(step) <
+                        data?.data?.timeLine.length - 1 && (
+                        <div className="absolute top-8 transform left-24 w-full h-0.5 bg-purple-500"></div>
+                      )}
+                    </Popover>
                   )}
                   <div className="text-center mt-2 text-gray-600 w-36 h-24">
                     <span className="font-semibold ">{step.title}</span>

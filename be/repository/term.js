@@ -2,6 +2,9 @@ import moment from "moment";
 import Term from "../model/Term.js";
 import Class from "../model/Class.js";
 import Student from "../model/Student.js";
+import Teacher from "../model/Teacher.js";
+import Mentor from "../model/Mentor.js";
+import Group from "../model/Group.js";
 const getAllTerms = async () => {
   try {
     const terms = await Term.find({});
@@ -76,7 +79,10 @@ const getTotalStudentByTerm = async ({ termCode }) => {
 
 const getTotalTeacherByTerm = async ({ termCode }) => {
   try {
-    const teachers = await Student.find({ term: termCode });
+    const classes = await Class.find({ term: termCode }).populate('teacher');
+    const teachers = classes
+      .map(classItem => classItem.teacher)
+      .filter(teacher => teacher !== null);
     return teachers;
   } catch (error) {
     throw new Error(error.message);
@@ -85,7 +91,10 @@ const getTotalTeacherByTerm = async ({ termCode }) => {
 
 const getTotalMentorByTerm = async ({ termCode }) => {
   try {
-    const mentors = await Student.find({ term: termCode });
+    const groups = await Group.find({ term: termCode }).populate('mentor');
+    const mentors = groups
+      .map(group => group.mentor)
+      .filter(mentor => mentor !== null);
     return mentors;
   } catch (error) {
     throw new Error(error.message);
@@ -100,7 +109,7 @@ const deleteTerm = async ({ termCode }) => {
   return Term.deleteOne({ _id: termCode });
 };
 
-const createTimelineOfTerm = async ({title, type, description, startDate, endDate, termObjectId}) => {
+const createTimelineOfTerm = async ({ title, type, description, startDate, endDate, termObjectId }) => {
   try {
     const newDeadline = {
       title,
@@ -122,7 +131,7 @@ const createTimelineOfTerm = async ({title, type, description, startDate, endDat
     return new Error(error);
   }
 }
-const deleteTimelineOfTerm = async ({tId, termObjectId}) => {
+const deleteTimelineOfTerm = async ({ tId, termObjectId }) => {
   try {
     const termUpdate = await Term.findByIdAndUpdate(
       termObjectId,
@@ -137,7 +146,7 @@ const deleteTimelineOfTerm = async ({tId, termObjectId}) => {
   }
 }
 
-const updateTimelineOfTerm = async ({title, type, description, startDate, endDate, termObjectId, tId}) => {
+const updateTimelineOfTerm = async ({ title, type, description, startDate, endDate, termObjectId, tId }) => {
   try {
     const updatedTimeline = {
       title,
