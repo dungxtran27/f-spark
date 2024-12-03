@@ -7,7 +7,8 @@ import {
   Table,
   Divider,
   Pagination,
-  Modal
+  Modal,
+  Statistic as AntdStatistic
 } from "antd";
 import {
   SearchOutlined,
@@ -16,8 +17,10 @@ import {
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
-import type { AutoCompleteProps } from "antd/es/auto-complete";
+import { FaUserGroup } from "react-icons/fa6";
+import { MdOutlineGrade } from "react-icons/md";
+import { PiChalkboardTeacherLight, PiStudent } from "react-icons/pi";
+import { LiaChalkboardTeacherSolid } from "react-icons/lia";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../utils/const";
 import { Admin } from "../../../api/manageAccoount";
@@ -216,6 +219,26 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
 
   return (
     <div className="max-w-full mx-auto p-3 rounded-lg shadow-md">
+      <div className="flex items-center justify-between shadow-lg bg-white border-primary/30 rounded border mb-5 p-5">
+        <div className="flex items-end gap-5 p-2">
+          <AntdStatistic title="Group" value={99} prefix={<FaUserGroup />} />
+          <div className="font-semibold">
+            <p className="text-yellow-500">10 Pending Request</p>
+            <p className="text-textSecondary">12 Sponsored</p>
+          </div>
+        </div>
+        <div className="flex items-end gap-5">
+          <AntdStatistic
+            title="Average grade"
+            value={7.7}
+            prefix={<MdOutlineGrade />}
+          />
+          <div className="font-semibold">
+            <p className="text-pendingStatus">30% greater than 8</p>
+            <p className="text-textSecondary">8 groups greater than 8</p>
+          </div>
+        </div>
+      </div>
       <Row gutter={[16, 16]} className="mb-4" justify="space-between">
         <Col flex="auto">
           <Row gutter={[16, 16]}>

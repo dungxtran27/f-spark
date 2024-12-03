@@ -10,22 +10,41 @@ interface MentorData {
   groupNumber: number;
   tags: Tag[];
   profilePicture: string;
+  assignedGroupLength: number;
+  term: string;
+  openGroupListModal: any;
+  setSelectedMentor: any;
+  info: any;
 }
 const MentorCard = ({
+  info,
   name,
-  groupNumber,
+  term,
+  assignedGroupLength,
   tags,
   profilePicture,
+  openGroupListModal,
+  setSelectedMentor,
 }: MentorData) => {
   return (
-    <div className="mentor_card bg-white rounded-sm w-5/6 shadow ">
+    <div className="mentor_card bg-white rounded-sm  shadow ">
       <div className="mentor_card_header  rounded-t-sm p-2 pb-4 flex justify-between bg-blue-400">
         <div className="mentor_card_info">
           <div className=" text-white text-lg">{name}</div>
-          <div className=" text-white"> {groupNumber} groups</div>
+          <div className=" text-white">
+            {term == "curr" ? "this sememter:" : " total:"}{" "}
+            {assignedGroupLength} groups
+          </div>
         </div>
         <div className="menotr_card_assignbtn">
-          <Button>Assign</Button>
+          <Button
+            onClick={() => {
+              setSelectedMentor(info);
+              openGroupListModal();
+            }}
+          >
+            Assign
+          </Button>
         </div>
       </div>
 
@@ -38,7 +57,7 @@ const MentorCard = ({
               </Tag>
             ))}
           </div>
-          <div> thứ 5 anh rảnh nhé</div>
+          {/* <div> </div> */}
         </div>
         <div className="mentor_card_avatar  w-1/5 pr-3 relative">
           <img

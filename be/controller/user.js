@@ -6,7 +6,6 @@ import User from "../model/RegisteredUser.js"
 const changePassword = async (req, res) => {
   try {
     const { id, currentPassword, newPassword } = req.body;
-    console.log(req.body);
     const user = await UserRepository.findById(id);
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {

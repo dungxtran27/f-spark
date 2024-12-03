@@ -8,7 +8,6 @@ import Outcome from "../model/Outcome.js";
 import Group from "../model/Group.js";
 const getClassesOfTeacher = async (teacherId) => {
   try {
-
     const classes = await Class.aggregate([
       {
         $match: {
@@ -125,7 +124,6 @@ const findClassById = async (classId) => {
         select: "profilePicture email",
       },
     });
-
     return result;
   } catch (error) {
     throw new Error(error.message);
@@ -216,37 +214,46 @@ const getAllClasses = async () => {
     throw new Error(error.message);
   }
 };
-const getAllClass = async (page, limit, classCode, teacherName, category, termCode) => {
+const getAllClass = async (
+  page,
+  limit,
+  classCode,
+  teacherName,
+  category,
+  termCode
+) => {
   try {
     let filterCondition = {
-      $and: []
+      $and: [],
     };
 
     if (classCode) {
-      filterCondition.$and.push({ classCode: { $regex: classCode, $options: "i" } });
+      filterCondition.$and.push({
+        classCode: { $regex: classCode, $options: "i" },
+      });
     }
 
     if (teacherName) {
-      filterCondition.$and.push({ "teacherDetails.name": { $regex: teacherName, $options: "i" } });
+      filterCondition.$and.push({
+        "teacherDetails.name": { $regex: teacherName, $options: "i" },
+      });
     }
 
-    if (category === 'full') {
+    if (category === "full") {
       filterCondition.$and.push(
         { totalGroups: { $gte: 5 } },
         { totalStudents: { $gte: 30 } }
       );
     }
 
-    if (category === 'miss') {
-      filterCondition.$and.push(
-        { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] }
-      )
-    };
+    if (category === "miss") {
+      filterCondition.$and.push({
+        $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }],
+      });
+    }
     if (termCode) {
       filterCondition.$and.push({
-        $or: [
-          { termCode: { $regex: termCode, $options: "i" } },
-        ],
+        $or: [{ termCode: { $regex: termCode, $options: "i" } }],
       });
     }
     if (filterCondition.$and.length === 0) {
@@ -290,27 +297,27 @@ const getAllClass = async (page, limit, classCode, teacherName, category, termCo
           from: "Students",
           localField: "_id",
           foreignField: "classId",
-          as: "students"
-        }
+          as: "students",
+        },
       },
       {
         $addFields: {
-          totalStudents: { $size: "$students" }
-        }
+          totalStudents: { $size: "$students" },
+        },
       },
       {
         $lookup: {
           from: "Term",
           localField: "term",
           foreignField: "_id",
-          as: "termDetails"
-        }
+          as: "termDetails",
+        },
       },
       {
         $unwind: {
           path: "$termDetails",
-          preserveNullAndEmptyArrays: true
-        }
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $group: {
@@ -325,7 +332,7 @@ const getAllClass = async (page, limit, classCode, teacherName, category, termCo
           term: { $first: "$term" },
           termDetails: { $first: "$termDetails" },
           termCode: {
-            $first: "$termDetails.termCode"
+            $first: "$termDetails.termCode",
           },
         },
       },
@@ -353,8 +360,7 @@ const getAllClass = async (page, limit, classCode, teacherName, category, termCo
       {
         $limit: limit,
       },
-    ]
-    );
+    ]);
 
     const isLastPage = page >= maxPages;
     return {
@@ -374,8 +380,8 @@ const getAllClassMissStudent = async () => {
   try {
     const filterCondition = {
       $and: [
-        { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] }
-      ]
+        { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] },
+      ],
     };
     const classes = await Class.aggregate([
       {
@@ -411,13 +417,13 @@ const getAllClassMissStudent = async () => {
           from: "Students",
           localField: "_id",
           foreignField: "classId",
-          as: "students"
-        }
+          as: "students",
+        },
       },
       {
         $addFields: {
-          totalStudents: { $size: "$students" }
-        }
+          totalStudents: { $size: "$students" },
+        },
       },
       {
         $group: {
@@ -428,7 +434,7 @@ const getAllClassMissStudent = async () => {
           pinDetails: { $first: "$pinDetails" },
           groups: { $push: "$groups" },
           students: { $push: "$students" },
-          totalStudents: { $first: "$totalStudents" }
+          totalStudents: { $first: "$totalStudents" },
         },
       },
       {
@@ -443,9 +449,8 @@ const getAllClassMissStudent = async () => {
       },
       {
         $match: filterCondition,
-      }
-    ]
-    );
+      },
+    ]);
     return classes;
   } catch (error) {
     throw new Error(error.message);
@@ -455,10 +460,7 @@ const getAllClassMissStudent = async () => {
 const getAllClassFullStudent = async () => {
   try {
     const filterCondition = {
-      $and: [
-        { totalGroups: { $gte: 5 } },
-        { totalStudents: { $gte: 30 } }
-      ]
+      $and: [{ totalGroups: { $gte: 5 } }, { totalStudents: { $gte: 30 } }],
     };
     const classes = await Class.aggregate([
       {
@@ -494,13 +496,13 @@ const getAllClassFullStudent = async () => {
           from: "Students",
           localField: "_id",
           foreignField: "classId",
-          as: "students"
-        }
+          as: "students",
+        },
       },
       {
         $addFields: {
-          totalStudents: { $size: "$students" }
-        }
+          totalStudents: { $size: "$students" },
+        },
       },
       {
         $group: {
@@ -511,7 +513,7 @@ const getAllClassFullStudent = async () => {
           pinDetails: { $first: "$pinDetails" },
           groups: { $push: "$groups" },
           students: { $push: "$students" },
-          totalStudents: { $first: "$totalStudents" }
+          totalStudents: { $first: "$totalStudents" },
         },
       },
       {
@@ -526,9 +528,8 @@ const getAllClassFullStudent = async () => {
       },
       {
         $match: filterCondition,
-      }
-    ]
-    );
+      },
+    ]);
     return classes;
   } catch (error) {
     throw new Error(error.message);
@@ -555,9 +556,10 @@ const createClass = async ({
       isActive,
       term: matchingTerm._id,
     });
-    const outcomeDeadlines = matchingTerm.timeLine?.filter(
-      (deadline) => deadline.type === "outcome"
-    ) || [];
+    const outcomeDeadlines =
+      matchingTerm.timeLine?.filter(
+        (deadline) => deadline.type === "outcome"
+      ) || [];
     for (const deadline of outcomeDeadlines) {
       const outcome = await Outcome.findById(deadline.outcome);
       await Classwork.create({
@@ -572,7 +574,6 @@ const createClass = async ({
     }
     return result._doc;
   } catch (error) {
-    console.error("Error creating class:", error.message);
     throw new Error(error.message);
   }
 };
@@ -588,6 +589,20 @@ const getClassByTermCode = async (termId) => {
   }
 }
 
+const assignTeacher = async (classId, teacherId) => {
+  try {
+    const result = await Class?.findByIdAndUpdate(classId, {
+      $set: {
+        teacher: new mongoose.Types.ObjectId(teacherId),
+      },
+    });
+    console.log(result, classId);
+    
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   pinClasswork,
   getClassesOfTeacher,
@@ -598,5 +613,6 @@ export default {
   getAllClassMissStudent,
   getAllClassFullStudent,
   createClass,
-  getClassByTermCode
+  getClassByTermCode,
+  assignTeacher
 };

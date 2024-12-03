@@ -22,8 +22,8 @@ import DOMPurify from "dompurify";
 import { useForm } from "antd/es/form/Form";
 import QuillEditor from "../../../../common/QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
-import { useRef } from "react";
 import { notificationApi } from "../../../../../api/notification/notification";
+import { useRef, useState } from "react";
 
 interface Props {
   _id: string;
@@ -52,6 +52,7 @@ const Submissions = ({
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
+  const [isFormVisible, setIsFormVisible] = useState(true);
   const isTeacher = userInfo?.role === ROLE.teacher;
   const { classId } = useParams();
   const fClassid = classId ? classId : classID;
@@ -97,7 +98,9 @@ const Submissions = ({
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY?.TEACHER_OUTCOMES_LIST],
       });
+      setIsFormVisible(false);      
     },
+    
   });
   const groupsOfClass = groups?.data?.data?.groupStudent;
 
@@ -214,11 +217,10 @@ const Submissions = ({
               <span className="font-medium flex items-center gap-3">
                 Grade:{" "}
                 <span
-                  className={`${
-                    groupSubmission?.grade
+                  className={`${groupSubmission?.grade
                       ? "text-okStatus"
                       : "text-pendingStatus"
-                  }`}
+                    }`}
                 >
                   {groupSubmission?.grade
                     ? groupSubmission?.grade
@@ -228,37 +230,46 @@ const Submissions = ({
             </div>
           </div>
         </div>
-      ) : (
-        <div>
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={() => {
-              const { attachment, content } = form.getFieldsValue();
-              createSubmission.mutate({ attachment, content });
-            }}
+      ) : isFormVisible ? (
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={() => {
+            const { attachment, content } = form.getFieldsValue();
+            createSubmission.mutate({ attachment, content });
+          }}
+        >
+          <Form.Item
+            name={"content"}
+            label={"Content"}
+            rules={[{ required: true, message: "Content is required" }]}
           >
-            <Form.Item name={"content"} label={"Content"}>
-              <QuillEditor onChange={setSubmissionContent} />
-            </Form.Item>
-            <Form.Item name="attachment" label={"Attachment"}>
-              <Upload {...props}>
-                <Button icon={<UploadOutlined />}>Click to Upload</Button>
-              </Upload>
-            </Form.Item>
-            <Form.Item className="flex justify-end">
-              <Button
-                onClick={() => {
-                  form.submit();
-                }}
-              >
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </div>
+            <QuillEditor onChange={setSubmissionContent} />
+          </Form.Item>
+          <Form.Item
+            name="attachment"
+            label={"Attachment"}
+            rules={[{ required: true, message: "Attachment is required" }]}
+          >
+            <Upload {...props}>
+              <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            </Upload>
+          </Form.Item>
+          <Form.Item className="flex justify-end">
+            <Button
+              onClick={() => {
+                form.submit();
+              }}
+            >
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
+      ) : (
+        <div>Submission successful!</div>
       )}
     </div>
   );
 };
+
 export default Submissions;

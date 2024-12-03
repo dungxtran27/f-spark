@@ -2,36 +2,40 @@ import mongoose from "mongoose";
 import Mentor from "../model/Mentor.js";
 import TagMajor from "../model/TagMajor.js";
 import Group from "../model/Group.js";
-
-const getAllMentors = async (tagIds, name, page, limit) => {
+import group from "./group.js";
+const getAllMentors = async (tagIds, name, page, limit, order, term) => {
   try {
     const tagIdArray = Array.isArray(tagIds) ? tagIds : tagIds ? [tagIds] : [];
-    const searchConditions = [];
-    if (tagIdArray.length > 0) {
-      searchConditions.push({
-        "tag.id": {
-          $in: tagIdArray.map((id) => new mongoose.Types.ObjectId(id)),
-        },
-      });
-    }
-
-    if (name) {
-      searchConditions.push({
-        name: { $regex: name, $options: "i" },
-      });
-    }
-
-    const matchCondition =
-      searchConditions.length > 0 ? { $or: searchConditions } : {};
-
-    const totalItems = await Mentor.countDocuments(matchCondition);
-    const maxPages = Math.ceil(totalItems / limit);
-
+    const sortDirection = order === "down" ? 1 : -1;
     const mentors = await Mentor.aggregate([
       {
-        $match: matchCondition,
+        $match: {
+          // find by tagid and name
+          $and: [
+            ...(tagIdArray.length > 0
+              ? [
+                  {
+                    "tag.id": {
+                      $all: tagIdArray.map(
+                        (id) => new mongoose.Types.ObjectId(id)
+                      ),
+                    },
+                  },
+                ]
+              : []),
+            ...(name
+              ? [
+                  {
+                    name: { $regex: name, $options: "i" },
+                  },
+                ]
+              : []),
+            { isActive: true },
+          ],
+        },
       },
       {
+        //populate tagid
         $lookup: {
           from: "TagMajors",
           localField: "tag.id",
@@ -40,26 +44,105 @@ const getAllMentors = async (tagIds, name, page, limit) => {
         },
       },
       {
+        $lookup: {
+          //populate group
+          from: "Groups",
+          localField: "assignedGroup",
+          foreignField: "_id",
+          as: "groups",
+        },
+      },
+      {
+        $addFields: {
+          // Process the groups by filtering and then mapping to choose specific fields
+          groups: {
+            $let: {
+              vars: {
+                filteredGroups: {
+                  $filter: {
+                    input: "$groups",
+                    as: "group",
+                    cond: {
+                      $or: [
+                        { $eq: [term, null] }, // Either term is null
+                        { $eq: ["$$group.term", term] }, // Or group.term matches the specified term
+                      ],
+                    },
+                  },
+                },
+              },
+              in: {
+                $map: {
+                  input: "$$filteredGroups", // Operate on the filtered groups
+                  as: "group",
+                  in: {
+                    _id: "$$group._id",
+                    term: "$$group.term",
+                    groupName: "$$group.GroupName",
+                  },
+                },
+              },
+            },
+          },
+          // Use the filtered groups to calculate the length
+          assignedGroupLength: {
+            $size: {
+              $let: {
+                vars: {
+                  filteredGroups: {
+                    $filter: {
+                      input: "$groups",
+                      as: "group",
+                      cond: {
+                        $or: [
+                          { $eq: [term, null] },
+                          { $eq: ["$$group.term", term] },
+                        ],
+                      },
+                    },
+                  },
+                },
+                in: "$$filteredGroups",
+              },
+            },
+          },
+        },
+      },
+      {
         $project: {
           name: 1,
           email: 1,
           phoneNumber: 1,
           profile: 1,
-          assignedClasses: 1,
           profilePicture: 1,
           createdAt: 1,
           updatedAt: 1,
           tags: 1,
+          groups: 1,
+          assignedGroupLength: 1,
         },
       },
       {
-        $skip: (page - 1) * limit,
+        $sort: {
+          assignedGroupLength: sortDirection,
+        },
       },
-      { $limit: limit },
+      {
+        $facet: {
+          totalItems: [{ $count: "total" }],
+          data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+        },
+      },
     ]);
+
+    const totalItems = mentors[0].totalItems[0]
+      ? mentors[0].totalItems[0].total
+      : 0;
+    const maxPages = Math.ceil(totalItems / limit);
     const isLastPage = page >= maxPages;
+
     return {
-      mentors,
+      mentors: mentors[0].data,
       totalItems,
       maxPages,
       isLastPage,
@@ -117,13 +200,24 @@ const assignMentor = async ({ groupId, mentorId }) => {
     }
     const group = await Group.findOne({
       _id: groupId,
-      mentor: mentorId,
     });
-
-    if (group) {
-      throw new Error("Mentor already exists in the group ");
+    if (!group) {
+      throw new Error("Group not found ");
     }
-    const updateMentor = await Mentor.findByIdAndUpdate(
+    if (group.mentor) {
+      if (group.mentor.toString() == mentorId.toString()) {
+        throw new Error("Mentor already exists in the group ");
+      }
+      const updateOldMentor = await Mentor.findByIdAndUpdate(
+        group.mentor.toString(),
+        {
+          $pull: { assignedGroup: groupId },
+        },
+        { new: true }
+      );
+    }
+
+    const updateNewMentor = await Mentor.findByIdAndUpdate(
       mentorId,
       {
         $addToSet: { assignedGroup: groupId },
@@ -172,8 +266,13 @@ const getAllAccMentor = async (page, limit, searchText, status, tag) => {
       filterCondition.$and.push({
         $or: [
           { name: { $regex: searchText, $options: "i" } },
-          { email: { $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, '\\$&'), $options: "i" } },
-        ]
+          {
+            email: {
+              $regex: searchText.replace(/[.*+?^=!:${}()|\[\]\/\\-]/g, "\\$&"),
+              $options: "i",
+            },
+          },
+        ],
       });
     }
 
@@ -274,7 +373,7 @@ const getMentorAssignedGroupInfo = async (mentorId) => {
       tag: mentor.tag,
       profilePicture: mentor.profilePicture,
       isActive: mentor.isActive,
-      assignedGroup: mentor.assignedGroup.map(group => ({
+      assignedGroup: mentor.assignedGroup.map((group) => ({
         GroupName: group.GroupName,
         GroupDescription: group.GroupDescription,
         teamMembersCount: group.teamMembers.length,
@@ -291,5 +390,5 @@ export default {
   assignMentor,
   getAllMentors,
   getAllAccMentor,
-  getMentorAssignedGroupInfo
+  getMentorAssignedGroupInfo,
 };

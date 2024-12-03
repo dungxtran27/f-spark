@@ -77,27 +77,33 @@ const getAllAccStudent = async (req, res) => {
 };
 
 const getAllStudentsNoClass = async (req, res) => {
-    try {
-        const { page, limit, searchText, termCode,major } = req.body;
-        const {
-            students,
-            totalStudent,
-            StudentNotHaveClass,
-            countStudentNotHaveClass,
-            uniqueMajors,
-        } = await StudentRepository.getAllStudentsNoClass(page, limit, searchText, termCode, major);
-        return res.status(200).json({
-            data: {
-                students,
-                totalStudent,
-                StudentNotHaveClass,
-                countStudentNotHaveClass,
-                uniqueMajors
-            },
-        });
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+  try {
+    const { page, limit, searchText, termCode, major } = req.body;
+    const {
+      students,
+      totalStudent,
+      StudentNotHaveClass,
+      countStudentNotHaveClass,
+      uniqueMajors,
+    } = await StudentRepository.getAllStudentsNoClass(
+      page,
+      limit,
+      searchText,
+      termCode,
+      major
+    );
+    return res.status(200).json({
+      data: {
+        students,
+        totalStudent,
+        StudentNotHaveClass,
+        countStudentNotHaveClass,
+        uniqueMajors,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 const addManyStudentNoClassToClass = async (req, res) => {
   try {
@@ -110,6 +116,8 @@ const addManyStudentNoClassToClass = async (req, res) => {
     if (!classId) {
       return res.status(400).json({ message: "Class ID must be provided." });
     }
+    console.log(studentIds, classId);
+
     const updatedStudents =
       await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
     return res.status(200).json({
@@ -161,6 +169,10 @@ const importStudent = async (req, res) => {
       acc[s?.group].push(s);
       return acc;
     }, {});
+    for (let key in groupedStudents) {
+      const studentIds = groupedStudents[key].map((student) => student._id);
+      await GroupRepository.updateMember(key, studentIds);
+    }
     return res.status(201).json({
       message: `Imported data successfully, ${newStudents?.length} has been added to term ${activeTerm?.termCode}`,
     });
@@ -168,6 +180,7 @@ const importStudent = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 export default {
   getStudentsInSameGroup,
   getTeacherByStudentId,

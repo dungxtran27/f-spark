@@ -1,9 +1,9 @@
-
 import {
   ClassRepository,
   GroupRepository,
   NotificationRepository,
   StudentRepository,
+  TermRepository,
 } from "../repository/index.js";
 import mongoose from "mongoose";
 import { CLASS_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
@@ -201,7 +201,6 @@ const updateCustomerPersona = async (req, res) => {
     }
 
     const updatedPersona = { detail, bio, needs };
-    console.log(updatedPersona);
 
     const updatedGroup = await GroupRepository.updateCustomerPersona({
       groupId: req.groupId,
@@ -287,10 +286,13 @@ const createGroup = async (req, res) => {
         .status(400)
         .json({ error: "Please fill in all required fields" });
     }
+    const currTerm = await TermRepository.getActiveTerm();
+    const termId = currTerm._id;
     const data = await GroupRepository.createGroup(
       groupName,
       classId,
-      groupDescription
+      groupDescription,
+      termId
     );
     return res.status(200).json(data);
   } catch (error) {
@@ -356,12 +358,10 @@ const editTimelineForManyGroups = async (req, res) => {
   try {
     const { groupIds, type, updateData, editAble } = req.body;
     if (!groupIds || !type || !updateData || editAble === undefined) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Group IDs, timeline type, editAble, and new timeline data are required",
-        });
+      return res.status(400).json({
+        message:
+          "Group IDs, timeline type, editAble, and new timeline data are required",
+      });
     }
     if (editAble === false) {
       return res
@@ -426,7 +426,7 @@ const getAllGroupsNoClass = async (req, res) => {
         const majors = [...new Set(members?.map((m) => m.major))];
         return { ...g._doc, members, majors: majors };
       })
-    )
+    );
     const isLastPage = pageIndex >= maxPages;
     return res.status(200).json({
       data: {
@@ -467,6 +467,24 @@ const addGroupToClass = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+};
+const getAllGroupsOfTeacherbyClassIds = async (req, res) => {
+  try {
+    const { tagIds, mentorStatus } = req.body;
+    const decodedToken = req.decodedToken;
+    const classes = await ClassRepository.getClassesOfTeacher(
+      decodedToken?.role?.id
+    );
+    const classIds = classes.map((c) => c._id);
+    const groups = await GroupRepository.findAllGroupsOfTeacherbyClassIds(
+      classIds,
+      tagIds,
+      mentorStatus
+    );
+    res.status(200).json({ data: groups });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -518,6 +536,18 @@ const getGroupStatistic = async (req, res) => {
     );
     
     return res.status(200).json({ data: groups });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getGroupsOfTerm = async (req, res) => {
+  try {
+    const { termId } = req.params;
+    console.log(termId);
+    
+    const result = await GroupRepository.getGroupsOfTerm(termId);
+    return res.status(200).json({ data: result });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -579,6 +609,7 @@ const updateGroupSponsorStatus = async (req, res) => {
 }
 
 export default {
+  getGroupsOfTerm,
   createJourneyRow,
   createJourneyCol,
   findGroupById,
@@ -606,5 +637,6 @@ export default {
   getGroupClassByTermCode,
   getGroupByClassId,
   getGroupStatistic,
-  updateGroupSponsorStatus
+  updateGroupSponsorStatus,
+  getAllGroupsOfTeacherbyClassIds
 };

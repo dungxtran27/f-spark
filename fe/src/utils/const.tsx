@@ -9,6 +9,8 @@ import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStude
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
 import TimelineClassWrapper from "../component/teacher/Timeline";
+import Phrase1 from "../component/student/Money/Phrase1";
+import Phrase2 from "../component/student/Money/Phrase2";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -88,7 +90,7 @@ export const STUDENT_FILTERS = {
   studentId: "studentId",
   email: "email",
   major: "major",
-  searchKey: 'searchKey',
+  searchKey: "searchKey",
 };
 
 export const GROUP_FILTERS = {
@@ -120,7 +122,7 @@ export const CREATE_TASK_FILTER = {
   timeBlock: "timeBlock",
   parentTask: "parentTask",
   priority: "priority",
-  status: "status"
+  status: "status",
 };
 export const TASK_PRIORITY = [
   {
@@ -222,6 +224,7 @@ export const NOTIFICATION_READ_STATUS = [
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
   STUDENT_OF_TERM: "studentOfTerm",
+  GROUPS_OF_TERM: 'groupsOfTerm',
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
@@ -252,8 +255,8 @@ export const QUERY_KEY = {
   ALLMAJOR: "allMajor",
   CLASSCODE: "clasCode",
   GROUP_OF_CLASS: "groupOfClass",
-  TEACHERINFO:"teacherInfo",
-  MENTORINFO:"mentorInfo",
+  TEACHERINFO: "teacherInfo",
+  MENTORINFO: "mentorInfo",
   NO_CLASS_STUDENT: "noClassStudent",
   NO_CLASS_GROUPS: "noClassGroups",
   ADD_STUDENT_TO_CLASS: "addStudentToClass",
@@ -264,8 +267,9 @@ export const QUERY_KEY = {
   GROUP_CLASS_OF_TERM: "groupClassByTerm",
   GROUP_LIST_BY_CLASS: "groupListByClass",
   GROUP_OF_TERM: "groupOfTerm",
-  TERM_TIMELINE: "timelineOfTerm"
-
+  TERM_TIMELINE: "timelineOfTerm",
+  CLASS_DETAIL: "classDetail",
+  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -274,6 +278,8 @@ export const colorMap: Record<string, string> = {
   GD: "green",
   HS: "orange",
 };
+export const majors = ["SE", "HS", "GD", "IB"];
+
 export const colorMajorGroup: Record<string, string> = {
   "Ky Thuat": "orange",
   "Kinh Te": "green",
@@ -311,4 +317,7 @@ export const NOTIFICATION_TYPE = {
 export const CREATE_REQUEST_DEADLINE = {
   newDate: "newDate",
   reason: "reason",
-};
+};export const PHRASE_TAB = [
+  { key: "phrase_1", label: "Phrase 1", children: <Phrase1 /> },
+  { key: "phrase_2", label: "Phrase 2", children: <Phrase2 /> },
+];
