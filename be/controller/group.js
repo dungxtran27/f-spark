@@ -4,6 +4,7 @@ import {
   StudentRepository,
   TermRepository,
 } from "../repository/index.js";
+import { uploadImage } from "../utils/uploadImage.js";
 const createJourneyRow = async (req, res) => {
   try {
     const { rowName } = req.body;
@@ -496,10 +497,20 @@ const getGroupsOfTerm = async (req, res) => {
 };
 const addImageToGroupGallery = async (req, res) => {
   try {
-    const { filePath } = req.body;
-    console.log(req.body);
+    const file = req.file;
 
-    return res.status(200).json({});
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const cloudImageLink = await uploadImage(file);
+    console.log(cloudImageLink);
+    if (!cloudImageLink) {
+      return res
+        .status(400)
+        .json({ message: "not 2 ok", data: cloudImageLink });
+    }
+    return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

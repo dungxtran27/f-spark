@@ -2,6 +2,9 @@ import express from "express";
 import { GroupController } from "../controller/index.js";
 import verifyToken from "../middleware/verifyToken.js";
 import authorization from "../middleware/authorization.js";
+import multer from "multer";
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const groupRouter = express.Router();
 groupRouter.post(
   "/createRow",
@@ -109,6 +112,10 @@ groupRouter.post(
   verifyToken,
   GroupController.getAllGroupsOfTeacherbyClassIds
 );
-groupRouter.post("/uploadGallery", GroupController.addImageToGroupGallery);
+groupRouter.post(
+  "/uploadGallery",
+  upload.single("file"),
+  GroupController.addImageToGroupGallery
+);
 
 export default groupRouter;

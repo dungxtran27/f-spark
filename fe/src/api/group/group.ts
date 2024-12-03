@@ -35,6 +35,10 @@ export const groupApi = {
     );
   },
   uploadGallery: async (requestBody: any) => {
-    return await axios.post(`/api/group/uploadGallery`, requestBody);
+    return await axios.post(`/api/group/uploadGallery`, requestBody, {
+      headers: {
+        Accept: "application/json; charset=UTF-8",
+      },
+    });
   },
 };

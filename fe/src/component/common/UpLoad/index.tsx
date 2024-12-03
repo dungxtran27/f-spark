@@ -1,45 +1,30 @@
-import React, { useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Button, message, Form, UploadProps } from "antd";
+import React, { useState } from "react";
+import { Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { groupApi } from "../../../api/group/group";
-import { QUERY_KEY } from "../../../utils/const";
-
-// const uploadImage = async (file) => {
-//   const formData = new FormData();
-//   formData.append("file", file);
-
-//   const response = await axios.post("/upload", formData, {
-//     headers: {
-//       "Content-Type": "multipart/form-data",
-//     },
-//   });
-
-//   return response.data;
-// };
+import { forEach } from "lodash";
+import axios from "axios";
 
 const ImageUpload = () => {
-  const [filePath, setFilePath] = useState(null);
-  const [type, setType] = useState("");
-  const [form] = Form.useForm();
-  const uploadedFiles = useRef<string[]>([]);
+  const [fileList, setFileList] = useState([]);
   const queryClient = useQueryClient();
-const [image, setImage] = useState(null);
-const [url, setUrl] = useState("");
-const handleImageChange = (e) => {
-  setImage(e.target.files[0]);
-};
-  const uploadGallery = useMutation({
-    
-    mutationFn: async ({ type, filePath }: any) => {
-      const formData = new FormData();
-      formData.append("file", image);
 
-      return await groupApi.uploadGallery({
-        type: type,
-        filePath: filePath,
-      });
+  const uploadGalerry = async (formData: FormData) => {
+    const response = await axios.post(
+      "http://localhost:9999/api/group/uploadGallery",
+      formData,
+      {
+        headers: {
+          Accept: "application/json; charset=UTF-8",
+        },
+      }
+    );
+    return response;
+  };
+  const uploadGallery = useMutation({
+    mutationFn: async ({ file }: any) => {
+      return await uploadGalerry(file);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -48,44 +33,38 @@ const handleImageChange = (e) => {
     },
   });
 
-  const props: UploadProps = {
-    name: "file",
-    multiple: true,
-    action: "http://localhost:9999/api/group/uploadGallery",
-    onChange(info) {
-      if (uploadedFiles?.current && info.file?.status !== "uploading") {
-        uploadedFiles.current.push(
-          "https://www.youtube.com/watch?v=eAs7NGvjiiI"
-        );
+  const handleChange = ({ fileList }: any) => setFileList(fileList);
+  // console.log(fileList[0].originFileObj);
 
-        form.setFieldValue("image", uploadedFiles);
-      }
-    },
+  const handleUpload = () => {
+    if (fileList.length > 0) {
+      const file = fileList[0].originFileObj;
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      uploadGallery.mutate({ type: "image", file: formData });
+    } else {
+      message.warning("Please select a file to upload");
+    }
   };
-  
+
   return (
     <div>
-      <Form layout="vertical" form={form}>
-        {/* <Form.Item name={"content"} label={"Content"}>
-          <QuillEditor onChange={setSubmissionContent} />
-        </Form.Item> */}
-        <Form.Item name="image" label={"image"}>
-          <Upload {...props}>
-            <Button icon={<UploadOutlined />}>Click to Upload</Button>
-          </Upload>
-        </Form.Item>
-      </Form>
-      <div>
-        
-        <input type="file" onChange={handleImageChange} />{" "}
-        <button
-          onClick={() => {
-            uploadGallery.mutate({ type: "image", filePath: image });
-          }}
-        >
-          Upload
-        </button>{" "}
-      </div>
+      <Upload
+        fileList={fileList}
+        onChange={handleChange}
+        beforeUpload={() => false} // Prevent automatic upload
+      >
+        <Button icon={<UploadOutlined />}>Select File</Button>
+      </Upload>
+      <Button
+        type="primary"
+        onClick={handleUpload}
+        disabled={fileList.length === 0}
+      >
+        Upload Image
+      </Button>
     </div>
   );
 };
