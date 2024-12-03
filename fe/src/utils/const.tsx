@@ -262,7 +262,9 @@ export const QUERY_KEY = {
   TERMACTIVE:"termActive",
   TERM_LIST: "termList",
   CLASS_DETAIL: "classDetail",
-  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass"
+  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass",
+  ALLTEACHER:"allTeacher",
+  ALLMENTOR:"allMentor"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

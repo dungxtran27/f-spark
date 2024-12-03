@@ -14,21 +14,21 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
           $and: [
             ...(tagIdArray.length > 0
               ? [
-                  {
-                    "tag.id": {
-                      $all: tagIdArray.map(
-                        (id) => new mongoose.Types.ObjectId(id)
-                      ),
-                    },
+                {
+                  "tag.id": {
+                    $all: tagIdArray.map(
+                      (id) => new mongoose.Types.ObjectId(id)
+                    ),
                   },
-                ]
+                },
+              ]
               : []),
             ...(name
               ? [
-                  {
-                    name: { $regex: name, $options: "i" },
-                  },
-                ]
+                {
+                  name: { $regex: name, $options: "i" },
+                },
+              ]
               : []),
             { isActive: true },
           ],
@@ -385,10 +385,73 @@ const getMentorAssignedGroupInfo = async (mentorId) => {
   }
 };
 
+const getTotalMentors = async (termCode) => {
+  try {
+    const filterCondition = {
+      "assignedGroup": { $ne: [] },
+    };
+
+    const mentors = await Mentor.aggregate([
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "assignedGroup",
+          foreignField: "_id",
+          as: "assignedGroups",
+        },
+      },
+      {
+        $lookup: {
+          from: "Term",
+          localField: "assignedGroups.term",
+          foreignField: "_id",
+          as: "assignedGroupTerm",
+        },
+      },
+      {
+        $unwind: {
+          path: "$assignedGroupTerm",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          ...filterCondition,
+          "assignedGroupTerm.termCode": termCode,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          assignedGroups: { $push: "$assignedGroups" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: 1,
+          assignedGroups: 1,
+        },
+      },
+    ]);
+    return {
+      totalMentor: mentors.length,
+      mentors: mentors,
+    };
+  } catch (error) {
+    throw new Error(`Failed to fetch mentor data: ${error.message}`);
+  }
+};
+
+
+
+
 export default {
   getMentor,
   assignMentor,
   getAllMentors,
   getAllAccMentor,
   getMentorAssignedGroupInfo,
+  getTotalMentors
 };

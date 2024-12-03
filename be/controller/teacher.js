@@ -12,14 +12,14 @@ const getTeacherByClassId = async (req, res) => {
 
 const getAllAccTeacher = async (req, res) => {
   try {
-    const { page, limit, searchText, status, term } = req.body;
+    const { page, limit, searchText, status, term} = req.body;
     const activeTerm = await TermRepository.getActiveTerm();
     const teachers = await TeacherRepository.getAllAccTeacher(
       page,
       limit,
       searchText,
       status,
-      term || activeTerm?._id
+      term || activeTerm?._id,
     );
     return res.status(201).json({ data: teachers });
   } catch (error) {
@@ -56,9 +56,21 @@ const getTeacherInfo = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+const getTotalTeachers = async (req, res) => {
+  try {
+    const { termCode } = req.body; 
+    const result = await TeacherRepository.getTotalTeachers(termCode); 
+    res.status(200).json({
+      data: result
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 export default {
   getTeacherByClassId,
   getAllAccTeacher,
   getTeacherInfo,
+  getTotalTeachers
 };

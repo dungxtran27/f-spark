@@ -23,7 +23,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -47,7 +47,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -851,7 +851,7 @@ const getAllGroupsNoClass = async (
           $and: [{ class: { $in: [null, undefined] } }, matchCondition],
         },
       },
-      { $unwind: "$tag" },
+      { $unwind: { path: "$tag", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "TagMajors",
@@ -1040,14 +1040,14 @@ const findAllGroupsOfTeacherbyClassIds = async (
   }
 };
 
-const updateTimelineForGroup = async ({groupId, classworkId, newDate}) => {
+const updateTimelineForGroup = async ({ groupId, classworkId, newDate }) => {
   try {
     const updatedGroup = await Group.findOneAndUpdate(
       { _id: groupId, "timeline.classworkId": classworkId },
-      { $set: { "timeline.$.endDate": newDate } },          
-      { new: true }                                    
+      { $set: { "timeline.$.endDate": newDate } },
+      { new: true }
     );
-    
+
     const updatedTimeline = updatedGroup.timeline.find(timeline => timeline.classworkId.toString() == classworkId);
     return updatedTimeline;
   } catch (error) {
@@ -1089,11 +1089,11 @@ const updateMember = async (groupId, studentIds) => {
   }
 };
 
-const getTimelineClassworkOfGroup = async ({groupId, classworkId}) => {
+const getTimelineClassworkOfGroup = async ({ groupId, classworkId }) => {
   try {
     const group = await Group.findOne(
       { _id: groupId, "timeline.classworkId": classworkId },
-      { "timeline.$": 1 } 
+      { "timeline.$": 1 }
     );
     return group.timeline[0];
   } catch (error) {

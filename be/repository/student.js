@@ -3,6 +3,7 @@ import Student from "../model/Student.js";
 import Class from "../model/Class.js";
 import Teacher from "../model/Teacher.js";
 import Mentor from "../model/Mentor.js";
+import Term from "../model/Term.js";
 const findStudentByAccountId = async (accountId) => {
   try {
     const student = await Student.findOne({
@@ -347,7 +348,7 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
   }
 };
 
-const getAllAccStudent = async (page, limit, searchText, classId, status) => {
+const getAllAccStudent = async (page, limit, searchText, classId, status, termCode) => {
   try {
     let filterCondition = { $and: [] };
 
@@ -374,7 +375,14 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
         });
       }
     }
-
+    if (termCode) {
+      const termDoc = await Term.findOne({ termCode: termCode });      
+      if (termDoc) {
+        filterCondition.$and.push({
+          term: termDoc._id,
+        });
+      }
+    }
     if (status) {
       filterCondition.$and.push({ isActive: status });
     }
@@ -430,6 +438,9 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
         },
       },
       {
+        $match: filterCondition,
+      },
+      {
         $project: {
           name: 1,
           studentId: 1,
@@ -444,9 +455,7 @@ const getAllAccStudent = async (page, limit, searchText, classId, status) => {
           updatedAt: 1,
         },
       },
-      {
-        $match: filterCondition,
-      },
+
       {
         $sort: { isActive: -1, name: 1 },
       },
@@ -476,12 +485,12 @@ const findStudentDetailByAccountId = async (accountId) => {
       account: accountId,
     }).populate({
       path: "group",
-      select: "_id GroupName", 
+      select: "_id GroupName",
     })
-    .populate({
-      path: "classId",
-      select: "_id teacher classCode", 
-    });
+      .populate({
+        path: "classId",
+        select: "_id teacher classCode",
+      });
     return student;
   } catch (error) {
     throw new Error(error.message);
@@ -505,6 +514,57 @@ const bulkCreateStudentsFromExcel = async (studentsData) => {
     throw new Error(error.message);
   }
 };
+const getTotalStudentsByTerm = async (termCode) => {
+  try {
+    const filterCondition = { "termDetails.termCode": termCode };
+
+    const students = await Student.aggregate([
+      {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails"
+        }
+      },
+      {
+        $unwind: "$termDetails"
+      },
+      {
+        $match: filterCondition 
+      },
+      {
+        $group: {
+          _id: null,
+          totalStudent: { $sum: 1 },
+          totalStudentNoClass: {
+            $sum: { $cond: [{ $eq: ["$classId", null] }, 1, 0] }
+          },
+          totalStudentHaveClass: {
+            $sum: { $cond: [{ $eq: ["$classId", null] }, 0, 1] }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalStudent: 1,
+          totalStudentNoClass: 1,
+          totalStudentHaveClass: 1
+        }
+      }
+    ]);
+
+    return students[0] || { totalStudent: 0, totalStudentNoClass: 0, totalStudentHaveClass: 0 };
+  } catch (error) {
+    throw new Error(`Failed to fetch students: ${error.message}`);
+  }
+};
+
+
+
+
+
 export default {
   bulkCreateStudentsFromExcel,
   findStudentByAccountId,
@@ -518,5 +578,6 @@ export default {
   getAllAccStudent,
   getAllStudentUngroupByClassIds,
   findStudentDetailByAccountId,
-  getAllStudentByGroupId
+  getAllStudentByGroupId,
+  getTotalStudentsByTerm
 };
