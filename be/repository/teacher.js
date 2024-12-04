@@ -288,6 +288,14 @@ const assignClass = async (classId, teacherId) => {
     throw new Error(error.message);
   }
 };
+const getClassOfTeacher = async (teacherId) => {
+  try {
+    const classList = await Teacher.findById(teacherId)
+    return classList.assignedClasses
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 export default {
   getTeacherByClassId,
   findByAccountId,
@@ -295,5 +303,5 @@ export default {
   getTeacherWithClasses,
   getTeacherAccountByClassId,
   assignClass,
-  // getClassOfTeacher
+  getClassOfTeacher
 };

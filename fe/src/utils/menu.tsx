@@ -61,8 +61,8 @@ export const TeacherRoutes = [
     icon: <FaTasks size={20} />,
   },
   {
-    route: "hos/dashboard",
-    page: "Dashboard",
+    route: "hos/timeline",
+    page: "Timeline",
     icon: <FaChartPie size={20} />,
   },
 ];
@@ -113,8 +113,8 @@ export const SecondaryMenu = [
 ];
 export const HeadOfSubjectRouter = [
   {
-    route: "hos/dashboard",
-    page: "Dashboard",
+    route: "hos/timeline",
+    page: "Timeline",
     icon: <FaChartPie size={20} />,
   },
   {

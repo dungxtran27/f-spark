@@ -59,7 +59,7 @@ const Router = () => {
         <Route path="/mentorProfile/:id" element={<MentorProfile />} />
         <Route path="/accountant" element={<AccountantPage />} />
         {/* TM */}
-        <Route path="/hos/dashboard" element={<DashboardTM/>} />
+        <Route path="/hos/timeline" element={<DashboardTM/>} />
         <Route path="/hos/groups" element={<ManageClassTM/>} />
         <Route path="/hos/mentors" element={<></>} />
       </Routes>

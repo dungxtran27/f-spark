@@ -534,8 +534,10 @@ const getGroupStatistic = async (req, res) => {
       status
       }
     );
-    
-    return res.status(200).json({ data: groups });
+    const statistic = await GroupRepository.getGroupCountsByTerm(new mongoose.Types.ObjectId(term))
+    console.log(statistic);
+
+    return res.status(200).json({ data: groups, statistic: statistic });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
