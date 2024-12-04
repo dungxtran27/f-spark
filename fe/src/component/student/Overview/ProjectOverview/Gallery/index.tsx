@@ -1,4 +1,4 @@
-import { Button, Image, message, Modal, Tooltip } from "antd";
+import { Button, Empty, Image, message, Modal, Tooltip } from "antd";
 import React, { useState } from "react";
 import ImageUpload from "../../../../common/UpLoad";
 import { FaEye, FaPlus, FaTrash } from "react-icons/fa6";
@@ -58,28 +58,34 @@ const Gallery: React.FC<GalleryProps> = ({ groupId }) => {
       // }}
       >
         <div className="flex">
-          <div>
-            {gallery?.data.data.gallery.slice(0, 5).map((i: any) => (
-              <Image
-                width={200}
-                height={200}
-                className="object-contain"
-                alt="hahaah"
-                src={i}
-              />
-            ))}
-          </div>
-          {gallery?.data.data.gallery.length > 5 ? (
-            <div
-              onClick={showModal}
-              className="w-[200px] h-[200px] bg-gray-100  place-content-center  place-items-center hover:bg-gray-200"
-            >
-              <p className="text-gray-500">
-                {gallery?.data.data.gallery.length - 5}+
-              </p>
-            </div>
+          {gallery?.data.data?.gallery.length > 0 ? (
+            <>
+              <div>
+                {gallery?.data.data?.gallery.slice(0, 5).map((i: any) => (
+                  <Image
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                    alt="hahaah"
+                    src={i}
+                  />
+                ))}
+              </div>
+              {gallery?.data.data?.gallery.length > 5 ? (
+                <div
+                  onClick={showModal}
+                  className="w-[200px] h-[200px] bg-gray-100  place-content-center  place-items-center hover:bg-gray-200"
+                >
+                  <p className="text-gray-500">
+                    {gallery?.data.data.gallery.length - 5}+
+                  </p>
+                </div>
+              ) : (
+                <></>
+              )}
+            </>
           ) : (
-            <></>
+            <Empty description={"No image uploaded"} />
           )}
         </div>
       </Image.PreviewGroup>{" "}
@@ -98,34 +104,41 @@ const Gallery: React.FC<GalleryProps> = ({ groupId }) => {
       >
         <div className="h-[70vh] overflow-auto flex flex-wrap">
           <Image.PreviewGroup>
-            {gallery?.data.data.gallery.map((i: any) => (
-              <Image
-                src={i}
-                width={200}
-                height={200}
-                className="object-contain"
-                preview={{
-                  visible: true, // Enable preview
-                  mask: (
-                    <div className="flex gap-4">
-                      <Tooltip title={"preview"}>
-                        <FaEye
-                        //    onClick={() => handleImagePreview(index)}
-                        />
-                      </Tooltip>
-                      <Tooltip title={"delete"}>
-                        <FaTrash
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteImageFromGallery.mutate(i);
-                          }}
-                        />
-                      </Tooltip>
-                    </div>
-                  ), // Use the custom preview function
-                }}
-              />
-            ))}
+            {gallery?.data.data?.gallery.length > 0 ? (
+              <>
+                {" "}
+                {gallery?.data.data?.gallery.map((i: any) => (
+                  <Image
+                    src={i}
+                    width={200}
+                    height={200}
+                    className="object-contain"
+                    preview={{
+                      visible: true, // Enable preview
+                      mask: (
+                        <div className="flex gap-4">
+                          <Tooltip title={"preview"}>
+                            <FaEye
+                            //    onClick={() => handleImagePreview(index)}
+                            />
+                          </Tooltip>
+                          <Tooltip title={"delete"}>
+                            <FaTrash
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteImageFromGallery.mutate(i);
+                              }}
+                            />
+                          </Tooltip>
+                        </div>
+                      ), // Use the custom preview function
+                    }}
+                  />
+                ))}
+              </>
+            ) : (
+              <Empty />
+            )}
           </Image.PreviewGroup>
         </div>
       </Modal>

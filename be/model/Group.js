@@ -249,6 +249,7 @@ const GroupSchema = new Schema(
       {
         type: String,
         required: false,
+        default: [],
       },
     ],
   },
