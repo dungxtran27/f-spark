@@ -193,37 +193,69 @@ const TermWrapper: React.FC = () => {
   };
 
   const handleDeleteTerm = () => {
-    if (selectedTerm) {
-      deleteTerm.mutate();
-    }
+    Modal.confirm({
+      title: "Are you sure?",
+      content: "Do you really want to delete this term?",
+      okText: "Yes",
+      cancelText: "No",
+      okButtonProps: {
+        style: {
+          backgroundColor: "#8B5CF6",
+          borderColor: "#8B5CF6",
+          color: "white",
+        },
+      },
+      centered: true,
+      onOk: () => {
+        if (selectedTerm) {
+          deleteTerm.mutate();
+        }
+      },
+    });
   };
 
   const handleSave = (values: any) => {
-    const startMonth = values.startDate.month();
-    const startYear = values.startDate.year();
-    let code = "";
-    if (startMonth >= 0 && startMonth <= 3) {
-      code = "SP";
-    } else if (startMonth >= 4 && startMonth <= 8) {
-      code = "SU";
-    } else if (startMonth >= 9 && startMonth <= 11) {
-      code = "FA";
-    }
+    Modal.confirm({
+      title: "Are you sure?",
+      content: "Do you want to save the term with the selected details?",
+      okText: "Yes",
+      cancelText: "No",
+      centered: true,
+      okButtonProps: {
+        style: {
+          backgroundColor: "#8B5CF6",
+          borderColor: "#8B5CF6",
+          color: "white",
+        },
+      },
+      onOk: () => {
+        const startMonth = values.startDate.month();
+        const startYear = values.startDate.year();
+        let code = "";
+        if (startMonth >= 0 && startMonth <= 3) {
+          code = "SP";
+        } else if (startMonth >= 4 && startMonth <= 8) {
+          code = "SU";
+        } else if (startMonth >= 9 && startMonth <= 11) {
+          code = "FA";
+        }
 
-    const termYear = startYear % 100;
-    const TermCode = `${code}${termYear}`;
+        const termYear = startYear % 100;
+        const TermCode = `${code}${termYear}`;
 
-    const newTerm = {
-      termCode: TermCode,
-      startTime: values.startDate.toISOString(),
-      endTime: values.endDate.toISOString(),
-      timeLine: [],
-      totalClasses: 0,
-      totalMentors: 0,
-      totalStudents: 0,
-      totalTeachers: 0,
-    };
-    mutate(newTerm);
+        const newTerm = {
+          termCode: TermCode,
+          startTime: values.startDate.toISOString(),
+          endTime: values.endDate.toISOString(),
+          timeLine: [],
+          totalClasses: 0,
+          totalMentors: 0,
+          totalStudents: 0,
+          totalTeachers: 0,
+        };
+        mutate(newTerm);
+      },
+    });
   };
 
   const isFinished = moment(data?.data?.endTime).isBefore(moment(), "day");
@@ -328,7 +360,11 @@ const TermWrapper: React.FC = () => {
                 >
                   {step.description && (
                     <Popover
-                      content={<div className="h-[50px] w-[500px]">{step.description}</div>} 
+                      content={
+                        <div className="h-[50px] w-[500px]">
+                          {step.description}
+                        </div>
+                      }
                       title="Description"
                       trigger="click"
                       placement="top"
