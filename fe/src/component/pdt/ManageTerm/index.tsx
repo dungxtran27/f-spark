@@ -95,6 +95,9 @@ const TermWrapper: React.FC = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.TERM_LIST],
       });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.TERM],
+      });
     },
   });
 
@@ -162,13 +165,6 @@ const TermWrapper: React.FC = () => {
     return (
       <div>
         <Skeleton />
-      </div>
-    );
-
-  if (!data)
-    return (
-      <div>
-        <Empty />
       </div>
     );
 
@@ -262,197 +258,251 @@ const TermWrapper: React.FC = () => {
   const isIncoming = moment(data?.data?.startTime).isAfter(moment(), "day");
 
   return (
-    <div className="p-6 w-full">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-xl font-bold text-gray-800">Manage Term</h2>
+    <>
+      {!data ? (
+        <div className="p-6 w-full">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-bold text-gray-800">Manage Term</h2>
+            <div className="flex mb-2 ml-2">
+              <label htmlFor="semester" className="text-gray-600 mr-2">
+                Term:
+              </label>
+              <Select
+                id="semester"
+                onChange={handleSelectChange}
+                className="w-32"
+                value={selectTerm}
+              >
+                {selectTerm && selectTerm.length > 0 ? (
+                  selectTerm.map((term: any) => (
+                    <Option key={term._id} value={term._id}>
+                      {term.termCode}
+                      {term._id === defaultTerm && " (current)"}
+                    </Option>
+                  ))
+                ) : (
+                  <Option disabled>No terms available</Option>
+                )}
+              </Select>
+              <Button
+                type="primary"
+                className="bg-purple-500 hover:bg-purple-600 ml-2"
+                onClick={showModal}
+              >
+                Create term
+              </Button>
+            </div>
+          </div>
 
-        <div className="flex mb-2 ml-2">
-          <label htmlFor="semester" className="text-gray-600 mr-2">
-            Term:
-          </label>
-          <Select id="semester" onChange={handleSelectChange} className="w-32">
-            {selectTerm && selectTerm.length > 0 ? (
-              selectTerm.map((term: any) => (
-                <Option key={term._id} value={term._id}>
-                  {term.termCode}
-                  {term._id === defaultTerm && " (current)"}
-                </Option>
-              ))
-            ) : (
-              <Option disabled>No terms available</Option>
-            )}
-          </Select>
-          <Button
-            type="primary"
-            className="bg-purple-500 hover:bg-purple-600 ml-2"
-            onClick={showModal}
-          >
-            Create term
-          </Button>
-        </div>
-      </div>
+          <div key={data?.data?._id}>
+            <div className="flex flex-row items-center justify-center bg-white p-4 rounded mb-4 w-full h-24 shadow-md">
+              <Empty imageStyle={{ height: 70, width: 70 }} />
+            </div>
 
-      <div key={data?.data?._id}>
-        <div className="flex flex-row justify-between items-center bg-white p-4 rounded mb-4 w-full h-24 shadow-md">
-          <div className="text-gray-700">
-            <p>
-              <span className="text-lg font-semibold">Time Range: </span>
-              <span className="text-lg">
-                {formatDate(data?.data?.startTime)} -{" "}
-                {formatDate(data?.data?.endTime)}
-              </span>
-            </p>
-            <span className="text-lg font-semibold">Status: </span>
-            <span
-              className={
-                isFinished
-                  ? "text-red-500 text-lg"
-                  : isIncoming
-                  ? "text-yellow-500 text-lg"
-                  : "text-green-500 text-lg"
-              }
-            >
-              {isFinished
-                ? "Finished"
-                : isIncoming
-                ? "Incoming"
-                : "In Progress"}
-            </span>
-          </div>
-          <div className="text-gray-700 flex flex-col items-center">
-            <p className="text-lg font-semibold">Total Class </p>
-            <p className="text-lg">{data.totalClasses}</p>
-          </div>
-          <div className="text-gray-700 flex flex-col items-center">
-            <p className="text-lg font-semibold">Total Stundent </p>
-            <p className="text-lg">{data.totalStudents}</p>
-          </div>
-          <div className="text-gray-700 flex flex-col items-center">
-            <p className="text-lg font-semibold">Mentor participant</p>
-            <p className="text-lg">{data.totalMentors}</p>
-          </div>
-          <div className="text-gray-700 flex flex-col items-center">
-            <p className="text-lg font-semibold">Teacher participant</p>
-            <p className="text-lg">{data.totalTeachers}</p>
+            <div className="flex bg-white rounded h-96 shadow-md items-center justify-center">
+              <Empty />
+            </div>
           </div>
         </div>
+      ) : (
+        <div className="p-6 w-full">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-bold text-gray-800">Manage Term</h2>
+            <div className="flex mb-2 ml-2">
+              <label htmlFor="semester" className="text-gray-600 mr-2">
+                Term:
+              </label>
+              <Select
+                id="semester"
+                onChange={handleSelectChange}
+                className="w-32"
+              >
+                {selectTerm && selectTerm.length > 0 ? (
+                  selectTerm.map((term: any) => (
+                    <Option key={term._id} value={term._id}>
+                      {term.termCode}
+                      {term._id === defaultTerm && " (current)"}
+                    </Option>
+                  ))
+                ) : (
+                  <Option disabled>No terms available</Option>
+                )}
+              </Select>
+              <Button
+                type="primary"
+                className="bg-purple-500 hover:bg-purple-600 ml-2"
+                onClick={showModal}
+              >
+                Create term
+              </Button>
+            </div>
+          </div>
 
-        <div className="bg-white rounded h-96 shadow-md">
-          {isIncoming ? (
-            <Button
-              type="primary"
-              className="bg-purple-500 hover:bg-purple-600 ml-3 mt-3"
-              onClick={handleDeleteTerm}
-            >
-              Delete term
-            </Button>
-          ) : (
-            <div className="p-5 ml-5 mt-5"></div>
-          )}
-          <div className="flex items-center justify-between h-full">
-            {data?.data?.timeLine.map((step: any) => {
-              const stepStartDate = moment(step.startDate);
-              const stepEndDate = moment(step.endDate);
-              return (
-                <div
-                  key={step._id}
-                  className="flex flex-col items-center relative w-full"
+          <div key={data?.data?._id}>
+            <div className="flex flex-row justify-between items-center bg-white p-4 rounded mb-4 w-full h-24 shadow-md">
+              <div className="text-gray-700">
+                <p>
+                  <span className="text-lg font-semibold">Time Range: </span>
+                  <span className="text-lg">
+                    {formatDate(data?.data?.startTime)} -{" "}
+                    {formatDate(data?.data?.endTime)}
+                  </span>
+                </p>
+                <span className="text-lg font-semibold">Status: </span>
+                <span
+                  className={
+                    isFinished
+                      ? "text-red-500 text-lg"
+                      : isIncoming
+                      ? "text-yellow-500 text-lg"
+                      : "text-green-500 text-lg"
+                  }
                 >
-                  {step.description && (
-                    <Popover
-                      content={
-                        <div className="h-[50px] w-[500px]">
-                          {step.description}
-                        </div>
-                      }
-                      title="Description"
-                      trigger="click"
-                      placement="top"
-                    >
-                      <div className="rounded-full text-xl w-16 h-16 flex items-center justify-center text-white bg-purple-500 hover:bg-purple-400">
-                        {data?.data?.timeLine.indexOf(step) + 1}
-                      </div>
-                      {data?.data?.timeLine.indexOf(step) <
-                        data?.data?.timeLine.length - 1 && (
-                        <div className="absolute top-8 transform left-24 w-full h-0.5 bg-purple-500"></div>
-                      )}
-                    </Popover>
-                  )}
-                  <div className="text-center mt-2 text-gray-600 w-36 h-24">
-                    <span className="font-semibold ">{step.title}</span>
-                    <br />
-                    <span>
-                      {formatDate(stepStartDate.toString())} -{" "}
-                      {formatDate(stepEndDate.toString())}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+                  {isFinished
+                    ? "Finished"
+                    : isIncoming
+                    ? "Incoming"
+                    : "In Progress"}
+                </span>
+              </div>
+              <div className="text-gray-700 flex flex-col items-center">
+                <p className="text-lg font-semibold">Total Class </p>
+                <p className="text-lg">{data.totalClasses}</p>
+              </div>
+              <div className="text-gray-700 flex flex-col items-center">
+                <p className="text-lg font-semibold">Total Stundent </p>
+                <p className="text-lg">{data.totalStudents}</p>
+              </div>
+              <div className="text-gray-700 flex flex-col items-center">
+                <p className="text-lg font-semibold">Mentor participant</p>
+                <p className="text-lg">{data.totalMentors}</p>
+              </div>
+              <div className="text-gray-700 flex flex-col items-center">
+                <p className="text-lg font-semibold">Teacher participant</p>
+                <p className="text-lg">{data.totalTeachers}</p>
+              </div>
+            </div>
 
-      <Modal
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={null}
-      >
-        <p className="font-bold mb-3">Create Timeline :</p>
-        <Form form={form} onFinish={handleSave}>
-          <Form.Item
-            label="Start Date"
-            name="startDate"
-            rules={[{ required: true, message: "Please select start date!" }]}
-          >
-            <DatePicker
-              format="YYYY-MM-DD"
-              value={startDate}
-              onChange={handleStartDateChange}
-            />
-          </Form.Item>
-
-          <Form.Item
-            className="ml-2"
-            label="End Date"
-            name="endDate"
-            initialValue={endDate}
-          >
-            <DatePicker format="YYYY-MM-DD" value={endDate} disabled />
-          </Form.Item>
-          <div className="preview-timeline mt-4">
-            <p className="font-bold">Preview Timeline :</p>
-            <div className="mt-4 -ml-24 -mb-9">
-              <Timeline mode="right">
-                {previewTimeline.map((step) => {
+            <div className="bg-white rounded h-96 shadow-md">
+              {isIncoming ? (
+                <Button
+                  type="primary"
+                  className="bg-purple-500 hover:bg-purple-600 ml-3 mt-3"
+                  onClick={handleDeleteTerm}
+                >
+                  Delete term
+                </Button>
+              ) : (
+                <div className="p-5 ml-5 mt-5"></div>
+              )}
+              <div className="flex items-center justify-between h-full">
+                {data?.data?.timeLine.map((step: any, index: number) => {
                   const stepStartDate = moment(step.startDate);
                   const stepEndDate = moment(step.endDate);
                   return (
-                    <Timeline.Item
-                      key={step._id}
-                      label={`${formatDate(
-                        stepStartDate.toString()
-                      )} - ${formatDate(stepEndDate.toString())}`}
+                    <div
+                      key={`${step._id}-${index}`}
+                      className="flex flex-col items-center relative w-full"
                     >
-                      <p className="font-semibold">{step.title}</p>
-                    </Timeline.Item>
+                      {step.description && (
+                        <Popover
+                          content={
+                            <div className="h-[50px] w-[500px]">
+                              {step.description}
+                            </div>
+                          }
+                          title="Description"
+                          trigger="click"
+                          placement="top"
+                        >
+                          <div className="rounded-full text-xl w-16 h-16 flex items-center justify-center text-white bg-purple-500 hover:bg-purple-400">
+                            {data?.data?.timeLine.indexOf(step) + 1}
+                          </div>
+                          {data?.data?.timeLine.indexOf(step) <
+                            data?.data?.timeLine.length - 1 && (
+                            <div className="absolute top-8 transform left-24 w-full h-0.5 bg-purple-500"></div>
+                          )}
+                        </Popover>
+                      )}
+                      <div className="text-center mt-2 text-gray-600 w-36 h-24">
+                        <span className="font-semibold ">{step.title}</span>
+                        <br />
+                        <span>
+                          {formatDate(stepStartDate.toString())} -{" "}
+                          {formatDate(stepEndDate.toString())}
+                        </span>
+                      </div>
+                    </div>
                   );
                 })}
-              </Timeline>
+              </div>
             </div>
           </div>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="w-full bg-purple-500"
-            >
-              Save
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+
+          <Modal
+            open={isModalVisible}
+            onCancel={() => setIsModalVisible(false)}
+            footer={null}
+          >
+            <p className="font-bold mb-3">Create Timeline :</p>
+            <Form form={form} onFinish={handleSave}>
+              <Form.Item
+                label="Start Date"
+                name="startDate"
+                rules={[
+                  { required: true, message: "Please select start date!" },
+                ]}
+              >
+                <DatePicker
+                  format="YYYY-MM-DD"
+                  value={startDate}
+                  onChange={handleStartDateChange}
+                />
+              </Form.Item>
+
+              <Form.Item
+                className="ml-2"
+                label="End Date"
+                name="endDate"
+                initialValue={endDate}
+              >
+                <DatePicker format="YYYY-MM-DD" value={endDate} disabled />
+              </Form.Item>
+              <div className="preview-timeline mt-4">
+                <p className="font-bold">Preview Timeline :</p>
+                <div className="mt-4 -ml-24 -mb-9">
+                  <Timeline mode="right">
+                    {previewTimeline.map((step) => {
+                      const stepStartDate = moment(step.startDate);
+                      const stepEndDate = moment(step.endDate);
+                      return (
+                        <Timeline.Item
+                          key={step._id}
+                          label={`${formatDate(
+                            stepStartDate.toString()
+                          )} - ${formatDate(stepEndDate.toString())}`}
+                        >
+                          <p className="font-semibold">{step.title}</p>
+                        </Timeline.Item>
+                      );
+                    })}
+                  </Timeline>
+                </div>
+              </div>
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="w-full bg-purple-500"
+                >
+                  Save
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+        </div>
+      )}
+    </>
   );
 };
 
