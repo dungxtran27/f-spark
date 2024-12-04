@@ -14,8 +14,8 @@ import { UserInfo } from "../../../../model/auth";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { notificationApi } from "../../../../api/notification/notification";
-import AssignmentNoti from "../../../common/Stream/AssignmentNoti";
-import OutcomeNoti from "../../../common/Stream/OutcomeNoti";
+import AssignmentNoti from "../../../common/Notification/AssignmentNoti";
+import OutcomeNoti from "../../../common/Notification/OutcomeNoti";
 const { Panel } = Collapse;
 
 const Class = () => {

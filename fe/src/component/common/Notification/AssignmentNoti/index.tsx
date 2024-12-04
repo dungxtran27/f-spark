@@ -5,7 +5,7 @@ import { CiEdit } from "react-icons/ci";
 import { FaRegTrashCan, FaStar } from "react-icons/fa6";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import classNames from "classnames";
-import styles from "../style.module.scss";
+import styles from "../../Stream/style.module.scss";
 import DOMPurify from "dompurify";
 import { TiAttachment } from "react-icons/ti";
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
   sub: any;
   sen: any;
   userInfo: any;
+  sender: any;
   setOpenSubmission?: (value: any) => void;
   setSubmitModal?: (value: any) => void;
 }
@@ -21,6 +22,7 @@ const AssignmentNoti = ({
   sen,
   sub,
   userInfo,
+  sender,
   setOpenSubmission,
   setSubmitModal,
 }: Props) => {
@@ -29,10 +31,16 @@ const AssignmentNoti = ({
     <div className="w-full p-5 border  rounded bg-white shadow-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          {sender?.account?.profilePicture != null ? 
+          <img
+            src={sender?.account?.profilePicture}
+            className="aspect-square w-[40px] object-cover object-center rounded-full border-2 border-primary"
+          /> :
           <img
             src={userInfo?.account?.profilePicture}
             className="aspect-square w-[40px] object-cover object-center rounded-full border-2 border-primary"
-          />
+          /> 
+          }
           <div className="flex flex-col">
             <span className="font-medium">
               {userInfo?.role === ROLE.teacher ? "You" : "Teacher"}
@@ -64,7 +72,8 @@ const AssignmentNoti = ({
         )}
       </div>
       <div className="border-[1px] border-black/30"></div>
-      <div className="pt-3">
+      {sender == null && 
+        <div className="pt-3">
         {userInfo?.role === ROLE.teacher ? (
           sub?._id ? (
             <div className="flex flex-col gap-5">
@@ -142,7 +151,9 @@ const AssignmentNoti = ({
           <Empty description={"You have not submitted your answer"} />
         )}
       </div>
-      {userInfo?.role === ROLE.student && !post?.mySubmission && (
+      }
+      
+      {userInfo?.role === ROLE.student && !post?.mySubmission && sender == null && (
         <div className="flex items-center mt-5 gap-3">
           <img
             src={userInfo?.account?.profilePicture}

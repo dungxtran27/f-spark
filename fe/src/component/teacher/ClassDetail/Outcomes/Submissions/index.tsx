@@ -22,6 +22,7 @@ import DOMPurify from "dompurify";
 import { useForm } from "antd/es/form/Form";
 import QuillEditor from "../../../../common/QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
+import { notificationApi } from "../../../../../api/notification/notification";
 import { useRef, useState } from "react";
 
 interface Props {
@@ -103,6 +104,13 @@ const Submissions = ({
   });
   const groupsOfClass = groups?.data?.data?.groupStudent;
 
+  const remindGroup = (groupId, outcomeId) => {
+    const data = {
+      groupId: groupId,
+      classworkId: outcomeId
+    }
+    notificationApi.remindGroupSubmitOutcome(data)
+  }
   const items: CollapseProps["items"] = groupsOfClass?.map((g: any) => {
     const s = submissions?.find((gs) => gs?.group?._id === g?._id);
     return {
@@ -167,7 +175,9 @@ const Submissions = ({
         </div>
       ) : (
         <div className="w-full flex justify-center">
-          <Button>Remind group</Button>
+          <Button onClick={() => {
+            remindGroup(g?._id,outcome?._id)
+          }}>Remind group</Button>
         </div>
       ),
     };

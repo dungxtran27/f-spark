@@ -202,6 +202,12 @@ const GroupSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    sponsorStatus: {
+      type: String,
+      required: false,
+      enum: ["normal", "pending", "sponsored"],
+      default: "normal",
+    },
     teamMembers: [
       {
         type: Schema.Types.ObjectId,
