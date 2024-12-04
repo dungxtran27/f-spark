@@ -114,8 +114,13 @@ groupRouter.post(
 );
 groupRouter.post(
   "/uploadGallery",
-  upload.single("file"),
+  verifyToken,
+  upload.array("files"),
   GroupController.addImageToGroupGallery
 );
-
+groupRouter.get("/getGallery/:groupId", GroupController.getGallery);
+groupRouter.post(
+  "/deleteImageFromGallery",
+  GroupController.deleteImageFromGallery
+);
 export default groupRouter;

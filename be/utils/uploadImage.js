@@ -10,7 +10,7 @@ export const uploadImage = async (file) => {
   try {
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { resource_type: "Raw" },
+        { resource_type: "image" },
         (error, result) => {
           if (error) {
             console.error("Upload 1Error:", error);

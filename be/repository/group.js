@@ -1040,15 +1040,17 @@ const findAllGroupsOfTeacherbyClassIds = async (
   }
 };
 
-const updateTimelineForGroup = async ({groupId, classworkId, newDate}) => {
+const updateTimelineForGroup = async ({ groupId, classworkId, newDate }) => {
   try {
     const updatedGroup = await Group.findOneAndUpdate(
       { _id: groupId, "timeline.classworkId": classworkId },
-      { $set: { "timeline.$.endDate": newDate } },          
-      { new: true }                                    
+      { $set: { "timeline.$.endDate": newDate } },
+      { new: true }
     );
-    
-    const updatedTimeline = updatedGroup.timeline.find(timeline => timeline.classworkId.toString() == classworkId);
+
+    const updatedTimeline = updatedGroup.timeline.find(
+      (timeline) => timeline.classworkId.toString() == classworkId
+    );
     return updatedTimeline;
   } catch (error) {
     throw new Error(error.message);
@@ -1089,26 +1091,66 @@ const updateMember = async (groupId, studentIds) => {
   }
 };
 
-const getTimelineClassworkOfGroup = async ({groupId, classworkId}) => {
+const getTimelineClassworkOfGroup = async ({ groupId, classworkId }) => {
   try {
     const group = await Group.findOne(
       { _id: groupId, "timeline.classworkId": classworkId },
-      { "timeline.$": 1 } 
+      { "timeline.$": 1 }
     );
     return group.timeline[0];
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
 const getMemberOfGroupByGroupId = async (groupId) => {
   try {
-    const group = await Group.findById(groupId)
+    const group = await Group.findById(groupId);
     return group.teamMembers;
   } catch (error) {
     throw error;
   }
-}
+};
+const updateGallery = async (groupId, images) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $push: {
+          gallery: { $each: images },
+        },
+      },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const deleteImageFromGallery = async (groupId, imageLink) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $pull: {
+          gallery: imageLink,
+        },
+      },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const getGallery = async (groupId) => {
+  try {
+    const result = await Group.findById(groupId).select("gallery");
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1142,5 +1184,8 @@ export default {
   updateTimelineForGroup,
   getTimelineClassworkOfGroup,
   createGroupsFromExcel,
-  getMemberOfGroupByGroupId
+  getMemberOfGroupByGroupId,
+  updateGallery,
+  deleteImageFromGallery,
+  getGallery,
 };

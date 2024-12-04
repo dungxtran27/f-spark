@@ -1,3 +1,4 @@
+import group from "../repository/group.js";
 import {
   ClassRepository,
   GroupRepository,
@@ -497,22 +498,63 @@ const getGroupsOfTerm = async (req, res) => {
 };
 const addImageToGroupGallery = async (req, res) => {
   try {
-    const file = req.file;
+    const files = req.files;
+    const decodedToken = req.decodedToken;
+    console.log(decodedToken);
+    const student = await StudentRepository.findById(decodedToken?.role.id);
+    console.log(student);
 
-    if (!file) {
-      return res.status(400).json({ message: "No file uploaded" });
+    // const group= await GroupRepository.findGroupById
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
     }
 
-    const cloudImageLink = await uploadImage(file);
-    console.log(cloudImageLink);
-    if (!cloudImageLink) {
-      return res
-        .status(400)
-        .json({ message: "not 2 ok", data: cloudImageLink });
-    }
+    const cloudImageLinks = await Promise.all(
+      files.map(async (file) => {
+        const cloudImageLink = await uploadImage(file);
+        if (!cloudImageLink) {
+          throw new Error("Failed to upload image");
+        }
+        return cloudImageLink;
+      })
+    );
+    const updategallery = await GroupRepository.updateGallery(
+      student.group,
+      cloudImageLinks
+    );
+
     return res.status(200).json({ message: "ok" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+};
+const getGallery = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    if (!groupId) {
+      return res.status(400).json({ error: "Bad request" });
+    }
+    const gallery = await GroupRepository.getGallery(groupId);
+
+    return res.status(200).json({ data: gallery });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const deleteImageFromGallery = async (req, res) => {
+  try {
+    const { groupId, imageLink } = req.body;
+    if (!groupId || !imageLink) {
+      return res.status(400).json({ error: "Bad request" });
+    }
+    const gallery = await GroupRepository.deleteImageFromGallery(
+      groupId,
+      imageLink
+    );
+
+    return res.status(200).json({ message: "Delete Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 };
 export default {
@@ -543,4 +585,6 @@ export default {
   addGroupToClass,
   getAllGroupsOfTeacherbyClassIds,
   addImageToGroupGallery,
+  getGallery,
+  deleteImageFromGallery,
 };

@@ -34,11 +34,17 @@ export const groupApi = {
       requestBody
     );
   },
-  uploadGallery: async (requestBody: any) => {
-    return await axios.post(`/api/group/uploadGallery`, requestBody, {
+  uploadGallery: async (formData: FormData) => {
+    return await axios.post(`/api/group/uploadGallery`, formData, {
       headers: {
         Accept: "application/json; charset=UTF-8",
       },
     });
+  },
+  getGallery: async (groupId: any) => {
+    return await axios.get(`/api/group/getGallery/${groupId}`);
+  },
+  deleteImageFromGallery: async (requestBody: any) => {
+    return await axios.post(`/api/group/deleteImageFromGallery`, requestBody);
   },
 };
