@@ -28,8 +28,32 @@ const createOutcome = async ({title, description, gradingCriteria}) => {
         throw new Error(error.message)
     }
 }
+
+const deleteOutcome = async (outcomeId) => {
+    try {
+      const outcomeToDelete = await Outcome.findOne({ _id: outcomeId });
+      if (!outcomeToDelete) {
+        throw new Error("Outcome not found");
+      }
+      const deletedIndex = outcomeToDelete.index;
+
+      await Outcome.deleteOne({ _id: outcomeId });
+ 
+      const updatedOutcomes = await Outcome.find({ index: { $gt: deletedIndex } });
+      for (const outcome of updatedOutcomes) {
+        outcome.index -= 1;
+        outcome.title = `Outcome ${outcome.index}`;
+        await outcome.save();
+      }
+  
+      return { success: true, message: "Outcome deleted, indexes and titles updated" };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+};
 export default {
     getAllOutcome, 
     createOutcome,
-    getOutcome
+    getOutcome,
+    deleteOutcome
 }

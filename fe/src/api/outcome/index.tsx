@@ -6,5 +6,8 @@ export const outcomeApi = {
   },
   createOutcome: async (requestBody: any) => {
     return await axios.post(`/api/outcome/createOutcome`, requestBody);
-},
+  },
+  deleteOutcome: async (outcomeId: string | undefined) => {
+    return await axios.delete(`/api/outcome/deleteOutcome/${outcomeId}`);
+  },
 };

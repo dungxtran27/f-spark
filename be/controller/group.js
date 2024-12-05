@@ -575,7 +575,7 @@ const updateGroupSponsorStatus = async (req, res) => {
         receivers: members,
         sender: req.decodedToken.role.id,
         group: groupId,
-        senderType: "Teacher",
+        senderType: "Head Of Subject",
         type: "Group",
         action: {
           action: `request for funding`,

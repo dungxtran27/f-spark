@@ -10,7 +10,8 @@ import {
   Form,
   Button,
   Modal,
-  Input
+  Input,
+  Popover
 } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../utils/const";
@@ -81,11 +82,65 @@ const DashboardTMWrapper: React.FC = () => {
       }
     }, [isLoading, outcomes]);
 
-    const steps = outcomes?.data?.data.map((item) => ({
-      title: item.title,
-      status: 'process',
-      subTitle: 'Duration: 20 days',
-      description: item.description.length > 50 ? item.description.substring(0, 50) + '...' : item.description,
+    const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
+    const handleOpenChange = (open, index) => {
+      if (open) {
+        setOpenPopoverIndex(index); // Mở Popover tại index cụ thể
+      } else {
+        setOpenPopoverIndex(null); // Đóng Popover
+      }
+    };
+    
+    const handleDelete = async (outcomeId) => {
+      await outcomeApi.deleteOutcome(outcomeId)
+      queryClient.invalidateQueries([QUERY_KEY.TERM_TIMELINE]);
+    };
+    const daysPerStep = outcomes?.data?.data.length > 0 ? 90 / outcomes?.data?.data.length : 0;
+    const steps = outcomes?.data?.data.map((item,index) => ({
+      title: (
+        <Popover
+          content={
+            <div className="w-80">
+              <p>
+                <strong>Title:</strong> {item.title}
+              </p>
+              <p className="mt-1 block">
+                <strong>Description:</strong> {item.description}
+              </p>
+              {item.GradingCriteria && (
+                <div>
+                  <strong className="mt-1 block">Grading Criteria:</strong>
+                  <ul>
+                    {item.GradingCriteria.map((criteria, idx) => (
+                      <li key={idx}>{criteria.description}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="flex gap-2 mt-3 justify-end">
+                <Button type="primary" onClick={() => console.log("Change:", item)}>
+                  Change
+                </Button>
+                <Button onClick={() => handleDelete(item._id)}>
+                  Delete
+                </Button>
+              </div>
+            </div>
+          }
+          title={`Details ${item.title}`}
+          trigger="click"
+          open={openPopoverIndex === index} 
+          onOpenChange={(open) => handleOpenChange(open, index)} 
+        >
+          <span style={{ cursor: "pointer" }}>{item.title}</span>
+        </Popover>
+      ),
+      status: "process",
+      subTitle: `Duration: ${Math.ceil(daysPerStep)} days`,
+      description:
+        item.description.length > 50
+          ? item.description.substring(0, 50) + "..."
+          : item.description,
     })) || [];
 
 
@@ -131,17 +186,7 @@ const DashboardTMWrapper: React.FC = () => {
     const handleItemClick = (item) => {
         setSelectedItem(item);
       };
-    
-      // const handleDelete = async () => {
-      //   const data = {
-      //     termId: termFilter,
-      //     timelineId: selectedItem._id
-      //   }
-      //   await term.deleteTimelineOfTerm(data)
-      //   queryClient.invalidateQueries([QUERY_KEY.TERM_TIMELINE]);
-      //   setIsOpenDelete(false)
-      // };
-    
+
       // const handleChange = () => {
       //   setStatusUpdate(true)
       //   form.setFieldsValue({

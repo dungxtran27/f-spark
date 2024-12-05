@@ -35,7 +35,7 @@ export const ROLE = {
   student: "STUDENT",
   startUpDepartment: "START_UP_DEPARTMENT",
   admin: "ADMIN",
-  headOfSubject: "HEAD_OF_SUBJECT"
+  headOfSubject: "HEADOFSUBJECT"
 };
 export const DASHBOARD_TABS = [
   { key: "task", label: "Task", children: <Task /> },
