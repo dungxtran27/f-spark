@@ -135,7 +135,7 @@ const Distributing = () => {
                 />
                 <Statistic
                   title="Transaction made"
-                  value={transactions?.length}
+                  value={transactions?.transactions?.length}
                 />
                 <Statistic
                   title="Fund Used"
