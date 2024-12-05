@@ -2,6 +2,9 @@ import express from "express";
 import { GroupController } from "../controller/index.js";
 import verifyToken from "../middleware/verifyToken.js";
 import authorization from "../middleware/authorization.js";
+import multer from "multer";
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const groupRouter = express.Router();
 groupRouter.post(
   "/createRow",
@@ -102,22 +105,33 @@ groupRouter.post("/ungroup", GroupController.ungroup);
 groupRouter.get("/:classId", GroupController.getAllGroupByClassId);
 groupRouter.put("/update", GroupController.editTimelineForManyGroups);
 groupRouter.post("/", GroupController.getAllGroupsNoClass);
-groupRouter.patch('/addGroupToClass', GroupController.addGroupToClass);
+groupRouter.patch("/addGroupToClass", GroupController.addGroupToClass);
 groupRouter.get(
   "/getGroupClassByTermCode/:termId",
   GroupController.getGroupClassByTermCode
 );
-groupRouter.get(
-  "/getGroupByClass/:classId",
-  GroupController.getGroupByClassId
+groupRouter.get("/getGroupByClass/:classId", GroupController.getGroupByClassId);
+groupRouter.post("/groupStatistic", GroupController.getGroupStatistic);
+groupRouter.post(
+  "/updateGroupSponsorStatus",
+  verifyToken,
+  GroupController.updateGroupSponsorStatus
 );
-groupRouter.post('/groupStatistic', GroupController.getGroupStatistic);
-groupRouter.post("/updateGroupSponsorStatus",verifyToken, GroupController.updateGroupSponsorStatus);
-groupRouter.get("/getGroupsOfTerm/:termId", GroupController.getGroupsOfTerm)
+groupRouter.get("/getGroupsOfTerm/:termId", GroupController.getGroupsOfTerm);
 groupRouter.post(
   "/getAllGroupsOfTeacherbyClassIds",
   verifyToken,
   GroupController.getAllGroupsOfTeacherbyClassIds
 );
-
+groupRouter.post(
+  "/uploadGallery",
+  verifyToken,
+  upload.array("files"),
+  GroupController.addImageToGroupGallery
+);
+groupRouter.get("/getGallery/:groupId", GroupController.getGallery);
+groupRouter.post(
+  "/deleteImageFromGallery",
+  GroupController.deleteImageFromGallery
+);
 export default groupRouter;

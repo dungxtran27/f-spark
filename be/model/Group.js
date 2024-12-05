@@ -206,7 +206,7 @@ const GroupSchema = new Schema(
       type: String,
       required: false,
       enum: ["normal", "pending", "sponsored"],
-      default: "normal"
+      default: "normal",
     },
     teamMembers: [
       {
@@ -239,12 +239,19 @@ const GroupSchema = new Schema(
       type: Number,
       required: false,
     },
+    timeline: [TimelineSchema],
     term: {
       type: Schema.Types.ObjectId,
       ref: "Term",
-      require: true
+      required: true,
     },
-    timeline: [TimelineSchema],
+    gallery: [
+      {
+        type: String,
+        required: false,
+        default: [],
+      },
+    ],
   },
   { timestamps: true, collection: "Groups" }
 );

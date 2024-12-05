@@ -35,7 +35,7 @@ export const ROLE = {
   student: "STUDENT",
   startUpDepartment: "START_UP_DEPARTMENT",
   admin: "ADMIN",
-  headOfSubject: "HEAD_OF_SUBJECT"
+  headOfSubject: "HEAD_OF_SUBJECT",
 };
 export const DASHBOARD_TABS = [
   { key: "task", label: "Task", children: <Task /> },
@@ -224,7 +224,7 @@ export const NOTIFICATION_READ_STATUS = [
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
   STUDENT_OF_TERM: "studentOfTerm",
-  GROUPS_OF_TERM: 'groupsOfTerm',
+  GROUPS_OF_TERM: "groupsOfTerm",
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
@@ -261,15 +261,16 @@ export const QUERY_KEY = {
   NO_CLASS_GROUPS: "noClassGroups",
   ADD_STUDENT_TO_CLASS: "addStudentToClass",
   REQUEST_DEADLINE_LIST: "requestDeadlineList",
-  TERM:"term",
-  TERMACTIVE:"termActive",
+  TERM: "term",
+  TERMACTIVE: "termActive",
   TERM_LIST: "termList",
   GROUP_CLASS_OF_TERM: "groupClassByTerm",
   GROUP_LIST_BY_CLASS: "groupListByClass",
   GROUP_OF_TERM: "groupOfTerm",
   TERM_TIMELINE: "timelineOfTerm",
   CLASS_DETAIL: "classDetail",
-  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass"
+  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass",
+  GALLERY: "gallery",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -298,7 +299,7 @@ export const NOTIFICATION_ACTION_TYPE = {
   UPDATE_TASK: "UpdateTask",
   DELETE_TASK: "DeleteTask",
   RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline",
-  REMIND_GROUP_SUBMIT: "RemindGroupSubmit"
+  REMIND_GROUP_SUBMIT: "RemindGroupSubmit",
 };
 export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",
@@ -307,7 +308,7 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_SUBMISSION: "CreateSubmission",
   REQUEST_DEADLINE: "RequestDeadline",
   CREATE_REQUEST_DEADLINE: "CreateRequestDeadline",
-  REMIND_GROUP_SUBMIT: "RemindGroupSubmitOutcome"
+  REMIND_GROUP_SUBMIT: "RemindGroupSubmitOutcome",
 };
 export const NOTIFICATION_TYPE = {
   CLASS: "class",
@@ -317,7 +318,8 @@ export const NOTIFICATION_TYPE = {
 export const CREATE_REQUEST_DEADLINE = {
   newDate: "newDate",
   reason: "reason",
-};export const PHRASE_TAB = [
+};
+export const PHRASE_TAB = [
   { key: "phrase_1", label: "Phrase 1", children: <Phrase1 /> },
   { key: "phrase_2", label: "Phrase 2", children: <Phrase2 /> },
 ];

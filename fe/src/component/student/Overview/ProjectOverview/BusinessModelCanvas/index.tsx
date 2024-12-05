@@ -22,9 +22,6 @@ import {
 import { businessModelCanvas } from "../../../../../api/apiOverview/businessModelCanvas";
 import { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux/store";
-import { UserInfo } from "../../../../../model/auth";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -32,8 +29,12 @@ const { TextArea } = Input;
 interface ErrorResponse {
   error: string;
 }
-
-const BusinessModelCanvas: React.FC = () => {
+interface BusinessModelCanvasProps {
+  groupId: string;
+}
+const BusinessModelCanvas: React.FC<BusinessModelCanvasProps> = ({
+  groupId,
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [tempText, setTempText] = useState("");
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -51,11 +52,6 @@ const BusinessModelCanvas: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const userInfo = useSelector(
-    (state: RootState) => state.auth.userInfo
-  ) as UserInfo | null;
-
-  const groupId = userInfo?.group ?? "";
   const fetchSections = async () => {
     setIsLoading(true);
     try {

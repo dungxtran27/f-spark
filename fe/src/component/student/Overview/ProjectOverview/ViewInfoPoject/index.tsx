@@ -3,9 +3,7 @@ import { Avatar, Row, Col, Typography, Skeleton, Button } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../../utils/const";
 import { businessModelCanvas } from "../../../../../api/apiOverview/businessModelCanvas";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux/store";
-import { UserInfo } from "../../../../../model/auth";
+
 import { FaStar } from "react-icons/fa6";
 import { MdCancelPresentation } from "react-icons/md";
 import styles from "./styles.module.scss";
@@ -13,14 +11,12 @@ import classNames from "classnames";
 import { requestList } from "../../../../../api/request/request";
 const { Title, Text } = Typography;
 
-const ViewInfoPoject: React.FC = () => {
-  const userInfo = useSelector(
-    (state: RootState) => state.auth.userInfo
-  ) as UserInfo | null;
+interface ViewInfoPojectProps {
+  groupId: string;
+  userId: string;
+}
+const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
   const queryClient = useQueryClient();
-
-  const groupId = userInfo?.group ?? "";
-  const userId = userInfo?.account?._id ?? "";
 
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEY.STUDENT_OF_GROUP],

@@ -14,9 +14,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { customerJourneyMapApi } from "../../../../../api/apiOverview/customerJourneyMap";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import TextArea from "antd/es/input/TextArea";
-import { UserInfo } from "../../../../../model/auth";
-import { RootState } from "../../../../../redux/store";
-import { useSelector } from "react-redux";
+
 import { QUERY_KEY } from "../../../../../utils/const";
 
 const { Title } = Typography;
@@ -39,7 +37,9 @@ interface Cell {
   col: string;
   content: string;
 }
-
+interface CustomerJourneyMapProps {
+  groupId: string; 
+}
 const colorOptions = [
   "#b2e5c6",
   "#add998",
@@ -81,13 +81,7 @@ function lightenColor(color: string, percent: number) {
   );
 }
 
-const CustomerJourneyMap: React.FC = () => {
-  const userInfo = useSelector(
-    (state: RootState) => state.auth.userInfo
-  ) as UserInfo | null;
-
-  const groupId = userInfo?.group ?? "";
-
+const CustomerJourneyMap: React.FC<CustomerJourneyMapProps> = ({groupId}) => {
   const [isRowModalVisible, setIsRowModalVisible] = useState(false);
   const [isColModalVisible, setIsColModalVisible] = useState(false);
   const [isCellModalVisible, setIsCellModalVisible] = useState(false);
@@ -335,7 +329,7 @@ const CustomerJourneyMap: React.FC = () => {
       });
     }
   };
-  
+
   if (isLoading)
     return (
       <div className="bg-white rounded-lg p-4">

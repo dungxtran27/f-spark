@@ -15,9 +15,7 @@ import {
 import { PlusOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
 import { GoQuestion } from "react-icons/go";
 import TextArea from "antd/es/input/TextArea";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux/store";
-import { UserInfo } from "../../../../../model/auth";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../../utils/const";
 import { businessModelCanvas } from "../../../../../api/apiOverview/businessModelCanvas";
@@ -57,15 +55,12 @@ const defaultPersona: Persona = {
   needs: [],
   _id: "",
 };
-
-const CustomerPersonas: React.FC = () => {
+interface CustomerPersonasProps {
+  groupId: string;
+}
+const CustomerPersonas: React.FC<CustomerPersonasProps> = ({ groupId }) => {
   const queryClient = useQueryClient();
 
-  const userInfo = useSelector(
-    (state: RootState) => state.auth.userInfo
-  ) as UserInfo | null;
-
-  const groupId = userInfo?.group ?? "";
   const { data, isLoading, error } = useQuery({
     queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
     queryFn: async () =>
