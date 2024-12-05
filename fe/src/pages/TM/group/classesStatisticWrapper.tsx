@@ -12,22 +12,18 @@ import {
 } from "antd";
 import {
   SearchOutlined,
-  UserDeleteOutlined,
   CloseCircleOutlined,
-  PlusOutlined,
-  UploadOutlined,
 } from "@ant-design/icons";
 import { FaUserGroup } from "react-icons/fa6";
 import { MdOutlineGrade } from "react-icons/md";
-import { PiChalkboardTeacherLight, PiStudent } from "react-icons/pi";
-import { LiaChalkboardTeacherSolid } from "react-icons/lia";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../utils/const";
 import { Admin } from "../../../api/manageAccoount";
 import dayjs from "dayjs";
-import axios from "axios";
 import { groupApi } from "../../../api/group/group";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Term } from "../../../model/auth";
 const { Option } = Select;
 
 const ClassesStatisticWrapper: React.FC = () => {
@@ -36,12 +32,17 @@ const ClassesStatisticWrapper: React.FC = () => {
   const [itemsPerPage] = useState(10);
   const [groupFilter, setGroupFilter] = useState<string | undefined>(undefined);
   const [classFilter, setClassFilter] = useState<string | undefined>(undefined);
-  const [termFilter, setTermFilter] = useState<string | undefined>('674241ba21d3a593602e7994');
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [groupId, setGroupId] = useState("");
   const handleSearch = () => {
     setCurrentPage(1);
   };
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+  const defaultTerm = activeTerm?._id;
+  const [termFilter, setTermFilter] = useState<string | undefined>(defaultTerm);
 
   const { data: groupsData } = useQuery({
     queryKey: [
@@ -153,6 +154,12 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
 
   const columns = [
     {
+      title: "#",
+      dataIndex: "_id",
+      key: "_id",
+      render: (_, __, index) => (page - 1) * itemsPerPage + index + 1,
+    },
+    {
       title: "Group",
       dataIndex: "GroupName",
       key: "GroupName",
@@ -164,9 +171,9 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
       dataIndex: "mentor", 
       render: (_, record) => record.mentor?.name || "" 
     },
-    { title: "OutCome 1", dataIndex: "",className: "text-center", key: "" },
-    { title: "OutCome 2", dataIndex: "",className: "text-center", key: "" },
-    { title: "OutCome 3", dataIndex: "",className: "text-center", key: "" },
+    // { title: "OutCome 1", dataIndex: "",className: "text-center", key: "" },
+    // { title: "OutCome 2", dataIndex: "",className: "text-center", key: "" },
+    // { title: "OutCome 3", dataIndex: "",className: "text-center", key: "" },
     { 
       title: "Class", 
       dataIndex: "classCode", 
@@ -221,21 +228,10 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
     <div className="max-w-full mx-auto p-3 rounded-lg shadow-md">
       <div className="flex items-center justify-between shadow-lg bg-white border-primary/30 rounded border mb-5 p-5">
         <div className="flex items-end gap-5 p-2">
-          <AntdStatistic title="Group" value={99} prefix={<FaUserGroup />} />
+          <AntdStatistic title="Group" value={groupsData?.data.statistic.total} prefix={<FaUserGroup />} />
           <div className="font-semibold">
-            <p className="text-yellow-500">10 Pending Request</p>
-            <p className="text-textSecondary">12 Sponsored</p>
-          </div>
-        </div>
-        <div className="flex items-end gap-5">
-          <AntdStatistic
-            title="Average grade"
-            value={7.7}
-            prefix={<MdOutlineGrade />}
-          />
-          <div className="font-semibold">
-            <p className="text-pendingStatus">30% greater than 8</p>
-            <p className="text-textSecondary">8 groups greater than 8</p>
+            <p className="text-yellow-500">{groupsData?.data.statistic.pending} Pending Request</p>
+            <p className="text-textSecondary">{groupsData?.data.statistic.sponsored} Sponsored</p>
           </div>
         </div>
       </div>

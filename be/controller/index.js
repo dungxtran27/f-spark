@@ -15,6 +15,7 @@ import RequestController from "./request.js";
 import NotificationController from "./notification.js";
 import TermController from "./term.js";
 import RequestDeadlineController from "./requestDeadline.js";
+import OutcomeController from "./outcome.js"
 import FundEstimationController from "./fundEstimation.js";
 export {
   AuthenticationController,
@@ -34,5 +35,6 @@ export {
   RequestController,
   TermController,
   RequestDeadlineController,
+  OutcomeController,
   FundEstimationController,
 };

@@ -3,7 +3,7 @@ export const ROLE_NAME = {
   student: "STUDENT",
   startUpDepartment: "START_UP_DEPARTMENT",
   admin: "ADMIN",
-  headOfSubject: "HEAD_OF_SUBJECT"
+  headOfSubject: "HEADOFSUBJECT"
 };
 export const Priority = {
   High: 100,

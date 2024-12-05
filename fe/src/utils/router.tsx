@@ -61,7 +61,7 @@ const Router = () => {
         <Route path="/accountant" element={<AccountantPage />} />
         <Route path="/manageTerms" element={<ManageTerm />} />
         {/* TM */}
-        <Route path="/hos/dashboard" element={<DashboardTM/>} />
+        <Route path="/hos/timeline" element={<DashboardTM/>} />
         <Route path="/hos/groups" element={<ManageClassTM/>} />
         <Route path="/hos/mentors" element={<></>} />
       </Routes>

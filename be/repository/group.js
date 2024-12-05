@@ -1203,20 +1203,28 @@ const getGroupStatistic = async ({
 
     const skip = (page - 1) * limit;
 
+    const sortingOrder = {
+      pending: 1,
+      sponsored: 2,
+      normal: 3,
+    };
+
     const groups = await Group.find(filters)
-      .skip(skip)
-      .limit(limit)
       .populate("class", "classCode")
       .populate("term", "termCode")
       .populate("mentor", "name")
       .exec();
 
-    const totalItems = await Group.countDocuments(filters);
+    groups.sort((a, b) => sortingOrder[a.sponsorStatus] - sortingOrder[b.sponsorStatus]);
+
+    const paginatedGroups = groups.slice(skip, skip + limit);
+
+    const totalItems = groups.length;
     const maxPages = Math.ceil(totalItems / limit);
     const isLastPage = page >= maxPages;
 
     return {
-      groups,
+      groups: paginatedGroups,
       totalItems,
       maxPages,
       isLastPage,
@@ -1227,6 +1235,7 @@ const getGroupStatistic = async ({
     throw new Error(error.message);
   }
 };
+
 
 const updateGroupSponsorStatus = async ({ groupId, status }) => {
   try {
@@ -1244,7 +1253,40 @@ const updateGroupSponsorStatus = async ({ groupId, status }) => {
   } catch (error) {
     throw new Error(error.message);
   }
+}
+const getGroupCountsByTerm = async (term) => {
+  try {    
+    const sponsorStatusCounts = await Group.aggregate([
+      {
+        $match: {
+          term,
+          sponsorStatus: { $in: ["pending", "sponsored"] }, 
+        },
+      },
+      {
+        $group: {
+          _id: "$sponsorStatus", 
+          count: { $sum: 1 }, 
+        },
+      },
+    ]);
+
+    const totalGroups = await Group.countDocuments({term}); 
+    const response = sponsorStatusCounts.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    return {
+      pending: response.pending || 0,
+      sponsored: response.sponsored || 0,
+      total: totalGroups,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
+
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1287,4 +1329,5 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
+  getGroupCountsByTerm
 };
