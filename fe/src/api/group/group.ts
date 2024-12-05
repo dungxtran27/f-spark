@@ -25,13 +25,38 @@ export const groupApi = {
   addGroupToClass: async (requestBody: any) => {
     return await axios.patch(`/api/group/addGroupToClass`, requestBody);
   },
-  getGroupOfTerm: async (termId: string|undefined) =>{
-    return await axios.get(`/api/group/getGroupsOfTerm/${termId}`)
+  getGroupByTM: async (requestBody: any) => {
+    return await axios.post(`/api/group/groupStatistic`, requestBody);
+  },
+  getGroupClassByTerm: async (termId: string | undefined) => {
+    return await axios.get(`/api/group/getGroupClassByTermCode/${termId}`);
+  },
+  getGroupByClass: async (classId: string | undefined) => {
+    return await axios.get(`/api/group/getGroupByClass/${classId}`);
+  },
+  updateGroupSponsorStatus: async (requestBody: any) => {
+    return await axios.post(`/api/group/updateGroupSponsorStatus`, requestBody);
+  },
+  getGroupOfTerm: async (termId: string | undefined) => {
+    return await axios.get(`/api/group/getGroupsOfTerm/${termId}`);
   },
   getAllGroupOfTeacherByClassIds: async (requestBody: any) => {
     return await axios.post(
       `/api/group/getAllGroupsOfTeacherbyClassIds`,
       requestBody
     );
+  },
+  uploadGallery: async (formData: FormData) => {
+    return await axios.post(`/api/group/uploadGallery`, formData, {
+      headers: {
+        Accept: "application/json; charset=UTF-8",
+      },
+    });
+  },
+  getGallery: async (groupId: any) => {
+    return await axios.get(`/api/group/getGallery/${groupId}`);
+  },
+  deleteImageFromGallery: async (requestBody: any) => {
+    return await axios.post(`/api/group/deleteImageFromGallery`, requestBody);
   },
 };

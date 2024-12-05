@@ -1,9 +1,15 @@
+import group from "../repository/group.js";
 import {
   ClassRepository,
   GroupRepository,
+  NotificationRepository,
   StudentRepository,
   TermRepository,
 } from "../repository/index.js";
+import { uploadImage } from "../utils/uploadImage.js";
+import mongoose from "mongoose";
+import { CLASS_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
+import { io, userSocketMap } from "../index.js";
 const createJourneyRow = async (req, res) => {
   try {
     const { rowName } = req.body;
@@ -478,8 +484,58 @@ const getAllGroupsOfTeacherbyClassIds = async (req, res) => {
       tagIds,
       mentorStatus
     );
-
     res.status(200).json({ data: groups });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getGroupClassByTermCode = async (req, res) => {
+  try {
+    const termId = req.params.termId;
+    const classes = await ClassRepository.getClassByTermCode(
+      new mongoose.Types.ObjectId(termId)
+    );
+    const groups = await GroupRepository.getGroupByTermCode(
+      new mongoose.Types.ObjectId(termId)
+    );
+
+    return res.status(200).json({ class: classes, group: groups });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const getGroupByClassId = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+    const groups = await GroupRepository.getGroupByClassId(
+      new mongoose.Types.ObjectId(classId)
+    );
+    return res.status(200).json({ data: groups });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const getGroupStatistic = async (req, res) => {
+  try {
+    let { page, limit, groupId, classId, term, status } = req.body;
+    if (classId) {
+      classId = new mongoose.Types.ObjectId(classId);
+    }
+    if (groupId) {
+      groupId = new mongoose.Types.ObjectId(groupId);
+    }
+    const groups = await GroupRepository.getGroupStatistic({
+      page,
+      limit,
+      groupId,
+      classId,
+      term: new mongoose.Types.ObjectId(term),
+      status,
+    });
+
+    return res.status(200).json({ data: groups });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -488,8 +544,6 @@ const getAllGroupsOfTeacherbyClassIds = async (req, res) => {
 const getGroupsOfTerm = async (req, res) => {
   try {
     const { termId } = req.params;
-    console.log(termId);
-
     const result = await GroupRepository.getGroupsOfTerm(termId);
     return res.status(200).json({ data: result });
   } catch (error) {
@@ -518,6 +572,130 @@ const addTransaction = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+const addImageToGroupGallery = async (req, res) => {
+  try {
+    const files = req.files;
+    const decodedToken = req.decodedToken;
+    console.log(decodedToken);
+    const student = await StudentRepository.findById(decodedToken?.role.id);
+    console.log(student);
+
+    // const group= await GroupRepository.findGroupById
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
+    }
+
+    const cloudImageLinks = await Promise.all(
+      files.map(async (file) => {
+        const cloudImageLink = await uploadImage(file);
+        if (!cloudImageLink) {
+          throw new Error("Failed to upload image");
+        }
+        return cloudImageLink;
+      })
+    );
+    const updategallery = await GroupRepository.updateGallery(
+      student.group,
+      cloudImageLinks
+    );
+
+    return res.status(200).json({ message: "ok" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+const getGallery = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    if (!groupId) {
+      return res.status(400).json({ error: "Bad request" });
+    }
+    const gallery = await GroupRepository.getGallery(groupId);
+
+    return res.status(200).json({ data: gallery });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const deleteImageFromGallery = async (req, res) => {
+  try {
+    const { groupId, imageLink } = req.body;
+    if (!groupId || !imageLink) {
+      return res.status(400).json({ error: "Bad request" });
+    }
+    const gallery = await GroupRepository.deleteImageFromGallery(
+      groupId,
+      imageLink
+    );
+
+    return res.status(200).json({ message: "Delete Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const updateGroupSponsorStatus = async (req, res) => {
+  try {
+    const { groupId, statusBoolean } = req.body;
+    let status = "";
+    let message = "";
+    if (statusBoolean) {
+      status = "sponsored";
+      message = "Accepted successfully";
+    } else {
+      status = "normal";
+      message = "Rejected successfully";
+    }
+    const members = await GroupRepository.getMemberOfGroupByGroupId(
+      new mongoose.Types.ObjectId(groupId)
+    );
+    const groupUpdate = await GroupRepository.updateGroupSponsorStatus({
+      groupId,
+      status,
+    });
+    if (groupUpdate) {
+      const notificationData = {
+        class: groupUpdate.class,
+        receivers: members,
+        sender: req.decodedToken.role.id,
+        group: groupId,
+        senderType: "Teacher",
+        type: "Group",
+        action: {
+          action: `request for funding`,
+          target: groupId,
+          newVersion: groupUpdate,
+          actionType: CLASS_NOTIFICATION_ACTION_TYPE.RESPONSE_REQUEST_SPONSOR,
+          //extraUrl: `/class/${groupUpdate.class}`
+        },
+      };
+
+      await NotificationRepository.createNotification({
+        data: notificationData,
+      });
+      const studentsOfGroup = await StudentRepository.getAllStudentByGroupId(
+        new mongoose.Types.ObjectId(groupId)
+      );
+
+      studentsOfGroup.forEach((s) => {
+        const socketIds = userSocketMap[s?.account?.toString()];
+        if (socketIds) {
+          io.to(socketIds).emit(
+            "newNotification",
+            `Your request sponsor has been ${
+              statusBoolean ? "accepted" : "rejected"
+            }.`
+          );
+        }
+      });
+    }
+
+    return res.status(200).json({ data: groupUpdate, message: message });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   getGroupsOfTerm,
   createJourneyRow,
@@ -545,5 +723,12 @@ export default {
   getAllGroupsNoClass,
   addGroupToClass,
   getAllGroupsOfTeacherbyClassIds,
-  addTransaction
+  addTransaction,
+  addImageToGroupGallery,
+  getGallery,
+  deleteImageFromGallery,
+  getGroupClassByTermCode,
+  getGroupByClassId,
+  getGroupStatistic,
+  updateGroupSponsorStatus,
 };

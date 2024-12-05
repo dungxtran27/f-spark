@@ -5,7 +5,7 @@ import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
 import { BiMoneyWithdraw, BiSolidDashboard, BiSolidUserAccount } from "react-icons/bi";
 import { RiMailSendFill } from "react-icons/ri";
-import { IoTimerOutline } from "react-icons/io5";
+import { IoTime } from "react-icons/io5";
 import { Badge } from "antd";
 export const StudentRoutes = [
   {
@@ -55,6 +55,16 @@ export const TeacherRoutes = [
     page: "Mentors",
     icon: <FaPeopleGroup size={20} />,
   },
+  {
+    route: "hos/groups",
+    page: "Groups",
+    icon: <FaTasks size={20} />,
+  },
+  {
+    route: "hos/dashboard",
+    page: "Dashboard",
+    icon: <FaChartPie size={20} />,
+  },
 ];
 export const AdminRoutes = [
   {
@@ -79,7 +89,7 @@ export const AdminRoutes = [
   {
     route: "/manageTerms",
     page: "Terms",
-    icon: <IoTimerOutline size={20} />,
+    icon: <IoTime size={20} />,
   },
 ];
 
@@ -100,4 +110,21 @@ export const SecondaryMenu = [
   //   icon: <SlBell size={20} />,
   //   badge: <Badge count={10} />,
   // },
+];
+export const HeadOfSubjectRouter = [
+  {
+    route: "hos/dashboard",
+    page: "Dashboard",
+    icon: <FaChartPie size={20} />,
+  },
+  {
+    route: "hos/groups",
+    page: "Groups",
+    icon: <FaTasks size={20} />,
+  },
+  {
+    route: "hos/mentors",
+    page: "Requests",
+    icon: <FaPeopleGroup size={20} />,
+  },
 ];

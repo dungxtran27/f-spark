@@ -1,7 +1,7 @@
 import moment from "moment";
 import { OutcomeRepository, TermRepository } from "../repository/index.js";
 import { DEADLINE_TYPES } from "../utils/const.js";
-
+import mongoose from "mongoose";
 const getAllTerms = async (req, res) => {
   try {
     const terms = await TermRepository.getAllTerms();
@@ -10,10 +10,17 @@ const getAllTerms = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 const createTerm = async (req, res) => {
   try {
     const { termCode, startTime, endTime } = req.body;
     const outcomes = await OutcomeRepository.getAllOutcome();
+    const latestTerm = await TermRepository.getLatestTerm();
+
+    if (latestTerm && moment(startTime).isBefore(latestTerm.endTime)) {
+      return res.status(400).json({ error: "The new term cannot begin before the old term ends" });
+    }
+
     const startOfTerm = moment(startTime).add(1, "month");
     const timeline = [
       {
@@ -50,16 +57,17 @@ const createTerm = async (req, res) => {
       },
     ];
 
-    outcomes.map((o) => {
+    outcomes.sort((a, b) => a.index - b.index).forEach((o) => {
       timeline.push({
         title: `Outcome ${o?.index}`,
         description: o?.description,
-        startDate: moment(startOfTerm).add(2 * (o?.index - 1), "weeks"),
-        endDate: moment(startOfTerm).add(2 * o?.index, "weeks"),
+        startDate: moment(startOfTerm).add(4 * (o?.index - 1), "weeks"),
+        endDate: moment(startOfTerm).add(4 * o?.index, "weeks"),
         type: DEADLINE_TYPES.OUTCOME,
         outcome: o?._id
       });
     });
+
     const termData = {
       termCode,
       startTime,
@@ -72,6 +80,7 @@ const createTerm = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 const getActiveTerm = async (req, res) => {
   try {
     const activeTerm = await TermRepository.getActiveTerm();
@@ -89,9 +98,94 @@ const getAllTermsToFilter = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const getFillterTerm = async (req, res) => {
+  try {
+    const { termCode } = req.body;
+    const [terms, classes, students, teachers, mentors] = await Promise.all([
+      TermRepository.getFillterTerm({ termCode }),
+      TermRepository.getTotalClassByTerm({ termCode }),
+      TermRepository.getTotalStudentByTerm({ termCode }),
+      TermRepository.getTotalTeacherByTerm({ termCode }),
+      TermRepository.getTotalMentorByTerm({ termCode }),
+    ]);
+    return res.status(200).json({
+      data: terms,
+      totalClasses: classes.length,
+      totalStudents: students.length,
+      totalTeachers: teachers.length,
+      totalMentors: mentors.length,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteTermIncoming = async (req, res) => {
+  try {
+    const { termCode } = req.query;
+    await TermRepository.deleteTerm({ termCode });
+    return res.status(200).json({ message: "The term has been successfully deleted" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const getTimelineOfTerm = async (req,res) => {
+  try {
+    const termId = req.params.termId;
+    const term = await TermRepository.getTimelineOfTerm(new mongoose.Types.ObjectId(termId));
+    
+    return res.status(200).json({ data: term });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+const createTimelineOfTerm = async (req, res) => {
+  try {
+    const {title, type, description, startDate, endDate, termId} = req.body;
+    const termObjectId = new mongoose.Types.ObjectId(termId)
+    const result = await TermRepository.createTimelineOfTerm({title, type, description, startDate, endDate, termObjectId})
+    return res.status(201).json({ data: result, message: "Create Timeline Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+const deleteTimelineOfTerm = async (req, res) => {
+  try {
+    const {timelineId, termId} = req.body;
+    console.log(timelineId);
+    
+    const tId = new mongoose.Types.ObjectId(timelineId)
+    const termObjectId = new mongoose.Types.ObjectId(termId)
+    const result = await TermRepository.deleteTimelineOfTerm({tId, termObjectId})
+    return res.status(201).json({ data: result, message: "Delete Timeline Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+const updateTimelineOfTerm = async (req, res) => {
+  try {
+    const {title, type, description, startDate, endDate, termId, timelineId} = req.body;
+    const termObjectId = new mongoose.Types.ObjectId(termId)
+    const tId = new mongoose.Types.ObjectId(timelineId)
+    const result = await TermRepository.updateTimelineOfTerm({title, type, description, startDate, endDate, termObjectId, tId})
+    return res.status(201).json({ data: result, message: "Update Timeline Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
 export default {
   createTerm,
   getAllTerms,
   getActiveTerm,
-  getAllTermsToFilter
+  getAllTermsToFilter,
+  getFillterTerm,
+  deleteTermIncoming,
+  getTimelineOfTerm,
+  createTimelineOfTerm,
+  deleteTimelineOfTerm,
+  updateTimelineOfTerm
 };

@@ -1124,6 +1124,127 @@ const addTransaction = async (groupId, transactionData) => {
     throw new Error(error.message);
   }
 };
+const updateGallery = async (groupId, images) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $push: {
+          gallery: { $each: images },
+        },
+      },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const deleteImageFromGallery = async (groupId, imageLink) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $pull: {
+          gallery: imageLink,
+        },
+      },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const getGallery = async (groupId) => {
+  try {
+    const result = await Group.findById(groupId).select("gallery");
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const getGroupByTermCode = async (termId) => {
+  try {
+    const groups = Group.find({
+      term: termId,
+    });
+    return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getGroupByClassId = async (classId) => {
+  try {
+    const groups = Group.find({
+      class: classId,
+    });
+    return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getGroupStatistic = async ({
+  page,
+  limit,
+  groupId,
+  classId,
+  term,
+  status,
+}) => {
+  try {
+    const filters = {};
+    if (groupId) filters._id = groupId;
+    if (classId) filters.class = classId;
+    if (term) filters.term = term;
+    if (status) filters.sponsorStatus = status;
+
+    const skip = (page - 1) * limit;
+
+    const groups = await Group.find(filters)
+      .skip(skip)
+      .limit(limit)
+      .populate("class", "classCode")
+      .populate("term", "termCode")
+      .populate("mentor", "name")
+      .exec();
+
+    const totalItems = await Group.countDocuments(filters);
+    const maxPages = Math.ceil(totalItems / limit);
+    const isLastPage = page >= maxPages;
+
+    return {
+      groups,
+      totalItems,
+      maxPages,
+      isLastPage,
+      pageSize: limit,
+      pageIndex: page,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const updateGroupSponsorStatus = async ({ groupId, status }) => {
+  try {
+    let isSponsorship = "";
+    if (status == "sponsored") {
+      isSponsorship = true;
+    } else {
+      isSponsorship = false;
+    }
+    const updateStatus = await Group.findByIdAndUpdate(groupId, {
+      sponsorStatus: status,
+      isSponsorship: isSponsorship,
+    });
+    return updateStatus;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1158,5 +1279,12 @@ export default {
   getTimelineClassworkOfGroup,
   createGroupsFromExcel,
   getMemberOfGroupByGroupId,
-  addTransaction
+  addTransaction,
+  updateGallery,
+  deleteImageFromGallery,
+  getGallery,
+  getGroupByTermCode,
+  getGroupByClassId,
+  getGroupStatistic,
+  updateGroupSponsorStatus,
 };

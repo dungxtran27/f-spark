@@ -221,6 +221,12 @@ const GroupSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    sponsorStatus: {
+      type: String,
+      required: false,
+      enum: ["normal", "pending", "sponsored"],
+      default: "normal",
+    },
     teamMembers: [
       {
         type: Schema.Types.ObjectId,
@@ -267,6 +273,13 @@ const GroupSchema = new Schema(
       type: [TransactionSchema],
       default: [],
     },
+    gallery: [
+      {
+        type: String,
+        required: false,
+        default: [],
+      },
+    ],
   },
   { timestamps: true, collection: "Groups" }
 );

@@ -143,9 +143,17 @@ const login = async (req, res) => {
       case ROLE_NAME.startUpDepartment:
         return res.status(404).json({ error: "Unimplemented" });
       case ROLE_NAME.admin:
+        if (req.body.email !== "admin@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
         userDetail.account = existingAccount;
         userDetail.role = ROLE_NAME.admin;
         break
+      case ROLE_NAME.headOfSubject:
+        userDetail.role = ROLE_NAME.headOfSubject;
+        userDetail.account = existingAccount;
       default:
         return res.status(500).json({ error: "Bad request" });
     }
