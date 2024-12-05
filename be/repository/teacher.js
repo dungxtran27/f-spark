@@ -384,6 +384,13 @@ const getTotalTeachers = async (termCode) => {
 };
 
 
+const getClassOfTeacher = () => {
+  try {
+    return null;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   getTeacherByClassId,
   findByAccountId,
@@ -391,6 +398,7 @@ export default {
   getTeacherWithClasses,
   getTeacherAccountByClassId,
   assignClass,
-  getTotalTeachers
+  getTotalTeachers,
   // getClassOfTeacher
+  getClassOfTeacher,
 };

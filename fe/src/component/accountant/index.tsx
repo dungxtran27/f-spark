@@ -4,14 +4,14 @@ import FirstStep from "./FirstSteps";
 import { useState } from "react";
 import Distributing from "./Distributing";
 import Return from "./Return";
-const AccountantWrapper = () => {
+const AccountantWrapper = ({ termId }: { termId: string }) => {
   const [currenStep, setCurrentStep] = useState(0);
   const renderStep = () => {
     switch (currenStep) {
       case 0:
-        return <FirstStep />;
+        return <FirstStep termId={termId} />;
       case 1:
-        return <Distributing />;
+        return <Distributing termId={termId} />;
       case 2:
         return <Return />;
     }

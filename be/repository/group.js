@@ -1048,7 +1048,9 @@ const updateTimelineForGroup = async ({ groupId, classworkId, newDate }) => {
       { new: true }
     );
 
-    const updatedTimeline = updatedGroup.timeline.find(timeline => timeline.classworkId.toString() == classworkId);
+    const updatedTimeline = updatedGroup.timeline.find(
+      (timeline) => timeline.classworkId.toString() == classworkId
+    );
     return updatedTimeline;
   } catch (error) {
     throw new Error(error.message);
@@ -1099,47 +1101,106 @@ const getTimelineClassworkOfGroup = async ({ groupId, classworkId }) => {
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
 const getMemberOfGroupByGroupId = async (groupId) => {
   try {
-    const group = await Group.findById(groupId)
+    const group = await Group.findById(groupId);
     return group.teamMembers;
   } catch (error) {
     throw error;
   }
-}
+};
 
+const addTransaction = async (groupId, transactionData) => {
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $push: {
+        transactions: transactionData,
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const updateGallery = async (groupId, images) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $push: {
+          gallery: { $each: images },
+        },
+      },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const deleteImageFromGallery = async (groupId, imageLink) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $pull: {
+          gallery: imageLink,
+        },
+      },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const getGallery = async (groupId) => {
+  try {
+    const result = await Group.findById(groupId).select("gallery");
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 const getGroupByTermCode = async (termId) => {
   try {
     const groups = Group.find({
-      term: termId
-    })
+      term: termId,
+    });
     return groups;
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
 const getGroupByClassId = async (classId) => {
   try {
     const groups = Group.find({
-      class: classId
-    })
+      class: classId,
+    });
     return groups;
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
-const getGroupStatistic = async ({ page, limit, groupId, classId, term, status }) => {
+const getGroupStatistic = async ({
+  page,
+  limit,
+  groupId,
+  classId,
+  term,
+  status,
+}) => {
   try {
     const filters = {};
-    if (groupId) filters._id = groupId; 
-    if (classId) filters.class = classId; 
-    if (term) filters.term = term; 
+    if (groupId) filters._id = groupId;
+    if (classId) filters.class = classId;
+    if (term) filters.term = term;
     if (status) filters.sponsorStatus = status;
-    
+
     const skip = (page - 1) * limit;
 
     const groups = await Group.find(filters)
@@ -1167,26 +1228,23 @@ const getGroupStatistic = async ({ page, limit, groupId, classId, term, status }
   }
 };
 
-const updateGroupSponsorStatus = async ({groupId, status}) => {
+const updateGroupSponsorStatus = async ({ groupId, status }) => {
   try {
-    let isSponsorship = ''
-    if(status == "sponsored"){
-      isSponsorship = true
-    }else{
-      isSponsorship = false
+    let isSponsorship = "";
+    if (status == "sponsored") {
+      isSponsorship = true;
+    } else {
+      isSponsorship = false;
     }
-    const updateStatus = await Group.findByIdAndUpdate(
-      groupId,
-      {
-        sponsorStatus: status,
-        isSponsorship: isSponsorship
-      }
-    )
+    const updateStatus = await Group.findByIdAndUpdate(groupId, {
+      sponsorStatus: status,
+      isSponsorship: isSponsorship,
+    });
     return updateStatus;
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1221,8 +1279,12 @@ export default {
   getTimelineClassworkOfGroup,
   createGroupsFromExcel,
   getMemberOfGroupByGroupId,
+  addTransaction,
+  updateGallery,
+  deleteImageFromGallery,
+  getGallery,
   getGroupByTermCode,
   getGroupByClassId,
   getGroupStatistic,
-  updateGroupSponsorStatus
+  updateGroupSponsorStatus,
 };
