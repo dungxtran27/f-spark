@@ -37,7 +37,7 @@ const Login = () => {
           navigate("/manageClass");
           break;
         case ROLE.headOfSubject:
-          navigate("/hos/groups");
+          navigate("/hos/timeline");
           break;
         default:
           navigate("/");

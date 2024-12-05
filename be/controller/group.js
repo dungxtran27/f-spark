@@ -660,7 +660,7 @@ const updateGroupSponsorStatus = async (req, res) => {
       const notificationData = {
         class: groupUpdate.class,
         receivers: members,
-        sender: req.decodedToken.role.id,
+        //sender: req.decodedToken.role.id,
         group: groupId,
         senderType: "Head Of Subject",
         type: "Group",

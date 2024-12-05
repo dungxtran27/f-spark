@@ -11,7 +11,8 @@ import {
   Button,
   Modal,
   Input,
-  Popover
+  Popover,
+  message
 } from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../utils/const";
@@ -31,12 +32,23 @@ const DashboardTMWrapper: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedItem, setSelectedItem] = useState(null);
   const [statusUpdate, setStatusUpdate] = useState(false)
-  const activeTerm = useSelector(
-    (state: RootState) => state.auth.activeTerm
-  ) as Term | null;
-  const defaultTerm = activeTerm?._id;
-  const [termFilter, setTermFilter] = useState<string | undefined>(defaultTerm);
+  const [termFilter, setTermFilter] = useState<string | undefined>('');
+  const [messageApi, contextHolder] = message.useMessage();
+  const { data: terms, isSuccess: successTerm } = useQuery({
+    queryKey: [QUERY_KEY.TERM_LIST],
+    queryFn: async () => {
+      return Admin.getAllTerms();
+    },
+  });
+  useEffect(() => {
+    const currentTerm = terms?.data.data.find(
+      (term: any) =>
+        dayjs().isAfter(dayjs(term.startTime)) && dayjs().isBefore(dayjs(term.endTime))
+    );
+    setTermFilter(currentTerm?._id)
+  }, [successTerm, terms]);
   const [titleNew, setTitleNew] = useState('')
+
   const { data: termTimeline, isSuccess } = useQuery({
     queryKey: [
       QUERY_KEY.TERM_TIMELINE,
@@ -46,7 +58,6 @@ const DashboardTMWrapper: React.FC = () => {
       return term.getTimelineOfTerm(termFilter);
     },
   });
-
   useEffect(() => {
     if (isSuccess && termTimeline?.data) {
       const currentDate = new Date(); 
@@ -63,13 +74,6 @@ const DashboardTMWrapper: React.FC = () => {
     }
   }, [termTimeline, isSuccess]);
 
-    const { data: terms } = useQuery({
-      queryKey: [QUERY_KEY.TERM_LIST],
-      queryFn: async () => {
-        return Admin.getAllTerms();
-      },
-    });
-
     const { data: outcomes, isLoading } = useQuery({
       queryKey: [QUERY_KEY.All_OUTCOMES],
       queryFn: async () => {
@@ -85,13 +89,20 @@ const DashboardTMWrapper: React.FC = () => {
     const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
     const handleOpenChange = (open, index) => {
       if (open) {
-        setOpenPopoverIndex(index); // Mở Popover tại index cụ thể
+        setOpenPopoverIndex(index);
       } else {
-        setOpenPopoverIndex(null); // Đóng Popover
+        setOpenPopoverIndex(null);
       }
     };
     
     const handleDelete = async (outcomeId) => {
+      if(outcomes?.data?.data.length < 4){
+        messageApi.open({
+          type: 'error',
+          content: 'A semester cannot have less than 3 Outcomes.',
+        });
+        return;
+      }
       await outcomeApi.deleteOutcome(outcomeId)
       queryClient.invalidateQueries([QUERY_KEY.TERM_TIMELINE]);
     };
@@ -118,10 +129,13 @@ const DashboardTMWrapper: React.FC = () => {
                 </div>
               )}
               <div className="flex gap-2 mt-3 justify-end">
-                <Button type="primary" onClick={() => console.log("Change:", item)}>
+                <Button type="primary" onClick={() => handleChange(item)}>
                   Change
                 </Button>
-                <Button onClick={() => handleDelete(item._id)}>
+                <Button onClick={() => {
+                  setIsOpenDelete(true)
+                  setOpenPopoverIndex(null)
+                }}>
                   Delete
                 </Button>
               </div>
@@ -186,31 +200,28 @@ const DashboardTMWrapper: React.FC = () => {
     const handleItemClick = (item) => {
         setSelectedItem(item);
       };
-
-      // const handleChange = () => {
-      //   setStatusUpdate(true)
-      //   form.setFieldsValue({
-      //     title: selectedItem?.title,
-      //     type: selectedItem?.type,
-      //     description: selectedItem?.description,
-      //     duration: [
-      //       selectedItem?.startDate ? moment(selectedItem?.startDate) : null,
-      //       selectedItem?.endDate ? moment(selectedItem?.endDate) : null
-      //     ],
-      //   });
-
-      //   setIsModalOpen(true)
-
-      // };
   const [gradingCriteria, setGradingCriteria] = useState(['']);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [isOpenDelete, setIsOpenDelete] = useState(false);
+  const [isOpenDelete, setIsOpenDelete] = useState(false);
+  const [itemSellected, setItemSellected] = useState({});
   const handleAccept = () => {
     setStatusUpdate(false)
     setIsModalOpen(true)
     form.setFieldsValue({
       title: titleNew,
     });
+  };
+  const handleChange = (item) => {
+    setItemSellected(item)
+    setStatusUpdate(true)
+    setIsModalOpen(true)
+    form.setFieldsValue({
+    title: item.title,
+    description: item.description
+    })
+    const descriptions = item.GradingCriteria.map((criteria) => criteria.description);
+    setGradingCriteria(descriptions);
+    setOpenPopoverIndex(null)
   };
   
   steps.push({
@@ -229,8 +240,8 @@ const DashboardTMWrapper: React.FC = () => {
     if(!statusUpdate){
       await outcomeApi.createOutcome(data)
     }else{
-      // data.timelineId = selectedItem?._id
-      // await term.updateTimelineOfTerm(data)
+      data.id = itemSellected?._id
+      await outcomeApi.updateOutcome(data)
     }
     form.resetFields()
     setGradingCriteria([''])
@@ -239,9 +250,12 @@ const DashboardTMWrapper: React.FC = () => {
   }
 
   const handleCancel = () => {
-    // form.resetFields()
     setIsModalOpen(false)
-    // setIsOpenDelete(false)
+    if(statusUpdate){
+      form.resetFields()
+      setGradingCriteria([''])
+    }
+     setIsOpenDelete(false)
   }
   const addGradingCriteria = () => {
     setGradingCriteria([...gradingCriteria, '']);
@@ -258,6 +272,7 @@ const DashboardTMWrapper: React.FC = () => {
   };
   return (
     <div className="mx-auto p-3">
+        {contextHolder}
         <div style={{ display: "flex", flexDirection: "column", background: "white" }}>
         <FormItem className="w-1/6 font-semibold p-3 pb-0" name={"semester"} label={"Semester"}>
         {terms?.data?.data && (
@@ -312,10 +327,6 @@ const DashboardTMWrapper: React.FC = () => {
                 <Text style={{display: "inline-block", color: "#333333" }}>
                     <b>Date:</b> {new Date(selectedItem?.endDate).toLocaleDateString('en-GB')}
                 </Text>
-                {/* <div style={{ margin: 8, display: "flex", justifyContent: "flex-end"}}>
-                    <Button onClick={() => handleChange()} style={{ marginRight: 8 }}>Change</Button>
-                    <Button onClick={() => setIsOpenDelete(true)} danger>Delete</Button>
-                </div> */}
                 </div>
             </Col>
         </div>
@@ -334,9 +345,8 @@ const DashboardTMWrapper: React.FC = () => {
               name={"title"}
               label={"Title"}
               rules={[{ required: true, message: "Title is required" }]}
-              // initialValue={!statusUpdate ? titleNew : undefined}
             >
-              <Input placeholder="Title" size="large" disabled={!statusUpdate}/>
+              <Input placeholder="Title" size="large" disabled={true}/>
             </FormItem>
           </Col>
           <FormItem name={"description"} label={"Description"} rules={[{ required: true, message: "Description is required" }]}>
@@ -374,9 +384,9 @@ const DashboardTMWrapper: React.FC = () => {
         </Form>
       </div>
       </Modal>
-      {/* <Modal title={"Confirm Delete Deadline"} open={isOpenDelete} onOk={handleDelete} onCancel={handleCancel}>
-        <p>{"Are you sure you want to delete this timeline?"}</p>
-      </Modal> */}
+      <Modal title={"Confirm Delete Deadline"} open={isOpenDelete} onOk={handleDelete} onCancel={handleCancel}>
+        <p>{"Are you sure you want to delete this Outcome?"}</p>
+      </Modal>
     </div>
   );
 };

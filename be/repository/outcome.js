@@ -51,9 +51,30 @@ const deleteOutcome = async (outcomeId) => {
       throw new Error(error.message);
     }
 };
+
+const updateOutcome = async ({title, description, gradingCriteria, outcomeId}) => {
+    try {
+        const formattedGradingCriteria = gradingCriteria.map((item) => ({
+            description: item,
+          }));
+        const updatedOutcome = await Outcome.findByIdAndUpdate(
+            outcomeId,
+            {
+                title,
+                description,
+                GradingCriteria: formattedGradingCriteria,
+            },
+            { new: true }
+        );
+        return updatedOutcome;
+    } catch (error) {
+        throw new Error(error.message)
+    }
+}
 export default {
     getAllOutcome, 
     createOutcome,
     getOutcome,
-    deleteOutcome
+    deleteOutcome,
+    updateOutcome
 }

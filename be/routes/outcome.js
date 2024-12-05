@@ -4,5 +4,6 @@ import verifyToken from "../middleware/verifyToken.js";
 const outcomeRouter = express.Router();
 outcomeRouter.get("/getAllOutcome", verifyToken, OutcomeController.getAllOutcome);
 outcomeRouter.post("/createOutcome", verifyToken, OutcomeController.createOutcome);
+outcomeRouter.post("/updateOutcome", verifyToken, OutcomeController.updateOutcome);
 outcomeRouter.delete("/deleteOutcome/:outcomeId", verifyToken, OutcomeController.deleteOutcome);
 export default outcomeRouter;

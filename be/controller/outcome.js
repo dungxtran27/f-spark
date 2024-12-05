@@ -28,8 +28,21 @@ const deleteOutcome = async (req, res) => {
       return res.status(500).json({ message: error.message });
     }
 };
+
+const updateOutcome = async (req, res) => {
+  try {
+    const {title, description, gradingCriteria, id} = req.body
+    const outcomeId = new mongoose.Types.ObjectId(id)
+    
+    const result = await OutcomeRepository.updateOutcome({title, description, gradingCriteria, outcomeId})
+    return res.status(200).json({ data: result, message: 'Updated Successful' });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 export default {
     getAllOutcome,
     createOutcome,
-    deleteOutcome
+    deleteOutcome,
+    updateOutcome
 };
