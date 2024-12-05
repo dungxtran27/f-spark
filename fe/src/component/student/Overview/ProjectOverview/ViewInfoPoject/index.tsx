@@ -91,7 +91,7 @@ const ViewInfoPoject: React.FC = () => {
           <div className="p-5 rounded-lg flex flex-col w-full">
             <Title level={4}>Team Members</Title>
             <Row gutter={8}>
-              {data?.teamMembers.map(
+              {data?.teamMembers?.map(
                 (member: {
                   _id: React.Key | null | undefined;
                   account: { profilePicture: string | undefined; _id: any };

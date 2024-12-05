@@ -109,5 +109,10 @@ groupRouter.post(
   verifyToken,
   GroupController.getAllGroupsOfTeacherbyClassIds
 );
+groupRouter.post(
+  "/addTransaction",
+  verifyToken,
+  GroupController.addTransaction
+);
 
 export default groupRouter;

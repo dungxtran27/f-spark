@@ -13,8 +13,9 @@ import TimeBlockController from "./timeblock.js";
 import TagMajorController from "./tagmajor.js";
 import RequestController from "./request.js";
 import NotificationController from "./notification.js";
-import TermController from "./term.js"
+import TermController from "./term.js";
 import RequestDeadlineController from "./requestDeadline.js";
+import FundEstimationController from "./fundEstimation.js";
 export {
   AuthenticationController,
   UserController,
@@ -32,5 +33,6 @@ export {
   NotificationController,
   RequestController,
   TermController,
-  RequestDeadlineController
+  RequestDeadlineController,
+  FundEstimationController,
 };

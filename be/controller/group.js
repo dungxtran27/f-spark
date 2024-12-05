@@ -489,9 +489,31 @@ const getGroupsOfTerm = async (req, res) => {
   try {
     const { termId } = req.params;
     console.log(termId);
-    
+
     const result = await GroupRepository.getGroupsOfTerm(termId);
     return res.status(200).json({ data: result });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const addTransaction = async (req, res) => {
+  try {
+    const decodedToken = req.decodedToken;
+    const { title, fundUsed, transactionDate, evidence } = req.body;
+    const student = await StudentRepository.findById(decodedToken?.role?.id);
+    if (!student) {
+      return res.status(403).json({ error: "Invalid Student Credential" });
+    }
+    const result = await GroupRepository.addTransaction(student?.group, {
+      title,
+      fundUsed,
+      transactionDate,
+      evidence,
+    });
+    return res
+      .status(201)
+      .json({ data: result, message: "Transaction created" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -523,4 +545,5 @@ export default {
   getAllGroupsNoClass,
   addGroupToClass,
   getAllGroupsOfTeacherbyClassIds,
+  addTransaction
 };

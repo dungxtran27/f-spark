@@ -35,7 +35,7 @@ export const StudentRoutes = [
   },
   {
     route: "/money",
-    page: "Money",
+    page: "SponsorShip",
     icon: <BiMoneyWithdraw  size={20} />,
   },
 ];

@@ -9,8 +9,6 @@ import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStude
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
 import TimelineClassWrapper from "../component/teacher/Timeline";
-import Phrase1 from "../component/student/Money/Phrase1";
-import Phrase2 from "../component/student/Money/Phrase2";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -223,7 +221,7 @@ export const NOTIFICATION_READ_STATUS = [
 export const QUERY_KEY = {
   GROUP_CUSTOMER_JOURNEY_MAP: "groupCustomerJourneyMap",
   STUDENT_OF_TERM: "studentOfTerm",
-  GROUPS_OF_TERM: 'groupsOfTerm',
+  GROUPS_OF_TERM: "groupsOfTerm",
   REFRESH_TOKEN: "refreshToken",
   TASKS_BOARD: "tasksBoard",
   STUDENT_OF_GROUP: "studentOfGroup",
@@ -260,11 +258,14 @@ export const QUERY_KEY = {
   NO_CLASS_GROUPS: "noClassGroups",
   ADD_STUDENT_TO_CLASS: "addStudentToClass",
   REQUEST_DEADLINE_LIST: "requestDeadlineList",
-  TERM:"term",
-  TERMACTIVE:"termActive",
+  TERM: "term",
+  TERMACTIVE: "termActive",
   TERM_LIST: "termList",
   CLASS_DETAIL: "classDetail",
-  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass"
+  NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass",
+  GROUP_FUND_ESTIMATIONS: "groupFundEstimation",
+  ACTIVE_SPONSOR_REQUEST: "activeSponsorRequest",
+  APPROVED_SPONSOR_REQUEST: "approvedSponsorRequest",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
@@ -292,7 +293,7 @@ export const NOTIFICATION_ACTION_TYPE = {
   UPDATE_TASK_STATUS: "UpdateTaskStatus",
   UPDATE_TASK: "UpdateTask",
   DELETE_TASK: "DeleteTask",
-  RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline"
+  RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline",
 };
 export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",
@@ -300,7 +301,7 @@ export const CLASS_NOTIFICATION_ACTION_TYPE = {
   GRADE_OUTCOME_SUBMISSION: "GradeOutcomeSubmission",
   CREATE_SUBMISSION: "CreateSubmission",
   REQUEST_DEADLINE: "RequestDeadline",
-  CREATE_REQUEST_DEADLINE: "CreateRequestDeadline"
+  CREATE_REQUEST_DEADLINE: "CreateRequestDeadline",
 };
 export const NOTIFICATION_TYPE = {
   CLASS: "class",
@@ -310,7 +311,4 @@ export const NOTIFICATION_TYPE = {
 export const CREATE_REQUEST_DEADLINE = {
   newDate: "newDate",
   reason: "reason",
-};export const PHRASE_TAB = [
-  { key: "phrase_1", label: "Phrase 1", children: <Phrase1 /> },
-  { key: "phrase_2", label: "Phrase 2", children: <Phrase2 /> },
-];
+};

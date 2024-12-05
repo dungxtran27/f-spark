@@ -41,7 +41,10 @@ export const DEADLINE_TYPES = {
   DIVIDING_CLASSES: "dividingClasses",
   OUTCOME: "outcome",
   START_TERM: "startTerm",
-  TEACHER_LOCK_GROUP: "teacherLockGroup"
+  TEACHER_LOCK_GROUP: "teacherLockGroup",
+  FUND_ESTIMATION: "fundEstimation",
+  FUND_DISTRIBUTION: "fundDistribution",
+  FUND_RETURN: "fundReturn"
 }
 
 export const REQUEST_DEADLINE_STATUS = {

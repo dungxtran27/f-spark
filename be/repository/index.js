@@ -16,6 +16,7 @@ import NotificationRepository from "./notification.js";
 import TermRepository from "./term.js";
 import OutcomeRepository from "./outcome.js";
 import RequestDeadlineRepository from "./requestDeadline.js";
+import FundEstimationRepository from "./fundEstimation.js"
 export {
   AuthenticateRepository,
   UserRepository,
@@ -34,5 +35,6 @@ export {
   RequestRepository,
   TermRepository,
   OutcomeRepository,
-  RequestDeadlineRepository
+  RequestDeadlineRepository,
+  FundEstimationRepository
 };
