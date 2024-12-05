@@ -6,6 +6,7 @@ import BusinessModelCanvas from "./BusinessModelCanvas";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
+import Gallery from "./Gallery";
 
 const ProjectOverviewWrapper: React.FC = () => {
   const userInfo = useSelector(
@@ -18,10 +19,11 @@ const ProjectOverviewWrapper: React.FC = () => {
 
   return (
     <div className="p-2 space-y-2 bg-gray-200 rounded-lg">
-      <ViewInfoPoject />
-      <CustomerJourneyMap />
-      <CustomerPersonas />
-      <BusinessModelCanvas />
+      <ViewInfoPoject groupId={userInfo.group} userId={userInfo._id} />
+      <Gallery groupId={userInfo.group} />
+      <CustomerJourneyMap groupId={userInfo.group} />
+      <CustomerPersonas groupId={userInfo.group} />
+      <BusinessModelCanvas groupId={userInfo.group} />
     </div>
   );
 };

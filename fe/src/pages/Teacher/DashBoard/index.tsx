@@ -1,4 +1,4 @@
-import TeacherDashBoard from "../../../component/teacher/DashBoard";
+import TeacherDashBoard from "../../../component/teacher/DashBoardNew";
 import DefaultLayout from "../../../layout/DefaultLayout";
 
 const TeacherDashboard = () => {

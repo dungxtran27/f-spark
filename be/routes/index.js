@@ -16,6 +16,7 @@ import NotificationRouter from "./notification.js";
 import TermRouter from "./term.js"
 import RequestDeadlineRouter from "./requestDeadline.js";
 import OutcomeRouter from "./outcome.js";
+import FundEstimationRouter from "./fundEstimation.js";
 export {
   AuthenticationRouter,
   UserRouter,
@@ -34,5 +35,6 @@ export {
   NotificationRouter,
   TermRouter,
   RequestDeadlineRouter,
-  OutcomeRouter
+  OutcomeRouter,
+  FundEstimationRouter,
 };

@@ -4,24 +4,36 @@ import {
   Input,
   InputNumber,
   InputNumberProps,
+  Modal,
   Popover,
   Slider,
   SliderSingleProps,
   Table,
-  Tag,
 } from "antd";
 import styles from "../styles.module.scss";
-import { TiAttachment } from "react-icons/ti";
-import { Link } from "react-router-dom";
 import classNames from "classnames";
 import { IoSearchOutline } from "react-icons/io5";
-import { PiExport } from "react-icons/pi";
-import { CiEdit, CiImport } from "react-icons/ci";
+import { CiImport } from "react-icons/ci";
 import { LuFilter } from "react-icons/lu";
 import { useState } from "react";
 import { BsExclamationCircle } from "react-icons/bs";
-const FirstStep = () => {
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { DATE_FORMAT, QUERY_KEY } from "../../../utils/const";
+import AccountantApi from "../../../api/accountant";
+import { TableRowSelection } from "antd/es/table/interface";
+import dayjs from "dayjs";
+import DeclineModal from "./DeclineModal";
+const FirstStep = ({ termId }: { termId: string }) => {
   const [fundEstimationFilterMin, setFundEstimationFilterMin] = useState(0);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+  const rowSelection: TableRowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
   const [fundEstimationFilterMax, setFundEstimationFilterMax] =
     useState(50000000);
   const onChange: InputNumberProps["onChange"] = (newValue) => {
@@ -30,332 +42,81 @@ const FirstStep = () => {
   const onMaxChange: InputNumberProps["onChange"] = (newValue) => {
     setFundEstimationFilterMax(newValue as number);
   };
-  const dataSource = [
-    {
-      key: "1",
-      GroupName: "Group 1 Lorem ipsum dolor sit amet",
-      fundEstimation: 7822168,
-      firstDistribution: 28901710,
-      document: null,
-      status: "processed",
+  const queryClient = useQueryClient();
+  const updateRequests = useMutation({
+    mutationFn: ({
+      requestIds,
+      status,
+      note,
+    }: {
+      requestIds: string[];
+      status: string;
+      note?: string;
+    }) => {
+      return AccountantApi.updateRequests({
+        requestIds,
+        status,
+        note,
+      });
     },
-    {
-      key: "2",
-      GroupName: "Group 2 Lorem ipsum dolor sit amet",
-      fundEstimation: 11575573,
-      firstDistribution: 21032788,
-      document: {
-        name: "Document1.pdf",
-        url: "https://www.example.com/doc1",
-      },
-      status: "pending",
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.ACTIVE_SPONSOR_REQUEST],
+      });
     },
-    {
-      key: "3",
-      GroupName: "Group 3 Lorem ipsum dolor sit amet",
-      fundEstimation: 15741215,
-      firstDistribution: 44110124,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "4",
-      GroupName: "Group 4 Lorem ipsum dolor sit amet",
-      fundEstimation: 39126942,
-      firstDistribution: 14392720,
-      document: {
-        name: "Document2.pdf",
-        url: "https://www.example.com/doc2",
-      },
-      status: "pending",
-    },
-    {
-      key: "5",
-      GroupName: "Group 5 Lorem ipsum dolor sit amet",
-      fundEstimation: 9042531,
-      firstDistribution: 4507907,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "6",
-      GroupName: "Group 6 Lorem ipsum dolor sit amet",
-      fundEstimation: 3862581,
-      firstDistribution: 13877692,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "7",
-      GroupName: "Group 7 Lorem ipsum dolor sit amet",
-      fundEstimation: 6195347,
-      firstDistribution: 39897370,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "8",
-      GroupName: "Group 8 Lorem ipsum dolor sit amet",
-      fundEstimation: 17249062,
-      firstDistribution: 22608111,
-      document: {
-        name: "Document1.pdf",
-        url: "https://www.example.com/doc1",
-      },
-      status: "pending",
-    },
-    {
-      key: "9",
-      GroupName: "Group 9 Lorem ipsum dolor sit amet",
-      fundEstimation: 43287407,
-      firstDistribution: 13558755,
-      document: {
-        name: "Document2.pdf",
-        url: "https://www.example.com/doc2",
-      },
-      status: "processed",
-    },
-    {
-      key: "10",
-      GroupName: "Group 10 Lorem ipsum dolor sit amet",
-      fundEstimation: 25413593,
-      firstDistribution: 6932580,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "11",
-      GroupName: "Group 11 Lorem ipsum dolor sit amet",
-      fundEstimation: 29778913,
-      firstDistribution: 21346024,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "12",
-      GroupName: "Group 12 Lorem ipsum dolor sit amet",
-      fundEstimation: 38276595,
-      firstDistribution: 6876126,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "13",
-      GroupName: "Group 13 Lorem ipsum dolor sit amet",
-      fundEstimation: 19712468,
-      firstDistribution: 42522867,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "14",
-      GroupName: "Group 14 Lorem ipsum dolor sit amet",
-      fundEstimation: 5893455,
-      firstDistribution: 31819634,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "15",
-      GroupName: "Group 15 Lorem ipsum dolor sit amet",
-      fundEstimation: 24798569,
-      firstDistribution: 43684734,
-      document: {
-        name: "Document1.pdf",
-        url: "https://www.example.com/doc1",
-      },
-      status: "pending",
-    },
-    {
-      key: "16",
-      GroupName: "Group 16 Lorem ipsum dolor sit amet",
-      fundEstimation: 21520473,
-      firstDistribution: 30144709,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "17",
-      GroupName: "Group 17 Lorem ipsum dolor sit amet",
-      fundEstimation: 7477540,
-      firstDistribution: 18830119,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "18",
-      GroupName: "Group 18 Lorem ipsum dolor sit amet",
-      fundEstimation: 27658182,
-      firstDistribution: 14112458,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "19",
-      GroupName: "Group 19 Lorem ipsum dolor sit amet",
-      fundEstimation: 39566823,
-      firstDistribution: 4992365,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "20",
-      GroupName: "Group 20 Lorem ipsum dolor sit amet",
-      fundEstimation: 13918457,
-      firstDistribution: 24075912,
-      document: {
-        name: "Document2.pdf",
-        url: "https://www.example.com/doc2",
-      },
-      status: "pending",
-    },
-    {
-      key: "21",
-      GroupName: "Group 21 Lorem ipsum dolor sit amet",
-      fundEstimation: 16556776,
-      firstDistribution: 33529650,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "22",
-      GroupName: "Group 22 Lorem ipsum dolor sit amet",
-      fundEstimation: 32412689,
-      firstDistribution: 10222432,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "23",
-      GroupName: "Group 23 Lorem ipsum dolor sit amet",
-      fundEstimation: 14364318,
-      firstDistribution: 26722672,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "24",
-      GroupName: "Group 24 Lorem ipsum dolor sit amet",
-      fundEstimation: 35413947,
-      firstDistribution: 30097005,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "25",
-      GroupName: "Group 25 Lorem ipsum dolor sit amet",
-      fundEstimation: 41837590,
-      firstDistribution: 12869257,
-      document: {
-        name: "Document1.pdf",
-        url: "https://www.example.com/doc1",
-      },
-      status: "processed",
-    },
-    {
-      key: "26",
-      GroupName: "Group 26 Lorem ipsum dolor sit amet",
-      fundEstimation: 31680937,
-      firstDistribution: 24537451,
-      document: null,
-      status: "processed",
-    },
-    {
-      key: "27",
-      GroupName: "Group 27 Lorem ipsum dolor sit amet",
-      fundEstimation: 5938902,
-      firstDistribution: 15221493,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "28",
-      GroupName: "Group 28 Lorem ipsum dolor sit amet",
-      fundEstimation: 13308712,
-      firstDistribution: 38270456,
-      document: {
-        name: "Document2.pdf",
-        url: "https://www.example.com/doc2",
-      },
-      status: "processed",
-    },
-    {
-      key: "29",
-      GroupName: "Group 29 Lorem ipsum dolor sit amet",
-      fundEstimation: 39438455,
-      firstDistribution: 24058918,
-      document: null,
-      status: "pending",
-    },
-    {
-      key: "30",
-      GroupName: "Group 30 Lorem ipsum dolor sit amet",
-      fundEstimation: 8219410,
-      firstDistribution: 7004987,
-      document: null,
-      status: "processed",
-    },
-  ];
-
-  const mappedDataSource = dataSource.map((d) => {
-    return {
-      ...d,
-      estimationItems: [
-        { fundType: "typ1", content: "12345", amount: "30000000" },
-        { fundType: "typ2", content: "12345", amount: "3000000", note: "HE" },
-      ],
-    };
   });
 
   const columns = [
     {
       title: "Group Name",
-      dataIndex: "GroupName",
-      key: "name",
+      render: (_: any, record: any) => {
+        return (
+          <span className="font-semibold">{record?.group?.GroupName}</span>
+        );
+      },
     },
     {
       title: "Fund Estimation (vnd)",
       dataIndex: "fundEstimation",
       key: "fundEstimation",
       render: (_: any, record: any) => {
+        const estimation = record?.items?.reduce(
+          (total: any, acc: any) => total + acc.amount,
+          0
+        );
         return (
           <span
-            className={
-              record?.fundEstimation > 30000000 ? "text-red-400 font-bold" : ""
-            }
+            className={estimation > 50000000 ? "text-red-400 font-bold" : ""}
           >
-            {record?.fundEstimation?.toLocaleString()}
+            {estimation.toLocaleString()}
           </span>
         );
       },
     },
     {
       title: "First distribution (vnd)",
-      dataIndex: "firstDistribution",
-      key: "firstDistribution",
-    },
-    {
-      title: "Document",
-      dataIndex: "document",
-      key: "document",
       render: (_: any, record: any) => {
+        const estimation =
+          record?.items?.reduce(
+            (total: any, acc: any) => total + acc.amount,
+            0
+          ) * 0.7;
         return (
-          <div className="flex items-center text-primaryBlue hover:underline">
-            <TiAttachment />
-            <Link to={record?.document?.url}>{record?.document?.name}</Link>
-          </div>
+          <span
+            className={estimation > 50000000 ? "text-red-400 font-bold" : ""}
+          >
+            {estimation.toLocaleString()}
+          </span>
         );
       },
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
+      title: "Date",
       render: (_: any, record: any) => {
         return (
-          <Tag color={record?.status === "processed" ? "green" : "gold"}>
-            {record?.status}
-          </Tag>
+          <span>
+            {dayjs(record?.createdAt).format(DATE_FORMAT.withoutTime)}
+          </span>
         );
       },
     },
@@ -364,39 +125,69 @@ const FirstStep = () => {
       key: "update",
       render: (_: any, record: any) => {
         return (
-          <Popover
-            trigger={"click"}
-            arrow={false}
-            placement="left"
-            content={() => actionContent(record?.status)}
-          >
-            <CiEdit className="text-primaryBlue" size={25} />
-          </Popover>
+          <div className="flex items-center gap-3">
+            <Button
+              type="primary"
+              onClick={() => {
+                Modal.confirm({
+                  title: "Confirm",
+                  content: `Accept ${record?.group?.GroupName}'s request ?`,
+                  onOk: () => {
+                    updateRequests.mutate({
+                      requestIds: [record?._id],
+                      status: "approved",
+                    });
+                  },
+                });
+              }}
+            >
+              Approve
+            </Button>
+            <Button
+              onClick={() => {
+                setSelectedRequest(record?._id);
+              }}
+            >
+              Reject
+            </Button>
+          </div>
         );
       },
+      width: "10%",
     },
   ];
 
   const fundEstimationColumn = [
     {
       title: "Fund Type",
-      dataIndex: "fundType",
+      dataIndex: "type",
       key: "fundType",
+      width: "25%",
     },
     {
       title: "Content",
       dataIndex: "content",
       key: "content",
+      width: "20%",
     },
     {
-      title: "Amount",
+      title: "Amount (vnđ)",
       dataIndex: "amount",
       key: "amount",
+      render: (_: any, record: any) => {
+        return (
+          <span className={`${record?.amount > 50000000 && "text-red-500"}`}>
+            {record?.amount.toLocaleString()}
+          </span>
+        );
+      },
+      width: "10%",
     },
     {
       title: "Note",
       dataIndex: "note",
       key: "note",
+      width: "45%",
     },
   ];
   const formatCurrency = (value: number) => {
@@ -409,6 +200,13 @@ const FirstStep = () => {
   ) => {
     return `${formatCurrency(value || 0)}`; // Format as currency and append 'VND'
   };
+
+  const { data: activeSponsorRequest } = useQuery({
+    queryKey: [QUERY_KEY.ACTIVE_SPONSOR_REQUEST, termId],
+    queryFn: () => {
+      return AccountantApi.getActiveSponsorRequest(termId);
+    },
+  });
 
   const FilterContent = () => {
     const [statusFilter, setStatusFilter] = useState("pending");
@@ -482,29 +280,6 @@ const FirstStep = () => {
     );
   };
 
-  const actionContent = (status: string) => {
-    if (status === "pending") {
-      return (
-        <div className="flex items-center">
-          <Tag color="gold">Pending</Tag>→
-          <div className="flex items-center gap-3 ml-3">
-            <span className="text-green-500 px-1 hover:bg-green-500/20 rounded">
-              Accept
-            </span>
-            <span className="text-red-500 px-1 hover:bg-red-500/20 rounded">
-              Decline
-            </span>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex items-center gap-3">
-          <Tag color="blue">Processed</Tag>
-        </div>
-      );
-    }
-  };
   return (
     <div>
       <div className="rounded-md border border-pendingStatus bg-pendingStatus/20 flex items-center gap-3 p-3 mb-3">
@@ -531,31 +306,38 @@ const FirstStep = () => {
               <CiImport />
               Export to excel
             </Button>
-            <Button className="flex items-center gap-3" type="primary">
-              <PiExport />
-              Export to excel
-            </Button>
           </div>
         </div>
         <Table
-          dataSource={mappedDataSource}
+          dataSource={activeSponsorRequest?.data?.data}
           columns={columns}
+          rowSelection={rowSelection}
           bordered
           expandable={{
             expandedRowRender: (record) => (
               <div>
                 <Table
                   columns={fundEstimationColumn}
-                  dataSource={record?.estimationItems}
+                  dataSource={record?.items}
                   pagination={false}
                 />
                 <Divider />
-                <span className="font-semibold">Total: 33.000.000 vnd</span>
+                <span className="font-semibold">
+                  Total:{" "}
+                  {record?.items
+                    ?.reduce((total: any, acc: any) => total + acc.amount, 0)
+                    .toLocaleString()}
+                </span>
               </div>
             ),
           }}
         />
       </div>
+      <DeclineModal
+        requestId={selectedRequest}
+        updateRequest={updateRequests}
+        setRequestId={setSelectedRequest}
+      />
     </div>
   );
 };

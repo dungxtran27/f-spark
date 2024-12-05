@@ -5,7 +5,7 @@ export interface UserInfo {
   gen: number;
   major: string;
   account: Account;
-  group: string;
+  group: any;
   role?: string;
   classId: string;
 }

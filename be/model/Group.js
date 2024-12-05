@@ -119,6 +119,25 @@ const CanvasCellsSchema = new Schema({
     default: "default content",
   },
 });
+const TransactionSchema = new Schema(
+  {
+    title: {
+      type: String,
+    },
+    fundUsed: {
+      type: Number,
+    },
+    transactionDate: {
+      type: Date,
+    },
+    evidence: {
+      type: [String],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 const GroupSchema = new Schema(
   {
     GroupName: {
@@ -206,7 +225,7 @@ const GroupSchema = new Schema(
       type: String,
       required: false,
       enum: ["normal", "pending", "sponsored"],
-      default: "normal"
+      default: "normal",
     },
     teamMembers: [
       {
@@ -242,9 +261,25 @@ const GroupSchema = new Schema(
     term: {
       type: Schema.Types.ObjectId,
       ref: "Term",
-      require: true
+      require: true,
     },
     timeline: [TimelineSchema],
+    term: {
+      type: Schema.Types.ObjectId,
+      ref: "Term",
+      required: true,
+    },
+    transactions: {
+      type: [TransactionSchema],
+      default: [],
+    },
+    gallery: [
+      {
+        type: String,
+        required: false,
+        default: [],
+      },
+    ],
   },
   { timestamps: true, collection: "Groups" }
 );

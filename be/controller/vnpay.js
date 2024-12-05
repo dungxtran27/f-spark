@@ -19,13 +19,10 @@ const purchaseSong = async (req, res) => {
   var date = new Date();
   var createDate = dateFormat(date, "yyyymmddHHMMss");
   createDate = createDate.replace("mm", "MM");
-  console.log(createDate);
-
   var orderId = dateFormat(date, "HHmmss");
   var amount = req.body.amount;
   var bankCode = req.body.bankCode;
-  const decodedToken = req.decodedToken;
-  var orderInfo = `Payment from user ${decodedToken.userId} for track ${req.body.songId} amount ${amount}`;
+  var orderInfo = `Payment from user for track amount `;
   var orderType = "190000";
   var locale = req.body.language;
   if (locale === null || locale === "") {
