@@ -66,7 +66,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
             className="text-lg font-semibold cursor-pointer"
             onClick={() => handleSetCategory("")}
           >
-            Total: {totalClasses} class
+            Total: {totalClasses} classes
           </div>
           <span
             className="-ml-20 cursor-pointer"

@@ -5,5 +5,6 @@ const teacherRouter = express.Router();
 teacherRouter.get("/getStudentByClassId/:classId",verifyToken, TeacherController.getTeacherByClassId);
 teacherRouter.post("/", TeacherController.getAllAccTeacher);
 teacherRouter.get('/:teacherId', TeacherController.getTeacherInfo);
+teacherRouter.post("/totalTeacher", TeacherController.getTotalTeachers);
 
 export default teacherRouter;

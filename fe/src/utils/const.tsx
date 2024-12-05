@@ -268,6 +268,8 @@ export const QUERY_KEY = {
   TERM_TIMELINE: "timelineOfTerm",
   CLASS_DETAIL: "classDetail",
   NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass",
+  ALLTEACHER:"allTeacher",
+  ALLMENTOR:"allMentor",
   GROUP_FUND_ESTIMATIONS: "groupFundEstimation",
   ACTIVE_SPONSOR_REQUEST: "activeSponsorRequest",
   APPROVED_SPONSOR_REQUEST: "approvedSponsorRequest",

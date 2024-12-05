@@ -8,5 +8,6 @@ mentorRouter.get("/getMentor", MentorController.getMentor);
 mentorRouter.put("/assignMentor", MentorController.assignMentor);
 mentorRouter.post("/getAllAccMentor", MentorController.getAllAccMentor);
 mentorRouter.get("/:mentorId", MentorController.getMentorGroups);
+mentorRouter.post('/totalMentors', MentorController.getTotalMentors);
 
 export default mentorRouter;

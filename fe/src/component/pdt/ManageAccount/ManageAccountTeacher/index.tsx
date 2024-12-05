@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../utils/const";
 import { Admin } from "../../../../api/manageAccoount";
+import dayjs from "dayjs";
 const { Option } = Select;
 
 interface Teacher {
@@ -49,12 +50,13 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
 
   const [page, setCurrentPage] = useState(1);
   const { data: teachertData } = useQuery({
-    queryKey: [QUERY_KEY.TEACHER_OUTCOMES_LIST, page, searchText],
+    queryKey: [QUERY_KEY.TEACHER_OUTCOMES_LIST, page, searchText, termFilter],
     queryFn: async () => {
       return Admin.getTeacher({
         limit: 10,
         page: page || 1,
         searchText: searchText || null,
+        term:termFilter
       });
     },
   });
@@ -66,6 +68,22 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
       });
     },
   });
+
+
+  const { data: terms } = useQuery({
+    queryKey: [QUERY_KEY.TERM_LIST],
+    queryFn: async () => {
+      return Admin.getAllTerms();
+    },
+  });
+  const termOptions = terms?.data?.data?.map((t: any) => {
+    return {
+      value: t?._id,
+      label: t?.termCode,
+    };
+  });
+
+
   const data: Teacher[] = Array.isArray(teachertData?.data?.data?.teachers)
     ? teachertData.data.data.teachers
     : [];
@@ -176,15 +194,21 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
           />
         </Col>
         <Col span={4}>
-          <Select
-            placeholder="Term"
-            value={termFilter}
-            onChange={setTermFilter}
-            className="w-full"
-          >
-            <Option value="Fall 2024">Fall 2024</Option>
-            <Option value="Spring 2024">Spring 2024</Option>
-          </Select>
+          {terms?.data?.data && (
+            <Select
+              placeholder="Term"
+              value={termFilter}
+              onChange={setTermFilter}
+              options={termOptions}
+              className="w-full"
+              defaultValue={`${terms?.data?.data?.find(
+                (t: any) =>
+                  dayjs().isAfter(t?.startTime) &&
+                  dayjs().isBefore(t?.endTime)
+              )?._id
+                }`}
+            />
+          )}
         </Col>
         <Col span={4}>
           <Select
@@ -232,11 +256,10 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
                 </span>
                 &nbsp;
                 <span
-                  className={`${
-                    c?.studentCount > 30
+                  className={`${c?.studentCount > 30
                       ? "text-pendingStatus"
                       : "text-textSecondary"
-                  }`}
+                    }`}
                 >
                   {c?.studentCount} students
                 </span>

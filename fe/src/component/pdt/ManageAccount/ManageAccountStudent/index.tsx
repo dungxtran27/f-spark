@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AutoComplete,
   Button,
@@ -26,9 +26,12 @@ import { Admin } from "../../../../api/manageAccoount";
 import dayjs from "dayjs";
 import axios from "axios";
 import AddStudentModal from "./AddStudentModal";
+import { classApi } from "../../../../api/Class/class";
+import { term } from "../../../../api/term/term";
 const { Option } = Select;
 
 interface Student {
+  class: any;
   _id: string;
   name: string;
   studentId: string;
@@ -37,7 +40,10 @@ interface Student {
   term: string;
   status: boolean;
 }
-
+interface Term {
+  _id: string;
+  termCode: string;
+}
 const AccountManagement: React.FC = () => {
   const [page, setCurrentPage] = useState(1);
   const [openAddStudent, setOpenAddStudent] = useState<boolean>(false);
@@ -46,6 +52,8 @@ const AccountManagement: React.FC = () => {
   const [classFilter, setClassFilter] = useState<string | undefined>(undefined);
   const [termFilter, setTermFilter] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<boolean>(true);
+  const [semester, setSemester] = useState<string | null>(null);
+
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<
     AutoCompleteProps["options"]
   >([]);
@@ -64,6 +72,7 @@ const AccountManagement: React.FC = () => {
       classFilter,
       termFilter,
       statusFilter,
+      semester
     ],
     queryFn: async () => {
       return Admin.getStudent({
@@ -72,28 +81,43 @@ const AccountManagement: React.FC = () => {
         searchText: searchText || null,
         classId: classFilter || null,
         // status: statusFilter || null,
+        termCode: semester || null,
       });
     },
   });
 
-  const { data: terms } = useQuery({
-    queryKey: [QUERY_KEY.TERM_LIST],
+  const { data: termData } = useQuery({
+    queryKey: [QUERY_KEY.TERM],
     queryFn: async () => {
-      return Admin.getAllTerms();
+      return term.getAllTermsToFilter();
     },
   });
-  const termOptions = terms?.data?.data?.map((t: any) => {
-    return {
-      value: t?._id,
-      label: t?.termCode,
-    };
-  });
+  const activeTerm = termData?.data?.data?.find(
+    (t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
+  );
+  useEffect(() => {
+    if (activeTerm?.termCode) {
+      setSemester(activeTerm.termCode);
+    }
+  }, [activeTerm]);
+
   const totalItems = studentData?.data?.data?.totalItems || 0;
 
   const data: Student[] = Array.isArray(studentData?.data?.data?.students)
     ? studentData.data.data.students
     : [];
-
+  const { data: classData } = useQuery({
+    queryKey: [QUERY_KEY.CLASSES],
+    queryFn: async () => {
+      return classApi.getClassListPagination({
+        limit: 12,
+        page: 1,
+      });
+    },
+  });
+  const handleSemesterChange = (value: string) => {
+    setSemester(value);
+  };
   const handleAutoCompleteSearch = (input: string) => {
     const normalizedInput = input.toLowerCase();
     const filteredOptions = studentData?.data?.data?.students
@@ -122,7 +146,9 @@ const AccountManagement: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-
+  const handleClassChange = (value: any) => {
+    setClassFilter(value);
+  };
   const columns: ColumnsType<Student> = [
     {
       title: "#",
@@ -133,7 +159,7 @@ const AccountManagement: React.FC = () => {
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "MSSV", dataIndex: "studentId", key: "studentId" },
     { title: "Class", dataIndex: "classId", key: "classId" },
-    { title: "Email", dataIndex: "email", key: "email" },
+    { title: "Email", dataIndex: "accountEmail", key: "accountEmail" },
     // { title: "Term", dataIndex: "term", key: "term" },
     {
       title: "Status",
@@ -218,36 +244,32 @@ const AccountManagement: React.FC = () => {
             </Col>
             <Col span={5}>
               <Select
-                placeholder="Class"
-                value={classFilter}
-                onChange={setClassFilter}
+                placeholder="Select Class Code"
                 className="w-full"
+                onChange={handleClassChange}
+                value={classFilter || undefined}
+                allowClear
                 showSearch
               >
-                {terms?.data?.data?.map((term: any) => (
-                  <Option key={term?._id} value={term?._id}>
-                    {term?._termCode}
+                {classData?.data?.data.map((option: any) => (
+                  <Option key={option.classCode} value={option.classCode}>
+                    {option.classCode}
                   </Option>
                 ))}
               </Select>
             </Col>
             <Col span={4}>
-              {terms?.data?.data && (
-                <Select
-                  placeholder="Term"
-                  value={termFilter}
-                  onChange={setTermFilter}
-                  options={termOptions}
-                  className="w-full"
-                  defaultValue={`${
-                    terms?.data?.data?.find(
-                      (t: any) =>
-                        dayjs().isAfter(t?.startTime) &&
-                        dayjs().isBefore(t?.endTime)
-                    )?._id
-                  }`}
-                />
-              )}
+              <Select
+                value={semester}
+                onChange={handleSemesterChange}
+                className="w-full"
+              >
+                {termData?.data?.data?.map((term: Term) => (
+                  <Option key={term.termCode} value={term.termCode}>
+                    {term.termCode} {/* Display termCode */}
+                  </Option>
+                ))}
+              </Select>
             </Col>
             <Col span={3}>
               <Select

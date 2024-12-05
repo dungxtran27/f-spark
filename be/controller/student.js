@@ -62,13 +62,14 @@ const getAllStudentUnGroupByClassId = async (req, res) => {
 
 const getAllAccStudent = async (req, res) => {
   try {
-    const { page, limit, searchText, classId, status } = req.body;
+    const { page, limit, searchText, classId, status, termCode } = req.body;
     const students = await StudentRepository.getAllAccStudent(
       page,
       limit,
       searchText,
       classId,
-      status
+      status,
+      termCode
     );
     return res.status(200).json({ data: students });
   } catch (error) {
@@ -180,6 +181,30 @@ const importStudent = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getTotalStudentsByTerm = async (req, res) => {
+  try {
+    const { termCode } = req.body;
+
+    const term = await TermRepository.getActiveTerm();
+    if (!term) {
+      return res.status(404).json({ message: "No active term found" });
+    }
+
+    const students = await StudentRepository.getTotalStudentsByTerm(termCode);
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: "No students found for the given termCode" });
+    }
+
+    return res.status(200).json({
+      data: students
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 
 export default {
   getStudentsInSameGroup,
@@ -190,4 +215,5 @@ export default {
   addManyStudentNoClassToClass,
   getAllAccStudent,
   importStudent,
+  getTotalStudentsByTerm
 };
