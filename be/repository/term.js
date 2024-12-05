@@ -30,12 +30,21 @@ const createTerms = async (data) => {
 
 const getActiveTerm = async () => {
   try {
-    const currentTime = moment().toISOString()
+    const currentTime = moment().toISOString();
     const activeTerm = await Term.findOne({
       startTime: { $lt: currentTime },
       endTime: { $gt: currentTime },
     });
-    return activeTerm
+    return activeTerm;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const findById = async (termId) => {
+  try {
+    const term = await Term.findById(termId);
+    return term;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -174,6 +183,7 @@ export default {
   getAllTerms,
   createTerms,
   getActiveTerm,
+  findById,
   getFillterTerm,
   getTotalClassByTerm,
   getTotalStudentByTerm,

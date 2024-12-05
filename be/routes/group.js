@@ -124,6 +124,11 @@ groupRouter.post(
   GroupController.getAllGroupsOfTeacherbyClassIds
 );
 groupRouter.post(
+  "/addTransaction",
+  verifyToken,
+  GroupController.addTransaction
+);
+groupRouter.post(
   "/uploadGallery",
   verifyToken,
   upload.array("files"),

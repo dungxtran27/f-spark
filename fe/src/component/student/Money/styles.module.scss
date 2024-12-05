@@ -11,11 +11,11 @@
       text-shadow: none; 
     }
   }
+}
+
+
+.customTable {
   :global {
-    .ant-tabs .ant-tabs-tab.ant-tabs-tab-active {
-      border-bottom: solid 1px var.$primary-color;
-      border-radius: 1px;
-    }
     .ant-table-tbody {
       min-height: calc(8 * 54.8px);
     }
@@ -25,7 +25,6 @@
     }
   }
 }
-
 
 
 

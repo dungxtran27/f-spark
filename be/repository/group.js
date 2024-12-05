@@ -1111,6 +1111,19 @@ const getMemberOfGroupByGroupId = async (groupId) => {
     throw error;
   }
 };
+
+const addTransaction = async (groupId, transactionData) => {
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $push: {
+        transactions: transactionData,
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 const updateGallery = async (groupId, images) => {
   try {
     const result = await Group.findByIdAndUpdate(
@@ -1266,6 +1279,7 @@ export default {
   getTimelineClassworkOfGroup,
   createGroupsFromExcel,
   getMemberOfGroupByGroupId,
+  addTransaction,
   updateGallery,
   deleteImageFromGallery,
   getGallery,

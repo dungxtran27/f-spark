@@ -550,6 +550,28 @@ const getGroupsOfTerm = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+const addTransaction = async (req, res) => {
+  try {
+    const decodedToken = req.decodedToken;
+    const { title, fundUsed, transactionDate, evidence } = req.body;
+    const student = await StudentRepository.findById(decodedToken?.role?.id);
+    if (!student) {
+      return res.status(403).json({ error: "Invalid Student Credential" });
+    }
+    const result = await GroupRepository.addTransaction(student?.group, {
+      title,
+      fundUsed,
+      transactionDate,
+      evidence,
+    });
+    return res
+      .status(201)
+      .json({ data: result, message: "Transaction created" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 const addImageToGroupGallery = async (req, res) => {
   try {
     const files = req.files;
@@ -701,6 +723,7 @@ export default {
   getAllGroupsNoClass,
   addGroupToClass,
   getAllGroupsOfTeacherbyClassIds,
+  addTransaction,
   addImageToGroupGallery,
   getGallery,
   deleteImageFromGallery,
@@ -708,5 +731,4 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
-  getAllGroupsOfTeacherbyClassIds,
 };

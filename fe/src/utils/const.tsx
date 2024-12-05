@@ -9,8 +9,6 @@ import AccountManagement from "../component/pdt/ManageAccount/ManageAccountStude
 import Teacher from "../component/pdt/ManageAccount/ManageAccountTeacher";
 import Mentor from "../component/pdt/ManageAccount/ManageAccountMentor";
 import TimelineClassWrapper from "../component/teacher/Timeline";
-import Phrase1 from "../component/student/Money/Phrase1";
-import Phrase2 from "../component/student/Money/Phrase2";
 
 export const LOGIN_DATA = {
   email: "email",
@@ -270,6 +268,9 @@ export const QUERY_KEY = {
   TERM_TIMELINE: "timelineOfTerm",
   CLASS_DETAIL: "classDetail",
   NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass",
+  GROUP_FUND_ESTIMATIONS: "groupFundEstimation",
+  ACTIVE_SPONSOR_REQUEST: "activeSponsorRequest",
+  APPROVED_SPONSOR_REQUEST: "approvedSponsorRequest",
   GALLERY: "gallery",
 };
 export const colorMap: Record<string, string> = {
@@ -319,7 +320,3 @@ export const CREATE_REQUEST_DEADLINE = {
   newDate: "newDate",
   reason: "reason",
 };
-export const PHRASE_TAB = [
-  { key: "phrase_1", label: "Phrase 1", children: <Phrase1 /> },
-  { key: "phrase_2", label: "Phrase 2", children: <Phrase2 /> },
-];

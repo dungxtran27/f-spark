@@ -7,8 +7,10 @@ import { Admin } from "../../../api/manageAccoount";
 import { useForm } from "antd/es/form/Form";
 interface Props {
   disable?: boolean;
+  termId?: string;
+  setTermId?: (value: string) => void;
 }
-const TermSelector = ({ disable = false }: Props) => {
+const TermSelector = ({ disable = false, termId, setTermId }: Props) => {
   const { data: terms } = useQuery({
     queryKey: [QUERY_KEY.TERM_LIST],
     queryFn: async () => {
@@ -38,7 +40,13 @@ const TermSelector = ({ disable = false }: Props) => {
             placeholder="Class"
             showSearch
             options={termOptions}
+            onChange={(value) => {
+              if (setTermId) {
+                setTermId(value);
+              }
+            }}
             defaultValue={`${
+              termId ||
               terms?.data?.data?.find(
                 (t: any) =>
                   dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
