@@ -576,9 +576,7 @@ const addImageToGroupGallery = async (req, res) => {
   try {
     const files = req.files;
     const decodedToken = req.decodedToken;
-    console.log(decodedToken);
     const student = await StudentRepository.findById(decodedToken?.role.id);
-    console.log(student);
 
     // const group= await GroupRepository.findGroupById
     if (!files || files.length === 0) {
@@ -695,7 +693,29 @@ const updateGroupSponsorStatus = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
+const updateGroupInfo = async (req, res) => {
+  try {
+    const decodedToken = req.decodedToken;
+    const { name, description, tags } = req.body;
+    if (!name && !description && !tags) {
+      return res.status(400).json({
+        error: "At least one field must be provided for update.",
+      });
+    }
+    const student = await StudentRepository.findById(decodedToken?.role.id);
+    if (!student) return res.status(400).json({ error: "Bad Request" });
+    const groupId = student.group;
+    const updatedGroup = await GroupRepository.updateGroupInfo({
+      name,
+      description,
+      tags,
+      groupId,
+    });
+    return res.status(200).json({ message: "Update success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupsOfTerm,
   createJourneyRow,
@@ -731,4 +751,5 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
+  updateGroupInfo,
 };
