@@ -1,7 +1,20 @@
-import React from "react";
-import { Avatar, Row, Col, Typography, Skeleton, Button } from "antd";
+import React, { useState } from "react";
+import {
+  Avatar,
+  Row,
+  Col,
+  Typography,
+  Skeleton,
+  Button,
+  Tag,
+  Modal,
+  Form,
+  Input,
+  Select,
+  SelectProps,
+} from "antd";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEY } from "../../../../../utils/const";
+import { colorMajorGroup, QUERY_KEY } from "../../../../../utils/const";
 import { businessModelCanvas } from "../../../../../api/apiOverview/businessModelCanvas";
 
 import { FaStar } from "react-icons/fa6";
@@ -9,6 +22,10 @@ import { MdCancelPresentation } from "react-icons/md";
 import styles from "./styles.module.scss";
 import classNames from "classnames";
 import { requestList } from "../../../../../api/request/request";
+import { FaEdit } from "react-icons/fa";
+import { groupApi } from "../../../../../api/group/group";
+import { mentorList } from "../../../../../api/mentor/mentor";
+import TextArea from "antd/es/input/TextArea";
 const { Title, Text } = Typography;
 
 interface ViewInfoPojectProps {
@@ -17,11 +34,19 @@ interface ViewInfoPojectProps {
 }
 const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
   const queryClient = useQueryClient();
+  const [form] = Form.useForm();
+  const [open, setOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
     queryFn: async () =>
       (await businessModelCanvas.getBusinessModelCanvas(groupId)).data.data,
+  });
+  const { data: tagData } = useQuery({
+    queryKey: [QUERY_KEY.TAGDATA],
+    queryFn: async () => {
+      return (await mentorList.getTag()).data.data;
+    },
   });
 
   const requestDeleteStudentFromGroup = useMutation({
@@ -37,6 +62,26 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
       });
     },
   });
+  const updateGroupInfo = useMutation({
+    mutationFn: async ({ name, description, tags }: any) => {
+      return await groupApi.updateGroupInfo({
+        name: name,
+        description: description,
+        tags: tags,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
+      });
+    },
+  });
+
+  const options: SelectProps["options"] = tagData?.map((i: any) => ({
+    label: i.name,
+    value: i._id,
+  }));
+
   if (isLoading)
     return (
       <div className="bg-white rounded-lg p-4">
@@ -44,15 +89,36 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
       </div>
     );
   return (
-    <div className="bg-white p-4 w-full rounded-lg">
+    <div className="bg-white p-4 w-full rounded">
       <Row gutter={16}>
         <Col span={12}>
-          <div className="bg-gray-100 p-5 rounded-lg h-full flex flex-col justify-between mb-10">
-            <div>
+          <div className="bg-gray-100 p-5 rounded h-full min-h-56 flex flex-col justify-around mb-10 shadow">
+            <FaEdit
+              onClick={() => setOpen(true)}
+              color="gray"
+              size={26}
+              className={`p-1 absolute right-7 top-5 hover:scale-105 hover:shadow 
+               
+              `}
+            />
+            <div className="">
               <Title level={3}>{data?.GroupName}</Title>
-              <p>{data?.GroupDescription}</p>
+              <div className="">
+                <span className="font-semibold text-gray-500">
+                  Description:{" "}
+                </span>
+                <span>{data?.GroupDescription}</span>
+              </div>
+              <div className="flex pt-2">
+                <p className="font-semibold text-gray-500">Tag:</p>
+                {data?.tag.map((t: any) => (
+                  <span className="pl-1">
+                    <Tag color={colorMajorGroup[t.name]}> {t.name}</Tag>
+                  </span>
+                ))}
+              </div>
             </div>
-            <Row>
+            <Row className="">
               <Col span={12}>
                 <Text className="font-semibold text-center text-gray-800 text-sm mb-2">
                   Teacher
@@ -163,6 +229,56 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
           </div>
         </Col>
       </Row>
+      <Modal
+        centered
+        open={open}
+        title={"Change you group info"}
+        onCancel={() => {
+          setOpen(false);
+        }}
+        destroyOnClose
+        onOk={() => {
+          const { name, description, tags } = form.getFieldsValue();
+          updateGroupInfo.mutate({
+            name: name,
+            description: description,
+            tags: tags,
+          });
+          setOpen(false);
+        }}
+      >
+        <Form layout="vertical" form={form}>
+          <Form.Item name={"name"} label={"Group Name"}>
+            <Input
+              showCount
+              maxLength={60}
+              placeholder={data.GroupName}
+              defaultValue={data.GroupName}
+            />
+          </Form.Item>
+          <Form.Item name={"description"} label={"Description"}>
+            <TextArea
+              rows={4}
+              defaultValue={data.GroupDescription}
+              maxLength={300}
+            />
+          </Form.Item>
+          <Form.Item name="tags" label={"Tag"}>
+            <Select
+              mode="multiple"
+              allowClear
+              defaultValue={data?.tag.map((i: any) => ({
+                label: i.name,
+                value: i._id,
+              }))}
+              // className={classNames(style.search_tag_bar)}
+              placeholder="Select major"
+              maxTagCount={"responsive"}
+              options={options}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

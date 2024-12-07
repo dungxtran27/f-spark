@@ -226,7 +226,7 @@ const CustomerPersonas: React.FC<CustomerPersonasProps> = ({ groupId }) => {
   if (error) return <div>Error loading personas.</div>;
 
   return (
-    <div className="bg-white rounded-lg p-4">
+    <div className="bg-white rounded p-4">
       <div className="flex items-center justify-between">
         <Title level={4} className="text-xl font-bold">
           Customer Personas

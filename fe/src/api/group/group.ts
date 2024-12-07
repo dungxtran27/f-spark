@@ -59,4 +59,10 @@ export const groupApi = {
   deleteImageFromGallery: async (requestBody: any) => {
     return await axios.post(`/api/group/deleteImageFromGallery`, requestBody);
   },
+  updateGroupInfo: async (requestBody: any) => {
+    return await axios.post(`/api/group/updateGroupInfo`, requestBody);
+  },
+  deleteTransaction: async (requestBody: any) => {
+    return await axios.post(`/api/group/deleteTransaction`, requestBody);
+  },
 };

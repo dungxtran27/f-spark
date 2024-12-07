@@ -332,13 +332,13 @@ const CustomerJourneyMap: React.FC<CustomerJourneyMapProps> = ({groupId}) => {
 
   if (isLoading)
     return (
-      <div className="bg-white rounded-lg p-4">
+      <div className="bg-white rounded p-4">
         <Skeleton />
       </div>
     );
 
   return (
-    <div className="bg-white p-4 w-full rounded-lg">
+    <div className="bg-white p-4 w-full rounded">
       <Title level={4} className="text-xl font-bold mb-5">
         Customer Journey Map
       </Title>

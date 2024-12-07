@@ -1,4 +1,4 @@
-import { Button, Empty, Image, message, Modal, Tooltip } from "antd";
+import { Button, Empty, Image, Modal, Tooltip } from "antd";
 import React, { useState } from "react";
 import ImageUpload from "../../../../common/UpLoad";
 import { FaEye, FaPlus, FaTrash } from "react-icons/fa6";
@@ -43,7 +43,7 @@ const Gallery: React.FC<GalleryProps> = ({ groupId }) => {
   });
 
   return (
-    <div className="p-2 space-y-2 bg-white rounded-lg">
+    <div className="p-2 space-y-2 bg-white rounded">
       <div className="flex justify-between">
         <div className="text-xl font-semibold">
           Gallery ({gallery?.data.data.gallery.length})

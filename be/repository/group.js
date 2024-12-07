@@ -98,6 +98,7 @@ const findGroupById = async ({ groupId }) => {
           },
         },
       })
+      .populate("tag")
       .populate({
         path: "mentor",
         select: "_id name email phoneNumber profile profilePicture",
@@ -1245,6 +1246,56 @@ const updateGroupSponsorStatus = async ({ groupId, status }) => {
     throw new Error(error.message);
   }
 };
+const updateGroupInfo = async ({ groupId, name, description, tags }) => {
+  try {
+    const updateData = {};
+
+    if (name) updateData.GroupName = name;
+    if (description) updateData.GroupDescription = description;
+    if (tags) updateData.tag = tags;
+
+    const updatedGroup = await Group.findByIdAndUpdate(groupId, updateData, {
+      new: true,
+    });
+
+    return updatedGroup;
+  } catch (error) {
+    return new Error(error.message);
+  }
+};
+const getTransactionByTransactionId = async (groupId, transactionId) => {
+  try {
+    const group = await Group.findById(groupId);
+
+    if (!group) {
+      throw new Error("Group not found.");
+    }
+
+    const transaction = group.transactions.find(
+      (transaction) => transaction._id.toString() === transactionId
+    );
+
+    if (!transaction) {
+      throw new Error("Transaction not found.");
+    }
+
+    return transaction;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const deleteTransaction = async (groupId, transactionId) => {
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $pull: {
+        transactions: { _id: transactionId },
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1287,4 +1338,7 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
+  updateGroupInfo,
+  deleteTransaction,
+  getTransactionByTransactionId,
 };
