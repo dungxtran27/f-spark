@@ -23,7 +23,6 @@ import styles from "./styles.module.scss";
 import classNames from "classnames";
 import { requestList } from "../../../../../api/request/request";
 import { FaEdit } from "react-icons/fa";
-import QuillEditor from "../../../../common/QuillEditor";
 import { groupApi } from "../../../../../api/group/group";
 import { mentorList } from "../../../../../api/mentor/mentor";
 import TextArea from "antd/es/input/TextArea";
@@ -36,14 +35,8 @@ interface ViewInfoPojectProps {
 const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
-  const [isHovered, setIsHovered] = useState(false);
   const [open, setOpen] = useState(false);
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
+
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
     queryFn: async () =>
@@ -99,11 +92,7 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
     <div className="bg-white p-4 w-full rounded">
       <Row gutter={16}>
         <Col span={12}>
-          <div
-            className="bg-gray-100 p-5 rounded h-full min-h-56 flex flex-col justify-around mb-10 shadow"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
+          <div className="bg-gray-100 p-5 rounded h-full min-h-56 flex flex-col justify-around mb-10 shadow">
             <FaEdit
               onClick={() => setOpen(true)}
               color="gray"

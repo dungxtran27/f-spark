@@ -144,4 +144,9 @@ groupRouter.post(
   verifyToken,
   GroupController.updateGroupInfo
 );
+groupRouter.post(
+  "/deleteTransaction",
+  verifyToken,
+  GroupController.deleteTransaction
+);
 export default groupRouter;

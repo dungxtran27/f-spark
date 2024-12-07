@@ -62,4 +62,7 @@ export const groupApi = {
   updateGroupInfo: async (requestBody: any) => {
     return await axios.post(`/api/group/updateGroupInfo`, requestBody);
   },
+  deleteTransaction: async (requestBody: any) => {
+    return await axios.post(`/api/group/deleteTransaction`, requestBody);
+  },
 };

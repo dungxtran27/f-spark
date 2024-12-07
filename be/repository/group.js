@@ -1263,6 +1263,39 @@ const updateGroupInfo = async ({ groupId, name, description, tags }) => {
     return new Error(error.message);
   }
 };
+const getTransactionByTransactionId = async (groupId, transactionId) => {
+  try {
+    const group = await Group.findById(groupId);
+
+    if (!group) {
+      throw new Error("Group not found.");
+    }
+
+    const transaction = group.transactions.find(
+      (transaction) => transaction._id.toString() === transactionId
+    );
+
+    if (!transaction) {
+      throw new Error("Transaction not found.");
+    }
+
+    return transaction;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const deleteTransaction = async (groupId, transactionId) => {
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $pull: {
+        transactions: { _id: transactionId },
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1306,4 +1339,6 @@ export default {
   getGroupStatistic,
   updateGroupSponsorStatus,
   updateGroupInfo,
+  deleteTransaction,
+  getTransactionByTransactionId,
 };

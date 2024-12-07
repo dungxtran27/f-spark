@@ -554,7 +554,7 @@ const getGroupsOfTerm = async (req, res) => {
 const addTransaction = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
-    const { title, fundUsed, transactionDate, evidence } = req.body;
+    const { title, fundUsed, evidence } = req.body;
     const student = await StudentRepository.findById(decodedToken?.role?.id);
     if (!student) {
       return res.status(403).json({ error: "Invalid Student Credential" });
@@ -562,7 +562,6 @@ const addTransaction = async (req, res) => {
     const result = await GroupRepository.addTransaction(student?.group, {
       title,
       fundUsed,
-      transactionDate,
       evidence,
     });
     return res
@@ -716,6 +715,38 @@ const updateGroupInfo = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const deleteTransaction = async (req, res) => {
+  try {
+    const { groupId, transactionId } = req.body;
+    if (!groupId || !transactionId) {
+      return res.status(400).json({ error: "Bad request" });
+    }
+    const foundTransaction =
+      await GroupRepository.getTransactionByTransactionId(
+        groupId,
+        transactionId
+      );
+    if (!foundTransaction) {
+      return res.status(400).json({ error: "Transaction not found" });
+    }
+    if (
+      foundTransaction.status == "approved" ||
+      foundTransaction.status == "rejected"
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Transaction is confirmed, cannot delete" });
+    }
+    const deleTransaction = await GroupRepository.deleteTransaction(
+      groupId,
+      transactionId
+    );
+
+    return res.status(200).json({ message: "Delete transaction Success" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupsOfTerm,
   createJourneyRow,
@@ -752,4 +783,5 @@ export default {
   getGroupStatistic,
   updateGroupSponsorStatus,
   updateGroupInfo,
+  deleteTransaction,
 };
