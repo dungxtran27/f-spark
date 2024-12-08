@@ -1,87 +1,106 @@
 import { useState } from "react";
 import { MdChat } from "react-icons/md";
+import { RootState } from "../../../redux/store";
+import { useSelector } from "react-redux";
+import { Term } from "../../../model/auth";
+import moment from "moment";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY } from "../../../utils/const";
+import { dashBoard } from "../../../api/dashboard/dashboard";
+import { requestDeadlineApi } from "../../../api/requestDeadline/requestDeadline";
 
-const InfoAndGroupDelay = () => {
+const InfoAndGroupDelay = ({
+  setInfoData,
+}: {
+  setInfoData: (data: any) => void;
+}) => {
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const filteredOutcomes =
+    activeTerm?.timeLine.filter((timeline: any) => {
+      return timeline.type === "outcome";
+    }) ?? [];
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedOutcome, setSelectedOutcome] = useState("Out come 1");
+  const [selectedOutcome, setSelectedOutcome] = useState(
+    filteredOutcomes.length > 0 ? filteredOutcomes[0] : null
+  );
+  const startDate = selectedOutcome?.startDate
+    ? moment(selectedOutcome.startDate).format("YYYY-MM-DD")
+    : moment().startOf("month").format("YYYY-MM-DD");
+  const endDate = selectedOutcome?.endDate
+    ? moment(selectedOutcome.endDate).format("YYYY-MM-DD")
+    : moment().endOf("month").format("YYYY-MM-DD");
 
-  const data = {
-    info: {
-      outcomes: ["Out come 1", "Out come 2", "Out come 3"],
-      endDate: "27 Nov, 2024",
-      remainingDays: 3,
-      status: "Pending",
-      totalAssignment: 6,
-      totalAnnounce: 1,
+  const { data } = useQuery({
+    queryKey: [QUERY_KEY.DASHBOARD_NEW],
+    queryFn: async () =>
+      (await dashBoard.getTotalClassWork(startDate, endDate)).data.data,
+  });
+  setInfoData(data);
+
+  const classIds =
+    data?.groupedClassWorks?.map((classWork: any) => classWork.classId) || [];
+
+  const { data: requestDeadlineList } = useQuery({
+    queryKey: [QUERY_KEY.DASHBOARD_REQUEST, classIds],
+    queryFn: async () => {
+      const results = await Promise.all(
+        classIds.map((classId: any) =>
+          requestDeadlineApi.getRequestDeadlineForDashBoard(classId)
+        )
+      );
+      return results.flatMap((result) => result.data);
     },
-    groupDelays: [
-      {
-        groupName: "Group 4 _ SE1705",
-        outcome: "Out come 1",
-        endDate: "24-11-2024",
-        grade: "No grade",
-      },
-      {
-        groupName: "Group 5 _ SE1705",
-        outcome: "Out come 1",
-        endDate: "24-11-2024",
-        grade: "No grade",
-      },
-    ],
-    requests: [
-      {
-        name: "Xin rời lịch",
-        group: "Group 1 _ SE1705",
-        endDate: "30 Nov, 2024",
-        status: "Pending",
-      },
-      {
-        name: "Xin rời lịch",
-        group: "Group 2 _ SE1706",
-        endDate: "29 Nov, 2024",
-        status: "Pending",
-      },
-    ],
-  };
+  });
+
+  const flatRequestList =
+    requestDeadlineList
+      ?.flatMap((item) => item.data)
+      ?.filter((detail) => detail.status === "approved") || [];
+
+  const flatRequestListDetail =
+    requestDeadlineList
+      ?.flatMap((item) => item.data)
+      ?.filter((detail) => detail.status === "pending") || [];
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
   };
 
   const handleSelectChange = (event: any) => {
-    setSelectedOutcome(event.target.value);
+    const selectedTitle = event.target.value;
+    const outcome = filteredOutcomes.find(
+      (item) => item.title === selectedTitle
+    );
+    setSelectedOutcome(outcome || null);
   };
 
   return (
-    <div className="relative w-2/6 rounded m-1">
-      <div className="bg-white rounded p-2 mb-2 space-y-2">
+    <div className="relative w-1/3 rounded ml-1 h-full">
+      <div className="bg-white rounded p-2 space-y-3 h-full">
         <div className="flex items-center justify-between">
           <select
-            value={selectedOutcome}
+            value={selectedOutcome?.title || ""}
             onChange={handleSelectChange}
             className="font-bold bg-white border rounded px-2 py-1 cursor-pointer"
           >
-            {data.info.outcomes.map((outcome, index) => (
-              <option key={index} value={outcome}>
-                {outcome}
+            {filteredOutcomes.map((outcome, index) => (
+              <option key={index} value={outcome.title}>
+                {outcome.title}
               </option>
             ))}
           </select>
-          <div className="relative">
-            <div
-              className="bg-gray-200 rounded p-1 cursor-pointer hover:bg-gray-400"
-              onClick={toggleDrawer}
-            >
-              <MdChat size={22} />
-            </div>
-            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
-              1
-            </span>
-          </div>
         </div>
         <p className="font-normal ml-2">
-          <span className="font-semibold mr-4">End Date: </span>
-          {data.info.endDate} (còn {data.info.remainingDays} ngày)
+          <span className="font-semibold mr-1">End Date: </span>
+          {selectedOutcome
+            ? moment(selectedOutcome.endDate).isValid()
+              ? moment(selectedOutcome.endDate).format("DD MMM, YYYY")
+              : "N/A"
+            : "N/A"}
         </p>
         <div className="flex justify-start ml-2">
           <div className="space-y-2 mr-7">
@@ -97,42 +116,103 @@ const InfoAndGroupDelay = () => {
           </div>
           <div className="space-y-2 text-left">
             <p>
-              <span className="font-semibold text-green-500">
-                {data.info.status}
+              <span
+                className={`font-semibold ${(() => {
+                  const today = new Date();
+                  const endDate = new Date(selectedOutcome?.endDate || "");
+                  const startDate = new Date(selectedOutcome?.startDate || "");
+
+                  if (endDate < today) {
+                    return "text-red-500";
+                  } else if (today >= startDate && today <= endDate) {
+                    return "text-green-500";
+                  } else {
+                    return "text-yellow-500";
+                  }
+                })()}`}
+              >
+                {(() => {
+                  const today = new Date();
+                  const endDate = new Date(selectedOutcome?.endDate || "");
+                  const startDate = new Date(selectedOutcome?.startDate || "");
+
+                  if (today < startDate) {
+                    return "Incoming";
+                  } else if (today >= startDate && today <= endDate) {
+                    return "Pending";
+                  } else {
+                    return "Overdue";
+                  }
+                })()}
+              </span>
+            </p>
+
+            <p className="border px-10 rounded">
+              <span className="font-semibold">
+                {data?.total?.totalCountAssignments}
               </span>
             </p>
             <p className="border px-10 rounded">
-              <span className="font-semibold">{data.info.totalAssignment}</span>
-            </p>
-            <p className="border px-10 rounded">
-              <span className="font-semibold">{data.info.totalAnnounce}</span>
+              <span className="font-semibold">
+                {" "}
+                {data?.total?.totalCountAnnouncements}
+              </span>
             </p>
           </div>
         </div>
-      </div>
-      <div className="bg-white rounded p-2">
-        <h2 className="font-bold text-lg mb-2">
-          Group delay deadline{" "}
-          <span className="text-red-500">({data.groupDelays.length})</span>
-        </h2>
-        {data.groupDelays.map((group, index) => (
-          <div key={index} className="bg-gray-200 rounded p-2 mb-2 space-y-1">
-            <p className="font-semibold">
-              <span className="bg-gray-400 px-1 w-14 rounded mr-1">
-                {group.groupName}
-              </span>
-              ({group.outcome})
-            </p>
-            <p className="text-sm">
-              <span className="font-semibold">End Date: </span>
-              {group.endDate}
-            </p>
-            <p>
-              <span className="font-semibold">Grade: </span>
-              <span className="text-red-500">{group.grade}</span>
-            </p>
+
+        <h2 className="font-bold text-lg mb-2 border-t-2 pt-5 flex items-center justify-between">
+          <p>
+            <span>Group delay deadline</span>
+            <span className="text-red-500">({flatRequestList.length})</span>
+          </p>
+          <div className="relative">
+            <div
+              className="bg-gray-200 rounded p-1 cursor-pointer hover:bg-gray-400"
+              onClick={toggleDrawer}
+            >
+              <MdChat size={22} />
+            </div>
+            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
+              {flatRequestListDetail.length}
+            </span>
           </div>
-        ))}
+        </h2>
+        <div className="max-h-[272px] overflow-y-auto">
+          {flatRequestList.map((group, index) => (
+            <div key={index} className="bg-gray-200 rounded p-2 mb-2 space-y-1">
+              <p className="font-semibold">
+                <span
+                  className="px-1 w-14 rounded mr-1"
+                  style={{ backgroundColor: "rgb(180,180,187)" }}
+                >
+                  {group.groupId?.GroupName || "Unknown Group"}
+                </span>
+                ({group.classworkId?.title || "Unknown Outcome"})
+              </p>
+              <p className="text-sm">
+                <span className="font-semibold">Date: </span>
+                <span className="font-semibold">
+                  {group.dueDate
+                    ? new Date(group.dueDate).toLocaleDateString()
+                    : "N/A"}
+                </span>{" "}
+                <span className="text-xl font-extralight">→ </span>
+                <span className="text-blue-500">
+                  {group.newDate
+                    ? new Date(group.newDate).toLocaleDateString()
+                    : "N/A"}
+                </span>
+              </p>
+              <p className="text-sm">
+                <span className="font-semibold">Status: </span>
+                <span className="font-semibold text-green-500">
+                  {group.status}
+                </span>
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
       {isDrawerOpen && (
         <div
@@ -147,22 +227,50 @@ const InfoAndGroupDelay = () => {
           </button>
           <h2 className="font-bold text-lg mb-4">Request Details</h2>
           <div className="space-y-4">
-            {data.requests.map((request, index) => (
-              <div key={index} className="bg-gray-100 p-3 rounded shadow">
-                <div className="flex justify-between">
-                  <p className="font-semibold">{request.name}</p>
-                  <p className="text-sm text-gray-500">{request.group}</p>
+            <div>
+              {flatRequestListDetail.map((group, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-200 rounded p-2 mb-2 space-y-1"
+                >
+                  <p className="font-semibold">
+                    <span
+                      className="px-1 w-14 rounded mr-1"
+                      style={{ backgroundColor: "rgb(180,180,187)" }}
+                    >
+                      {group.groupId?.GroupName || "Unknown Group"}
+                    </span>
+                    ({group.classworkId?.title || "Unknown Outcome"})
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-semibold">Due Date: </span>
+                    <span className="text-[16px]">
+                      {group.dueDate
+                        ? new Date(group.dueDate).toLocaleDateString()
+                        : "N/A"}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="font-semibold">New Date: </span>
+                    <span className="text-blue-500">
+                      {group.newDate
+                        ? new Date(group.newDate).toLocaleDateString()
+                        : "N/A"}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="font-semibold">Reason: </span>
+                    {group.reason || "No reason provided"}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Status: </span>
+                    <span className="text-red-500">
+                      {group.status || "N/A"}
+                    </span>
+                  </p>
                 </div>
-                <p className="text-sm mt-2">
-                  <span className="font-semibold">End Date: </span>
-                  <span className="text-blue-500">{request.endDate}</span>
-                </p>
-                <p>
-                  <span className="font-semibold">Status: </span>
-                  <span className="text-red-500">{request.status}</span>
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}

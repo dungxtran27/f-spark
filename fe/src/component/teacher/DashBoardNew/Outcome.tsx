@@ -1,79 +1,50 @@
+import moment from "moment";
 import { ImNotification } from "react-icons/im";
 
-const Outcome = () => {
-  const data = {
-    outcomes: [
-      {
-        group: "SE1708",
-        endDate: "27 Nov, 2024",
-        remainingDays: 3,
-        outcome: "5/6",
-        gradedOutcome: "5/6",
-      },
-      {
-        group: "SE1706",
-        endDate: "27 Nov, 2024",
-        remainingDays: 3,
-        outcome: "6/6",
-        gradedOutcome: "6/6",
-      },
-      {
-        group: "SE1707",
-        endDate: "27 Nov, 2024",
-        remainingDays: 3,
-        outcome: "6/6",
-        gradedOutcome: "6/6",
-      },
-    ],
-  };
-
+const Outcome = ({ infoData }: { infoData: any }) => {
   return (
-    <div className="w-2/6 bg-white rounded m-1 p-2">
+    <div className="w-2/3 bg-white rounded p-2 h-full">
       <h1 className="font-bold mb-2">Outcome</h1>
-      {data.outcomes.map((item, index) => (
-        <div key={index} className="bg-gray-200 p-2 rounded mb-2">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold bg-gray-400 px-1 w-14 rounded">
-              {item.group}
-            </h2>
-            {!(item.outcome === "6/6" && item.gradedOutcome === "6/6") && (
-              <ImNotification size={20} className="text-red-500" />
-            )}
-          </div>
-          <div className="bg-gray-200 p-1">
-            <p>
-              <span className="font-semibold"> End Date: </span>
-              <span className="font-normal">
-                {item.endDate} (còn {item.remainingDays} ngày )
-              </span>
-            </p>
-            <p className="font-semibold">
-              Outcome:{" "}
-              <span
-                className={
-                  item.outcome === "6/6" && item.gradedOutcome === "6/6"
-                    ? ""
-                    : "text-red-500"
-                }
+      <div>
+        {infoData?.groupedClassWorks?.map((item: any) => (
+          <div className="bg-gray-200 p-2 rounded mb-2">
+            <div className="flex items-center justify-between">
+              <h2
+                className="font-semibold px-1 rounded"
+                style={{ backgroundColor: "rgb(180,180,187)" }}
               >
-                {item.outcome}
-              </span>
-            </p>
-            <p className="font-semibold">
-              Graded Outcome:{" "}
-              <span
-                className={
-                  item.outcome === "6/6" && item.gradedOutcome === "6/6"
-                    ? ""
-                    : "text-red-500"
-                }
-              >
-                {item.gradedOutcome}
-              </span>
-            </p>
+                {item.className}
+              </h2>
+              {item.totalSubmissions === item.totalGroups && (
+                <ImNotification size={20} className="text-red-500" />
+              )}
+            </div>
+            <div className="bg-gray-200 p-1 text-sm">
+              <p>
+                <span className="font-semibold"> End Date: </span>
+                <span className="font-normal">
+                  {item?.outcomes?.endDate
+                    ? moment(item.outcomes.endDate).format("DD MMM, YYYY")
+                    : "No data"}
+                </span>
+              </p>
+              <p className="font-semibold">
+                <span> Outcome: </span>
+                <span
+                  className={
+                    item.totalSubmissions !== item.totalGroups
+                      ? ""
+                      : "text-red-500"
+                  }
+                >
+                  {item?.outcomes?.totalSubmissions}
+                </span>
+                <span>/{item?.outcomes?.totalGroups} </span>
+              </p>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
