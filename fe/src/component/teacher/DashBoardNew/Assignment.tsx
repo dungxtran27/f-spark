@@ -1,4 +1,5 @@
 import moment from "moment";
+import { Link } from "react-router-dom";
 
 const Assignment = ({ infoData }: { infoData: any }) => {
   return (
@@ -8,12 +9,13 @@ const Assignment = ({ infoData }: { infoData: any }) => {
         {infoData?.groupedClassWorks?.map((assignment: any) => (
           <div className="bg-gray-200 p-2 rounded mb-1">
             <div className="flex items-center justify-between">
-              <h2
-                className="font-semibold px-1 mb-2 rounded"
+              <Link
+                to={`/class/${assignment?.classId}`}
+                className="font-semibold px-1 mb-2 rounded hover:text-blue-700 hover:underline"
                 style={{ backgroundColor: "rgb(180,180,187)" }}
               >
                 {assignment?.className}
-              </h2>
+              </Link>
             </div>
             <div>
               {assignment?.assignments?.length > 0 ? (

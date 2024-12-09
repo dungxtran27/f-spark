@@ -1,5 +1,6 @@
 import moment from "moment";
 import { ImNotification } from "react-icons/im";
+import { Link } from "react-router-dom";
 
 const Outcome = ({ infoData }: { infoData: any }) => {
   return (
@@ -9,12 +10,13 @@ const Outcome = ({ infoData }: { infoData: any }) => {
         {infoData?.groupedClassWorks?.map((item: any) => (
           <div className="bg-gray-200 p-2 rounded mb-2">
             <div className="flex items-center justify-between">
-              <h2
-                className="font-semibold px-1 rounded"
+              <Link
+                to={`/class/${item?.classId}`}
+                className="font-semibold px-1 rounded hover:text-blue-700 hover:underline"
                 style={{ backgroundColor: "rgb(180,180,187)" }}
               >
                 {item.className}
-              </h2>
+              </Link>
               {item.totalSubmissions === item.totalGroups && (
                 <ImNotification size={20} className="text-red-500" />
               )}

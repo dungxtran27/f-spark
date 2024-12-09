@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../utils/const";
 import { dashBoard } from "../../../api/dashboard/dashboard";
 import { requestDeadlineApi } from "../../../api/requestDeadline/requestDeadline";
+import { Link } from "react-router-dom";
 
 const InfoAndGroupDelay = ({
   setInfoData,
@@ -182,12 +183,13 @@ const InfoAndGroupDelay = ({
           {flatRequestList.map((group, index) => (
             <div key={index} className="bg-gray-200 rounded p-2 mb-2 space-y-1">
               <p className="font-semibold">
-                <span
-                  className="px-1 w-14 rounded mr-1"
+                <Link
+                  to={`/class/${group?.classId}`}
+                  className="px-1 w-14 rounded mr-1 hover:text-blue-700 hover:underline"
                   style={{ backgroundColor: "rgb(180,180,187)" }}
                 >
                   {group.groupId?.GroupName || "Unknown Group"}
-                </span>
+                </Link>
                 ({group.classworkId?.title || "Unknown Outcome"})
               </p>
               <p className="text-sm">
@@ -234,12 +236,13 @@ const InfoAndGroupDelay = ({
                   className="bg-gray-200 rounded p-2 mb-2 space-y-1"
                 >
                   <p className="font-semibold">
-                    <span
-                      className="px-1 w-14 rounded mr-1"
+                    <Link
+                      to={`/class/${group?.classId}`}
+                      className="px-1 w-14 rounded mr-1 hover:text-blue-700 hover:underline"
                       style={{ backgroundColor: "rgb(180,180,187)" }}
                     >
                       {group.groupId?.GroupName || "Unknown Group"}
-                    </span>
+                    </Link>
                     ({group.classworkId?.title || "Unknown Outcome"})
                   </p>
                   <p className="text-sm">
