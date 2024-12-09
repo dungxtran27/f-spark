@@ -29,10 +29,25 @@ const createRequest = async (req, res) => {
       groupId,
       actionType
     );
-
-    if (!actionType) {
+    if (!studentId) {
       return res.status(400).json({
-        error: "Invalid action type.",
+        error: "Student ID is missing or invalid.",
+      });
+    }
+    const student = await StudentRepository.findById(studentId);
+    if (!student) {
+      return res.status(404).json({
+        error: "Student not found",
+      });
+    }
+    if (!groupId) {
+      return res.status(400).json({
+        error: "Group ID is missing or invalid.",
+      });
+    }
+    if (!actionType || !["join", "leave", "delete"].includes(actionType)) {
+      return res.status(400).json({
+        error: "Invalid or missing action type. Valid action types are: 'join', 'leave', or 'delete'.",
       });
     }
 

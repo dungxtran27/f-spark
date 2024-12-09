@@ -18,7 +18,21 @@ const createSubmission = async (req, res) => {
     }
     const classworkId = req.query.classworkId;
     const studentId = req.decodedToken.role.id;
+    if (!classworkId) {
+      return res.status(400).json({
+        error: "Classwork ID is required.",
+      });
+    }
+    const classworkfind = await ClassworkRepository.getClassworkByClassworkId(
+      new mongoose.Types.ObjectId(classworkId)
+    );
 
+    // Check if classwork exists
+    if (!classworkfind) {
+      return res.status(404).json({
+        error: "Classwork not found.",
+      });
+    }
     const createSubmiss = await SubmissionRepository.createSubmission({
       groupId: req.groupId,
       studentId,
@@ -36,8 +50,8 @@ const createSubmission = async (req, res) => {
     const teacher = await TeacherRepository.getTeacherAccountByClassId(
       new mongoose.Types.ObjectId(student.classId)
     )
-    
-    if(createSubmiss) {
+
+    if (createSubmiss) {
       const notificationData = {
         class: student.classId,
         sender: studentId,
@@ -57,13 +71,13 @@ const createSubmission = async (req, res) => {
         data: notificationData,
       })
       const socketIds = userSocketMap[teacher?.account.toString()];
-        if (socketIds) {
-          io.to(socketIds).emit(
-            "newNotification",
-            `Assignment ${classwork?.title} has a new submission`
-          );
-        }
-    }    
+      if (socketIds) {
+        io.to(socketIds).emit(
+          "newNotification",
+          `Assignment ${classwork?.title} has a new submission`
+        );
+      }
+    }
 
     return res
       .status(201)
@@ -79,12 +93,29 @@ const addGrade = async (req, res) => {
     const criteriaObjectIds = criteria.map(
       (id) => new mongoose.Types.ObjectId(id)
     );
-
+    if (!grade || grade <= 1 || grade >= 10) {
+      return res.status(400).json({
+        error: "Grade must be between 1 and 10.",
+      });
+    }
+    if (!submissionId || !mongoose.Types.ObjectId.isValid(submissionId)) {
+      return res.status(400).json({
+        error: "Invalid or missing submission ID.",
+      });
+    }
+    const submission = await SubmissionRepository.getSubmissionById(
+      new mongoose.Types.ObjectId(submissionId)
+    );
+    if (!submission) {
+      return res.status(404).json({
+        error: "Submission not found.",
+      });
+    }
     const updateGrade = await SubmissionRepository.addGrade({
       submissionId: new mongoose.Types.ObjectId(submissionId),
       grade,
       criteria: criteriaObjectIds,
-    });    
+    });
     if (updateGrade) {
       const notificationData = {
         group: updateGrade?.group,
@@ -105,7 +136,7 @@ const addGrade = async (req, res) => {
       });
       const studentsOfGroup = await StudentRepository.getStudentsByGroup(
         updateGrade?.group
-      );      
+      );
       studentsOfGroup.forEach((s) => {
         const socketIds = userSocketMap[s?.account?.toString()];
         if (socketIds) {
@@ -128,6 +159,17 @@ const getSubmissionsOfClassWork = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
     const { classworkId } = req.params;
+    if (!classworkId || !mongoose.Types.ObjectId.isValid(classworkId)) {
+      return res.status(400).json({
+        error: "Invalid or missing classworkId. It must be a valid ObjectId.",
+      });
+    }
+    const classworkExists = await ClassworkRepository.getClassworkByClassworkId(
+      new mongoose.Types.ObjectId(classworkId)
+    );
+    if (!classworkExists) {
+      return res.status(404).json({ error: "Classwork not found" });
+    }
     const submissions = await SubmissionRepository.getSubmissionsOfClassWork(
       classworkId,
       decodedToken?.role?.id
@@ -140,7 +182,7 @@ const getSubmissionsOfClassWork = async (req, res) => {
 const getSubmissionsByGroup = async (req, res) => {
   try {
     const { groupId } = req.query;
-        if (!groupId) {
+    if (!groupId) {
       return res.status(400).json({ message: 'groupId is required' });
     }
     const submissions = await SubmissionRepository.getSubmissionsByGroupId(groupId);

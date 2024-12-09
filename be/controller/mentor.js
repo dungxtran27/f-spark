@@ -1,4 +1,4 @@
-import { MentorRepository, TermRepository } from "../repository/index.js";
+import { GroupRepository, MentorRepository, TermRepository } from "../repository/index.js";
 import mongoose from "mongoose";
 
 export const viewAllMentors = async (req, res) => {
@@ -42,8 +42,26 @@ const getMentor = async (req, res) => {
 const assignMentor = async (req, res) => {
   try {
     const { mentorId, groupId } = req.body;
-    if (!groupId || !mentorId) {
-      return res.status(500).json({ error: "Thiếu groupId hoặc mentorId" });
+    if (!mentorId || !groupId) {
+      return res.status(400).json({ error: "mentorId and groupId are required" });
+    }
+    const mentorExists = await MentorRepository.getMentor(mentorId);
+    if (!mentorExists) {
+      return res.status(404).json({ error: "Mentor not found" });
+    }
+    const groupExists = await GroupRepository.findbyId(groupId);
+    if (!groupExists) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(mentorId)) {
+      return res.status(400).json({ error: "Invalid mentorId" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ error: "Invalid groupId" });
+    }
+    if (groupExists.mentor) {
+      return res.status(400).json({ error: "Group already has a mentor" });
     }
     const updateMentor = await MentorRepository.assignMentor({
       mentorId: new mongoose.Types.ObjectId(mentorId),
@@ -74,10 +92,23 @@ const getAllAccMentor = async (req, res) => {
 };
 const getMentorGroups = async (req, res) => {
   const mentorId = req.params.mentorId;
+  if (!mentorId) {
+    return res.status(400).json({ error: "mentorId is required" });
+  }
+  if (!mongoose.Types.ObjectId.isValid(mentorId)) {
+    return res.status(400).json({ error: "Invalid mentorId" });
+  }
   try {
+    const mentorExists = await MentorRepository.getMentor(mentorId);
+    if (!mentorExists) {
+      return res.status(404).json({ error: "Mentor not found" });
+    }
     const groupInfo = await MentorRepository.getMentorAssignedGroupInfo(
       mentorId
     );
+    if (!groupInfo.assignedGroup || groupInfo.assignedGroup.length === 0) {
+      return res.status(404).json({ error: "No groups found for this mentor" });
+    }
     return res.status(200).json({ data: groupInfo });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -85,9 +116,19 @@ const getMentorGroups = async (req, res) => {
 };
 const getTotalMentors = async (req, res) => {
   try {
-    const { termCode } = req.body; 
-    
-    const result = await MentorRepository.getTotalMentors(termCode); 
+    const { termCode } = req.body;
+    if (!termCode) {
+      return res.status(400).json({ error: "termCode is required" });
+    }
+    const termCodeRegex = /^[A-Za-z]{2}\d{2}$/;
+    if (!termCodeRegex.test(termCode)) {
+      return res.status(400).json({ error: "Invalid termCode format, expected like 'SU24'" });
+    }
+    const termExists = await TermRepository.findTermByCode(termCode);
+    if (!termExists) {
+      return res.status(404).json({ error: `Term code not found` });
+    }
+    const result = await MentorRepository.getTotalMentors(termCode);
     res.status(200).json({
       data: result
     });

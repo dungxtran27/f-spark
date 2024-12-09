@@ -1,9 +1,25 @@
-import { TeacherRepository, TermRepository } from "../repository/index.js";
+import { ClassRepository, TeacherRepository, TermRepository } from "../repository/index.js";
 import mongoose from "mongoose";
 const getTeacherByClassId = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const teachers = await StudentRepository.getTeacherByClassId(classId);
+    if (!classId || !mongoose.Types.ObjectId.isValid(classId)) {
+      return res.status(400).json({
+        error: "Invalid or missing classId. It must be a valid ObjectId.",
+      });
+    }
+    const classExists = await ClassRepository.findClassById(
+      new mongoose.Types.ObjectId(classId)
+    );
+    if (!classExists) {
+      return res.status(404).json({ error: "Class not found" });
+    }
+    const teachers = await TeacherRepository.getTeacherByClassId(classId);
+    if (!teachers || teachers.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No teachers found for the specified class." });
+    }
     return res.status(201).json({ data: teachers });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -12,7 +28,7 @@ const getTeacherByClassId = async (req, res) => {
 
 const getAllAccTeacher = async (req, res) => {
   try {
-    const { page, limit, searchText, status, term} = req.body;
+    const { page, limit, searchText, status, term } = req.body;
     const activeTerm = await TermRepository.getActiveTerm();
     const teachers = await TeacherRepository.getAllAccTeacher(
       page,
@@ -41,13 +57,13 @@ const getTeacherInfo = async (req, res) => {
       profilePicture: teacher.profilePicture,
       classes:
         Array.isArray(teacher.assignedClasses) &&
-        teacher.assignedClasses.length > 0
+          teacher.assignedClasses.length > 0
           ? teacher.assignedClasses.map((assignedClass) => ({
-              classCode: assignedClass.classCode,
-              backgroundImage: assignedClass.backgroundImage,
-              studentCount: assignedClass.studentCount || 0,
-              groupCount: assignedClass.groupCount || 0,
-            }))
+            classCode: assignedClass.classCode,
+            backgroundImage: assignedClass.backgroundImage,
+            studentCount: assignedClass.studentCount || 0,
+            groupCount: assignedClass.groupCount || 0,
+          }))
           : [],
     };
     res.status(200).json({ data: formattedData });
@@ -58,8 +74,15 @@ const getTeacherInfo = async (req, res) => {
 };
 const getTotalTeachers = async (req, res) => {
   try {
-    const { termCode } = req.body; 
-    const result = await TeacherRepository.getTotalTeachers(termCode); 
+    const { termCode } = req.body;
+    if (!termCode || typeof termCode !== "string") {
+      return res.status(400).json({ error: "Invalid or missing termCode" });
+    }
+    const termExists = await TermRepository.findTermByCode(termCode);
+    if (!termExists) {
+      return res.status(404).json({ error: "Term not found" });
+    }
+    const result = await TeacherRepository.getTotalTeachers(termCode);
     res.status(200).json({
       data: result
     });

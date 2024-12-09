@@ -124,6 +124,13 @@ const getFillterTerm = async (req, res) => {
 const deleteTermIncoming = async (req, res) => {
   try {
     const { termCode } = req.query;
+    if (!termCode || typeof termCode !== "string") {
+      return res.status(400).json({ error: "Invalid or missing termCode" });
+    }
+    const termExists = await TermRepository.findTermByCode(termCode);
+    if (!termExists) {
+      return res.status(404).json({ error: "Term not found" });
+    }
     await TermRepository.deleteTerm({ termCode });
     return res.status(200).json({ message: "The term has been successfully deleted" });
   } catch (error) {
@@ -131,11 +138,26 @@ const deleteTermIncoming = async (req, res) => {
   }
 };
 
-const getTimelineOfTerm = async (req,res) => {
+const getTimelineOfTerm = async (req, res) => {
   try {
     const termId = req.params.termId;
+    if (!termId || !mongoose.Types.ObjectId.isValid(termId)) {
+      return res.status(400).json({
+        error: "Invalid or missing termId. It must be a valid ObjectId.",
+      });
+    }
+    const termExists = await TermRepository.findById(
+      new mongoose.Types.ObjectId(termId)
+    );
+    if (!termExists) {
+      return res.status(404).json({ error: "Term not found" });
+    }
     const term = await TermRepository.getTimelineOfTerm(new mongoose.Types.ObjectId(termId));
-    
+    if (!term || !term.timeline || term.timeline.length === 0) {
+      return res.status(404).json({
+        error: "No timeline data found for the specified term.",
+      });
+    }
     return res.status(200).json({ data: term });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -143,9 +165,9 @@ const getTimelineOfTerm = async (req,res) => {
 }
 const createTimelineOfTerm = async (req, res) => {
   try {
-    const {title, type, description, startDate, endDate, termId} = req.body;
+    const { title, type, description, startDate, endDate, termId } = req.body;
     const termObjectId = new mongoose.Types.ObjectId(termId)
-    const result = await TermRepository.createTimelineOfTerm({title, type, description, startDate, endDate, termObjectId})
+    const result = await TermRepository.createTimelineOfTerm({ title, type, description, startDate, endDate, termObjectId })
     return res.status(201).json({ data: result, message: "Create Timeline Success" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -154,12 +176,12 @@ const createTimelineOfTerm = async (req, res) => {
 
 const deleteTimelineOfTerm = async (req, res) => {
   try {
-    const {timelineId, termId} = req.body;
+    const { timelineId, termId } = req.body;
     console.log(timelineId);
-    
+
     const tId = new mongoose.Types.ObjectId(timelineId)
     const termObjectId = new mongoose.Types.ObjectId(termId)
-    const result = await TermRepository.deleteTimelineOfTerm({tId, termObjectId})
+    const result = await TermRepository.deleteTimelineOfTerm({ tId, termObjectId })
     return res.status(201).json({ data: result, message: "Delete Timeline Success" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -168,10 +190,10 @@ const deleteTimelineOfTerm = async (req, res) => {
 
 const updateTimelineOfTerm = async (req, res) => {
   try {
-    const {title, type, description, startDate, endDate, termId, timelineId} = req.body;
+    const { title, type, description, startDate, endDate, termId, timelineId } = req.body;
     const termObjectId = new mongoose.Types.ObjectId(termId)
     const tId = new mongoose.Types.ObjectId(timelineId)
-    const result = await TermRepository.updateTimelineOfTerm({title, type, description, startDate, endDate, termObjectId, tId})
+    const result = await TermRepository.updateTimelineOfTerm({ title, type, description, startDate, endDate, termObjectId, tId })
     return res.status(201).json({ data: result, message: "Update Timeline Success" });
   } catch (error) {
     return res.status(500).json({ error: error.message });

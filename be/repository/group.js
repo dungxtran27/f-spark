@@ -1245,6 +1245,14 @@ const updateGroupSponsorStatus = async ({ groupId, status }) => {
     throw new Error(error.message);
   }
 };
+const findbyId = async (groupId) => {
+  try {
+    const group = await Group.findById(groupId);
+    return group;
+  } catch (error) {
+    throw new Error("Group not found");
+  }
+}
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1287,4 +1295,5 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
+  findbyId
 };

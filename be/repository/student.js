@@ -560,9 +560,9 @@ const getTotalStudentsByTerm = async (termCode) => {
     throw new Error(`Failed to fetch students: ${error.message}`);
   }
 };
-
-
-
+const findStudentsByIds = async (studentIds) => {
+  return await Student.find({ '_id': { $in: studentIds } });
+};
 
 
 export default {
@@ -579,5 +579,6 @@ export default {
   getAllStudentUngroupByClassIds,
   findStudentDetailByAccountId,
   getAllStudentByGroupId,
-  getTotalStudentsByTerm
+  getTotalStudentsByTerm,
+  findStudentsByIds
 };
