@@ -6,12 +6,13 @@ import Classwork from "../model/ClassWork.js";
 import { TermRepository } from "./index.js";
 import Outcome from "../model/Outcome.js";
 import Group from "../model/Group.js";
-const getClassesOfTeacher = async (teacherId) => {
+const getClassesOfTeacher = async ({ teacherId, termId }) => {
   try {
     const classes = await Class.aggregate([
       {
         $match: {
           teacher: new mongoose.Types.ObjectId(teacherId),
+          term: new mongoose.Types.ObjectId(termId),
         },
       },
       {
@@ -597,7 +598,7 @@ const assignTeacher = async (classId, teacherId) => {
       },
     });
     console.log(result, classId);
-    
+
     return result;
   } catch (error) {
     throw new Error(error.message);
