@@ -3,6 +3,7 @@ import { useState } from "react";
 import Requesting from "./Requesting";
 import Distributing from "./Distributing/Distributing";
 import { IoDownloadOutline } from "react-icons/io5";
+import Return from "./Return";
 const Process = ({
   current,
   setCurrentStep,
@@ -15,10 +16,12 @@ const Process = ({
     <div className="flex flex-col gap-8">
       <div className="flex justify-between">
         <h1 className="font-semibold text-lg">SponsorShip management</h1>
-        <Button type="primary">
-          <IoDownloadOutline size={20} />
-          document
-        </Button>
+        <a href="../../../utils/SBS.rar" download="SBS.rar">
+          <Button type="primary">
+            <IoDownloadOutline size={20} />
+            document
+          </Button>
+        </a>
       </div>
       <Steps
         current={current}
@@ -53,7 +56,7 @@ const MoneyWrapper = () => {
       case 1:
         return <Distributing />;
       case 2:
-        return <Distributing />;
+        return <Return />;
     }
   };
   return (

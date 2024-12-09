@@ -48,6 +48,7 @@ const PaymentModal = ({ isOpen, setIsOpen, request }: Props) => {
       });
     },
   });
+
   return (
     <Modal
       open={isOpen}
@@ -102,13 +103,29 @@ const PaymentModal = ({ isOpen, setIsOpen, request }: Props) => {
               ).toLocaleString()}{" "}
               VNĐ
             </span>
-          </div>
+          </div>{" "}
           <div className="flex items-center gap-2">
             <span className="font-semibold">Status: </span>
             <div className="flex items-center gap-1">
               <Tag color="orange">Pending</Tag>→
               <Tag color="green">Payment completed</Tag>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Account Name: </span>
+            <span>{request?.bankingInfo.accountName}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Account Number: </span>
+            <span>{request?.bankingInfo.accountNumber}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Bank Code: </span>
+            <span>{request?.bankingInfo.bankCode}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Branch: </span>
+            <span>{request?.bankingInfo.branch}</span>
           </div>
           <div className="flex flex-col gap-5 flex-grow">
             <span className="font-semibold">Bill: </span>

@@ -76,7 +76,6 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
       });
     },
   });
-
   const options: SelectProps["options"] = tagData?.map((i: any) => ({
     label: i.name,
     value: i._id,
@@ -205,7 +204,7 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
                         </div>
                       </div>
                       <div className={classNames(styles.deletebtn_container)}>
-                        {userId !== member?.account?._id ? (
+                        {userId !== member?._id ? (
                           <Button
                             type="link"
                             onClick={() => {

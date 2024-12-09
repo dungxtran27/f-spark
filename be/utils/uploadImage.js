@@ -13,7 +13,7 @@ export const uploadImage = async (file) => {
         { resource_type: "image" },
         (error, result) => {
           if (error) {
-            console.error("Upload 1Error:", error);
+            console.error("Upload Error:", error);
             return reject(error);
           }
           resolve(result);

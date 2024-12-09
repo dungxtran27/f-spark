@@ -179,6 +179,15 @@ const updateTimelineOfTerm = async ({ title, type, description, startDate, endDa
     return new Error(error);
   }
 }
+
+const getTermByTermId = async (termId) => {
+  try {
+    const term = await Term.findById(termId);
+    return term;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   getAllTerms,
   createTerms,
@@ -194,5 +203,6 @@ export default {
   getTimelineOfTerm,
   createTimelineOfTerm,
   deleteTimelineOfTerm,
-  updateTimelineOfTerm
+  updateTimelineOfTerm,
+  getTermByTermId,
 };

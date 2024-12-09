@@ -1,3 +1,4 @@
+import React from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -5,47 +6,62 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  TimeScale,
   Title,
   Tooltip,
   Legend,
 } from "chart.js";
+import dayjs from "dayjs";
+import { DATE_FORMAT } from "../../../../utils/const";
 
-// Register the necessary components of Chart.js
+import "chartjs-adapter-luxon";
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  TimeScale,
   Title,
   Tooltip,
   Legend
 );
-
-const TransactionChart = () => {
-  const data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"], // X-axis labels
+interface TransactionProp {
+  termId: string;
+  transactions: any;
+}
+const TransactionChart: React.FC<TransactionProp> = ({ transactions }) => {
+  const chartData = {
+    labels: transactions.map((t: any) =>
+      dayjs(t?.createdAt).format(DATE_FORMAT.withoutYear)
+    ),
     datasets: [
       {
-        label: "Sales Data",
-        data: [65, 59, 80, 81, 56, 55, 40], // Y-axis data points
+        label: "Transaction Titles",
+        data: transactions.map((t: any) => t.fundUsed),
         fill: false,
         borderColor: "#AC7AF7",
         tension: 0.1,
+        // Point styles can also be customized if desired
       },
     ],
   };
 
-  // Options to customize the chart
   const options = {
     responsive: true,
     plugins: {
       title: {
         display: true,
-        text: "Sales Data over Time",
+        text: "Money Spent (Last 4 Months)",
       },
       tooltip: {
-        mode: "index", // Valid mode values are 'index', 'dataset', 'point', 'nearest', 'x', or 'y'
-        intersect: false,
+        callbacks: {
+          label: function (context: any) {
+            const dateLabel = dayjs(context.raw.x).format(
+              DATE_FORMAT.withoutYear
+            );
+            return `${context.raw.y}: ${dateLabel}`;
+          },
+        },
       },
     },
     scales: {
@@ -58,17 +74,27 @@ const TransactionChart = () => {
       y: {
         title: {
           display: true,
-          text: "Sales",
+          text: "Amount Spent (VND)",
         },
-        min: 0, // Optional: set min value for Y axis
+        min: 0,
+        max: 10000000,
+        ticks: {
+          stepSize: 100000,
+          callback: (value: any) =>
+            value.toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }),
+        },
       },
     },
   };
 
   return (
     <div className="pt-3 w-1/2">
-        <span className="text-lg font-semibold ">Fund usage</span>
-      <Line data={data} options={options}/>
+      <span className="text-lg font-semibold">Money Spent</span>
+      {/* <Line data={chartData} options={options} /> */}
+      <Line data={chartData} options={options} />
     </div>
   );
 };

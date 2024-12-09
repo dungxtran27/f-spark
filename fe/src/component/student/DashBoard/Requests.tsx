@@ -21,7 +21,7 @@ const Requests = () => {
           <span className="text-yellow-500">Pending</span>
         </div>
         <div className="flex justify-between items-center border-b-2 p-2 mb-2 border-gray-300">
-          <p className="font-medium">Rời nhóm</p>
+          <p className="font-medium">Leave Groups</p>
           <div className="space-x-2">
             <Avatar size="small" src="path/to/chu-thang-image.jpg" />
             <span className="text-sm text-gray-500">Chu Thắng</span>
@@ -30,12 +30,12 @@ const Requests = () => {
             <BsFillPersonCheckFill className="text-green-500" />
             <BsFillPersonCheckFill className="text-green-500" />
             <BsFillPersonCheckFill className="text-green-500" />
-            <BsPersonXFill  className="text-red-500" />
-            <BsPersonXFill  className="text-red-500" />
+            <BsPersonXFill className="text-red-500" />
+            <BsPersonXFill className="text-red-500" />
           </div>
         </div>
         <div className="flex justify-between items-center border-b-2 p-2 mb-2 border-gray-300">
-          <p className="font-medium">Rời nhóm</p>
+          <p className="font-medium">Leave Group</p>
           <div className="space-x-2">
             <Avatar size="small" src="path/to/chu-thang-image.jpg" />
             <span className="text-sm text-gray-500">Chu Sơn</span>

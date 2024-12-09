@@ -78,10 +78,14 @@ const pinClasswork = async (req, res) => {
 };
 
 const getAllClasses = async (req, res) => {
+  console.log("hhh");
+
   try {
     const classes = await ClassRepository.getAllClasses();
     return res.status(200).json({ data: classes });
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json({ error: error.message });
   }
 };
@@ -147,6 +151,7 @@ const createClass = async (req, res) => {
 };
 
 const getClassDetail = async (req, res) => {
+  console.log("kkk");
   try {
     const { classId } = req.params;
     const result = await ClassRepository.findClassById(classId);
@@ -161,22 +166,24 @@ const getClassDetail = async (req, res) => {
 
 const assignTeacher = async (req, res) => {
   try {
-    const {teacherId, classId} = req.body;
+    const { teacherId, classId } = req.body;
     console.log(teacherId, classId);
-    
+
     const existClass = await ClassRepository.findClassById(classId);
-    if(existClass?.teacher){
-      return res.status(400).json({error: "This class already have a teacher !"})
+    if (existClass?.teacher) {
+      return res
+        .status(400)
+        .json({ error: "This class already have a teacher !" });
     }
     const [updatedClass, updatedTeacher] = await Promise.all([
       ClassRepository.assignTeacher(classId, teacherId),
-      TeacherRepository.assignClass(classId, teacherId)
+      TeacherRepository.assignClass(classId, teacherId),
     ]);
     return res.status(200).json({ message: "Assigned successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-}
+};
 export default {
   pinClasswork,
   getClassesOfTeacher,
@@ -185,5 +192,5 @@ export default {
   getTeacherDashboardInfo,
   createClass,
   getClassDetail,
-  assignTeacher
+  assignTeacher,
 };

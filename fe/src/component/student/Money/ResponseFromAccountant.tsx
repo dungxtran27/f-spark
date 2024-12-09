@@ -1,9 +1,9 @@
 import { Image, Result, Statistic } from "antd";
-import { FaRegClock } from "react-icons/fa6";
+// import { FaRegClock } from "react-icons/fa6";
 
 const Response = () => {
-  const paymentStatus = true;
-  const moneyData = { requested: 10000000, funded: 7000000, spent: 10000000 };
+  const paymentStatus = false;
+  const moneyData = { requested: 10000000, funded: 7000000, spent: 800000 };
   const spare = moneyData.funded - moneyData.spent;
   return (
     <>
@@ -18,7 +18,7 @@ const Response = () => {
         title="Please wait for confirming"
       />
     </div> */}
-      <div className="w-[35%]">
+      <div className="w-[35%] bg-white">
         {paymentStatus === false ? (
           <>
             {" "}

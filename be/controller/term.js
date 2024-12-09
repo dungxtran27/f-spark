@@ -141,6 +141,18 @@ const getTimelineOfTerm = async (req,res) => {
     return res.status(500).json({ error: error.message });
   }
 }
+const getTermByTermId = async (req, res) => {
+  try {
+    const termId = req.params.termId;
+    const term = await TermRepository.getTermByTermId(
+      new mongoose.Types.ObjectId(termId)
+    );
+
+    return res.status(200).json({ data: term });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 const createTimelineOfTerm = async (req, res) => {
   try {
     const {title, type, description, startDate, endDate, termId} = req.body;
@@ -187,5 +199,6 @@ export default {
   getTimelineOfTerm,
   createTimelineOfTerm,
   deleteTimelineOfTerm,
-  updateTimelineOfTerm
+  updateTimelineOfTerm,
+  getTermByTermId,
 };
