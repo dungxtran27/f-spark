@@ -367,6 +367,111 @@ const getClassworkByClassworkId = async (classworkId) => {
     throw new Error(error.message);
   }
 }
+
+const getTotalClassWork = async ({ startDate, endDate, teacherId }) => {
+  try {
+    const classes = await Class.find({ teacher: teacherId }).lean();
+    const classIds = classes.map((c) => c._id);
+
+    if (!startDate || isNaN(new Date(startDate).getTime())) {
+      throw new Error("Invalid startDate");
+    }
+    if (!endDate || isNaN(new Date(endDate).getTime())) {
+      throw new Error("Invalid endDate");
+    }
+
+
+    const start = new Date(`${startDate}T00:00:00.000Z`);
+    const end = new Date(`${endDate}T23:59:59.999Z`);
+
+    const classWorks = await ClassWork.find({
+      classId: { $in: classIds },
+      type: { $in: ['outcome', 'assignment', 'announcement'] },
+      startDate: { $gte: start },
+      dueDate: { $lte: end },
+    });
+
+    const groupedClassWorks = await Promise.all(
+      classIds.map(async (classId) => {
+        const className = classes.find((cls) => cls._id.toString() === classId.toString())?.classCode || 'Unknown';
+        const assignments = classWorks.filter((work) => work.classId.toString() === classId.toString() && work.type === 'assignment');
+        const announcements = classWorks.filter((work) => work.classId.toString() === classId.toString() && work.type === 'announcement');
+        const outcomes = classWorks.filter((work) => work.classId.toString() === classId.toString() && work.type === 'outcome');
+        const totalGroups = await Group.countDocuments({ class: classId });
+        const outcomeIds = outcomes.map((outcome) => outcome._id);
+        const totalSubmissions = await Submission.countDocuments({ classworkId: { $in: outcomeIds } });
+        const totalStudents = await Student.countDocuments({ classId });
+
+        return {
+          classId,
+          className,
+          assignments,
+          totalStudents,
+          outcomes: {
+            totalGroups,
+            totalSubmissions,
+            endDate: outcomes.length > 0 ? outcomes[0].dueDate : null,
+          },
+          countAssignments: assignments.length,
+          countAnnouncements: announcements.length,
+        };
+      })
+    );
+
+    const totalCountAssignments = classWorks.filter((work) => work.type === 'assignment').length;
+    const totalCountAnnouncements = classWorks.filter((work) => work.type === 'announcement').length;
+
+    return {
+      groupedClassWorks,
+      total: {
+        totalCountAssignments,
+        totalCountAnnouncements,
+      },
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getTotalClassWorkByClassId = async ({ classId }) => {
+  try {
+
+    const classworks = await ClassWork.find({
+      classId: classId,
+      type: "outcome"
+    }).select("_id");
+    const classworkIds = classworks.map((cw) => cw._id);
+
+    if (classworkIds.length === 0) {
+      return [];
+    }
+
+    const submissions = await Submission.find({
+      classworkId: { $in: classworkIds },
+      grade: { $in: null },
+    });
+
+    const announcementCount = await ClassWork.countDocuments({
+      classId: classId,
+      type: "announcement",
+    });
+
+    const assignmentCount = await ClassWork.countDocuments({
+      classId: classId,
+      type: "assignment",
+    });
+
+    return {
+      outcome: submissions.length,
+      announcements: announcementCount,
+      assignments: assignmentCount,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+
 export default {
   getClassWorkByStudent,
   getOutcomes,
@@ -381,5 +486,7 @@ export default {
   getLatestAnnounceOfClassesByTeacher,
   getLatestAssignmentOfClassesByTeacher,
   getOutcomesOfClasses,
-  getClassworkByClassworkId
+  getClassworkByClassworkId,
+  getTotalClassWork,
+  getTotalClassWorkByClassId
 };

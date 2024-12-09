@@ -17,4 +17,10 @@ export const dashBoard = {
   getTeacherDashboardInfo: async () => {
     return await axios.get(`api/class/getTeacherDashboardInfo`);
   },
+  getTotalClassWork: async (startDate: string, endDate: string) => {
+    return await axios.post(`api/classwork/getTotalClassWork`, {
+      startDate: startDate,
+      endDate: endDate,
+    });
+  },
 };

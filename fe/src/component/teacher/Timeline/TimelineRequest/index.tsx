@@ -1,11 +1,11 @@
 import { Button, Empty, Modal, Pagination, Select, Typography } from "antd";
-import { colorMajorGroup, QUERY_KEY } from "../../../../utils/const";
+import { QUERY_KEY } from "../../../../utils/const";
 import { GrFormNextLink } from "react-icons/gr";
 import dayjs from "dayjs";
 import { requestDeadlineApi } from "../../../../api/requestDeadline/requestDeadline";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
-import { Key, useState } from "react";
+import { useState } from "react";
 import type { PaginationProps } from "antd";
 
 const { Text } = Typography;
@@ -37,28 +37,17 @@ const TimelineRequest = () => {
   });
 
   const formatDate = (date: string) => {
-    return dayjs(date).format("DD/MM/YYYY HH:mm");
+    return dayjs(date).format("DD MMM ,YYYY");
   };
 
-  const getRemainingTime = (endDate: string) => {
-    const end = dayjs(endDate);
-    const now = dayjs();
-    const timeLeft = end.diff(now);
-    const daysLeft = Math.floor(timeLeft / (1000 * 3600 * 24));
-    const hoursLeft = Math.floor(
-      (timeLeft % (1000 * 3600 * 24)) / (1000 * 3600)
-    );
-    return { daysLeft, hoursLeft };
-  };
-
-  const showModalConfirm = (id, classworkId) => {
+  const showModalConfirm = (id: any, classworkId: any) => {
     setIsModalConfirmOpen(true);
     setStatusRequest(true);
     setRequestDeadlineId(id);
     setClassworkId(classworkId);
   };
 
-  const showModalReject = (id, classworkId) => {
+  const showModalReject = (id: any, classworkId: any) => {
     setIsModalConfirmOpen(true);
     setStatusRequest(false);
     setRequestDeadlineId(id);
@@ -74,7 +63,9 @@ const TimelineRequest = () => {
 
     await requestDeadlineApi.updateClassWorkFollowRequestDeadline(data);
 
-    queryClient.invalidateQueries([QUERY_KEY.REQUEST_DEADLINE_LIST]);
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEY.REQUEST_DEADLINE_LIST],
+    });
 
     setIsModalConfirmOpen(false);
   };
@@ -82,7 +73,7 @@ const TimelineRequest = () => {
   return (
     <div className="bg-white shadow-md rounded-md p-4 mt-3 mr-5">
       <div className="mb-3 flex items-center space-x-2">
-      <span className="font-semibold">Request Deadline from groups</span>
+        <span className="font-semibold">Request Deadline from groups</span>
         <Select
           value={status}
           onChange={(value) => {
@@ -104,76 +95,56 @@ const TimelineRequest = () => {
             <th className="p-2 w-1/12 text-left">Action</th>
           </tr>
         </thead>
-        {requestDeadlineList?.data.data.length > 0
-        ?
-        (
-        <tbody>
-          {requestDeadlineList?.data.data.map((r: any) => (
-            <tr className="border-b" key={r._id}>
-              <td className="p-1">{r.classworkId.title}</td>
-              <td className="p-1">{r.groupId.GroupName}</td>
-              <td className="p-1">{r.reason}</td>
-              <td
-                className="p-2"
-                style={{
-                  display: "flex",
-                  flexWrap: "nowrap",
-                  alignItems: "center",
-                }}
-              >
-                <span>{formatDate(r.dueDate)}</span>
-                <span className="text-red-500">
-                  Left:
-                  {getRemainingTime(r.dueDate).daysLeft <= 0 &&
-                  getRemainingTime(r.dueDate).hoursLeft <= 0
-                    ? "00:00 "
-                    : `${getRemainingTime(r.dueDate).daysLeft}d ${
-                        getRemainingTime(r.dueDate).hoursLeft
-                      }h`}
-                </span>
-                <GrFormNextLink />
-                <span>{formatDate(r.newDate)}</span>
-                <span className="text-red-500">
-                  Left:
-                  {getRemainingTime(r.newDate).daysLeft <= 0 &&
-                  getRemainingTime(r.newDate).hoursLeft <= 0
-                    ? "00:00"
-                    : `${getRemainingTime(r.newDate).daysLeft}d ${
-                        getRemainingTime(r.newDate).hoursLeft
-                      }h`}
-                </span>
-              </td>
-              <td>
-                {r.status === "pending" ? (
-                  <>
-                    <Button
-                      size="small"
-                      onClick={() =>
-                        showModalConfirm(r?._id, r?.classworkId._id)
-                      }
-                      type="primary"
-                      className="mr-1" 
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      size="small"
-                      onClick={() => showModalReject(r?._id, r?.classworkId._id)}
-                    >
-                      Reject
-                    </Button>
-                  </>
-                ) : (
-                  <Text
-                    type={r.status === "approved" ? "success" : "danger"}
-                  >
-                    {r.status}
-                  </Text>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
+        {requestDeadlineList?.data.data.length > 0 ? (
+          <tbody className="text-md">
+            {requestDeadlineList?.data.data.map((r: any) => (
+              <tr className="border-b" key={r._id}>
+                <td className="p-1">{r.classworkId.title}</td>
+                <td className="p-1">{r.groupId.GroupName}</td>
+                <td className="p-1">{r.reason}</td>
+                <td
+                  className="p-2"
+                  style={{
+                    display: "flex",
+                    flexWrap: "nowrap",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>{formatDate(r.dueDate)}</span>
+                  <GrFormNextLink className="ml-2 mr-2" />
+                  <span>{formatDate(r.newDate)}</span>
+                </td>
+                <td>
+                  {r.status === "pending" ? (
+                    <>
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          showModalConfirm(r?._id, r?.classworkId._id)
+                        }
+                        type="primary"
+                        className="mr-1"
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          showModalReject(r?._id, r?.classworkId._id)
+                        }
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  ) : (
+                    <Text type={r.status === "approved" ? "success" : "danger"}>
+                      {r.status}
+                    </Text>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
         ) : (
           <tbody>
             <tr>

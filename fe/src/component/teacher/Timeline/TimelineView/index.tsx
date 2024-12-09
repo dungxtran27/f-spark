@@ -1,237 +1,221 @@
-import React, { useState, useEffect } from 'react';
-import { Steps } from 'antd';
-import { EditOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import TimelineEdit from '../TimelineEdit';
-import dayjs from 'dayjs';
-import { useQuery } from '@tanstack/react-query';
-import { AxiosResponse } from 'axios';
-import { classApi } from '../../../../api/Class/class';
-import { QUERY_KEY } from '../../../../utils/const';
-
-interface Timeline {
-    _id: string;
-    title: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-    editAble: boolean;
-    status: string;
-    type: string;
-    classworkId: string
-}
-
-interface Submission {
-    _id: string;
-    student: string;
-    content: string;
-    attachment: string[];
-    passedCriteria: string[];
-    group: Group;
-    classworkId: {
-        _id: string;
-        title: string;
-        dueDate: string;
-    };
-    createdAt: string;
-    updatedAt: string;
-    grade: number | null;
-}
-interface Group {
-    _id: string;
-    GroupName: string;
-    GroupDescription: string;
-    timeline: Timeline[];
-}
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY } from "../../../../utils/const";
+import { groupApi } from "../../../../api/group/group";
+import { useParams } from "react-router-dom";
+import { Collapse, Empty } from "antd";
+import moment from "moment";
+import { classApi } from "../../../../api/Class/class";
+import TimelineEdit from "../TimelineEdit";
+import { EditOutlined } from "@ant-design/icons";
 
 interface TimelineViewProps {
-    group: {
-        _id: string;
-        GroupName: string;
-        GroupDescription: string;
-        timeline: Timeline[];
-    };
+  description: string;
+  index: number;
+  endDate: string;
+  startDate: string;
+}
+interface Timeline {
+  _id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  editAble: boolean;
+  status: string;
+  type: string;
+  classworkId: string;
 }
 
-const { Step } = Steps;
+const TimelineView: React.FC<TimelineViewProps> = ({
+  description,
+  index,
+  endDate,
+  startDate,
+}) => {
+  const { classId } = useParams();
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalData, setModalData] = useState<Timeline | null>(null);
 
-const TimelineView: React.FC<TimelineViewProps> = React.memo(({ group }) => {
-    const groupId = group._id;
-    const [activeStepIndex, setActiveStepIndex] = useState<number>(-1);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [modalData, setModalData] = useState<Timeline | null>(null);
-    const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([]);
+  const { data } = useQuery({
+    queryKey: [QUERY_KEY.GROUP_OF_CLASS],
+    queryFn: async () =>
+      (await groupApi.getAllGroupByClassId(classId)).data.data,
+  });
 
-    const handleStepChange = (index: number) => {
-        if (index === activeStepIndex) return;
-        setActiveStepIndex(index);
-        const selectedTimeline = group.timeline[index];
-        const relatedSubmissions = submissions.filter(
-            (submission) => submission.classworkId._id === selectedTimeline.classworkId
-        );
-        setFilteredSubmissions(relatedSubmissions);
-    };
-    const handleEditClick = (timeline: Timeline) => {
-        const timelineWithGroupId = { ...timeline, groupId: group._id };
-        setModalData(timelineWithGroupId);
-        setIsModalVisible(true);
-    };
-    const { data, isLoading, isError } = useQuery<AxiosResponse>({
-        queryKey: [QUERY_KEY.TIMELINE_TEACHER, group._id],
-        queryFn: () => classApi.getSubmissionsByGroup(group._id),
-        enabled: !!group._id,
-        retry: false,
+  const { data: submissionsResponse } = useQuery({
+    queryKey: [QUERY_KEY.ASSIGNMENT_SUBMISSIONS, selectedGroupIds],
+    queryFn: async () => {
+      const results = await Promise.all(
+        selectedGroupIds.map(
+          async (groupId) =>
+            (
+              await classApi.getSubmissionsByGroup(groupId)
+            )?.data?.data
+        )
+      );
+      return results;
+    },
+    enabled: selectedGroupIds.length > 0,
+  });
+
+  const submissions = submissionsResponse || [];
+
+  const handleEditClick = (timeline: Timeline) => {
+    const timelineWithGroupId = { ...timeline, groupId: selectedGroupIds[0] };
+    setModalData(timelineWithGroupId);
+    setIsModalVisible(true);
+  };
+
+  const items = data?.map((group: any) => {
+    const groupTimeline = group.timeline?.[index - 1];
+
+    if (!groupTimeline) {
+      return {
+        key: group._id,
+        label: <span className="font-semibold">{group.GroupName}</span>,
+        children: <Empty />,
+      };
+    }
+
+    const allSubmissions = submissions.flat();
+    const groupSubmissions = allSubmissions.filter((submission: any) => {
+      return submission.classworkId?._id === groupTimeline.classworkId;
     });
 
-    const submissions: Submission[] = Array.isArray(data?.data?.data) ? data.data.data : [];
-    const updateTimelineStatus = (timeline: Timeline) => {
-        if (!submissions || submissions.length === 0) {
-            return 'pending';
-        }
-        const submission = submissions.find((sub: Submission) =>
-            sub.group._id === groupId && sub.classworkId._id === timeline.classworkId
-        );
-        if (submission) {
-            const createdAt = dayjs(submission.createdAt);
-            const endDate = dayjs(timeline.endDate);
-            if (submission.grade !== null && submission.grade !== undefined) {
-                return createdAt.isBefore(endDate) ? 'finish' : 'overdue';
-            } else {
-                return createdAt.isBefore(endDate) ? 'waiting grade' : 'overdue';
-            }
-        }
-        return 'pending';
-    };
-    useEffect(() => {
-        if (!submissions || submissions.length === 0) return;
-        let processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'waiting grade');
-        if (processStepIndex === -1) {
-            processStepIndex = group.timeline.findIndex((step) => updateTimelineStatus(step) === 'pending');
-        }
-        if (processStepIndex !== -1) {
-            setActiveStepIndex(processStepIndex);
-            const selectedTimeline = group.timeline[processStepIndex];
-            const relatedSubmissions = submissions.filter(
-                (submission) => submission.classworkId._id === selectedTimeline.classworkId
-            );
-            setFilteredSubmissions(relatedSubmissions);
-        }
-    }, [group.timeline, submissions]);
-
-
-    const getRemainingTime = (endDate: string) => {
-        const end = dayjs(endDate);
-        const now = dayjs();
-        const timeLeft = end.diff(now);
-        const daysLeft = Math.floor(timeLeft / (1000 * 3600 * 24));
-        const hoursLeft = Math.floor((timeLeft % (1000 * 3600 * 24)) / (1000 * 3600));
-        return { daysLeft, hoursLeft };
-    };
-
-    const formatDate = (date: string) => {
-        return dayjs(date).format('DD/MM/YYYY HH:mm');
-    };
-
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
-    if (isError) {
-        return <div>Error fetching submissions</div>;
-    }
-
-    return (
-        <div className="space-y-2">
-            <Steps
-                direction="horizontal"
-                size="small"
-                current={activeStepIndex}
-                onChange={handleStepChange}
-                className="w-full"
-                progressDot
-                status='waiting grade'
-            >
-                {group.timeline.map((step, index) => (
-                    <Step
-                        key={index}
-                        title={
-                            <div
-                                className={`transition-all duration-200 px-2 py-1 rounded-md 
-                                    ${activeStepIndex === index ? 'bg-blue-100 text-blue-700' : ''}`}
-                            >
-                                <span>{step.title}</span>
-                                <div className="text-xs text-gray-500 mt-1">
-                                    {formatDate(step.startDate)} - {formatDate(step.endDate)}
-                                </div>
-                            </div>
-                        }
-                        status={updateTimelineStatus(step)}
-                        icon={updateTimelineStatus(step) === 'finish' ? <CheckCircleOutlined className="text-green-500" /> : null}
-                    />
-                ))}
-            </Steps>
-            {activeStepIndex >= 0 && (
-                <div className="bg-white p-2 border rounded-lg shadow-sm mb-4">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                            <span className="text-xl font-bold">{group.timeline[activeStepIndex].title}</span>
-                            <div className="my-2 ml-4">
-                                <span
-                                    className={`px-2 py-1 rounded-full text-white ${updateTimelineStatus(group.timeline[activeStepIndex]) === 'finish'
-                                        ? 'bg-green-500'
-                                        : updateTimelineStatus(group.timeline[activeStepIndex]) === 'waiting grade'
-                                            ? 'bg-yellow-500'
-                                            : 'bg-gray-500'
-                                        }`}
-                                >
-                                    {updateTimelineStatus(group.timeline[activeStepIndex])}
-                                </span>
-                            </div>
-                        </div>
-                        {group.timeline[activeStepIndex].editAble && (
-                            <EditOutlined
-                                className="cursor-pointer text-lg"
-                                onClick={() => handleEditClick(group.timeline[activeStepIndex])}
-                            />
-                        )}
-                    </div>
-                    <p className="my-0 text-sm text-gray-500 flex justify-between">
-                        <span>
-                            Deadline: {formatDate(group.timeline[activeStepIndex].startDate)} - {formatDate(group.timeline[activeStepIndex].endDate)}
-                        </span>
-                        <span className="text-red-500">Left:
-                            {getRemainingTime(group.timeline[activeStepIndex].endDate).daysLeft <= 0 && getRemainingTime(group.timeline[activeStepIndex].endDate).hoursLeft <= 0
-                                ? '00:00'
-                                : `${getRemainingTime(group.timeline[activeStepIndex].endDate).daysLeft} days ${getRemainingTime(group.timeline[activeStepIndex].endDate).hoursLeft} hours left`}
-                        </span>
-                    </p>
-                    <p className="my-0 text-sm">Descriptions: {group.timeline[activeStepIndex].description}</p>
-
-                    <div className="mt-4 flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Submissions</h3>
-                    </div>
-
-                    {filteredSubmissions.length > 0 ? (
-                        <ul>
-                            {filteredSubmissions.map((submission) => (
-                                <li key={submission._id}>
-                                    <div>Grade: {submission.grade != null && submission.grade !== undefined ? submission.grade : 'No grade'}</div>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <div>No submissions available for this Outcome.</div>
-                    )}
-                </div>
-            )}
-            <TimelineEdit
-                visible={isModalVisible}
-                timeline={modalData}
-                type={modalData?.type || ''}
-                onCancel={() => setIsModalVisible(false)}
-            />
+    return {
+      key: group._id,
+      label: (
+        <div className="flex items-center justify-between">
+          <span className="font-semibold">{group.GroupName}</span>
+          <span className="ml-3">
+            {moment(groupTimeline.startDate).format("DD MMM YYYY")} -{" "}
+            {moment(groupTimeline.endDate).format("DD MMM YYYY")}
+          </span>
         </div>
-    );
-});
+      ),
+      children: (
+        <div className="p-3 space-y-2">
+          <div>
+            <span className="font-semibold">Deadline Group:</span>
+            <span className="ml-3">
+              {moment(groupTimeline.startDate).format("DD MMM YYYY")} -{" "}
+              {moment(groupTimeline.endDate).format("DD MMM YYYY")}
+            </span>
+            <EditOutlined
+              className="cursor-pointer text-lg ml-5"
+              onClick={() => handleEditClick(groupTimeline)}
+            />
+          </div>
+          <p>
+            <span className="font-semibold mr-2">Description:</span>
+            <span>{groupTimeline.description}</span>
+          </p>
+          <p>
+            <span className="font-semibold mr-2">Status:</span>
+            <span
+              className={`text-white px-2 py-1 rounded ${
+                groupSubmissions?.some(
+                  (submission: any) => submission?.grade != null
+                )
+                  ? "bg-green-500"
+                  : moment().isAfter(moment(groupTimeline?.endDate))
+                  ? "bg-gray-500"
+                  : groupSubmissions?.some(
+                      (submission: any) => submission?.grade == null
+                    )
+                  ? "bg-red-500"
+                  : "bg-yellow-500"
+              }`}
+            >
+              {groupSubmissions?.some(
+                (submission: any) => submission?.grade != null
+              )
+                ? "Finish"
+                : moment().isAfter(moment(groupTimeline?.endDate))
+                ? "Overdue"
+                : groupSubmissions?.some(
+                    (submission: any) => submission?.grade == null
+                  )
+                ? "Waiting grade"
+                : "Pending"}
+            </span>
+          </p>
+          {groupSubmissions?.length >= 0 && (
+            <div>
+              {groupSubmissions.filter(
+                (submission: any) => submission.group._id === group._id
+              ).length > 0 ? (
+                groupSubmissions
+                  .filter(
+                    (submission: any) => submission.group._id === group._id
+                  )
+                  .map((submission: any) => (
+                    <div key={submission._id}>
+                      <div className="font-semibold">Submissions</div>
+                      <div className="space-y-2">
+                        <div>
+                          Grade:{" "}
+                          {submission.grade != null ? (
+                            submission.grade
+                          ) : (
+                            <span className="text-red-500"> Not Graded</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="text-red-500">
+                  The group has not submitted their work yet.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ),
+    };
+  });
+
+  return (
+    <div>
+      <div className="bg-white rounded p-5 mb-4">
+        <p className="font-semibold">OUT COME {index}</p>
+        <p>
+          <span className="font-semibold">Deadline :</span>
+          <span className="ml-2">
+            {moment(startDate).format("DD MMM YYYY")}
+            <span className="ml-2">
+              - {moment(endDate).format("DD MMM YYYY")}
+            </span>
+          </span>
+        </p>
+        <p>
+          <span className="font-semibold">Description: </span>
+          {description}
+        </p>
+      </div>
+      <div>
+        <Collapse
+          className="bg-gray-100 p-1"
+          items={items}
+          accordion
+          onChange={(keys) => {
+            const normalizedKeys = keys.map((key: any) => String(key).trim());
+            setSelectedGroupIds(normalizedKeys);
+          }}
+        />
+        <TimelineEdit
+          visible={isModalVisible}
+          timeline={modalData}
+          type={modalData?.type || ""}
+          onCancel={() => setIsModalVisible(false)}
+          groups={data}
+        />
+      </div>
+    </div>
+  );
+};
 
 export default TimelineView;
-

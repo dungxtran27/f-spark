@@ -1,24 +1,25 @@
 import mongoose from "mongoose";
 import RequestDeadline from "../model/RequestDeadline.js";
 import { REQUEST_DEADLINE_STATUS } from "../utils/const.js";
-const createRequestDeadline = async ({classworkId, groupId, reason, dueDate, newDate, teacherId, classId}) => {
-  try {        
+const createRequestDeadline = async ({ classworkId, groupId, reason, dueDate, newDate, teacherId, classId }) => {
+  try {
     const result = await RequestDeadline.create({
-        classworkId: classworkId,
-        groupId: groupId,
-        reason: reason,
-        dueDate: dueDate,
-        newDate: newDate,
-        teacherId: teacherId,
-        classId: classId
+      classworkId: classworkId,
+      groupId: groupId,
+      reason: reason,
+      dueDate: dueDate,
+      newDate: newDate,
+      teacherId: teacherId,
+      classId: classId
     })
-    
+
     return result;
   } catch (error) {
     throw new Error(error.message);
   }
 };
-const getRequestDeadlineByTeacher = async ({teacherId, classId, status, page}) => {
+
+const getRequestDeadlineByTeacher = async ({ teacherId, classId, status, page }) => {
   try {
     const currentDate = new Date();
     const query = {
@@ -35,16 +36,16 @@ const getRequestDeadlineByTeacher = async ({teacherId, classId, status, page}) =
     }
     const limit = 10;
     const skip = (page - 1) * limit;
-    const requestDeadline = await RequestDeadline.find(query).populate ({
+    const requestDeadline = await RequestDeadline.find(query).populate({
       path: "groupId",
-      select: "_id GroupName", 
+      select: "_id GroupName",
     })
-    .skip(skip)
-    .limit(limit)
-    .populate ({
-      path: "classworkId",
-      select: "_id title", 
-    })
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: "classworkId",
+        select: "_id title",
+      })
     const totalItems = await RequestDeadline.countDocuments(query);
     requestDeadline.totalItems = totalItems;
     return requestDeadline;
@@ -53,12 +54,12 @@ const getRequestDeadlineByTeacher = async ({teacherId, classId, status, page}) =
   }
 }
 
-const updateStatusRequestDeadline = async ({requestDeadlineId, status}) => {
+const updateStatusRequestDeadline = async ({ requestDeadlineId, status }) => {
   try {
     const updatedStatus = await RequestDeadline.findByIdAndUpdate(
       requestDeadlineId,
-      {status},
-      {new: true}
+      { status },
+      { new: true }
     )
     if (!updatedStatus) {
       return new Error("Request not found");
@@ -68,8 +69,35 @@ const updateStatusRequestDeadline = async ({requestDeadlineId, status}) => {
     throw new Error(error.message);
   }
 }
+
+const getRequestDeadlineForDashBoard = async ({ teacherId, classId }) => {
+  try {
+    const query = {
+      teacherId: teacherId,
+      classId: classId
+    };
+
+    const requestDeadline = await RequestDeadline.find(query)
+      .populate({
+        path: "groupId",
+        select: "_id GroupName",
+      })
+      .populate({
+        path: "classworkId",
+        select: "_id title",
+      });
+
+    const totalItems = await RequestDeadline.countDocuments(query);
+    requestDeadline.totalItems = totalItems;
+    return requestDeadline;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
-    createRequestDeadline,
-    getRequestDeadlineByTeacher,
-    updateStatusRequestDeadline
+  createRequestDeadline,
+  getRequestDeadlineByTeacher,
+  updateStatusRequestDeadline,
+  getRequestDeadlineForDashBoard
 };
