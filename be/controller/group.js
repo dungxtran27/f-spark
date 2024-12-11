@@ -532,10 +532,13 @@ const getGroupStatistic = async (req, res) => {
       groupId,
       classId,
       term: new mongoose.Types.ObjectId(term),
-      status,
-    });
+      status
+      }
+    );
+    const statistic = await GroupRepository.getGroupCountsByTerm(new mongoose.Types.ObjectId(term))
+    console.log(statistic);
 
-    return res.status(200).json({ data: groups });
+    return res.status(200).json({ data: groups, statistic: statistic });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -654,9 +657,9 @@ const updateGroupSponsorStatus = async (req, res) => {
       const notificationData = {
         class: groupUpdate.class,
         receivers: members,
-        sender: req.decodedToken.role.id,
+        //sender: req.decodedToken.role.id,
         group: groupId,
-        senderType: "Teacher",
+        senderType: "Head Of Subject",
         type: "Group",
         action: {
           action: `request for funding`,
