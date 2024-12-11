@@ -26,6 +26,10 @@ import { Admin } from "../../../../api/manageAccoount";
 import dayjs from "dayjs";
 import axios from "axios";
 import AddStudentModal from "./AddStudentModal";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../redux/store";
+import { Term } from "../../../../model/auth";
+import EmptyTerm from "../../../common/EmptyTerm";
 const { Option } = Select;
 
 interface Student {
@@ -38,7 +42,10 @@ interface Student {
   status: boolean;
 }
 
-const AccountManagement: React.FC = () => {
+const AccountManagement: React.FC<{
+  term: string|null;
+  setTerm: (value: any) => void;
+}> = ({ term, setTerm }) => {
   const [page, setCurrentPage] = useState(1);
   const [openAddStudent, setOpenAddStudent] = useState<boolean>(false);
   const [itemsPerPage] = useState(10);
@@ -53,7 +60,9 @@ const AccountManagement: React.FC = () => {
   const handleSearch = () => {
     setCurrentPage(1);
   };
-
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const { data: studentData } = useQuery({
@@ -64,6 +73,7 @@ const AccountManagement: React.FC = () => {
       classFilter,
       termFilter,
       statusFilter,
+      term
     ],
     queryFn: async () => {
       return Admin.getStudent({
@@ -71,6 +81,7 @@ const AccountManagement: React.FC = () => {
         page: page || 1,
         searchText: searchText || null,
         classId: classFilter || null,
+        term: term||activeTerm?._id,
         // status: statusFilter || null,
       });
     },
@@ -201,139 +212,147 @@ const AccountManagement: React.FC = () => {
   };
 
   return (
-    <div className="max-w-full mx-auto p-4 bg-white rounded-lg shadow-md">
+    <>
+      {activeTerm?._id ? (
+        <div className="max-w-full mx-auto p-4 bg-white rounded-lg shadow-md">
+          <Row gutter={[16, 16]} className="mb-4" justify="space-between">
+            <Col flex="auto">
+              <Row gutter={[16, 16]}>
+                <Col span={5}>
+                  <AutoComplete
+                    placeholder="Search by name, MSSV..."
+                    value={searchText}
+                    onChange={setSearchText}
+                    onSearch={handleAutoCompleteSearch}
+                    options={autoCompleteOptions}
+                    className="w-full"
+                  />
+                </Col>
+                <Col span={5}>
+                  <Select
+                    placeholder="Class"
+                    value={classFilter}
+                    onChange={setClassFilter}
+                    className="w-full"
+                    showSearch
+                  >
+                    {terms?.data?.data?.map((term: any) => (
+                      <Option key={term?._id} value={term?._id}>
+                        {term?._termCode}
+                      </Option>
+                    ))}
+                  </Select>
+                </Col>
+                <Col span={4}>
+                  {terms?.data?.data && (
+                    <Select
+                      placeholder="Term"
+                      value={termFilter}
+                      onChange={setTermFilter}
+                      options={termOptions}
+                      className="w-full"
+                      defaultValue={`${
+                        terms?.data?.data?.find(
+                          (t: any) =>
+                            dayjs().isAfter(t?.startTime) &&
+                            dayjs().isBefore(t?.endTime)
+                        )?._id
+                      }`}
+                    />
+                  )}
+                </Col>
+                <Col span={3}>
+                  <Select
+                    placeholder="Status"
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    className="w-full"
+                  >
+                    <Option value="Active">Active</Option>
+                    <Option value="Deactive">Deactive</Option>
+                  </Select>
+                </Col>
+                <Col span={3}>
+                  <Button
+                    icon={<CloseCircleOutlined />}
+                    onClick={handleClearFilters}
+                    className="w-full"
+                  >
+                    Clear
+                  </Button>
+                </Col>
+                <Col span={4}>
+                  <Button
+                    type="primary"
+                    icon={<SearchOutlined />}
+                    onClick={handleSearch}
+                    className="w-full"
+                  >
+                    Search
+                  </Button>
+                </Col>
+              </Row>
+            </Col>
 
-      <Row gutter={[16, 16]} className="mb-4" justify="space-between">
-        <Col flex="auto">
-          <Row gutter={[16, 16]}>
-            <Col span={5}>
-              <AutoComplete
-                placeholder="Search by name, MSSV..."
-                value={searchText}
-                onChange={setSearchText}
-                onSearch={handleAutoCompleteSearch}
-                options={autoCompleteOptions}
-                className="w-full"
-              />
-            </Col>
-            <Col span={5}>
-              <Select
-                placeholder="Class"
-                value={classFilter}
-                onChange={setClassFilter}
-                className="w-full"
-                showSearch
-              >
-                {terms?.data?.data?.map((term: any) => (
-                  <Option key={term?._id} value={term?._id}>
-                    {term?._termCode}
-                  </Option>
-                ))}
-              </Select>
-            </Col>
-            <Col span={4}>
-              {terms?.data?.data && (
-                <Select
-                  placeholder="Term"
-                  value={termFilter}
-                  onChange={setTermFilter}
-                  options={termOptions}
-                  className="w-full"
-                  defaultValue={`${
-                    terms?.data?.data?.find(
-                      (t: any) =>
-                        dayjs().isAfter(t?.startTime) &&
-                        dayjs().isBefore(t?.endTime)
-                    )?._id
-                  }`}
-                />
-              )}
-            </Col>
-            <Col span={3}>
-              <Select
-                placeholder="Status"
-                value={statusFilter}
-                onChange={setStatusFilter}
-                className="w-full"
-              >
-                <Option value="Active">Active</Option>
-                <Option value="Deactive">Deactive</Option>
-              </Select>
-            </Col>
-            <Col span={3}>
-              <Button
-                icon={<CloseCircleOutlined />}
-                onClick={handleClearFilters}
-                className="w-full"
-              >
-                Clear
-              </Button>
-            </Col>
-            <Col span={4}>
+            <Divider
+              type="vertical"
+              style={{ height: "auto", alignSelf: "stretch", color: "black" }}
+            />
+
+            <Col flex="none" className="flex justify-end">
               <Button
                 type="primary"
-                icon={<SearchOutlined />}
-                onClick={handleSearch}
-                className="w-full"
+                icon={<PlusOutlined />}
+                className="mr-2"
+                onClick={() => {
+                  setOpenAddStudent(true);
+                }}
               >
-                Search
+                Add Student
+              </Button>
+              <Button
+                type="default"
+                icon={<UploadOutlined />}
+                onClick={() => {
+                  fileInputRef.current?.click();
+                }}
+              >
+                Add File
               </Button>
             </Col>
           </Row>
-        </Col>
 
-        <Divider
-          type="vertical"
-          style={{ height: "auto", alignSelf: "stretch", color: "black" }}
-        />
-
-        <Col flex="none" className="flex justify-end">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            className="mr-2"
-            onClick={() => {
-              setOpenAddStudent(true);
-            }}
-          >
-            Add Student
-          </Button>
-          <Button
-            type="default"
-            icon={<UploadOutlined />}
-            onClick={() => {
-              fileInputRef.current?.click();
-            }}
-          >
-            Add File
-          </Button>
-        </Col>
-      </Row>
-
-      <Table
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-        rowKey="_id"
-      />
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-      <div className="flex justify-center mt-4">
-        <Pagination
-          current={page}
-          pageSize={itemsPerPage}
-          total={totalItems}
-          onChange={handlePageChange}
-          showSizeChanger={false}
-          showTotal={(total) => `Total ${total} students`}
-        />
-      </div>
-      <AddStudentModal isOpen={openAddStudent} setIsOpen={setOpenAddStudent} />
-    </div>
+          <Table
+            columns={columns}
+            dataSource={data}
+            pagination={false}
+            rowKey="_id"
+          />
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <div className="flex justify-center mt-4">
+            <Pagination
+              current={page}
+              pageSize={itemsPerPage}
+              total={totalItems}
+              onChange={handlePageChange}
+              showSizeChanger={false}
+              showTotal={(total) => `Total ${total} students`}
+            />
+          </div>
+          <AddStudentModal
+            isOpen={openAddStudent}
+            setIsOpen={setOpenAddStudent}
+          />
+        </div>
+      ) : (
+        <EmptyTerm setSemester={setTerm} />
+      )}
+    </>
   );
 };
 
