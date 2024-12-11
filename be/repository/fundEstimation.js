@@ -32,7 +32,7 @@ const findTermsRequest = async (startDate, endDate, status) => {
       status: status,
     }).populate({
       path: "group",
-      select: "GroupName _id",
+      select: "GroupName _id transactions",
     });
     return result;
   } catch (error) {
@@ -44,7 +44,7 @@ const findGroupRequest = async (groupId) => {
     const result = await FundEstimation.find({
       group: groupId,
     }).sort({
-      createdAt: -1
+      createdAt: -1,
     });
     return result;
   } catch (error) {

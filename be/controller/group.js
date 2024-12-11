@@ -747,6 +747,44 @@ const deleteTransaction = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const verifyTransaction = async (req, res) => {
+  try {
+    const { groupId, transactionId, status } = req.body;
+    if (!groupId || !transactionId || !status) {
+      return res.status(400).json({ error: "Bad request" });
+    }
+    const foundTransaction =
+      await GroupRepository.getTransactionByTransactionId(
+        groupId,
+        transactionId
+      );
+    if (!foundTransaction) {
+      return res.status(400).json({ error: "Transaction not found" });
+    }
+    if (
+      foundTransaction.status == "approved" ||
+      foundTransaction.status == "rejected"
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Transaction is verified, cannot modify" });
+    }
+    const verifyTransaction = await GroupRepository.verifyTransaction(
+      groupId,
+      transactionId,
+      status
+    );
+    let message = "";
+    if (status == "approved") message = "Approve transaction success";
+    if (status == "rejected") message = "Reject transaction success";
+    return res.status(200).json({
+      message: message,
+      data: verifyTransaction,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupsOfTerm,
   createJourneyRow,
@@ -784,4 +822,5 @@ export default {
   updateGroupSponsorStatus,
   updateGroupInfo,
   deleteTransaction,
+  verifyTransaction,
 };

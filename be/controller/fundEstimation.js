@@ -115,10 +115,26 @@ const getDistribution = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getReturn = async (req, res) => {
+  try {
+    const { termId } = req.params;
+    const term = await TermRepository.findById(termId);
+    const request = await FundEstimationRepository.findTermsRequest(
+      term?.startTime,
+      term?.endTime,
+      "received"
+    );
+    const approvedRequest = request?.filter((r) => r?.status === "received");
+    return res.status(200).json({ data: approvedRequest });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupRequest,
   getTermRequest,
   createRequest,
   updateRequest,
   getDistribution,
+  getReturn,
 };

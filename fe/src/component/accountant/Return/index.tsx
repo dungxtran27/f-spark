@@ -1,12 +1,14 @@
 import classNames from "classnames";
 import styles from "../styles.module.scss";
 import {
+  Badge,
   Button,
   Collapse,
   CollapseProps,
   Image,
   Input,
   Modal,
+  Popconfirm,
   Statistic,
   Table,
   Tag,
@@ -16,239 +18,257 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import { FaCheck } from "react-icons/fa6";
 import { FcCancel } from "react-icons/fc";
-const Return = () => {
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import AccountantApi from "../../../api/accountant";
+import { QUERY_KEY } from "../../../utils/const";
+import { groupApi } from "../../../api/group/group";
+const Return = ({ termId }: { termId: string }) => {
   const [open, setOpen] = useState(false);
   const [openRemind, setOpenRemind] = useState(false);
+  const [group, setGroup] = useState({});
   const [openDis, setOpenDis] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: returnRequest } = useQuery({
+    queryKey: [QUERY_KEY.APPROVED_SPONSOR_REQUEST],
+    queryFn: () => {
+      return AccountantApi.getReturnSponsorRequest(termId);
+    },
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "notsent":
-        return "red";
-      case "Pending":
-        return "gold";
-      case "Processed":
+      case "processing":
+        return "blue";
+      case "pending":
+        return "yellow";
+      case "processed":
         return "green";
       default:
         return "yellow";
     }
   };
-
+  const verifyTransaction = useMutation({
+    mutationFn: ({
+      transactionId,
+      status,
+    }: {
+      transactionId: string;
+      status: string;
+    }) => {
+      return groupApi.verifyTransaction({
+        groupId: group._id,
+        transactionId: transactionId,
+        status: status,
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.APPROVED_SPONSOR_REQUEST],
+      });
+      setGroup(data.data.data);
+    },
+  });
   const columns = [
     {
       title: "Group Name",
-      dataIndex: "GroupName",
+      dataIndex: "group",
       key: "GroupName",
+      render: (g: any) => <p>{g.GroupName}</p>,
+    },
+
+    {
+      title: "Total Fund (VNĐ)",
+      dataIndex: "items",
+      render: (item: any) => (
+        <p>
+          {item
+            ?.reduce((total: any, acc: any) => total + acc.amount, 0)
+            .toLocaleString()}
+        </p>
+      ),
     },
     {
-      title: "Total Fund",
-      dataIndex: "totalFund",
+      title: "Fund Provided (VNĐ)",
+      dataIndex: "items",
       key: "totalFund",
-    },
-    {
-      title: "Fund Sent",
-      // dataIndex: "fundUsed",
-      render: () => "10,0000,000 vnd",
-    },
-    {
-      title: "Fund used",
-      dataIndex: "fundUsed",
-      key: "fundUsed",
+      render: (item: any) => (
+        <p>
+          {(
+            item?.reduce((total: any, acc: any) => total + acc.amount, 0) * 0.7
+          ).toLocaleString()}
+        </p>
+      ),
     },
     {
       title: "Evidence",
-      dataIndex: "remaining",
+      dataIndex: "group",
       key: "remaining",
-      render: () => {
+      render: (g: any) => {
         return (
-          <Button
-            type="default"
-            onClick={() => {
-              setOpen(true);
-            }}
+          <Badge
+            count={
+              g.transactions.filter(
+                (transaction) => transaction.status == "pending"
+              ).length
+            }
           >
-            verify
-          </Button>
+            <Button
+              type="default"
+              onClick={() => {
+                setGroup(g);
+                setOpen(true);
+              }}
+            >
+              verify
+            </Button>
+          </Badge>
         );
       },
     },
     {
-      title: "Fund verified",
+      title: "Fund verified (vnđ)",
       key: "bankNumber",
-      render: () => {
-        return <Input disabled />;
+      dataIndex: "group",
+      render: (g: any) => {
+        return (
+          <Input
+            disabled
+            value={g.transactions
+              .filter((t: any) => t.status == "approved")
+              ?.reduce((total: any, acc: any) => total + acc.fundUsed, 0)
+              .toLocaleString()}
+          />
+        );
       },
     },
 
+    // {
+    //   title: "Status",
+    //   dataIndex: "returnStatus",
+    //   render: (s: any) => {
+    //     return <Tag color={getStatusColor(s)}>{s}</Tag>;
+    //   },
+    // },
+    // {
+    //   title: "Action",
+    //   render: (record: any) => {
+    //     if (record.returnStatus === "processed") {
+    //       return <FaCheck />;
+    //     }
+
+    //     return record.group.transactions
+    //       .filter((t: any) => t.status == "approved")
+    //       ?.reduce((total: any, acc: any) => total + acc.fundUsed, 0) < 0 ? (
+    //       <Button
+    //         type="primary"
+    //         onClick={() => {
+    //           setOpenRemind(true);
+    //         }}
+    //       >
+    //         Remind Group
+    //       </Button>
+    //     ) : (
+    //       <Button
+    //         type="default"
+    //         onClick={() => {
+    //           setOpenDis(true);
+    //         }}
+    //       >
+    //         Disbursement
+    //       </Button>
+    //     );
+    //   },
+    // },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (_: any, record: any) => {
-        return (
-          <Tag color={getStatusColor(record?.status)}>{record?.status}</Tag>
-        );
-      },
-    },
-    {
-      title: "Action",
-      render: (_: any, record: any) => {
-        if (record.status === "Processed") {
+      title: "Status & Action",
+      key: "statusAction",
+      render: (record: any) => {
+        console.log(record.group.transactions);
+
+        if (
+          record.group.transactions.filter((t: any) => t.status == "approved")
+            .length >= 0
+        ) {
+          return <>You need to verify all evidence</>;
+        }
+        if (record.returnStatus === "processed") {
           return <FaCheck />;
         }
 
-        return record.remaining < 0 ? (
-          <Button
-            type="primary"
-            onClick={() => {
-              setOpenRemind(true);
-            }}
-          >
-            Remind Group
-          </Button>
-        ) : (
-          <Button
-            type="default"
-            onClick={() => {
-              setOpenDis(true);
-            }}
-          >
-            Disbursement
-          </Button>
-        );
+        if (record.returnStatus === "processing") {
+          return (
+            <Tag color={getStatusColor(record.returnStatus)}>
+              {record.returnStatus}
+            </Tag>
+          );
+        }
+        // if
+        if (
+          record.group.transactions
+            .filter((t: any) => t.status == "approved")
+            ?.reduce((total: any, acc: any) => total + acc.fundUsed, 0) >
+          record.items?.reduce((total: any, acc: any) => total + acc.amount, 0)
+        ) {
+          return (
+            <Button
+              type="default"
+              onClick={() => {
+                setOpenDis(true);
+              }}
+            >
+              Disbursement
+            </Button>
+          );
+        }
+
+        if (
+          record.group.transactions
+            .filter((t: any) => t.status == "approved")
+            ?.reduce((total: any, acc: any) => total + acc.fundUsed, 0) <
+          record.items?.reduce((total: any, acc: any) => total + acc.amount, 0)
+        ) {
+          return (
+            <Button
+              type="primary"
+              onClick={() => {
+                setOpenRemind(true);
+              }}
+            >
+              Remind Group
+            </Button>
+          );
+        }
+
+        return null;
       },
     },
   ];
-  const dataSource = [
-    {
-      key: "1",
-      GroupName: "Group 1 - Fund Allocation",
-      totalFund: 5000000,
-      fundUsed: 2000000,
-      remaining: -3000000,
-      bankNumber: "123456789",
-      bank: "Bank A",
-      bankOwner: "John Doe",
-      status: "Pending",
-    },
-    {
-      key: "2",
-      GroupName: "Group 2 - Project Fund",
-      totalFund: 3000000,
-      fundUsed: 1500000,
-      remaining: 1500000,
-      bankNumber: "987654321",
-      bank: "Bank B",
-      bankOwner: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      key: "3",
-      GroupName: "Group 3 - Operational Fund",
-      totalFund: 10000000,
-      fundUsed: 4000000,
-      remaining: -6000000,
-      bankNumber: "1122334455",
-      bank: "Bank C",
-      bankOwner: "Mike Johnson",
-      status: "Processed",
-    },
-    {
-      key: "4",
-      GroupName: "Group 4 - Research Fund",
-      totalFund: 15000000,
-      fundUsed: 5000000,
-      remaining: 10000000,
-      bankNumber: "5566778899",
-      bank: "Bank D",
-      bankOwner: "Sarah Brown",
-      status: "Pending",
-    },
-    {
-      key: "5",
-      GroupName: "Group 5 - Innovation Fund",
-      totalFund: 2000000,
-      fundUsed: 500000,
-      remaining: 1500000,
-      bankNumber: "6677889900",
-      bank: "Bank E",
-      bankOwner: "David White",
-      status: "Processed",
-    },
-    {
-      key: "6",
-      GroupName: "Group 6 - Strategic Fund",
-      totalFund: 7000000,
-      fundUsed: 4000000,
-      remaining: 3000000,
-      bankNumber: "1122334455",
-      bank: "Bank F",
-      bankOwner: "Emily Davis",
-      status: "Pending",
-    },
-  ];
-  const transactions = [
-    {
-      status: "pending",
-      title: "writing",
-      fundUsed: 1200000,
-      transactionDate: "2024-12-16T17:00:00.000Z",
-      evidence: [
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-      ],
-      _id: "67534989c270925171dfb652",
-      createdAt: "2024-12-06T18:59:21.701Z",
-      updatedAt: "2024-12-06T18:59:21.701Z",
-    },
-    {
-      title: "writing3",
-      fundUsed: 1200000,
-      evidence: [
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-      ],
-      status: "pending",
-      _id: "67540cced8f9f5f9d2ad50d0",
-      createdAt: "2024-12-07T08:52:30.409Z",
-      updatedAt: "2024-12-07T08:52:30.409Z",
-    },
-    {
-      title: "project of dungxtran",
-      fundUsed: 5000000,
-      evidence: [
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-      ],
-      status: "pending",
-      _id: "67542942cca56cd1d274ba88",
-      createdAt: "2024-12-07T10:53:54.046Z",
-      updatedAt: "2024-12-07T10:53:54.046Z",
-    },
-    {
-      title: "submit",
-      fundUsed: 10000000,
-      evidence: [
-        "https://mybillbook.in/s/wp-content//uploads/2024/06/sales-bill-format.png",
-      ],
-      status: "pending",
-      _id: "6756c6a7764ee0a22458196f",
-      createdAt: "2024-12-09T10:29:59.604Z",
-      updatedAt: "2024-12-09T10:29:59.604Z",
-    },
-  ];
-  const items: CollapseProps["items"] = transactions?.map((t: any) => {
+
+  const items: CollapseProps["items"] = group.transactions?.map((t: any) => {
     return {
       key: t?._id,
       label: (
         <div className="flex justify-between">
-          <span>{t?.title}</span>
-          <span className="text-textSecondary">
-            {dayjs(t?.createdAt).format("ddd, MMM D, YYYY")}
+          <span>
+            {t?.title} -{" "}
+            <span className="text-textSecondary">
+              {dayjs(t?.createdAt).format("ddd, MMM D, YYYY")}
+            </span>
           </span>
+          <span
+            className={
+              t.status === "pending"
+                ? "text-pendingStatus"
+                : t.status === "approved"
+                ? "text-green-500"
+                : t.status === "rejected"
+                ? "text-red-500"
+                : ""
+            }
+          >
+            {t.status}
+          </span>{" "}
         </div>
       ),
       children: (
@@ -259,16 +279,41 @@ const Return = () => {
                 <span className="font-semibold">Fund Used:</span>&nbsp;
                 {t?.fundUsed?.toLocaleString()} vnđ
               </span>
-              <span
-                className="flex"
-                // onClick={() => deleteTransaction.mutate(transaction._id)}
-              >
-                <Button>
-                  <FaCheck size={17} />
-                </Button>
-                <Button>
-                  <FcCancel size={17} />
-                </Button>
+              <span className="flex">
+                <Popconfirm
+                  title="Approved Transasction"
+                  description="Are you sure to approve this transactions?"
+                  onConfirm={() => {
+                    verifyTransaction.mutate({
+                      transactionId: t._id,
+                      status: "approved",
+                    });
+                  }}
+                  // onCancel={}
+                  okText="Approve"
+                  cancelText="Cancel"
+                >
+                  <Button>
+                    <FaCheck size={17} />
+                  </Button>
+                </Popconfirm>
+                <Popconfirm
+                  title="Reject Transasction"
+                  description="Are you sure to reject this transactions?"
+                  onConfirm={() => {
+                    verifyTransaction.mutate({
+                      transactionId: t._id,
+                      status: "rejected",
+                    });
+                  }}
+                  // onCancel={}
+                  okText="Reject"
+                  cancelText="Cancel"
+                >
+                  <Button>
+                    <FcCancel size={17} />
+                  </Button>
+                </Popconfirm>
               </span>
             </div>
             <div className="pt-2">
@@ -292,24 +337,30 @@ const Return = () => {
   });
   return (
     <div className={classNames(styles.customTable, "p-3 bg-white rounded")}>
-      <Table dataSource={dataSource} columns={columns} />
+      <Table dataSource={returnRequest?.data.data} columns={columns} />
       <Modal
         open={open}
         onCancel={() => setOpen(false)}
         onOk={() => setOpen(false)}
-        title={"Evidence of groups Tra Duong Nhan"}
+        title={`Evidence of groups ${group.GroupName}`}
         width={700}
         footer={() => (
           <>
-            <Button type="default">Cancel</Button>
-            <Button type="primary">Add</Button>
+            <Button type="default" onClick={() => setOpen(false)}>
+              Close
+            </Button>
           </>
         )}
       >
         <Collapse items={items} accordion />
         <div className="text-lg font-semibold">
-          {" "}
-          Total fund use: 20,000,000 vnd
+          Total fund use:{" "}
+          {group?.transactions &&
+            group?.transactions
+              .filter((acc: any) => acc.status === "approved")
+              .reduce((total: any, acc: any) => total + acc.fundUsed, 0)
+              .toLocaleString()}{" "}
+          vnđ
         </div>
       </Modal>
       <Modal

@@ -32,13 +32,13 @@ interface TransactionProp {
 
 const TransactionChart: React.FC<TransactionProp> = ({ transactions }) => {
   const chartData = {
-    labels: transactions.map((t: any) =>
+    labels: transactions?.map((t: any) =>
       dayjs(t?.createdAt).format(DATE_FORMAT.withoutYear)
     ),
     datasets: [
       {
         label: "Transaction Titles",
-        data: transactions.map((t: any) => ({
+        data: transactions?.map((t: any) => ({
           x: dayjs(t.createdAt).format(DATE_FORMAT.withoutYear), // x-axis value
           y: t.fundUsed, // y-axis value
           content: t.title,

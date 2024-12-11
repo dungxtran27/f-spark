@@ -7,6 +7,9 @@ const AccountantApi = {
   getApprovedSponsorRequest: async (termId: string) => {
     return await axios.get(`api/fundEstimation/getApproved/${termId}`);
   },
+  getReturnSponsorRequest: async (termId: string) => {
+    return await axios.get(`api/fundEstimation/getReturn/${termId}`);
+  },
   updateRequests: async ({
     requestIds,
     status,

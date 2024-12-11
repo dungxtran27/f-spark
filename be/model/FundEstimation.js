@@ -51,6 +51,11 @@ const FundEstimationSchema = new Schema(
       enum: ["pending", "approved", "declined", "received"],
       default: "pending",
     },
+    returnStatus: {
+      type: String,
+      enum: ["pending", "processing", "processed"],
+      default: "pending",
+    },
     sender: {
       type: Schema.Types.ObjectId,
       ref: "Student",

@@ -65,4 +65,7 @@ export const groupApi = {
   deleteTransaction: async (requestBody: any) => {
     return await axios.post(`/api/group/deleteTransaction`, requestBody);
   },
+  verifyTransaction: async (requestBody: any) => {
+    return await axios.post(`/api/group/verifyTransaction`, requestBody);
+  },
 };

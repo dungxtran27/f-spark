@@ -149,4 +149,9 @@ groupRouter.post(
   verifyToken,
   GroupController.deleteTransaction
 );
+groupRouter.post(
+  "/verifyTransaction",
+  verifyToken,
+  GroupController.verifyTransaction
+);
 export default groupRouter;

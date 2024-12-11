@@ -7,8 +7,18 @@ fundEstimationRouter.get(
   verifyToken,
   FundEstimationController.getGroupRequest
 );
-fundEstimationRouter.get("/term/:termId", FundEstimationController.getTermRequest);
-fundEstimationRouter.get("/getApproved/:termId", FundEstimationController.getDistribution);
+fundEstimationRouter.get(
+  "/term/:termId",
+  FundEstimationController.getTermRequest
+);
+fundEstimationRouter.get(
+  "/getApproved/:termId",
+  FundEstimationController.getDistribution
+);
+fundEstimationRouter.get(
+  "/getReturn/:termId",
+  FundEstimationController.getReturn
+);
 fundEstimationRouter.post(
   "/",
   verifyToken,
