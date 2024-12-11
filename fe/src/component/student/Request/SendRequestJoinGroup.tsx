@@ -282,7 +282,7 @@ const RequestJoinGroup: React.FC = () => {
                 Deadline Passed
               </h2>
               <p className="mt-2 text-gray-700">
-                The deadline for requesting to join the group has passed.
+                The deadline for requesting to join the group over due.
               </p>
             </div>
           ) : (

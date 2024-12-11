@@ -74,7 +74,7 @@ export const classApi = {
     );
   },
   getAllClasses: async () => {
-    return await axios.get(`api/class/classes`);
+    return await axios.get(`api/class`);
   },
   // admin
   getClassListPagination: async (requestBody: any) => {
