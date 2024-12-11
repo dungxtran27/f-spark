@@ -99,10 +99,11 @@ const verifyUser = async (req, res) => {
 const login = async (req, res) => {
   try {
     const role = req.body.role;
-    
+
     const existingAccount = await AccountRepository.findAccountByEmail(
       req.body.email
     );
+
     if (!existingAccount) {
       return res.status(400).json({ error: "Email not found" });
     }
@@ -114,6 +115,8 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Bad Credential" });
     }
     let userDetail = {};
+    console.log(role);
+
     switch (role) {
       case ROLE_NAME.student:
         const student = await StudentRepository.findStudentByAccountId(
@@ -150,10 +153,11 @@ const login = async (req, res) => {
         }
         userDetail.account = existingAccount;
         userDetail.role = ROLE_NAME.admin;
-        break
+        break;
       case ROLE_NAME.headOfSubject:
+        userDetail.account = existingAccount
         userDetail.role = ROLE_NAME.headOfSubject;
-        userDetail.account = existingAccount;
+        break;
       default:
         return res.status(500).json({ error: "Bad request" });
     }
@@ -449,7 +453,8 @@ const googleLogin = async (req, res) => {
               );
               if (!student) {
                 return res.status(404).json({
-                  error: "No such student found matched with provided credential",
+                  error:
+                    "No such student found matched with provided credential",
                 });
               }
               userDetail = student.toObject();
@@ -462,7 +467,8 @@ const googleLogin = async (req, res) => {
               );
               if (!teacher) {
                 return res.status(404).json({
-                  error: "No such teacher found matched with provided credential",
+                  error:
+                    "No such teacher found matched with provided credential",
                 });
               }
               userDetail = teacher.toObject();

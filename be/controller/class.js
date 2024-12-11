@@ -7,14 +7,14 @@ import {
   SubmissionRepository,
   TeacherRepository,
 } from "../repository/index.js";
+import teacher from "./teacher.js";
 
 const getClassesOfTeacher = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
-    const classes = await ClassRepository.getClassesOfTeacher(
-      decodedToken?.role?.id
-    );
-
+    const teacherId = decodedToken?.role?.id;
+    const { termId } = req.body;
+    const classes = await ClassRepository.getClassesOfTeacher({ teacherId, termId });
     return res.status(200).json(classes);
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });

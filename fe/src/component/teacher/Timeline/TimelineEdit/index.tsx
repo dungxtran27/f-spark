@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Checkbox, Modal, notification, Button, DatePicker, message } from "antd";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Checkbox,
+  Modal,
+  notification,
+  Button,
+  DatePicker,
+  message,
+} from "antd";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { groupApi } from "../../../../api/group/group";
-import { AxiosResponse } from "axios";
-import { useParams } from "react-router-dom";
 import { QUERY_KEY } from "../../../../utils/const";
 import dayjs from "dayjs";
 
@@ -12,24 +17,11 @@ interface TimelineEditProps {
   timeline: any;
   onCancel: () => void;
   type: string;
-}
-
-interface Group {
-  _id: string;
-  GroupName: string;
-  timeline: Timeline[];
-  GroupDescription: string;
-}
-
-interface Timeline {
-  title: string;
-  groupId: string;
-  endDate: string;
-  description: string;
+  groups: any[];
 }
 
 const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
-  ({ visible, timeline, onCancel, type }) => {
+  ({ visible, timeline, onCancel, type, groups }) => {
     const [updatedData, setUpdatedData] = useState<{
       endDate: string;
       description: string;
@@ -39,15 +31,9 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
       description: timeline?.description || "",
       selectedGroupIds: timeline?.groupId ? [timeline.groupId] : [],
     });
-    const [isEditable, setIsEditable] = useState(true);
+    const queryClient = useQueryClient();
 
-    const { classId } = useParams();
-    const { data, refetch } = useQuery<AxiosResponse>({
-      queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
-      queryFn: () => groupApi.getAllGroupByClassId(classId),
-      enabled: !!classId,
-    });
-    const groups: Group[] = Array.isArray(data?.data?.data) ? data.data.data : [];
+    const [isEditable, setIsEditable] = useState(true);
 
     useEffect(() => {
       if (timeline?.editAble === false) {
@@ -83,12 +69,13 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
         }
       },
       onSuccess: () => {
-        refetch();
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEY.TERM_LIST],
+        });
         onCancel();
       },
       onError: () => {
         message.error("Fail to update");
-
       },
     });
 
@@ -98,7 +85,8 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
       } else {
         notification.error({
           message: "Cannot Edit",
-          description: "The timeline is either locked or the type does not match.",
+          description:
+            "The timeline is either locked or the type does not match.",
         });
       }
     }, [isEditable, timeline, type, mutation]);
@@ -112,23 +100,16 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
       setUpdatedData((prev) => ({ ...prev, selectedGroupIds: [] }));
     }, []);
 
-    const handleGroupChange = useCallback(
-      (selectedValues: string[]) => {
-        setUpdatedData((prev) => ({ ...prev, selectedGroupIds: selectedValues }));
-      },
-      []
-    );
+    const handleGroupChange = useCallback((selectedValues: string[]) => {
+      setUpdatedData((prev) => ({ ...prev, selectedGroupIds: selectedValues }));
+    }, []);
 
-    const handleDateChange = useCallback(
-      (date: dayjs.Dayjs | null) => {
-        setUpdatedData((prev) => ({
-          ...prev,
-          endDate: date ? date.format('YYYY-MM-DD') : "", 
-        }));
-      },
-      []
-    );
-    
+    const handleDateChange = useCallback((date: dayjs.Dayjs | null) => {
+      setUpdatedData((prev) => ({
+        ...prev,
+        endDate: date ? date.format("YYYY-MM-DD") : "",
+      }));
+    }, []);
 
     return (
       <Modal
@@ -186,7 +167,7 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
             className="w-full"
           >
             <div className="flex flex-col space-y-1">
-              {groups.map((group) => (
+              {groups?.map((group) => (
                 <Checkbox key={group._id} value={group._id}>
                   {group.GroupName}
                 </Checkbox>
@@ -194,7 +175,6 @@ const TimelineEdit: React.FC<TimelineEditProps> = React.memo(
             </div>
           </Checkbox.Group>
         </div>
-
       </Modal>
     );
   }

@@ -48,7 +48,7 @@ const NotificationSchema = new Schema(
     },
     senderType: { 
       type: String, 
-      enum: ['Student', 'Teacher', 'System'],
+      enum: ['Student', 'Teacher', 'System','Head Of Subject'],
       required: true 
     },
     type: {
