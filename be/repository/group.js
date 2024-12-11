@@ -911,6 +911,7 @@ const getAllGroupsNoClass = async (
           term: 1,
           termCode: 1,
           teamMemberCount: { $size: "$teamMembers" },
+          class: 1,
         },
       },
       {
@@ -933,7 +934,7 @@ const getAllGroupsNoClass = async (
     });
     const isLastPage = page >= maxPages;
     const group = await Group.find()
-      .select("GroupName leader tag teamMembers isSponsorship term")
+      .select("GroupName leader tag teamMembers isSponsorship term class")
       .populate({
         path: "teamMembers",
         select: "name",

@@ -544,7 +544,6 @@ const createClass = async ({
 }) => {
   try {
     const matchingTerm = await TermRepository.getActiveTerm();
-
     if (!matchingTerm) {
       throw new Error("No matching term found for the current date.");
     }
@@ -580,10 +579,21 @@ const createClass = async ({
 
 const getClassByTermCode = async (termId) => {
   try {
-    const groups = Class.find({
+    const groups = await Class.find({
       term: termId
     })
     return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+const findByClassCode = async (classCode) =>{
+  try {
+    const existingClass = await Class.findOne({
+      classCode: classCode
+    })
+    return existingClass
   } catch (error) {
     throw new Error(error.message);
   }
@@ -604,6 +614,7 @@ const assignTeacher = async (classId, teacherId) => {
   }
 };
 export default {
+  findByClassCode,
   pinClasswork,
   getClassesOfTeacher,
   findClassById,

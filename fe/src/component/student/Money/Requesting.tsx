@@ -310,7 +310,7 @@ const Requesting = () => {
             <Result
               status={"success"}
               className="w-[70%] min-h-[450px]"
-              title={"Request made successfully"}
+              title={"Request Approved"}
               subTitle={
                 "Please wait while we confirm and response to your request. Contact pkt@gmail.com if problem arises"
               }
