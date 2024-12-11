@@ -175,7 +175,7 @@ const Distributing = () => {
                   open={true}
                   content={
                     <Statistic
-                      title="Total distributed"
+                      title="Total distributed (70%)"
                       value={totalFund * 0.7}
                       suffix="vnđ"
                       formatter={formatter}
@@ -208,7 +208,7 @@ const Distributing = () => {
                       }
                     />
                   }
-                  placement={calWidthFundUsed < 20 ? "topRight" : "topLeft"}
+                  placement={calWidthFundUsed < 20 ? "topLeft" : "topRight"}
                 >
                   <Tooltip
                     trigger={"hover"}

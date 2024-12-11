@@ -58,7 +58,7 @@ const Return = () => {
       title: "Evidence",
       dataIndex: "remaining",
       key: "remaining",
-      render: (_: any) => {
+      render: () => {
         return (
           <Button
             type="default"
@@ -74,7 +74,7 @@ const Return = () => {
     {
       title: "Fund verified",
       key: "bankNumber",
-      render: (_: any) => {
+      render: () => {
         return <Input disabled />;
       },
     },

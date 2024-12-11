@@ -29,6 +29,7 @@ interface TransactionProp {
   termId: string;
   transactions: any;
 }
+
 const TransactionChart: React.FC<TransactionProp> = ({ transactions }) => {
   const chartData = {
     labels: transactions.map((t: any) =>
@@ -37,7 +38,11 @@ const TransactionChart: React.FC<TransactionProp> = ({ transactions }) => {
     datasets: [
       {
         label: "Transaction Titles",
-        data: transactions.map((t: any) => t.fundUsed),
+        data: transactions.map((t: any) => ({
+          x: dayjs(t.createdAt).format(DATE_FORMAT.withoutYear), // x-axis value
+          y: t.fundUsed, // y-axis value
+          content: t.title,
+        })),
         fill: false,
         borderColor: "#AC7AF7",
         tension: 0.1,
@@ -51,24 +56,23 @@ const TransactionChart: React.FC<TransactionProp> = ({ transactions }) => {
     plugins: {
       title: {
         display: true,
-        text: "Money Spent (Last 4 Months)",
+        text: "Money Spent During Project",
       },
       tooltip: {
         callbacks: {
           label: function (context: any) {
-            const dateLabel = dayjs(context.raw.x).format(
-              DATE_FORMAT.withoutYear
-            );
-            return `${context.raw.y}: ${dateLabel}`;
+            const dateLabel = context.raw.y.toLocaleString();
+            return `${context.raw.content}: ${dateLabel} vnđ`;
           },
         },
       },
     },
     scales: {
       x: {
+        // type: "time",
         title: {
           display: true,
-          text: "Month",
+          text: "Dates",
         },
       },
       y: {
