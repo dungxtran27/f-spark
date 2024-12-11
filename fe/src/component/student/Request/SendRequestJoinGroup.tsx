@@ -68,8 +68,6 @@ const RequestJoinGroup: React.FC = () => {
     activeTerm?.timeLine?.find((t) => t.type === "membersTransfer")?.endDate ??
     "";
 
-  console.log(deadlineRequestJoinGroup);
-
   const [itemsPerPage] = useState(8);
   const [page, setCurrentPage] = useState(1);
   const [searchText, setSearchText] = useState("");
@@ -278,7 +276,7 @@ const RequestJoinGroup: React.FC = () => {
         <Skeleton active />
       ) : (
         <>
-          {dayjs().isAfter(dayjs("2024-12-10T17:00:00.000Z")) ? (
+          {dayjs().isAfter(dayjs(deadlineRequestJoinGroup)) ? (
             <div className="p-4 bg-white rounded shadow-md border border-red-500/50 bg-red-500/15">
               <h2 className="text-2xl font-bold text-red-500">
                 Deadline Passed
