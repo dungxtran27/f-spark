@@ -282,7 +282,7 @@ const RequestJoinGroup: React.FC = () => {
                 Deadline Passed
               </h2>
               <p className="mt-2 text-gray-700">
-                The deadline for requesting to join the group has passed.
+                The deadline for requesting to join the group over due.
               </p>
             </div>
           ) : (
@@ -320,20 +320,19 @@ const RequestJoinGroup: React.FC = () => {
                   />
                 ))}
               </div>
+              <div className="flex justify-center mt-4">
+                <Pagination
+                  current={page}
+                  pageSize={itemsPerPage}
+                  total={totalItems}
+                  onChange={handlePageChange}
+                  showTotal={(total) => `Total ${total} group`}
+                />
+              </div>
             </>
           )}
         </>
       )}
-
-      <div className="flex justify-center mt-4">
-        <Pagination
-          current={page}
-          pageSize={itemsPerPage}
-          total={totalItems}
-          onChange={handlePageChange}
-          showTotal={(total) => `Total ${total} group`}
-        />
-      </div>
     </div>
   );
 };

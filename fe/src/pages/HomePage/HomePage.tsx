@@ -22,10 +22,13 @@ const HomePage = () => {
             navigate("/projectOverview");
             break;
           case ROLE.teacher:
-            navigate("/classes");
+            navigate("/teacher/dashboard");
             break;
           case ROLE.admin:
             navigate("/manageClass");
+            break;
+          case ROLE.headOfSubject:
+            navigate("/hos/timeline");
             break;
           default:
             navigate("/");

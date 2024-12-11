@@ -7,14 +7,14 @@ import {
   SubmissionRepository,
   TeacherRepository,
 } from "../repository/index.js";
+import teacher from "./teacher.js";
 
 const getClassesOfTeacher = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
-    const classes = await ClassRepository.getClassesOfTeacher(
-      decodedToken?.role?.id
-    );
-
+    const teacherId = decodedToken?.role?.id;
+    const { termId } = req.body;
+    const classes = await ClassRepository.getClassesOfTeacher({ teacherId, termId });
     return res.status(200).json(classes);
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
@@ -161,12 +161,12 @@ const getClassDetail = async (req, res) => {
 
 const assignTeacher = async (req, res) => {
   try {
-    const {teacherId, classId} = req.body;
+    const { teacherId, classId } = req.body;
     console.log(teacherId, classId);
-    
+
     const existClass = await ClassRepository.findClassById(classId);
-    if(existClass?.teacher){
-      return res.status(400).json({error: "This class already have a teacher !"})
+    if (existClass?.teacher) {
+      return res.status(400).json({ error: "This class already have a teacher !" })
     }
     const [updatedClass, updatedTeacher] = await Promise.all([
       ClassRepository.assignTeacher(classId, teacherId),

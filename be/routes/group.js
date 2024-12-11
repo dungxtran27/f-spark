@@ -139,4 +139,14 @@ groupRouter.post(
   "/deleteImageFromGallery",
   GroupController.deleteImageFromGallery
 );
+groupRouter.post(
+  "/updateGroupInfo",
+  verifyToken,
+  GroupController.updateGroupInfo
+);
+groupRouter.post(
+  "/deleteTransaction",
+  verifyToken,
+  GroupController.deleteTransaction
+);
 export default groupRouter;
