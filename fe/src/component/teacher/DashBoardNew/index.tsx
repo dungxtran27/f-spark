@@ -4,64 +4,70 @@ import type { StepsProps } from "antd";
 import Assignment from "./Assignment";
 import Outcome from "./Outcome";
 import InfoAndGroupDelay from "./InfoAndGroupDelay";
-
-const steps = [
-  {
-    title: "Member Transfer",
-  },
-  {
-    title: "Sponsorship",
-  },
-  {
-    title: "Dividing Classes",
-  },
-  {
-    title: "Out Come 1",
-  },
-  {
-    title: "Out Come 2",
-  },
-  {
-    title: "Out Come 3",
-  },
-];
-
-const customDot: StepsProps["progressDot"] = (dot, { status, index }) => (
-  <Popover
-    content={
-      <span>
-        step {index + 1} status: {status}
-      </span>
-    }
-  >
-    {dot}
-  </Popover>
-);
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Term } from "../../../model/auth";
+import moment from "moment";
 
 const TeacherDashBoard: React.FC = () => {
+  const [infoData, setInfoData] = useState<any>({});
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
   const [currentStep, setCurrentStep] = useState(0);
 
   const handleStepChange = (step: number) => {
     setCurrentStep(step);
   };
 
-  const items = steps.map((item) => ({ key: item.title, title: item.title }));
+  const filteredOutcomes =
+    activeTerm?.timeLine.filter((timeline: any) => {
+      return timeline.type === "outcome";
+    }) ?? [];
+
+  const items = filteredOutcomes.map((item) => ({
+    key: item.title,
+    title: item.title,
+  }));
+
+  const customDot: StepsProps["progressDot"] = (dot, { index }) => (
+    <Popover
+      content={
+        <div>
+          <strong>{filteredOutcomes[index].title}</strong>
+          <div className="text-md text-gray-500 mt-1">
+            {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")}
+          </div>
+        </div>
+      }
+      trigger="click"
+      placement="bottom"
+    >
+      {dot}
+    </Popover>
+  );
 
   return (
-    <div className="w-full">
-      <div className="bg-white p-4 rounded m-1">
-        <h1 className="font-bold mb-2">Timeline</h1>
-        <Steps
-          current={currentStep}
-          items={items}
-          onChange={handleStepChange}
-          progressDot={customDot}
-        />
+    <div className="w-full h-full flex">
+      <div className="bg-white p-2 rounded m-1 w-1/3">
+        <Assignment infoData={infoData} />
       </div>
-      <div className="flex flex-row">
-        <Assignment />
-        <Outcome />
-        <InfoAndGroupDelay />
+      <div className="w-2/3 flex flex-col">
+        <div className="bg-white rounded mt-1">
+          <h1 className="font-bold mb-2 p-2">Timeline</h1>
+          <Steps
+            current={currentStep}
+            items={items}
+            onChange={handleStepChange}
+            progressDot={customDot}
+          />
+        </div>
+        <div className="flex flex-row mt-1 flex-grow">
+          <Outcome infoData={infoData} />
+          <InfoAndGroupDelay setInfoData={setInfoData} />
+        </div>
       </div>
     </div>
   );

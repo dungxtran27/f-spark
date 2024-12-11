@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { DATE_FORMAT, QUERY_KEY, ROLE } from "../../../../utils/const";
 import { classApi } from "../../../../api/Class/class";
 import { RiCalendarScheduleFill } from "react-icons/ri";
-import { FaEye } from "react-icons/fa";
 import dayjs from "dayjs";
 import { IoNewspaperOutline } from "react-icons/io5";
 import { useState } from "react";
@@ -51,17 +50,7 @@ const DeadlineAndOutcome = () => {
 
   return (
     <div className="w-full bg-white shadow-lg rounded border border-black/15 p-2">
-      <div className="flex flex-col gap-2 pb-3 border-b border-b-black/15">
-        <span className="font-medium text-[18px] flex items-center gap-3">
-          Upcoming deadline
-          <FaEye className="text-primaryBlue" />
-        </span>
-        <div className="flex items-center gap-3">
-          <RiCalendarScheduleFill size={25} />
-          <span className="text-[16px]">26, Oct - 30, Oct 2024</span>
-        </div>
-        <span className="text-[16px]">Chốt thành viên của các nhóm</span>
-      </div>
+
       <div className="flex flex-col gap-2 w-full">
         <span className="font-medium text-[18px]">Outcomes</span>
         {outcomeListData?.data?.data?.map((o: any, index: number) => (

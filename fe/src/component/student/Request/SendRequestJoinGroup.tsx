@@ -320,20 +320,19 @@ const RequestJoinGroup: React.FC = () => {
                   />
                 ))}
               </div>
+              <div className="flex justify-center mt-4">
+                <Pagination
+                  current={page}
+                  pageSize={itemsPerPage}
+                  total={totalItems}
+                  onChange={handlePageChange}
+                  showTotal={(total) => `Total ${total} group`}
+                />
+              </div>
             </>
           )}
         </>
       )}
-
-      <div className="flex justify-center mt-4">
-        <Pagination
-          current={page}
-          pageSize={itemsPerPage}
-          total={totalItems}
-          onChange={handlePageChange}
-          showTotal={(total) => `Total ${total} group`}
-        />
-      </div>
     </div>
   );
 };

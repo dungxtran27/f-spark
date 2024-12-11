@@ -273,6 +273,8 @@ export const QUERY_KEY = {
   ACTIVE_SPONSOR_REQUEST: "activeSponsorRequest",
   APPROVED_SPONSOR_REQUEST: "approvedSponsorRequest",
   GALLERY: "gallery",
+  DASHBOARD_NEW:"new dash board",
+  DASHBOARD_REQUEST:"request dash board"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",
