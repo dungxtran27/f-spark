@@ -27,6 +27,9 @@ const HomePage = () => {
           case ROLE.admin:
             navigate("/manageClass");
             break;
+          case ROLE.headOfSubject:
+            navigate("/hos/timeline");
+            break;
           default:
             navigate("/");
             break;

@@ -22,6 +22,7 @@ import {
   NotificationRouter,
   TermRouter,
   RequestDeadlineRouter,
+  OutcomeRouter,
   FundEstimationRouter
 } from "./routes/index.js";
 import "./utils/google-oauth2.js";
@@ -75,6 +76,7 @@ app.use("/api/notification", NotificationRouter)
 app.use("/api/term", TermRouter)
 app.use("/api/fundEstimation", FundEstimationRouter)
 app.use("/api/requestDeadline", RequestDeadlineRouter)
+app.use("/api/outcome", OutcomeRouter)
 app.use("/api/vnpay", VnPayRouter)
 
 const port = process.env.PORT || 9999;
