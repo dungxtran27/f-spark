@@ -30,4 +30,7 @@ export const term = {
   updateTimelineOfTerm: async (requestBody: any) => {
     return await axios.post(`/api/term/updateTimelineOfTerm`, requestBody);
   },
+  getAllOutCome: async () => {
+    return await axios.get(`/api/term/getAllOutCome`);
+  },
 };

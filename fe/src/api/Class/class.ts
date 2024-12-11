@@ -43,8 +43,8 @@ export const classApi = {
   getGroupOfClass: async (classId: string | undefined) => {
     return await axios.get(`api/group/getAllStudentByGroup/${classId}`);
   },
-  getTeacherClasses: async () => {
-    return await axios.get(`api/class/getTeacherClasses`);
+  getTeacherClasses: async (termId: string) => {
+    return await axios.post(`api/class/getTeacherClasses`, { termId });
   },
   gradeOutcome: async (requestBody: any) => {
     return await axios.patch(`api/submission/addGrade`, requestBody);
@@ -74,7 +74,7 @@ export const classApi = {
     );
   },
   getAllClasses: async () => {
-    return await axios.get(`api/class/classes`);
+    return await axios.get(`api/class`);
   },
   // admin
   getClassListPagination: async (requestBody: any) => {
@@ -86,7 +86,7 @@ export const classApi = {
   getClassDetail: async (classId: any) => {
     return await axios.get(`api/class/${classId}`);
   },
-  getUnGroupStudentOfClass: async (classId: any) =>{
-    return await axios.get(`api/student/${classId}`)
-  }
+  getUnGroupStudentOfClass: async (classId: any) => {
+    return await axios.get(`api/student/${classId}`);
+  },
 };

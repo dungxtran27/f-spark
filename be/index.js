@@ -31,6 +31,8 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { eventScheduler } from "./utils/scheduler.js";
 import http from "http";
+// import morgan from "morgan";
+
 const app = express();
 const server = http.createServer(app);
 dotenv.config();
@@ -54,6 +56,7 @@ app.use(
   "/upload/image",
   express.static(path.join(__dirname, "upload", "image"))
 );
+// app.use(morgan("dev"));
 
 app.get("/hello", (req, res) => {
   return res.status(200).json("hello");

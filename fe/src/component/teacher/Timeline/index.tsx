@@ -1,58 +1,57 @@
-import React from 'react';
-import { Tabs } from 'antd';
-import TimelineView from './TimelineView';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { groupApi } from '../../../api/group/group';
-import { QUERY_KEY } from '../../../utils/const';
-import { AxiosResponse } from 'axios';
-import TimelineRequest from './TimelineRequest';
-interface Timeline {
-    _id: string;
-    title: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-    editAble: boolean;
-    status: string;
-    type: string;
-    classworkId: string;
-}
-
-interface Group {
-    _id: string;
-    GroupName: string;
-    GroupDescription: string;
-    timeline: Timeline[];
-}
+import React from "react";
+import { Tabs } from "antd";
+import TimelineRequest from "./TimelineRequest";
+import TimelineView from "./TimelineView";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Term } from "../../../model/auth";
 
 const TimelineClassWrapper: React.FC = () => {
-    const { classId } = useParams();
-    const { data } = useQuery<AxiosResponse>({
-        queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
-        queryFn: () => groupApi.getAllGroupByClassId(classId),
-        enabled: !!classId,
-    });
-    const groups: Group[] = Array.isArray(data?.data?.data) ? data.data.data : [];
-    const renderTimeline = (group: Group) => {
-        return (
-            <TimelineView group={group} key={group._id} />
-        );
-    };
-    
-    return (
-        <div>
-            <Tabs defaultActiveKey="0" tabPosition="left">
-                {groups.map((group: Group, index: number) => (
-                    <Tabs.TabPane tab={group.GroupName} key={index.toString()}>
-                        {renderTimeline(group)}
-                    </Tabs.TabPane>
-                ))}
-            </Tabs>
-            <TimelineRequest/>
-        </div>
-    );
-    
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const filteredOutcomes =
+    activeTerm?.timeLine.filter((timeline: any) => {
+      return timeline.type === "outcome";
+    }) ?? [];
+
+  return (
+    <div>
+      <Tabs defaultActiveKey="0" tabPosition="left">
+        {filteredOutcomes.length > 0 ? (
+          filteredOutcomes.map((a: any, index: number) => {
+            const adjustedIndex =
+              a.title === "Outcome 1"
+                ? 1
+                : a.title === "Outcome 2"
+                ? 2
+                : a.title === "Outcome 3"
+                ? 3
+                : index + 1;
+
+            return (
+              <Tabs.TabPane
+                className="-ml-6"
+                tab={a.title}
+                key={adjustedIndex.toString()}
+              >
+                <TimelineView
+                  description={a.description}
+                  index={adjustedIndex}
+                  endDate={a.endDate}
+                  startDate={a.startDate}
+                />
+              </Tabs.TabPane>
+            );
+          })
+        ) : (
+          <div>No outcomes available</div>
+        )}
+      </Tabs>
+      <TimelineRequest />
+    </div>
+  );
 };
 
 export default TimelineClassWrapper;
