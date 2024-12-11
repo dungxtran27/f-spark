@@ -31,7 +31,7 @@ const Login = () => {
           navigate("/projectOverview");
           break;
         case ROLE.teacher:
-          navigate("/classes");
+          navigate("/teacher/dashboard");
           break;
         case ROLE.admin:
           navigate("/manageClass");
