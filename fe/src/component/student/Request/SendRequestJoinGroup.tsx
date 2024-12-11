@@ -68,6 +68,8 @@ const RequestJoinGroup: React.FC = () => {
     activeTerm?.timeLine?.find((t) => t.type === "membersTransfer")?.endDate ??
     "";
 
+  console.log(deadlineRequestJoinGroup);
+
   const [itemsPerPage] = useState(8);
   const [page, setCurrentPage] = useState(1);
   const [searchText, setSearchText] = useState("");
@@ -276,13 +278,13 @@ const RequestJoinGroup: React.FC = () => {
         <Skeleton active />
       ) : (
         <>
-          {dayjs().isAfter(dayjs(deadlineRequestJoinGroup)) ? (
+          {dayjs().isAfter(dayjs("2024-12-10T17:00:00.000Z")) ? (
             <div className="p-4 bg-white rounded shadow-md border border-red-500/50 bg-red-500/15">
               <h2 className="text-2xl font-bold text-red-500">
                 Deadline Passed
               </h2>
               <p className="mt-2 text-gray-700">
-                The deadline for requesting to join the group has passed.
+                The deadline for requesting to join the group over due.
               </p>
             </div>
           ) : (
@@ -320,20 +322,19 @@ const RequestJoinGroup: React.FC = () => {
                   />
                 ))}
               </div>
+              <div className="flex justify-center mt-4">
+                <Pagination
+                  current={page}
+                  pageSize={itemsPerPage}
+                  total={totalItems}
+                  onChange={handlePageChange}
+                  showTotal={(total) => `Total ${total} group`}
+                />
+              </div>
             </>
           )}
         </>
       )}
-
-      <div className="flex justify-center mt-4">
-        <Pagination
-          current={page}
-          pageSize={itemsPerPage}
-          total={totalItems}
-          onChange={handlePageChange}
-          showTotal={(total) => `Total ${total} group`}
-        />
-      </div>
     </div>
   );
 };
