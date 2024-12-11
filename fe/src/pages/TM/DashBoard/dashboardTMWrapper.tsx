@@ -95,7 +95,8 @@ const DashboardTMWrapper: React.FC = () => {
       }
     };
     
-    const handleDelete = async (outcomeId) => {
+    const [outcomeId, setOutcomeId] = useState('')
+    const handleDelete = async () => {
       if(outcomes?.data?.data.length < 4){
         messageApi.open({
           type: 'error',
@@ -104,6 +105,7 @@ const DashboardTMWrapper: React.FC = () => {
         return;
       }
       await outcomeApi.deleteOutcome(outcomeId)
+      setIsOpenDelete(false)
       queryClient.invalidateQueries([QUERY_KEY.TERM_TIMELINE]);
     };
     const daysPerStep = outcomes?.data?.data.length > 0 ? 90 / outcomes?.data?.data.length : 0;
@@ -135,6 +137,7 @@ const DashboardTMWrapper: React.FC = () => {
                 <Button onClick={() => {
                   setIsOpenDelete(true)
                   setOpenPopoverIndex(null)
+                  setOutcomeId(item._id)
                 }}>
                   Delete
                 </Button>
