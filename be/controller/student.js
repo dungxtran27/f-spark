@@ -128,12 +128,12 @@ const addManyStudentNoClassToClass = async (req, res) => {
       return res.status(404).json({ message: `Students with IDs ${missingStudents.join(", ")} not found.` });
     }
     const studentsAlreadyInClass = students.filter(student => student.classId);
-    if (studentsAlreadyInClass.length > 0) {
-      const studentNames = studentsAlreadyInClass.map(student => student.name);
-      return res.status(400).json({
-        message: `The following students are already assigned to a class: ${studentNames.join(", ")}`
-      });
-    }
+    // if (studentsAlreadyInClass.length > 0) {
+    //   const studentNames = studentsAlreadyInClass.map(student => student.name);
+    //   return res.status(400).json({
+    //     message: `The following students are already assigned to a class: ${studentNames.join(", ")}`
+    //   });
+    // }
     const updatedStudents =
       await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
     return res.status(200).json({
