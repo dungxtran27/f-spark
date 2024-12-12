@@ -15,8 +15,8 @@ export const authApi = {
   logOut: async () => {
     return await axios.get("api/auth/logOut");
   },
-  googleLogin: async (token: string) => {
-    return await axios.post("api/auth/googleLogin", { token });
+  googleLogin: async (token: string, role: string) => {
+    return await axios.post("api/auth/googleLogin", { token, role });
   },
   getActiveTerm: async () => {
     return await axios.post("api/term/active");
