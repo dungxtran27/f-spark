@@ -38,11 +38,13 @@ classWorkRouter.post(
 );
 classWorkRouter.patch(
   "/upvoteAnnouncement/:classWorkId",
-  verifyToken, 
+  verifyToken,
   ClassworkController.upvoteAnnouncement
 )
 
 //thang
 classWorkRouter.get('/class/:classId', ClassworkController.getClassStatistics);
+classWorkRouter.post('/getTotalClassWork', verifyToken, ClassworkController.getTotalClassWork);
+classWorkRouter.get('/getTotalClassWorkByClassId/:classId', verifyToken, ClassworkController.getTotalClassWorkByClassId);
 
 export default classWorkRouter;

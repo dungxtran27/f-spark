@@ -3,16 +3,17 @@ import { ClockCircleOutlined } from '@ant-design/icons';
 import {
   Select,
   Timeline,
-  Modal,
-  Button, 
-  Input,
+  Steps,
   Row, 
   Col, 
   Typography,
   Form,
-  DatePicker
+  Button,
+  Modal,
+  Input,
+  Popover,
+  message
 } from "antd";
-import QuillEditor from "../../../component/common/QuillEditor";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../utils/const";
 import { Admin } from "../../../api/manageAccoount";
@@ -21,13 +22,32 @@ import moment from "moment";
 import { groupApi } from "../../../api/group/group";
 import FormItem from "antd/es/form/FormItem";
 import { term } from "../../../api/term/term";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { CiCircleMinus, CiCirclePlus  } from "react-icons/ci";
+import { outcomeApi } from "../../../api/outcome";
 const { Option } = Select;
 const { Text, Title } = Typography;
 const DashboardTMWrapper: React.FC = () => {
   const queryClient = useQueryClient();
-  const [termFilter, setTermFilter] = useState<string | undefined>('674241ba21d3a593602e7994');
   const [selectedItem, setSelectedItem] = useState(null);
   const [statusUpdate, setStatusUpdate] = useState(false)
+  const [termFilter, setTermFilter] = useState<string | undefined>('');
+  const [messageApi, contextHolder] = message.useMessage();
+  const { data: terms, isSuccess: successTerm } = useQuery({
+    queryKey: [QUERY_KEY.TERM_LIST],
+    queryFn: async () => {
+      return Admin.getAllTerms();
+    },
+  });
+  useEffect(() => {
+    const currentTerm = terms?.data.data.find(
+      (term: any) =>
+        dayjs().isAfter(dayjs(term.startTime)) && dayjs().isBefore(dayjs(term.endTime))
+    );
+    setTermFilter(currentTerm?._id)
+  }, [successTerm, terms]);
+  const [titleNew, setTitleNew] = useState('')
 
   const { data: termTimeline, isSuccess } = useQuery({
     queryKey: [
@@ -38,7 +58,6 @@ const DashboardTMWrapper: React.FC = () => {
       return term.getTimelineOfTerm(termFilter);
     },
   });
-
   useEffect(() => {
     if (isSuccess && termTimeline?.data) {
       const currentDate = new Date(); 
@@ -55,12 +74,89 @@ const DashboardTMWrapper: React.FC = () => {
     }
   }, [termTimeline, isSuccess]);
 
-      const { data: terms } = useQuery({
-      queryKey: [QUERY_KEY.TERM_LIST],
+    const { data: outcomes, isLoading } = useQuery({
+      queryKey: [QUERY_KEY.All_OUTCOMES],
       queryFn: async () => {
-        return Admin.getAllTerms();
+        return outcomeApi.getAllOutcome();
       },
     });
+    useEffect(() => {
+      if (outcomes?.data.data) {
+        setTitleNew(`Outcome ${outcomes?.data.data.length + 1}`);
+      }
+    }, [isLoading, outcomes]);
+
+    const [openPopoverIndex, setOpenPopoverIndex] = useState(null);
+    const handleOpenChange = (open, index) => {
+      if (open) {
+        setOpenPopoverIndex(index);
+      } else {
+        setOpenPopoverIndex(null);
+      }
+    };
+    
+    const handleDelete = async (outcomeId) => {
+      if(outcomes?.data?.data.length < 4){
+        messageApi.open({
+          type: 'error',
+          content: 'A semester cannot have less than 3 Outcomes.',
+        });
+        return;
+      }
+      await outcomeApi.deleteOutcome(outcomeId)
+      queryClient.invalidateQueries([QUERY_KEY.TERM_TIMELINE]);
+    };
+    const daysPerStep = outcomes?.data?.data.length > 0 ? 90 / outcomes?.data?.data.length : 0;
+    const steps = outcomes?.data?.data.map((item,index) => ({
+      title: (
+        <Popover
+          content={
+            <div className="w-80">
+              <p>
+                <strong>Title:</strong> {item.title}
+              </p>
+              <p className="mt-1 block">
+                <strong>Description:</strong> {item.description}
+              </p>
+              {item.GradingCriteria && (
+                <div>
+                  <strong className="mt-1 block">Grading Criteria:</strong>
+                  <ul>
+                    {item.GradingCriteria.map((criteria, idx) => (
+                      <li key={idx}>{criteria.description}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <div className="flex gap-2 mt-3 justify-end">
+                <Button type="primary" onClick={() => handleChange(item)}>
+                  Change
+                </Button>
+                <Button onClick={() => {
+                  setIsOpenDelete(true)
+                  setOpenPopoverIndex(null)
+                }}>
+                  Delete
+                </Button>
+              </div>
+            </div>
+          }
+          title={`Details ${item.title}`}
+          trigger="click"
+          open={openPopoverIndex === index} 
+          onOpenChange={(open) => handleOpenChange(open, index)} 
+        >
+          <span style={{ cursor: "pointer" }}>{item.title}</span>
+        </Popover>
+      ),
+      status: "process",
+      subTitle: `Duration: ${Math.ceil(daysPerStep)} days`,
+      description:
+        item.description.length > 50
+          ? item.description.substring(0, 50) + "..."
+          : item.description,
+    })) || [];
+
 
     const termOptions = terms?.data?.data?.map((t: any) => ({
       value: t?._id,
@@ -104,70 +200,81 @@ const DashboardTMWrapper: React.FC = () => {
     const handleItemClick = (item) => {
         setSelectedItem(item);
       };
-    
-      const handleDelete = async () => {
-        const data = {
-          termId: termFilter,
-          timelineId: selectedItem._id
-        }
-        await term.deleteTimelineOfTerm(data)
-        queryClient.invalidateQueries([QUERY_KEY.TERM_TIMELINE]);
-        setIsOpenDelete(false)
-      };
-    
-      const handleChange = () => {
-        setStatusUpdate(true)
-        form.setFieldsValue({
-          title: selectedItem?.title,
-          type: selectedItem?.type,
-          description: selectedItem?.description,
-          duration: [
-            selectedItem?.startDate ? moment(selectedItem?.startDate) : null,
-            selectedItem?.endDate ? moment(selectedItem?.endDate) : null
-          ],
-        });
-
-        setIsModalOpen(true)
-
-      };
-
+  const [gradingCriteria, setGradingCriteria] = useState(['']);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpenDelete, setIsOpenDelete] = useState(false);
+  const [itemSellected, setItemSellected] = useState({});
   const handleAccept = () => {
     setStatusUpdate(false)
     setIsModalOpen(true)
+    form.setFieldsValue({
+      title: titleNew,
+    });
+  };
+  const handleChange = (item) => {
+    setItemSellected(item)
+    setStatusUpdate(true)
+    setIsModalOpen(true)
+    form.setFieldsValue({
+    title: item.title,
+    description: item.description
+    })
+    const descriptions = item.GradingCriteria.map((criteria) => criteria.description);
+    setGradingCriteria(descriptions);
+    setOpenPopoverIndex(null)
   };
   
+  steps.push({
+    title: 'Create Outcome',
+    status: 'wait',
+    icon: <CiCirclePlus style={{ fontSize: '36px', cursor: 'pointer' }} onClick={handleAccept} />,
+  });
+  
   const handleOk = async () => {
-    const { title, type, description, duration } = form.getFieldsValue(); 
+    const { title, description } = form.getFieldsValue(); 
     const data = {
       title,
-      type,
       description,
-      startDate: duration? duration[0] : null,
-      endDate: duration ? duration[1] : null,
-      termId: termFilter
+      gradingCriteria
     }
     if(!statusUpdate){
-      await term.createTimelineOfTerm(data)
+      await outcomeApi.createOutcome(data)
     }else{
-      data.timelineId = selectedItem?._id
-      await term.updateTimelineOfTerm(data)
+      data.id = itemSellected?._id
+      await outcomeApi.updateOutcome(data)
     }
-    queryClient.invalidateQueries([QUERY_KEY.TERM_TIMELINE]);
     form.resetFields()
+    setGradingCriteria([''])
     setIsModalOpen(false)
+    queryClient.invalidateQueries([QUERY_KEY.All_OUTCOMES]); 
   }
 
   const handleCancel = () => {
-    form.resetFields()
     setIsModalOpen(false)
-    setIsOpenDelete(false)
+    if(statusUpdate){
+      form.resetFields()
+      setGradingCriteria([''])
+    }
+     setIsOpenDelete(false)
   }
+  const addGradingCriteria = () => {
+    setGradingCriteria([...gradingCriteria, '']);
+  };
+  const updateGradingCriteria = (index, value) => {
+    const updatedCriteria = [...gradingCriteria];
+    updatedCriteria[index] = value;
+    setGradingCriteria(updatedCriteria);
+  };
 
+  const removeGradingCriteria = (index) => {
+    const updatedCriteria = gradingCriteria.filter((_, i) => i !== index);
+    setGradingCriteria(updatedCriteria);
+  };
   return (
     <div className="mx-auto p-3">
-        <FormItem className="w-1/6" name={"semester"} label={"Semester"}>
+        {contextHolder}
+        <div style={{ display: "flex", flexDirection: "column", background: "white" }}>
+        <FormItem className="w-1/6 font-semibold p-3 pb-0" name={"semester"} label={"Semester"}>
         {terms?.data?.data && (
         <Select
           placeholder="Term"
@@ -184,22 +291,17 @@ const DashboardTMWrapper: React.FC = () => {
         />
         )}
         </FormItem>
-        <div style={{ display: "flex", flexDirection: "column", background: "white" }}>
         <Row
             justify="center"
             style={{
-            height: "46px",
-            marginTop: "10px"
+            height: "40px",
             }}
         >
             <Title level={5} style={{ margin: 0 }}>Today: {formattedDate}</Title>
         </Row>
         <div style={{ flex: 1, display: "flex" }}>
-            <Col span={12} style={{ padding: "8px" }}>
+            <Col span={13} style={{ padding: "8px" }}>
             <Timeline mode="left" items={timelineItems} />
-            </Col>
-            <Col span={2}>
-                <Button onClick={handleAccept} type="primary" style={{ marginTop: 0 }}>+ Add</Button>
             </Col>
             <Col
             span={1}
@@ -208,7 +310,7 @@ const DashboardTMWrapper: React.FC = () => {
                 marginBottom: "2vh"
             }}
             />
-            <Col span={9} style={{ paddingRight: "28px" }}>
+            <Col span={10} style={{ paddingRight: "28px" }}>
                 <div>
                 <Text style={{ marginBottom: "10px", display: "inline-block", color: "#333333" }}>
                     <b>Title: {selectedItem?.title}</b>
@@ -222,57 +324,68 @@ const DashboardTMWrapper: React.FC = () => {
                     <b>Description:</b> {selectedItem?.description}
                 </Text>
                 <br />
-                <Text style={{ marginBottom: "10px", display: "inline-block", color: "#333333" }}>
+                <Text style={{display: "inline-block", color: "#333333" }}>
                     <b>Date:</b> {new Date(selectedItem?.endDate).toLocaleDateString('en-GB')}
                 </Text>
-                <div style={{ margin: 8, display: "flex", justifyContent: "flex-end"}}>
-                    <Button onClick={() => handleChange()} style={{ marginRight: 8 }}>Change</Button>
-                    <Button onClick={() => setIsOpenDelete(true)} danger>Delete</Button>
-                </div>
                 </div>
             </Col>
         </div>
         </div>
-        
-      <Modal title={!statusUpdate ? "Create Timeline" : "Change Timeline"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <div className="bg-white mt-3 p-3">
+        <span className="font-semibold">Update timeline for next term</span>
+        <div className="flex items-center justify-center p-10">
+        <Steps items={steps} />
+        </div>
+        </div>
+      <Modal title={!statusUpdate ? "Create Outcome" : "Change Outcome"} open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
       <div className="w-full mt-5 flex flex-col gap-3">
         <Form layout="vertical" form={form}>
-          <Row gutter={16}> 
-          <Col span={12}> 
+          <Col span={24}> 
             <FormItem
               name={"title"}
               label={"Title"}
               rules={[{ required: true, message: "Title is required" }]}
             >
-              <Input placeholder="Title" size="large" />
+              <Input placeholder="Title" size="large" disabled={true}/>
             </FormItem>
           </Col>
-          <Col span={12}> 
-            <FormItem
-              name={"type"}
-              label={"Type"}
-              rules={[{ required: true, message: "Type is required" }]}
-            >
-              <Input placeholder="Type" size="large" />
-            </FormItem>
-          </Col>
-        </Row>
-          <FormItem name={"description"} label={"Description"}>
+          <FormItem name={"description"} label={"Description"} rules={[{ required: true, message: "Description is required" }]}>
             <Input.TextArea placeholder="Description" size="large" rows={4} />
           </FormItem>
-            <FormItem name={"duration"} label={"Duration"}>
-              <DatePicker.RangePicker
-                className="w-full"
-                showTime={{ format: "HH:mm" }}
-                format="YYYY-MM-DD HH:mm"
-                placeholder={["Start Date", "Due date"]}
-              />
-            </FormItem>
+          <div className="mt-4">
+            <label className="font-semibold mb-2 block">Grading Criteria</label>
+            {gradingCriteria.map((item, index) => (
+              <div key={index} className="flex items-center gap-2 mb-3">
+                <Input
+                  placeholder="Enter Grading Criteria"
+                  size="large"
+                  value={item}
+                  onChange={(e) => updateGradingCriteria(index, e.target.value)}
+                />
+                {gradingCriteria.length > 1 && (
+                  <Button
+                    icon={<CiCircleMinus className="text-xl"/>}
+                    type="text"
+                    danger
+                    onClick={() => removeGradingCriteria(index)}
+                  />
+                )}
+              </div>
+            ))}
+            <Button
+              type="dashed"
+              icon={<CiCirclePlus className="text-xl"/>}
+              onClick={addGradingCriteria}
+              className="mt-2"
+            >
+              Add Grading Criteria
+            </Button>
+          </div>
         </Form>
       </div>
       </Modal>
       <Modal title={"Confirm Delete Deadline"} open={isOpenDelete} onOk={handleDelete} onCancel={handleCancel}>
-        <p>{"Are you sure you want to delete this timeline?"}</p>
+        <p>{"Are you sure you want to delete this Outcome?"}</p>
       </Modal>
     </div>
   );

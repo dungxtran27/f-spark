@@ -249,6 +249,34 @@ const getClassStatistics = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const getTotalClassWork = async (req, res) => {
+  try {
+    const teacherId = req.decodedToken.role.id;
+    const { startDate, endDate } = req.body;
+    if (!teacherId) {
+      return res.status(400).json({ error: "Bad request !" });
+    }
+    const result = await ClassworkRepository.getTotalClassWork({ startDate, endDate, teacherId });
+    return res.status(201).json({ data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const getTotalClassWorkByClassId = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    if (!classId) {
+      return res.status(400).json({ error: "Bad request !" });
+    }
+    const result = await ClassworkRepository.getTotalClassWorkByClassId({ classId });
+    return res.status(201).json({ data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   getClassWorkByStudent,
   getClassWorkByTeacher,
@@ -259,4 +287,6 @@ export default {
   createClassWork,
   upvoteAnnouncement,
   getClassStatistics,
+  getTotalClassWork,
+  getTotalClassWorkByClassId
 };

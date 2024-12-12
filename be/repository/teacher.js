@@ -384,13 +384,15 @@ const getTotalTeachers = async (termCode) => {
 };
 
 
-const getClassOfTeacher = () => {
+const getClassOfTeacher = async (teacherId) => {
   try {
-    return null;
+    const classList = await Teacher.findById(teacherId)
+    return classList.assignedClasses
   } catch (error) {
     throw new Error(error.message);
   }
-};
+}
+
 export default {
   getTeacherByClassId,
   findByAccountId,

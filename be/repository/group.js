@@ -98,6 +98,7 @@ const findGroupById = async ({ groupId }) => {
           },
         },
       })
+      .populate("tag")
       .populate({
         path: "mentor",
         select: "_id name email phoneNumber profile profilePicture",
@@ -1203,20 +1204,30 @@ const getGroupStatistic = async ({
 
     const skip = (page - 1) * limit;
 
+    const sortingOrder = {
+      pending: 1,
+      sponsored: 2,
+      normal: 3,
+    };
+
     const groups = await Group.find(filters)
-      .skip(skip)
-      .limit(limit)
       .populate("class", "classCode")
       .populate("term", "termCode")
       .populate("mentor", "name")
       .exec();
 
-    const totalItems = await Group.countDocuments(filters);
+    groups.sort(
+      (a, b) => sortingOrder[a.sponsorStatus] - sortingOrder[b.sponsorStatus]
+    );
+
+    const paginatedGroups = groups.slice(skip, skip + limit);
+
+    const totalItems = groups.length;
     const maxPages = Math.ceil(totalItems / limit);
     const isLastPage = page >= maxPages;
 
     return {
-      groups,
+      groups: paginatedGroups,
       totalItems,
       maxPages,
       isLastPage,
@@ -1253,6 +1264,88 @@ const findbyId = async (groupId) => {
     throw new Error("Group not found");
   }
 }
+const getGroupCountsByTerm = async (term) => {
+  try {
+    const sponsorStatusCounts = await Group.aggregate([
+      {
+        $match: {
+          term,
+          sponsorStatus: { $in: ["pending", "sponsored"] },
+        },
+      },
+      {
+        $group: {
+          _id: "$sponsorStatus",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const totalGroups = await Group.countDocuments({ term });
+    const response = sponsorStatusCounts.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    return {
+      pending: response.pending || 0,
+      sponsored: response.sponsored || 0,
+      total: totalGroups,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const updateGroupInfo = async ({ groupId, name, description, tags }) => {
+  try {
+    const updateData = {};
+
+    if (name) updateData.GroupName = name;
+    if (description) updateData.GroupDescription = description;
+    if (tags) updateData.tag = tags;
+
+    const updatedGroup = await Group.findByIdAndUpdate(groupId, updateData, {
+      new: true,
+    });
+
+    return updatedGroup;
+  } catch (error) {
+    return new Error(error.message);
+  }
+};
+const getTransactionByTransactionId = async (groupId, transactionId) => {
+  try {
+    const group = await Group.findById(groupId);
+
+    if (!group) {
+      throw new Error("Group not found.");
+    }
+
+    const transaction = group.transactions.find(
+      (transaction) => transaction._id.toString() === transactionId
+    );
+
+    if (!transaction) {
+      throw new Error("Transaction not found.");
+    }
+
+    return transaction;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const deleteTransaction = async (groupId, transactionId) => {
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $pull: {
+        transactions: { _id: transactionId },
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1295,5 +1388,9 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
-  findbyId
+  findbyId,
+  updateGroupInfo,
+  deleteTransaction,
+  getTransactionByTransactionId,
+  getGroupCountsByTerm,
 };

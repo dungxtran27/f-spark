@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { socket } from "./utils/socket";
 import { notification } from "antd";
 import Router from "./utils/router";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 type NotificationType = "success" | "info" | "warning" | "error";
 function App() {
   const [api, contextHolder] = notification.useNotification();
@@ -27,8 +28,11 @@ function App() {
 
   return (
     <>
-      {contextHolder}
-      <Router/>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID
+        || ""}>
+        {contextHolder}
+        <Router />
+      </GoogleOAuthProvider>
     </>
   );
 }

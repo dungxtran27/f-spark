@@ -127,11 +127,14 @@ const TransactionSchema = new Schema(
     fundUsed: {
       type: Number,
     },
-    transactionDate: {
-      type: Date,
-    },
     evidence: {
       type: [String],
+    },
+    status: {
+      type: String,
+      required: false,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
     },
   },
   {

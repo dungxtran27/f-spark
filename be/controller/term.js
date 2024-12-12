@@ -160,7 +160,7 @@ const getTimelineOfTerm = async (req, res) => {
     }
     return res.status(200).json({ data: term });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error });
   }
 }
 const createTimelineOfTerm = async (req, res) => {

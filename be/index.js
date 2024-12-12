@@ -22,6 +22,7 @@ import {
   NotificationRouter,
   TermRouter,
   RequestDeadlineRouter,
+  OutcomeRouter,
   FundEstimationRouter
 } from "./routes/index.js";
 import "./utils/google-oauth2.js";
@@ -30,6 +31,8 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { eventScheduler } from "./utils/scheduler.js";
 import http from "http";
+// import morgan from "morgan";
+
 const app = express();
 const server = http.createServer(app);
 dotenv.config();
@@ -53,6 +56,7 @@ app.use(
   "/upload/image",
   express.static(path.join(__dirname, "upload", "image"))
 );
+// app.use(morgan("dev"));
 
 app.get("/hello", (req, res) => {
   return res.status(200).json("hello");
@@ -75,6 +79,7 @@ app.use("/api/notification", NotificationRouter)
 app.use("/api/term", TermRouter)
 app.use("/api/fundEstimation", FundEstimationRouter)
 app.use("/api/requestDeadline", RequestDeadlineRouter)
+app.use("/api/outcome", OutcomeRouter)
 app.use("/api/vnpay", VnPayRouter)
 
 const port = process.env.PORT || 9999;
