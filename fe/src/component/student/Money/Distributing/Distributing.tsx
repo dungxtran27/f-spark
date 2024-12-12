@@ -145,7 +145,7 @@ const Distributing = () => {
               title="Fund Estimation has been approved"
               subTitle="Please wait we distribute funds among the groups. Please contact pkt@gmail.com for more detail"
             />
-          )}{" "}
+          )}
           {receivedEstimation && (
             <div className="w-full p-3">
               <span className="text-lg font-semibold">Balance</span>

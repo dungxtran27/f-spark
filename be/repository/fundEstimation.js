@@ -43,17 +43,43 @@ const findGroupRequest = async (groupId) => {
   try {
     const result = await FundEstimation.find({
       group: groupId,
-    }).sort({
-      createdAt: -1,
+    })
+      .populate({
+        path: "group",
+        select: "GroupName _id transactions",
+      })
+      .sort({
+        createdAt: -1,
+      });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const updateReturnStatus = async (requestId, returnStatus) => {
+  try {
+    const result = await FundEstimation.findByIdAndUpdate(
+      requestId,
+      {
+        $set: {
+          returnStatus: returnStatus,
+        },
+      },
+      { new: true }
+    ).populate({
+      path: "group",
+      select: "GroupName _id transactions",
     });
     return result;
   } catch (error) {
     throw new Error(error.message);
   }
 };
+
 export default {
   create,
   findTermsRequest,
   findGroupRequest,
   updateRequest,
+  updateReturnStatus,
 };

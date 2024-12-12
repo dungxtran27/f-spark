@@ -39,6 +39,19 @@ const BankingInfoSchema = new Schema(
   },
   { _id: false }
 );
+const EvidenceSchema = new Schema(
+  {
+    type: {
+      type: String,
+      required: true,
+    },
+    image: {
+      type: String,
+      required: true,
+    },
+  },
+  { _id: false }
+);
 const FundEstimationSchema = new Schema(
   {
     group: {
@@ -72,6 +85,11 @@ const FundEstimationSchema = new Schema(
     note: {
       type: String,
     },
+    evidences: {
+      type: [EvidenceSchema],
+      default: [],
+    },
+    default: [],
   },
   { timestamps: true }
 );

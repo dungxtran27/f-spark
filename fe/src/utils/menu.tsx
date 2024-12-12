@@ -1,9 +1,13 @@
-import { FaChartPie } from "react-icons/fa6";
+import { FaChartPie, FaMoneyBill } from "react-icons/fa6";
 import { FaTasks } from "react-icons/fa";
 import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
-import { BiMoneyWithdraw, BiSolidDashboard, BiSolidUserAccount } from "react-icons/bi";
+import {
+  BiMoneyWithdraw,
+  BiSolidDashboard,
+  BiSolidUserAccount,
+} from "react-icons/bi";
 import { RiMailSendFill } from "react-icons/ri";
 import { IoTime } from "react-icons/io5";
 import { Badge } from "antd";
@@ -36,7 +40,7 @@ export const StudentRoutes = [
   {
     route: "/money",
     page: "SponsorShip",
-    icon: <BiMoneyWithdraw  size={20} />,
+    icon: <BiMoneyWithdraw size={20} />,
   },
 ];
 export const TeacherRoutes = [
@@ -117,4 +121,12 @@ export const HeadOfSubjectRouter = [
     page: "Requests",
     icon: <FaPeopleGroup size={20} />,
   },
+];
+export const AccountantRouter = [
+  {
+    route: "/accountant",
+    page: "Money",
+    icon: <FaMoneyBill size={20} />,
+  },
+ 
 ];

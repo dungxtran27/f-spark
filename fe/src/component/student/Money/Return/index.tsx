@@ -1,24 +1,34 @@
-import { Collapse, CollapseProps, Divider, Empty, Image } from "antd";
+import { Collapse, CollapseProps, Divider, Empty, Image, Result } from "antd";
 import Response from "../ResponseFromAccountant";
-import { FaQuestion } from "react-icons/fa6";
+import { FaQuestion, FaRegClock } from "react-icons/fa6";
 import dayjs from "dayjs";
-import { businessModelCanvas } from "../../../../api/apiOverview/businessModelCanvas";
 import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../utils/const";
-import { useSelector } from "react-redux";
-import { UserInfo } from "../../../../model/auth";
-import { RootState } from "../../../../redux/store";
+
+import { student } from "../../../../api/student/student";
 
 const Return = () => {
-  const userInfo = useSelector(
-    (state: RootState) => state.auth.userInfo
-  ) as UserInfo | null;
-  const { data: transactions } = useQuery({
-    queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
-    queryFn: async () =>
-      (await businessModelCanvas.getBusinessModelCanvas(userInfo?.group || ""))
-        .data.data,
+  const { data: groupFundEstimation } = useQuery({
+    queryKey: [QUERY_KEY.GROUP_FUND_ESTIMATIONS],
+    queryFn: () => {
+      return student.getGroupFundEstimation();
+    },
   });
+  const receivedEstimation = groupFundEstimation?.data?.data?.find(
+    (r: any) => r?.status === "received"
+  );
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "rejected":
+        return "text-red-500";
+      case "pending":
+        return "text-yellow-500";
+      case "approved":
+        return "text-green-500";
+      default:
+        return "yellow";
+    }
+  };
   const evidence = (transaction: any) => (
     <div className="">
       <div className="flex items-center justify-between">
@@ -46,8 +56,8 @@ const Return = () => {
       </div>
     </div>
   );
-  const items: CollapseProps["items"] = transactions?.transactions?.map(
-    (t: any) => {
+  const items: CollapseProps["items"] =
+    receivedEstimation.group.transactions?.map((t: any) => {
       return {
         key: t?._id,
         label: (
@@ -58,39 +68,56 @@ const Return = () => {
                 {dayjs(t?.createdAt).format("ddd, MMM D, YYYY")}
               </span>
             </div>
-            <div>{t?.status}</div>
+            <div className={getStatusColor(t.status)}>{t?.status}</div>
           </div>
         ),
         children: evidence(t),
       };
-    }
-  );
+    });
   return (
     <div className="flex bg-white min-h-[60vh] ">
-      {/* <div className="w-[35%] justify-center text-center place-items-center ">
-      <Result className="place-items-center"
-        icon={
-          <FaRegClock
-            size={150}
-            className="items-center place-item-center text-center"
-          />
-        }
-        title="Please wait for confirming"
-      />
-    </div> */}
-      <div className="w-full bg-white">
-        <div className="p-4">
-          <span className="text-lg font-semibold">Transaction verified: </span>
-          <span>4/5</span>
-        </div>
-        {transactions?.transactions?.length > 0 ? (
-          <Collapse items={items} accordion />
-        ) : (
-          <Empty description="No transaction were made" />
-        )}
-      </div>
-      <Divider type="vertical" className="b" />
-      <Response />
+      {receivedEstimation.returnStatus == "pending" && (
+        <>
+          <div className="w-[35%] justify-center text-center place-items-center ">
+            <Result
+              className="place-items-center"
+              icon={
+                <FaRegClock
+                  size={150}
+                  className="items-center place-item-center text-center"
+                />
+              }
+              title="Please wait for confirming"
+            />
+          </div>
+        </>
+      )}
+      {receivedEstimation.returnStatus !== "pending" && (
+        <>
+          <div className="w-full bg-white">
+            <div className="p-4">
+              <span className="text-lg font-semibold">
+                Transaction verified:{" "}
+              </span>
+              <span>
+                {`${
+                  receivedEstimation.group?.transactions.filter(
+                    (t: any) => t.status != "pending"
+                  ).length
+                }
+                   / ${receivedEstimation.group?.transactions.length}`}
+              </span>
+            </div>
+            {receivedEstimation.group.transactions.length > 0 ? (
+              <Collapse items={items} accordion />
+            ) : (
+              <Empty description="No transaction were made" />
+            )}
+          </div>
+          <Divider type="vertical" className="b" />
+          <Response req={receivedEstimation} />
+        </>
+      )}
     </div>
   );
 };

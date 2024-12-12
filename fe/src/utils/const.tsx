@@ -33,7 +33,8 @@ export const ROLE = {
   student: "STUDENT",
   startUpDepartment: "START_UP_DEPARTMENT",
   admin: "ADMIN",
-  headOfSubject: "HEADOFSUBJECT"
+  headOfSubject: "HEADOFSUBJECT",
+  accountant: "ACCOUNTANT",
 };
 export const DASHBOARD_TABS = [
   { key: "task", label: "Task", children: <Task /> },
@@ -272,9 +273,10 @@ export const QUERY_KEY = {
   GROUP_FUND_ESTIMATIONS: "groupFundEstimation",
   ACTIVE_SPONSOR_REQUEST: "activeSponsorRequest",
   APPROVED_SPONSOR_REQUEST: "approvedSponsorRequest",
+  RECEIVE_SPONSOR_REQUEST: "receivedSponsorRequest",
   GALLERY: "gallery",
-  DASHBOARD_NEW:"new dash board",
-  DASHBOARD_REQUEST:"request dash board"
+  DASHBOARD_NEW: "new dash board",
+  DASHBOARD_REQUEST: "request dash board",
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

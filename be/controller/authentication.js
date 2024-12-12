@@ -155,8 +155,17 @@ const login = async (req, res) => {
         userDetail.role = ROLE_NAME.admin;
         break;
       case ROLE_NAME.headOfSubject:
-        userDetail.account = existingAccount
+        userDetail.account = existingAccount;
         userDetail.role = ROLE_NAME.headOfSubject;
+        break;
+      case ROLE_NAME.accountant:
+        if (req.body.email !== "accountant@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
+        userDetail.account = existingAccount;
+        userDetail.role = ROLE_NAME.accountant;
         break;
       default:
         return res.status(500).json({ error: "Bad request" });

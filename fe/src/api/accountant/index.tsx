@@ -25,5 +25,17 @@ const AccountantApi = {
       note,
     });
   },
+  updateReturnStatus: async ({
+    requestId,
+    returnStatus,
+  }: {
+    requestId: string | undefined;
+    returnStatus: string;
+  }) => {
+    return await axios.patch(`api/fundEstimation/updateReturnStatus`, {
+      requestId,
+      returnStatus,
+    });
+  },
 };
 export default AccountantApi;

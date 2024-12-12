@@ -53,9 +53,6 @@ const Gallery: React.FC<GalleryProps> = ({ groupId }) => {
         </Button>
       </div>
       <Image.PreviewGroup
-      // preview={{
-      //   onChange: (current, prev) => false,
-      // }}
       >
         <div className="flex">
           {gallery?.data.data?.gallery.length > 0 ? (
@@ -88,7 +85,7 @@ const Gallery: React.FC<GalleryProps> = ({ groupId }) => {
             <Empty description={"No image uploaded"} />
           )}
         </div>
-      </Image.PreviewGroup>{" "}
+      </Image.PreviewGroup>
       <Modal
         title="Gallery"
         width={1000}
@@ -106,7 +103,6 @@ const Gallery: React.FC<GalleryProps> = ({ groupId }) => {
           <Image.PreviewGroup>
             {gallery?.data.data?.gallery.length > 0 ? (
               <>
-                {" "}
                 {gallery?.data.data?.gallery.map((i: any) => (
                   <Image
                     src={i}

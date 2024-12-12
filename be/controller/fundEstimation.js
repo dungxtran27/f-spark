@@ -130,6 +130,20 @@ const getReturn = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const updateReturnStatus = async (req, res) => {
+  try {
+    const { returnStatus, requestId } = req.body;
+    const result = await FundEstimationRepository.updateReturnStatus(
+      requestId,
+      returnStatus
+    );
+    return res
+      .status(200)
+      .json({ message: "Updated Successful", data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupRequest,
   getTermRequest,
@@ -137,4 +151,5 @@ export default {
   updateRequest,
   getDistribution,
   getReturn,
+  updateReturnStatus,
 };

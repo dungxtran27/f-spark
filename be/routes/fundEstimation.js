@@ -28,4 +28,8 @@ fundEstimationRouter.patch(
   "/updateRequests",
   FundEstimationController.updateRequest
 );
+fundEstimationRouter.patch(
+  "/updateReturnStatus",
+  FundEstimationController.updateReturnStatus
+);
 export default fundEstimationRouter;

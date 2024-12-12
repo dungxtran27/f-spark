@@ -11,7 +11,6 @@ const Process = ({
   current: number;
   setCurrentStep: (value: number) => void;
 }) => {
-  const description = <p>testing</p>;
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-between">
@@ -31,16 +30,16 @@ const Process = ({
         items={[
           {
             title: "Requesting",
-            description,
+     
           },
           {
             title: "Distributing And Executing",
-            description,
-            subTitle: "Left 00:00:08",
+            // description,
+            // subTitle: "Left 00:00:08",
           },
           {
             title: "Return",
-            description,
+            // description,
           },
         ]}
       />
