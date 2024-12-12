@@ -162,17 +162,12 @@ const getClassDetail = async (req, res) => {
 const assignTeacher = async (req, res) => {
   try {
     const { teacherId, classId } = req.body;
-<<<<<<< HEAD
     if (!teacherId || !classId) {
       return res.status(400).json({ error: "TeacherId and classId are required" });
     }
     if (!isValidObjectId(teacherId) || !isValidObjectId(classId)) {
       return res.status(400).json({ error: "Invalid teacherId or classId format" });
     }
-=======
-    console.log(teacherId, classId);
-
->>>>>>> 252cdaea3a064f267cc1c8142e8fcdb6648f1e62
     const existClass = await ClassRepository.findClassById(classId);
     if (existClass?.teacher) {
       return res.status(400).json({ error: "This class already have a teacher !" })
