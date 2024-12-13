@@ -124,13 +124,13 @@ const getFillterTerm = async (req, res) => {
 const deleteTermIncoming = async (req, res) => {
   try {
     const { termCode } = req.query;
-    if (!termCode || typeof termCode !== "string") {
-      return res.status(400).json({ error: "Invalid or missing termCode" });
-    }
-    const termExists = await TermRepository.findTermByCode(termCode);
-    if (!termExists) {
-      return res.status(404).json({ error: "Term not found" });
-    }
+    // if (!termCode || typeof termCode !== "string") {
+    //   return res.status(400).json({ error: "Invalid or missing termCode" });
+    // }
+    // const termExists = await TermRepository.findTermByCode(termCode);
+    // if (!termExists) {
+    //   return res.status(404).json({ error: "Term not found" });
+    // }
     await TermRepository.deleteTerm({ termCode });
     return res.status(200).json({ message: "The term has been successfully deleted" });
   } catch (error) {
@@ -141,23 +141,23 @@ const deleteTermIncoming = async (req, res) => {
 const getTimelineOfTerm = async (req, res) => {
   try {
     const termId = req.params.termId;
-    if (!termId || !mongoose.Types.ObjectId.isValid(termId)) {
-      return res.status(400).json({
-        error: "Invalid or missing termId. It must be a valid ObjectId.",
-      });
-    }
-    const termExists = await TermRepository.findById(
-      new mongoose.Types.ObjectId(termId)
-    );
-    if (!termExists) {
-      return res.status(404).json({ error: "Term not found" });
-    }
+    // if (!termId || !mongoose.Types.ObjectId.isValid(termId)) {
+    //   return res.status(400).json({
+    //     error: "Invalid or missing termId. It must be a valid ObjectId.",
+    //   });
+    // }
+    // const termExists = await TermRepository.findById(
+    //   new mongoose.Types.ObjectId(termId)
+    // );
+    // if (!termExists) {
+    //   return res.status(404).json({ error: "Term not found" });
+    // }
     const term = await TermRepository.getTimelineOfTerm(new mongoose.Types.ObjectId(termId));
-    if (!term || !term.timeline || term.timeline.length === 0) {
-      return res.status(404).json({
-        error: "No timeline data found for the specified term.",
-      });
-    }
+    // if (!term || !term.timeline || term.timeline.length === 0) {
+    //   return res.status(404).json({
+    //     error: "No timeline data found for the specified term.",
+    //   });
+    // }
     return res.status(200).json({ data: term });
   } catch (error) {
     return res.status(500).json({ error });

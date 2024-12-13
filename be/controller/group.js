@@ -233,13 +233,13 @@ const deleteCustomerPersona = async (req, res) => {
 const findAllStudentByGroup = async (req, res) => {
   try {
     const classId = req.params.classId;
-    if (!classId) {
-      return res.status(400).json({ error: "classId is required" });
-    }
-    const classExists = await ClassRepository.findClassById(classId); // Thay ClassRepository bằng tên repository thực tế của bạn
-    if (!classExists) {
-      return res.status(404).json({ error: "Class not found" });
-    }
+    // if (!classId) {
+    //   return res.status(400).json({ error: "classId is required" });
+    // }
+    // const classExists = await ClassRepository.findClassById(classId); // Thay ClassRepository bằng tên repository thực tế của bạn
+    // if (!classExists) {
+    //   return res.status(404).json({ error: "Class not found" });
+    // }
     const [countStudent, groupStudent, unGroupStudents] = await Promise.all([
       StudentRepository.getAllStudentByClassId(classId),
       GroupRepository.findAllGroupsOfClass(classId),
@@ -281,20 +281,20 @@ const getClassTeacherAndgroupInfo = async (req, res) => {
 const addStundentInGroup = async (req, res) => {
   try {
     const { groupId, studentId } = req.body;
-    if (!groupId || !studentId) {
-      return res.status(400).json({ error: "groupId and studentId are required" });
-    }
-    const groupExists = await GroupRepository.findbyId(groupId);
-    if (!groupExists) {
-      return res.status(404).json({ error: "Group not found" });
-    }
-    const studentExists = await StudentRepository.findById(studentId);
-    if (!studentExists) {
-      return res.status(404).json({ error: "Student not found" });
-    }
-    if (studentExists.group) {
-      return res.status(400).json({ error: "Student already has a group" });
-    }
+    // if (!groupId || !studentId) {
+    //   return res.status(400).json({ error: "groupId and studentId are required" });
+    // }
+    // const groupExists = await GroupRepository.findbyId(groupId);
+    // if (!groupExists) {
+    //   return res.status(404).json({ error: "Group not found" });
+    // }
+    // const studentExists = await StudentRepository.findById(studentId);
+    // if (!studentExists) {
+    //   return res.status(404).json({ error: "Student not found" });
+    // }
+    // if (studentExists.group) {
+    //   return res.status(400).json({ error: "Student already has a group" });
+    // }
     const data = await GroupRepository.addStundentInGroup(groupId, studentId);
     return res.status(200).json({ data: data });
   } catch (error) {
@@ -310,10 +310,10 @@ const createGroup = async (req, res) => {
         .status(400)
         .json({ error: "Please fill in all required fields" });
     }
-    const classExists = await ClassRepository.findClassById(classId);
-    if (!classExists) {
-      return res.status(404).json({ error: "Class not found" });
-    }
+    // const classExists = await ClassRepository.findClassById(classId);
+    // if (!classExists) {
+    //   return res.status(404).json({ error: "Class not found" });
+    // }
     const currTerm = await TermRepository.getActiveTerm();
     const termId = currTerm._id;
     const data = await GroupRepository.createGroup(
@@ -351,13 +351,13 @@ const deleteStudentFromGroup = async (req, res) => {
 const ungroup = async (req, res) => {
   try {
     const { groupId } = req.body;
-    if (!groupId) {
-      return res.status(400).json({ error: "groupId is required" });
-    }
-    const groupExists = await GroupRepository.findbyId(groupId);
-    if (!groupExists) {
-      return res.status(404).json({ error: "Group not found" });
-    }
+    // if (!groupId) {
+    //   return res.status(400).json({ error: "groupId is required" });
+    // }
+    // const groupExists = await GroupRepository.findbyId(groupId);
+    // if (!groupExists) {
+    //   return res.status(404).json({ error: "Group not found" });
+    // }
     const data = await GroupRepository.ungroup(groupId);
     return res.status(200).json(data);
   } catch (error) {
@@ -376,16 +376,16 @@ const lockOrUnlockGroup = async (req, res) => {
 const getAllGroupByClassId = async (req, res) => {
   try {
     const { classId } = req.params;
-    if (!classId) {
-      return res.status(400).json({ error: "classId is required" });
-    }
-    const classExists = await ClassRepository.findClassById(classId);
-    if (!classExists) {
-      return res.status(404).json({ error: "Class not found" });
-    }
-    if (!mongoose.Types.ObjectId.isValid(classId)) {
-      return res.status(400).json({ error: "Invalid classId format" });
-    }
+    // if (!classId) {
+    //   return res.status(400).json({ error: "classId is required" });
+    // }
+    // const classExists = await ClassRepository.findClassById(classId);
+    // if (!classExists) {
+    //   return res.status(404).json({ error: "Class not found" });
+    // }
+    // if (!mongoose.Types.ObjectId.isValid(classId)) {
+    //   return res.status(400).json({ error: "Invalid classId format" });
+    // }
     const groups = await GroupRepository.getGroupsByClassId(classId);
     const mappedGroups = await Promise.all(
       groups.map(async (g) => {
@@ -590,9 +590,9 @@ const getGroupStatistic = async (req, res) => {
 const getGroupsOfTerm = async (req, res) => {
   try {
     const { termId } = req.params;
-    if (!termId) {
-      return res.status(400).json({ error: "termId is required" });
-    }
+    // if (!termId) {
+    //   return res.status(400).json({ error: "termId is required" });
+    // }
     const result = await GroupRepository.getGroupsOfTerm(termId);
     return res.status(200).json({ data: result });
   } catch (error) {
@@ -740,14 +740,14 @@ const updateGroupSponsorStatus = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-const findbyId = async (groupId) => {
-  try {
-    const group = await Group.findById(groupId);
-    return group;
-  } catch (error) {
-    throw new Error("Group not found");
-  }
-}
+// const findbyId = async (groupId) => {
+//   try {
+//     const group = await Group.findById(groupId);
+//     return group;
+//   } catch (error) {
+//     throw new Error("Group not found");
+//   }
+// }
 const updateGroupInfo = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -838,7 +838,7 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
-  findbyId,
+  // findbyId,
   updateGroupInfo,
   deleteTransaction,
 };

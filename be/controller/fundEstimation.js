@@ -75,13 +75,13 @@ const getTermRequest = async (req, res) => {
 const updateRequest = async (req, res) => {
   try {
     const { status, requestIds, note } = req.body;
-    const validStatuses = ["pending", "approved", "declined", "received"];
-    if (!status || !validStatuses.includes(status)) {
-      return res.status(400).json({ error: "Invalid status. It must be one of the following: pending, approved, declined, received." });
-    }
-    if (!Array.isArray(requestIds) || requestIds.some(id => !mongoose.Types.ObjectId.isValid(id))) {
-      return res.status(400).json({ error: "Invalid requestIds. They must be an array of valid ObjectIds." });
-    }
+    // const validStatuses = ["pending", "approved", "declined", "received"];
+    // if (!status || !validStatuses.includes(status)) {
+    //   return res.status(400).json({ error: "Invalid status. It must be one of the following: pending, approved, declined, received." });
+    // }
+    // if (!Array.isArray(requestIds) || requestIds.some(id => !mongoose.Types.ObjectId.isValid(id))) {
+    //   return res.status(400).json({ error: "Invalid requestIds. They must be an array of valid ObjectIds." });
+    // }
     const result = await FundEstimationRepository.updateRequest(
       requestIds,
       status,

@@ -47,10 +47,7 @@ const viewOutcomes = async (req, res) => {
       decodedToken.account
     );
     if (!student) {
-      return res.status(404).json({ error: "Student not found" });
-    }
-    if (!student.classId) {
-      return res.status(400).json({ error: "Student does not belong to a class" });
+      return res.status(404).json({ error: "Unauthorized" });
     }
     const outcomesList = await ClassworkRepository.getOutcomes(
       student.classId,
@@ -90,13 +87,13 @@ const getOutcomesByTeacher = async (req, res) => {
 const getClassWorkByTeacher = async (req, res) => {
   try {
     const classId = req.params.classId;
-    if (!classId) {
-      return res.status(400).json({ error: "classId is required" });
-    }
-    const existClass = await ClassRepository.findClassById(classId);
-    if (!existClass) {
-      return res.status(404).json({ error: "Class not found" });
-    }
+    // if (!classId) {
+    //   return res.status(400).json({ error: "classId is required" });
+    // }
+    // const existClass = await ClassRepository.findClassById(classId);
+    // if (!existClass) {
+    //   return res.status(404).json({ error: "Class not found" });
+    // }
     const classworkList = await ClassworkRepository.getClassWorkByTeacher(
       classId
     );
@@ -109,13 +106,13 @@ const getClassWorkByTeacher = async (req, res) => {
 const editClassWorkByTeacher = async (req, res) => {
   try {
     const { classWorkId, name, description } = req.body;
-    if (!classWorkId) {
-      return res.status(400).json({ error: "classWorkId is required" });
-    }
-    const existClasswork = await ClassworkRepository.findClassworkById(classWorkId);
-    if (!existClasswork) {
-      return res.status(404).json({ error: "Classwork not found" });
-    }
+    // if (!classWorkId) {
+    //   return res.status(400).json({ error: "classWorkId is required" });
+    // }
+    // const existClasswork = await ClassworkRepository.findClassworkById(classWorkId);
+    // if (!existClasswork) {
+    //   return res.status(404).json({ error: "Classwork not found" });
+    // }
     const classworkList = await ClassworkRepository.editClassWorkByTeacher(
       classWorkId,
       name,
@@ -147,15 +144,15 @@ const createClassWork = async (req, res) => {
     const { classId } = req.params;
     const { title, description, attachment, startDate, dueDate, type } =
       req.body;
-      if (!type || !['assignment', 'announcement'].includes(type)) {
-        return res.status(400).json({
-          error: "Invalid type. Must be one of 'assignment', or 'announcement'."
-        });
-      }
+      // if (!type || !['assignment', 'announcement'].includes(type)) {
+      //   return res.status(400).json({
+      //     error: "Invalid type. Must be one of 'assignment', or 'announcement'."
+      //   });
+      // }
   
-      if (!title) {
-        return res.status(400).json({ error: "Title is required." });
-      }
+      // if (!title) {
+      //   return res.status(400).json({ error: "Title is required." });
+      // }
     
     const classwork = await ClassworkRepository.createClassWork({
       title,
@@ -228,9 +225,9 @@ const upvoteAnnouncement = async (req, res) => {
 const getClassStatistics = async (req, res) => {
   try {
     const { classId } = req.params;
-    if (!classId) {
-      return res.status(400).json({ error: "classId is required" });
-    }
+    // if (!classId) {
+    //   return res.status(400).json({ error: "classId is required" });
+    // }
     const ungradedOutcomeSubmisstion =
       await ClassworkRepository.getUngradedOutcomesCount(classId);
     const upvotesOnLatestAnnouncement =

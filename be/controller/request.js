@@ -29,27 +29,32 @@ const createRequest = async (req, res) => {
       groupId,
       actionType
     );
-    if (!studentId) {
+    if (!actionType) {
       return res.status(400).json({
-        error: "Student ID is missing or invalid.",
+        error: "Invalid action type.",
       });
     }
-    const student = await StudentRepository.findById(studentId);
-    if (!student) {
-      return res.status(404).json({
-        error: "Student not found",
-      });
-    }
-    if (!groupId) {
-      return res.status(400).json({
-        error: "Group ID is missing or invalid.",
-      });
-    }
-    if (!actionType || !["join", "leave", "delete"].includes(actionType)) {
-      return res.status(400).json({
-        error: "Invalid or missing action type. Valid action types are: 'join', 'leave', or 'delete'.",
-      });
-    }
+    // if (!studentId) {
+    //   return res.status(400).json({
+    //     error: "Student ID is missing or invalid.",
+    //   });
+    // }
+    // const student = await StudentRepository.findById(studentId);
+    // if (!student) {
+    //   return res.status(404).json({
+    //     error: "Student not found",
+    //   });
+    // }
+    // if (!groupId) {
+    //   return res.status(400).json({
+    //     error: "Group ID is missing or invalid.",
+    //   });
+    // }
+    // if (!actionType || !["join", "leave", "delete"].includes(actionType)) {
+    //   return res.status(400).json({
+    //     error: "Invalid or missing action type. Valid action types are: 'join', 'leave', or 'delete'.",
+    //   });
+    // }
 
     if (existingRequest) {
       return res.status(400).json({

@@ -162,12 +162,6 @@ const getClassDetail = async (req, res) => {
 const assignTeacher = async (req, res) => {
   try {
     const { teacherId, classId } = req.body;
-    if (!teacherId || !classId) {
-      return res.status(400).json({ error: "TeacherId and classId are required" });
-    }
-    if (!isValidObjectId(teacherId) || !isValidObjectId(classId)) {
-      return res.status(400).json({ error: "Invalid teacherId or classId format" });
-    }
     const existClass = await ClassRepository.findClassById(classId);
     if (existClass?.teacher) {
       return res.status(400).json({ error: "This class already have a teacher !" })
@@ -180,9 +174,6 @@ const assignTeacher = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-}
-function isValidObjectId(id) {
-  return /^[0-9a-fA-F]{24}$/.test(id);
 }
 export default {
   pinClasswork,
