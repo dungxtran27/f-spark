@@ -111,10 +111,5 @@ export const HeadOfSubjectRouter = [
     route: "/hos/groups",
     page: "Groups",
     icon: <FaTasks size={20} />,
-  },
-  {
-    route: "/hos/mentors",
-    page: "Requests",
-    icon: <FaPeopleGroup size={20} />,
-  },
+  }
 ];

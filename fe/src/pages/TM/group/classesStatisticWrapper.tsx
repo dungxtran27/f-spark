@@ -24,6 +24,7 @@ import { groupApi } from "../../../api/group/group";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { Term } from "../../../model/auth";
+import ProjectOverviewWrapperTM from "../../../component/student/Overview/ProjectOverviewTM";
 const { Option } = Select;
 
 const ClassesStatisticWrapper: React.FC = () => {
@@ -117,7 +118,6 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
   const handleClearFilters = () => {
     setGroupFilter(undefined);
     setClassFilter(undefined);
-    // setTermFilter(undefined);
     setStatusFilter(undefined);
   };
   const handlePageChange = (page: number) => {
@@ -150,6 +150,7 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
 
   const handleCancel = () => {
     setIsModalOpen(false)
+    setIsModalOpenOverview(false)
   }
 
   const columns = [
@@ -163,7 +164,12 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
       title: "Group",
       dataIndex: "GroupName",
       key: "GroupName",
-      render: (text) => <span className="font-medium">{text}</span>,
+      render: (_, record) => <span 
+      onClick={() => {
+        setIsModalOpenOverview(true);
+        setGroupId(record._id);
+      }}
+      className="font-medium">{record.GroupName}</span>,
     },
     { title: "Members", dataIndex: "teamMembers",className: "text-center", render: (_, record) => record.teamMembers?.length || 0 },
     { 
@@ -171,9 +177,6 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
       dataIndex: "mentor", 
       render: (_, record) => record.mentor?.name || "" 
     },
-    // { title: "OutCome 1", dataIndex: "",className: "text-center", key: "" },
-    // { title: "OutCome 2", dataIndex: "",className: "text-center", key: "" },
-    // { title: "OutCome 3", dataIndex: "",className: "text-center", key: "" },
     { 
       title: "Class", 
       dataIndex: "classCode", 
@@ -224,6 +227,7 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
     },
   ];
 
+  const [isModalOpenOverview, setIsModalOpenOverview] = useState(false)
   return (
     <div className="max-w-full mx-auto p-3 rounded-lg shadow-md">
       <div className="flex items-center justify-between shadow-lg bg-white border-primary/30 rounded border mb-5 p-5">
@@ -333,6 +337,9 @@ const termOptions = terms?.data?.data?.map((t: any) => ({
           showTotal={(total) => `Total ${total} groups`}
         />
       </div>
+      <Modal title={<h2 className="text-2xl font-semibold">Project Overview</h2>} width="80%" open={isModalOpenOverview} footer={null} onCancel={handleCancel}>
+        <ProjectOverviewWrapperTM groupId={groupId}/>
+      </Modal>
     </div>
   );
 };

@@ -234,6 +234,7 @@ const DashboardTMWrapper: React.FC = () => {
   });
   
   const handleOk = async () => {
+    await form.validateFields();
     const { title, description } = form.getFieldsValue(); 
     const data = {
       title,
@@ -277,7 +278,7 @@ const DashboardTMWrapper: React.FC = () => {
     <div className="mx-auto p-3">
         {contextHolder}
         <div style={{ display: "flex", flexDirection: "column", background: "white" }}>
-        <FormItem className="w-1/6 font-semibold p-3 pb-0" name={"semester"} label={"Semester"}>
+        <FormItem className="w-1/5 p-3 pb-0" name={"semester"} label={<span className="font-semibold text-base">Timeline Semester</span>}>
         {terms?.data?.data && (
         <Select
           placeholder="Term"

@@ -1338,6 +1338,34 @@ const deleteTransaction = async (groupId, transactionId) => {
     throw new Error(error.message);
   }
 };
+
+const getGroupById = async (groupId) => {
+  try {
+    const result = await Group.findById(groupId)
+    .populate('tag class leader term mentor')
+    .populate({
+        path: 'class',
+        populate: {
+          path: 'teacher',
+          model: 'Teacher',
+          populate: {
+            path: 'account',
+            model: 'Account', 
+          },
+        },
+      })
+      .populate({
+        path: 'teamMembers',
+        populate: {
+          path: 'account',
+          model: 'Account',
+        },
+      });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   updateMember,
   getGroupsOfTerm,
@@ -1384,4 +1412,5 @@ export default {
   deleteTransaction,
   getTransactionByTransactionId,
   getGroupCountsByTerm,
+  getGroupById
 };

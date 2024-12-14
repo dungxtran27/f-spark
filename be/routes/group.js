@@ -149,4 +149,5 @@ groupRouter.post(
   verifyToken,
   GroupController.deleteTransaction
 );
+groupRouter.get("/getGroupById/:groupId", GroupController.getGroupById);
 export default groupRouter;

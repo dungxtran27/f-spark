@@ -313,7 +313,10 @@ const CustomerJourneyMap: React.FC<CustomerJourneyMapProps> = ({groupId}) => {
   };
 
   const handleEditRow = () => {
-    if (currentRow) {
+    if(newColName == ''){
+      message.error("Row name cannot be empty!");
+    }
+    if (currentRow && newColName != '') {
       editRowMutation.mutate({
         rowId: currentRow._id,
         rowName: newColName,
@@ -322,7 +325,10 @@ const CustomerJourneyMap: React.FC<CustomerJourneyMapProps> = ({groupId}) => {
   };
 
   const handleEditCell = () => {
-    if (currentCell) {
+    if(cellContent == ''){
+      message.error("Content cannot be empty!");
+    }
+    if (currentCell && cellContent != '') {
       editCellMutation.mutate({
         cellId: currentCell._id,
         content: cellContent,
