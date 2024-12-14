@@ -177,6 +177,48 @@ const assignTeacher = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 }
+const importClassData = async (req, res) => {
+  try {
+    const { studentData, classData } = req.body;
+    console.log(studentData, classData);
+    
+    // Handle class data (use for...of loop to allow async/await)
+    if (classData && classData.length > 0) {
+      for (const c of classData) {
+        const existingClass = await ClassRepository.findByClassCode(c);
+        if (!existingClass && c !== null) {
+          await ClassRepository.createClass({ classCode: c });
+        }
+      }
+    }
+
+    // Handle student data (use for...of loop to allow async/await)
+    if (studentData && studentData.length > 0) {
+      for (const s of studentData) {
+        const existingStudent = await StudentRepository.findByStudentId(s?.studentId);
+        if (!existingStudent) {
+          return res.status(400).json({
+            error: 'Data contains unknown student. Create student at Account management',
+          });
+        }
+
+        if (existingStudent?.classId?.classCode !== s?.classCode) {
+          const classUpdate = await ClassRepository.findByClassCode(s?.classCode);
+          if (classUpdate) {
+            await StudentRepository.updateClass(existingStudent?._id, classUpdate?._id);
+          } else {
+            await StudentRepository.updateClass(existingStudent?._id, null);
+          }
+        }
+      }
+    }
+
+    return res.status(200).json({ message: 'Updated successfully!' });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   pinClasswork,
   getClassesOfTeacher,
@@ -185,5 +227,6 @@ export default {
   getTeacherDashboardInfo,
   createClass,
   getClassDetail,
-  assignTeacher
+  assignTeacher,
+  importClassData
 };

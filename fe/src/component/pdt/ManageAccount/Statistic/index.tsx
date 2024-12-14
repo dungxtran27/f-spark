@@ -7,7 +7,10 @@ import { useForm } from "antd/es/form/Form";
 import FormItem from "antd/es/form/FormItem";
 import { PiChalkboardTeacherLight, PiStudent } from "react-icons/pi";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
-const Statistic = () => {
+const Statistic: React.FC<{
+  term: string | null;
+  setTerm: (value: any) => void;
+}> = ({ term, setTerm }) => {
   const { data: terms } = useQuery({
     queryKey: [QUERY_KEY.TERM_LIST],
     queryFn: async () => {
@@ -63,6 +66,9 @@ const Statistic = () => {
               placeholder="Class"
               showSearch
               options={termOptions}
+              onChange={(value) => {
+                setTerm(value);
+              }}
               defaultValue={`${
                 terms?.data?.data?.find(
                   (t: any) =>

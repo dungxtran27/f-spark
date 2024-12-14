@@ -14,4 +14,5 @@ classRouter.get(
 );
 classRouter.post("/create", ClassController.createClass);
 classRouter.patch("/assignTeacher", ClassController.assignTeacher)
+classRouter.post("/import", ClassController.importClassData)
 export default classRouter;
