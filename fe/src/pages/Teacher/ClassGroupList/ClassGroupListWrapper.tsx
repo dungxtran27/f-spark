@@ -358,9 +358,8 @@ const ClassGroupListWrapper = () => {
       width: 300,
     },
     {
-      title: `Group support ${
-        currentSemester == "curr" ? " this semester" : "all semesters"
-      }`,
+      title: `Group support ${currentSemester == "curr" ? " this semester" : "all semesters"
+        }`,
       // dataIndex: "groupNumber",
       render: (rc: any) => (
         <>
@@ -821,19 +820,23 @@ const ClassGroupListWrapper = () => {
             Cancel
           </Button>,
           <Button
-            key="submit"
-            type="primary"
-            onClick={() => {
+          key="submit"
+          type="primary"
+          onClick={() => {
+            form.validateFields().then((values) => {
               createGroup.mutate({
                 classId: classId,
-                groupName: groupName,
-                groupDescription: groupDescription,
+                groupName: values.groupName,
+                groupDescription: values.groupDescription,
               });
               handleClosecreateGroupModal();
-            }}
-          >
-            Save
-          </Button>,
+            }).catch((errorInfo) => {
+              console.error('Validation Failed:', errorInfo);
+            });
+          }}
+        >
+          Save
+        </Button>,
         ]}
       >
         <Form form={form}>
@@ -844,6 +847,10 @@ const ClassGroupListWrapper = () => {
               {
                 required: true,
                 message: "Please input group name!",
+              },
+              {
+                max: 40,
+                message: "Group name cannot exceed 40 characters!",
               },
             ]}
           >

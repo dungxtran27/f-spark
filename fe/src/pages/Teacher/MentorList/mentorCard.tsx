@@ -32,7 +32,7 @@ const MentorCard = ({
         <div className="mentor_card_info">
           <div className=" text-white text-lg">{name}</div>
           <div className=" text-white">
-            {term == "curr" ? "this sememter:" : " total:"}{" "}
+            {term == "curr" ? "This sememter:" : " total:"}{" "}
             {assignedGroupLength} groups
           </div>
         </div>
