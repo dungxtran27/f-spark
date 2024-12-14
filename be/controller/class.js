@@ -227,17 +227,15 @@ const importClassData = async (req, res) => {
                 if (dl?.type === DEADLINE_TYPES.OUTCOME) {
                   classOutcomes?.forEach((oc) => {
                     if (oc?.outcome.toString() === dl?.outcome.toString()) {
-                      return {
-                        ...dl,
-                        classworkId: oc?._id,
+                      dl = {
+                        ...dl.toObject(),
+                        classworkId: oc?._id || null,
                       };
                     }
                   });
                 }
                 return dl;
-              });  
-              console.log(updatedTimeline);
-              
+              });
               await GroupRepository.updateGroupTimeLine(
                 existingStudent?.group,
                 updatedTimeline

@@ -64,12 +64,14 @@ const TimeLine = () => {
     <div className="space-y-2 mb-2 sticky top-2 z-10">
       <div className="bg-white p-4 rounded shadow">
         <h3 className="font-bold mb-2">Time Line</h3>
-        <Steps
-          current={currentStep}
-          items={items}
-          onChange={handleStepChange}
-          progressDot={customDot}
-        />
+        <div className="overflow-x-auto pt-1">
+          <Steps
+            current={currentStep}
+            items={items}
+            onChange={handleStepChange}
+            progressDot={customDot}
+          />
+        </div>
       </div>
     </div>
   );

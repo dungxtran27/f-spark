@@ -40,6 +40,7 @@ const getOutcomes = async (classId, isTeacher) => {
           };
         })
       );
+      
       return outcomeWithSubmissions;
     }
     return outcomeList;

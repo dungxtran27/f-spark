@@ -25,7 +25,7 @@ import { useState } from "react";
 import GradingSubmission from "../../../../teacher/ClassDetail/Outcomes/GradingSubmission";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
-import { UserInfo } from "../../../../../model/auth";
+import { Term, UserInfo } from "../../../../../model/auth";
 import FormItem from "antd/es/form/FormItem";
 import { requestDeadlineApi } from "../../../../../api/requestDeadline/requestDeadline";
 import { useQuery } from "@tanstack/react-query";
@@ -35,15 +35,22 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
   const { data: groupData, isLoading } = useQuery({
     queryKey: [QUERY_KEY.GROUP_CUSTOMER_JOURNEY_MAP, userInfo?.group],
     queryFn: async () => {
       return await customerJourneyMapApi.getGroupData(userInfo?.group);
     },
+    enabled: !!userInfo?.group,
   });
-  const deadline = groupData?.data?.data?.timeline?.filter(
-    (d: any) => d?.outcome === o?.outcome
-  );
+  const deadline =
+    userInfo?.role === ROLE.student
+      ? groupData?.data?.data?.timeline?.filter(
+          (d: any) => d?.outcome === o?.outcome
+        )
+      : activeTerm?.timeLine?.filter((d: any) => d?.outcome === o?.outcome);
   const isTeacher = userInfo?.role === ROLE.teacher;
   const [submission, setSubmission] = useState(null);
   const [form] = Form.useForm();

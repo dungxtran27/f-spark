@@ -35,7 +35,6 @@ const DeadlineSchema = new Schema({
   deadLineFor: {
     type: [String],
     required: true,
-    enum: ["STUDENT", "TEACHER", "ADMIN", "HOS", "ACCOUNTANT"],
   },
   type: {
     type: String,
