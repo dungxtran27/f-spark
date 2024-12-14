@@ -117,7 +117,7 @@ const login = async (req, res) => {
     let userDetail = {};
     console.log(role);
 
-    switch (role) {
+    switch (role) {      
       case ROLE_NAME.student:
         const student = await StudentRepository.findStudentByAccountId(
           existingAccount._id
@@ -155,6 +155,11 @@ const login = async (req, res) => {
         userDetail.role = ROLE_NAME.admin;
         break;
       case ROLE_NAME.headOfSubject:
+        if (req.body.email !== "headofsubject@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
         userDetail.account = existingAccount
         userDetail.role = ROLE_NAME.headOfSubject;
         break;
