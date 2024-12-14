@@ -276,6 +276,7 @@ export const QUERY_KEY = {
   DASHBOARD_NEW:"new dash board",
   DASHBOARD_REQUEST:"request dash board",
   SIGN_UP: "sign up",
+  GROUP_AND_CLASS: "groupAndClass"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

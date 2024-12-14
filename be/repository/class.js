@@ -545,7 +545,6 @@ const createClass = async ({
 }) => {
   try {
     const matchingTerm = await TermRepository.getActiveTerm();
-
     if (!matchingTerm) {
       throw new Error("No matching term found for the current date.");
     }
@@ -561,9 +560,10 @@ const createClass = async ({
       matchingTerm.timeLine?.filter(
         (deadline) => deadline.type === "outcome"
       ) || [];
+    let outcomeOfClass = []
     for (const deadline of outcomeDeadlines) {
       const outcome = await Outcome.findById(deadline.outcome);
-      await Classwork.create({
+      const newClasswork = await Classwork.create({
         name: deadline.title || null,
         description: deadline.description || null,
         startDate: deadline.startDate || null,
@@ -571,9 +571,11 @@ const createClass = async ({
         GradingCriteria: outcome?.GradingCriteria || [],
         type: "outcome",
         classId: result._id,
+        outcome: outcome?._id
       });
+      outcomeOfClass.push(newClasswork)
     }
-    return result._doc;
+    return {newClass: result._doc, outcomesClasswork: outcomeOfClass};
   } catch (error) {
     throw new Error(error.message);
   }
@@ -581,10 +583,21 @@ const createClass = async ({
 
 const getClassByTermCode = async (termId) => {
   try {
-    const groups = Class.find({
+    const groups = await Class.find({
       term: termId
     })
     return groups;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+const findByClassCode = async (classCode) =>{
+  try {
+    const existingClass = await Class.findOne({
+      classCode: classCode
+    })
+    return existingClass
   } catch (error) {
     throw new Error(error.message);
   }
@@ -597,14 +610,13 @@ const assignTeacher = async (classId, teacherId) => {
         teacher: new mongoose.Types.ObjectId(teacherId),
       },
     });
-    console.log(result, classId);
-
     return result;
   } catch (error) {
     throw new Error(error.message);
   }
 };
 export default {
+  findByClassCode,
   pinClasswork,
   getClassesOfTeacher,
   findClassById,
