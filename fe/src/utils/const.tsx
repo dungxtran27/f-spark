@@ -205,11 +205,6 @@ export const OVERVIEW_TABS = [
   { key: "overview", label: "Overview", children: <Overview /> },
   { key: "outcome", label: "Outcome", children: <Outcome /> },
 ];
-export const MANAGEACCOUNT_TABS = [
-  { key: "student", label: "Student", children: <AccountManagement /> },
-  { key: "teacher", label: "Teacher", children: <Teacher /> },
-  { key: "mentor", label: "Mentor", children: <Mentor /> },
-];
 export const TASK_TYPE = {
   CLASS_WORK: "Class work",
   GROUP_WORK: "Group task",
