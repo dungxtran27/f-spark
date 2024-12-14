@@ -23,7 +23,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -47,7 +47,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -1339,6 +1339,15 @@ const deleteTransaction = async (groupId, transactionId) => {
     throw new Error(error.message);
   }
 };
+const findGroupByOldMark = async () => {
+  try {
+    const result = await Group.find({ oldMark: { $gte: 8 } });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 const updateClass = async (groupId, classId) =>{
   try {
     const result = await Group.findByIdAndUpdate(groupId, {
@@ -1409,5 +1418,6 @@ export default {
   deleteTransaction,
   getTransactionByTransactionId,
   getGroupCountsByTerm,
+  findGroupByOldMark,
   updateClass
 };

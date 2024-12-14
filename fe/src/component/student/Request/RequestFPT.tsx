@@ -34,7 +34,8 @@ const RequestFPT = () => {
 
   const userId = userInfo?._id ?? "";
   const groupId = userInfo?.group ?? "";
-  const deadlineRequestFPT = activeTerm?.timeLine?.find((t) => t.type === "sponsorShip")?.endDate ?? "";
+  const deadlineRequestFPT =
+    activeTerm?.timeLine?.find((t) => t.type === "sponsorShip")?.endDate ?? "";
 
   const { data: requestData, isLoading } = useQuery<Request[]>({
     queryKey: [QUERY_KEY.REQUESTS, groupId],
@@ -196,7 +197,7 @@ const RequestFPT = () => {
             </div>
             <div className="flex flex-col items-end mt-4 space-y-2">
               <div className="mt-6 flex flex-row">
-                {!dayjs().isAfter(dayjs(deadlineRequestFPT)) && (
+                {!dayjs().isAfter(dayjs(deadlineRequestFPT)) ? (
                   <div className="flex space-x-2">
                     <Button
                       className="px-4 py-2 rounded"
@@ -213,6 +214,12 @@ const RequestFPT = () => {
                     >
                       Accept
                     </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-red-500">
+                    <span className="text-lg">
+                      Your group has decline the sponsorship request
+                    </span>
                   </div>
                 )}
               </div>

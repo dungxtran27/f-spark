@@ -31,7 +31,7 @@ import { student } from "../../../api/student/student";
 import GroupCard from "./GroupCard";
 import { FaEdit, FaPlus, FaShareSquare, FaStar } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { UserInfo } from "../../../model/auth";
+import { Term, UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
 import { useParams } from "react-router-dom";
 import { groupApi } from "../../../api/group/group";
@@ -47,6 +47,7 @@ import {
 
 import { CSS } from "@dnd-kit/utilities";
 import { MdOutlineFilterListOff } from "react-icons/md";
+import moment from "moment";
 
 interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
   "data-row-key": string;
@@ -141,6 +142,18 @@ const ClassGroupListWrapper = () => {
     teamMembers: [],
     _id: "",
   });
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const lockGroup = activeTerm?.timeLine?.find(
+    (item) => item.type === "teacherLockGroup"
+  );
+
+  const isLockGroupExpired = lockGroup?.endDate
+    ? moment().isAfter(moment(lockGroup.endDate))
+    : false;
   //drag
 
   //add mentor modal
@@ -441,7 +454,9 @@ const ClassGroupListWrapper = () => {
                 <GroupCard
                   info={s}
                   handleLock={() => {
-                    lockOrUnlockGroup.mutate({ groupId: s._id });
+                    if (!isLockGroupExpired) {
+                      lockOrUnlockGroup.mutate({ groupId: s._id });
+                    }
                   }}
                   handleOpenAddMentorModal={handleOpenAddMentorModal}
                   handleOpengroupDetailModal={handleOpengroupDetailModal}
