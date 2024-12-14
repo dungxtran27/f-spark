@@ -1339,7 +1339,31 @@ const deleteTransaction = async (groupId, transactionId) => {
     throw new Error(error.message);
   }
 };
+const updateClass = async (groupId, classId) =>{
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $set: {class: new mongoose.Types.ObjectId(classId)}
+    })
+    return result;
+  } catch (error) {
+    throw new Error(error.message)
+  }
+}
+
+const updateGroupTimeLine= async (groupId, timeLine) =>{
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $set: {
+        timeline: timeLine
+      }
+    })
+    return result
+  } catch (error) {
+    throw new Error(error.message)
+  }
+}
 export default {
+  updateGroupTimeLine,
   updateMember,
   getGroupsOfTerm,
   createCellsOnUpdate,
@@ -1385,4 +1409,5 @@ export default {
   deleteTransaction,
   getTransactionByTransactionId,
   getGroupCountsByTerm,
+  updateClass
 };

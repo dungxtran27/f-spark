@@ -155,14 +155,14 @@ const RequestFPT = () => {
     requestData?.filter((request) => request.typeRequest === "FPT") || [];
 
   return (
-    <div className="bg-white shadow-md rounded-lg w-full p-4">
+    <div className="bg-white shadow-md rounded-lg w-full">
       {isLoading ? (
         <Skeleton active className="mt-5" />
       ) : filteredRequests.length === 0 ? (
-        <Empty />
+        <></>
       ) : (
         filteredRequests.map((request) => (
-          <div key={request._id}>
+          <div key={request._id} className="p-4">
             <div className="flex items-center mb-4">
               <div
                 className="rounded-md px-3"

@@ -13,6 +13,7 @@ import { GrGallery } from "react-icons/gr";
 import { FaMap } from "react-icons/fa6";
 import { IoPersonCircle } from "react-icons/io5";
 import { MdOutlineBusiness } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 const ProjectOverviewWrapper: React.FC = () => {
   const userInfo = useSelector(
@@ -20,7 +21,15 @@ const ProjectOverviewWrapper: React.FC = () => {
   ) as UserInfo | null;
 
   if (!userInfo?.group) {
-    return <div> abc </div>;
+    return (
+      <div className="text-lg text-center mt-60">
+        You are not included in any group, request to join one{" "}
+        <Link className="text-primaryBlue hover:underline" to={"/request"}>
+          here
+        </Link>{" "}
+        or wait for your teacher to assign yo to a group in your class
+      </div>
+    );
   }
 
   return (

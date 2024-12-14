@@ -29,7 +29,7 @@ const Statistic: React.FC<{
 
   const [form] = useForm();
   return (
-    <div className="border rounded w-full mb-5 p-5 flex items-center gap-5 shadow-lg bg-white border-primary/30">
+    <div className="border rounded w-full p-5 flex items-center gap-5 shadow-lg bg-white border-primary/30">
       <div className="flex items-center justify-between w-4/6">
         <div className="flex items-end gap-5">
           <AntdStatistic title="Student" value={1128} prefix={<PiStudent />} />

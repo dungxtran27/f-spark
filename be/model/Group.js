@@ -20,19 +20,18 @@ const TimelineSchema = new Schema(
     editAble: {
       type: Boolean,
     },
-    // status: {
-    //   type: String,
-    //   required: false,
-    // },
+
     type: {
       type: String,
       required: true,
-      enum: ["isSponsorship", "lockgroup", "outcome1", "outcome2", "outcome3"],
+    },
+    outcome: {
+      type: Schema.Types.ObjectId,
+      ref: "Outcome",
     },
     classworkId: {
       type: Schema.Types.ObjectId,
       ref: "Classwork",
-      required: true,
     },
   },
   { timestamps: true }

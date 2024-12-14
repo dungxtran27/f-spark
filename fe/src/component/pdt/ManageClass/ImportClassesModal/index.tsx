@@ -1,11 +1,11 @@
-import { Badge, Modal, Popover, Table, Tabs, Tag } from "antd";
+import { Badge, Modal, Popover, Spin, Table, Tabs, Tag } from "antd";
 import { ModalProps } from "../../../../model/common";
 import styles from "../styles.module.scss";
 import classNames from "classnames";
 import { AiTwotoneDelete } from "react-icons/ai";
 import { useEffect, useState } from "react";
 import { CiEdit } from "react-icons/ci";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { manageClass } from "../../../../api/ManageClass/manageClass";
 import { QUERY_KEY } from "../../../../utils/const";
 import { Admin } from "../../../../api/manageAccoount";
@@ -32,6 +32,7 @@ const ImportClassesModal = ({ isOpen, setIsOpen, excelData }: Props) => {
       });
     },
   });
+  const queryClient = useQueryClient();
   const [data, setData] = useState(excelData);
   const changes = data
     ?.map((s: any) => {
@@ -379,18 +380,21 @@ const ImportClassesModal = ({ isOpen, setIsOpen, excelData }: Props) => {
     mutationFn: ({
       studentData,
       classData,
-      unchecked
+      unchecked,
     }: {
       studentData: any;
       classData: any;
-      unchecked?: any
+      unchecked?: any;
     }) => {
       return manageClass.importClassData({
         studentData,
         classData,
-        unchecked
+        unchecked,
       });
     },
+    onSuccess: () =>{
+      queryClient.invalidateQueries({queryKey: [QUERY_KEY.CLASSES]})
+    }
   });
 
   const rowSelection = {
@@ -412,7 +416,9 @@ const ImportClassesModal = ({ isOpen, setIsOpen, excelData }: Props) => {
           ],
           unchecked: changes
             .map((change: any) => change.studentId)
-            .filter((s: any) => selectedRowKeys?.some((r: any) => r === s?.studentId)),
+            .filter((s: any) =>
+              selectedRowKeys?.some((r: any) => r === s?.studentId)
+            ),
         });
         setIsOpen(false);
         setData([]);
@@ -561,6 +567,7 @@ const ImportClassesModal = ({ isOpen, setIsOpen, excelData }: Props) => {
             rowKey={"studentId"}
           />
         </div>
+        {importClassData?.isPending && <Spin fullscreen />}
       </div>
     </Modal>
   );

@@ -3,6 +3,7 @@ import Student from "../model/Student.js";
 import Class from "../model/Class.js";
 import Teacher from "../model/Teacher.js";
 import Mentor from "../model/Mentor.js";
+import Group from "../model/Group.js";
 const findStudentByAccountId = async (accountId) => {
   try {
     const student = await Student.findOne({
@@ -536,6 +537,16 @@ const findByStudentId = async (studentId) => {
   }
 };
 
+const findByStudentIdPopulated = async (studentId) => {
+  try {
+    const result = await Student.findById(studentId)
+      .populate({ path: "classId" })
+      .populate({ path: "group" });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 const updateClass = async (studentId, classId) => {
   try {
     const result = await Student.findByIdAndUpdate(studentId, {
@@ -548,6 +559,7 @@ const updateClass = async (studentId, classId) => {
     throw new Error(error.message);
   }
 };
+
 export default {
   findByStudentId,
   bulkCreateStudentsFromExcel,
@@ -564,4 +576,5 @@ export default {
   findStudentDetailByAccountId,
   getAllStudentByGroupId,
   updateClass,
+  findByStudentIdPopulated
 };

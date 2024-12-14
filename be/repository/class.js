@@ -560,9 +560,10 @@ const createClass = async ({
       matchingTerm.timeLine?.filter(
         (deadline) => deadline.type === "outcome"
       ) || [];
+    let outcomeOfClass = []
     for (const deadline of outcomeDeadlines) {
       const outcome = await Outcome.findById(deadline.outcome);
-      await Classwork.create({
+      const newClasswork = await Classwork.create({
         name: deadline.title || null,
         description: deadline.description || null,
         startDate: deadline.startDate || null,
@@ -570,9 +571,11 @@ const createClass = async ({
         GradingCriteria: outcome?.GradingCriteria || [],
         type: "outcome",
         classId: result._id,
+        outcome: outcome?._id
       });
+      outcomeOfClass.push(newClasswork)
     }
-    return result._doc;
+    return {newClass: result._doc, outcomesClasswork: outcomeOfClass};
   } catch (error) {
     throw new Error(error.message);
   }
@@ -607,8 +610,6 @@ const assignTeacher = async (classId, teacherId) => {
         teacher: new mongoose.Types.ObjectId(teacherId),
       },
     });
-    console.log(result, classId);
-
     return result;
   } catch (error) {
     throw new Error(error.message);

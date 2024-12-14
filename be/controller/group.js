@@ -257,7 +257,8 @@ const getClassTeacherAndgroupInfo = async (req, res) => {
         StudentRepository.getAllStudentUngroupByClassId(classId),
         ClassRepository.findClassById(classId),
       ]);
-
+      console.log(classId);
+      
     const studentData = {
       teacher: classInfo.teacher,
       groupStudent,
