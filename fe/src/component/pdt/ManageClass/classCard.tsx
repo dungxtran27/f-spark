@@ -68,11 +68,11 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
   return (
     <div
-      className={`rounded-lg overflow-hidden shadow-md mb-2 cursor-pointer ${isSelected ? "border-2 border-purple-400" : ""
+      className={`rounded-lg overflow-hidden shadow-md cursor-pointer ${isSelected ? "border-2 border-purple-400" : ""
         }`}
       onClick={onClick}
     >
-      <div className={`${getCardColor()} opacity-100 p-4 text-white`}>
+      <div className={`${getCardColor()} opacity-100 p-2 text-white`}>
         <div className="flex text-lg font-semibold">
           {classCode}
           <div className="ml-auto flex items-center">
@@ -90,7 +90,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
         <div className="text-sm">Teacher: {teacherName ?? "N/A"}</div>
       </div>
       <div className="bg-white p-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2">
           <div className="flex items-center">
             <span className="text-sm font-medium text-gray-600">
               {totalMembers} Students

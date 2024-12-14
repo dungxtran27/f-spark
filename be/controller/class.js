@@ -7,6 +7,7 @@ import {
   SubmissionRepository,
   TeacherRepository,
 } from "../repository/index.js";
+import { DEADLINE_TYPES } from "../utils/const.js";
 import teacher from "./teacher.js";
 
 const getClassesOfTeacher = async (req, res) => {
@@ -14,7 +15,10 @@ const getClassesOfTeacher = async (req, res) => {
     const decodedToken = req.decodedToken;
     const teacherId = decodedToken?.role?.id;
     const { termId } = req.body;
-    const classes = await ClassRepository.getClassesOfTeacher({ teacherId, termId });
+    const classes = await ClassRepository.getClassesOfTeacher({
+      teacherId,
+      termId,
+    });
     return res.status(200).json(classes);
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
@@ -121,7 +125,7 @@ const createClass = async (req, res) => {
     if (!classCode) {
       return res.status(400).json({ message: "Class code is required." });
     }
-    const newClass = await ClassRepository.createClass({ classCode });
+    const { newClass } = await ClassRepository.createClass({ classCode });
     if (groupIds && Array.isArray(groupIds) && groupIds.length > 0) {
       const result = await GroupRepository.addGroupAndStudentsToClass(
         groupIds,
@@ -162,21 +166,99 @@ const getClassDetail = async (req, res) => {
 const assignTeacher = async (req, res) => {
   try {
     const { teacherId, classId } = req.body;
-    console.log(teacherId, classId);
-
     const existClass = await ClassRepository.findClassById(classId);
     if (existClass?.teacher) {
-      return res.status(400).json({ error: "This class already have a teacher !" })
+      return res
+        .status(400)
+        .json({ error: "This class already have a teacher !" });
     }
     const [updatedClass, updatedTeacher] = await Promise.all([
       ClassRepository.assignTeacher(classId, teacherId),
-      TeacherRepository.assignClass(classId, teacherId)
+      TeacherRepository.assignClass(classId, teacherId),
     ]);
     return res.status(200).json({ message: "Assigned successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-}
+};
+const importClassData = async (req, res) => {
+  try {
+    const { studentData, classData } = req.body;
+    if (classData && classData.length > 0) {
+      for (const c of classData) {
+        const existingClass = await ClassRepository.findByClassCode(c);
+        if (!existingClass && c !== null) {
+          const { classes, outcomesClasswork } =
+            await ClassRepository.createClass({ classCode: c });
+        }
+      }
+    }
+    if (studentData && studentData.length > 0) {
+      for (const s of studentData) {
+        const existingStudent = await StudentRepository.findByStudentId(
+          s?.studentId
+        );
+        if (!existingStudent) {
+          return res.status(400).json({
+            error:
+              "Data contains unknown student. Create student at Account management",
+          });
+        }
+
+        if (existingStudent?.classId?.classCode !== s?.classCode) {
+          const classUpdate = await ClassRepository.findByClassCode(
+            s?.classCode
+          );
+          if (classUpdate) {
+            await StudentRepository.updateClass(
+              existingStudent?._id,
+              classUpdate?._id
+            );
+            if (existingStudent?.group) {
+              const updatedGroup = await GroupRepository.updateClass(
+                existingStudent?.group,
+                classUpdate?._id
+              );
+              const classOutcomes = await ClassworkRepository.getOutcomes(
+                classUpdate?._id,
+                false
+              );
+              const updatedTimeline = updatedGroup?.timeline?.map((dl) => {
+                if (dl?.type === DEADLINE_TYPES.OUTCOME) {
+                  classOutcomes?.forEach((oc) => {
+                    if (oc?.outcome.toString() === dl?.outcome.toString()) {
+                      return {
+                        ...dl,
+                        classworkId: oc?._id,
+                      };
+                    }
+                  });
+                }
+                return dl;
+              });  
+              console.log(updatedTimeline);
+              
+              await GroupRepository.updateGroupTimeLine(
+                existingStudent?.group,
+                updatedTimeline
+              );
+            }
+          } else {
+            await StudentRepository.updateClass(existingStudent?._id, null);
+            if (existingStudent?.group) {
+              await GroupRepository.updateClass(existingStudent?.group, null);
+            }
+          }
+        }
+      }
+    }
+
+    return res.status(200).json({ message: "Updated successfully!" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   pinClasswork,
   getClassesOfTeacher,
@@ -185,5 +267,6 @@ export default {
   getTeacherDashboardInfo,
   createClass,
   getClassDetail,
-  assignTeacher
+  assignTeacher,
+  importClassData,
 };

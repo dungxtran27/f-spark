@@ -69,7 +69,7 @@ const DeadlineAndOutcome = () => {
                   {index + 1}
                 </span>
                 <span className="w-[200px] whitespace-nowrap truncate">
-                  {o?.title}
+                  {o?.name}
                 </span>
               </div>
               {o?.submissions?.filter((s: any) => !!s?.grade)?.length ===
@@ -116,7 +116,7 @@ const DeadlineAndOutcome = () => {
       </div>
       <Modal
       centered
-        title={outcome?.title}
+        title={outcome?.name}
         open={!!outcome}
         onCancel={() => {
           setOutcome(null);
@@ -124,7 +124,7 @@ const DeadlineAndOutcome = () => {
         footer={<></>}
         width={1000}
       >
-        <Outcome o={outcome} />
+        <Outcome o={outcome} classID={userInfo?.classId}/>
       </Modal>
     </div>
   );

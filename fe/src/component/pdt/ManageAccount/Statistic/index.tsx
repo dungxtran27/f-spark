@@ -7,7 +7,10 @@ import { useForm } from "antd/es/form/Form";
 import FormItem from "antd/es/form/FormItem";
 import { PiChalkboardTeacherLight, PiStudent } from "react-icons/pi";
 import { LiaChalkboardTeacherSolid } from "react-icons/lia";
-const Statistic = () => {
+const Statistic: React.FC<{
+  term: string | null;
+  setTerm: (value: any) => void;
+}> = ({ term, setTerm }) => {
   const { data: terms } = useQuery({
     queryKey: [QUERY_KEY.TERM_LIST],
     queryFn: async () => {
@@ -26,7 +29,7 @@ const Statistic = () => {
 
   const [form] = useForm();
   return (
-    <div className="border rounded w-full mb-5 p-5 flex items-center gap-5 shadow-lg bg-white border-primary/30">
+    <div className="border rounded w-full p-5 flex items-center gap-5 shadow-lg bg-white border-primary/30">
       <div className="flex items-center justify-between w-4/6">
         <div className="flex items-end gap-5">
           <AntdStatistic title="Student" value={1128} prefix={<PiStudent />} />
@@ -63,6 +66,9 @@ const Statistic = () => {
               placeholder="Class"
               showSearch
               options={termOptions}
+              onChange={(value) => {
+                setTerm(value);
+              }}
               defaultValue={`${
                 terms?.data?.data?.find(
                   (t: any) =>
