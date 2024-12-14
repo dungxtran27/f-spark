@@ -39,8 +39,10 @@ export const SENDER_TYPE = {
 }
 
 export const DEADLINE_TYPES = {
+  STUDENT_ACCOUNT_CREATE: "studentAccountCreate",
   MEMBERS_TRANSFER: "membersTransfer",
-  SPONSOR_SHIP: "sponsorShip",
+  SPONSOR_SHIP_VOTE: "sponsorShipVote",
+  SPONSORSHIP_FINALIZED: "sponsorship_finalized",
   DIVIDING_CLASSES: "dividingClasses",
   OUTCOME: "outcome",
   START_TERM: "startTerm",

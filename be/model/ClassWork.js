@@ -1,11 +1,14 @@
 import mongoose, { Schema } from "mongoose";
 
-const GradingCriteriaSchema = new Schema({
-  description: {
-    type: String,
-    required: false,
-  }
-}, { _id: true });
+const GradingCriteriaSchema = new Schema(
+  {
+    description: {
+      type: String,
+      required: false,
+    },
+  },
+  { _id: true }
+);
 
 const ClassworkSchema = new Schema(
   {
@@ -34,12 +37,12 @@ const ClassworkSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['assignment', 'outcome', 'announcement'],
+      enum: ["assignment", "outcome", "announcement"],
       required: true,
     },
     classId: {
       type: Schema.Types.ObjectId,
-      ref: 'Class',
+      ref: "Class",
       required: true,
     },
     GradingCriteria: [
@@ -47,14 +50,20 @@ const ClassworkSchema = new Schema(
         type: GradingCriteriaSchema,
       },
     ],
-    upVote: [{
+    upVote: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Student",
+        required: false,
+      },
+    ],
+    outcome: {
       type: Schema.Types.ObjectId,
-      ref: "Student",
-      required: false,
-    }]
+      ref: "Outcome",
+    },
   },
-  { timestamps: true, collection: 'Classworks' }
+  { timestamps: true, collection: "Classworks" }
 );
 
-const Classwork = mongoose.model('Classwork', ClassworkSchema);
+const Classwork = mongoose.model("Classwork", ClassworkSchema);
 export default Classwork;

@@ -8,34 +8,34 @@ import Statistic from "./Statistic";
 const { Text } = Typography;
 const RequestWrapper = () => {
   const { data: reqData } = useQuery({
-    queryKey: [QUERY_KEY.REQUEST_LEAVE_CLASS],
+    queryKey: [QUERY_KEY?.REQUEST_LEAVE_CLASS],
     queryFn: async () => {
-      return requestList.getLeaveClassRequest();
+      return requestList?.getLeaveClassRequest();
     },
   });
 
   const queryClient = useQueryClient();
   const approveLeaveReq = useMutation({
     mutationFn: ({ requestId }: any) =>
-      requestList.approveLeaveRequest({
+      requestList?.approveLeaveRequest({
         requestId: requestId,
       }),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.REQUEST_LEAVE_CLASS],
+      queryClient?.invalidateQueries({
+        queryKey: [QUERY_KEY?.REQUEST_LEAVE_CLASS],
       });
     },
   });
   const declineLeaveReq = useMutation({
     mutationFn: ({ requestId }: any) =>
-      requestList.declineLeaveRequest({
+      requestList?.declineLeaveRequest({
         requestId: requestId,
       }),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.REQUEST_LEAVE_CLASS],
+      queryClient?.invalidateQueries({
+        queryKey: [QUERY_KEY?.REQUEST_LEAVE_CLASS],
       });
     },
   });
@@ -43,20 +43,20 @@ const RequestWrapper = () => {
     {
       title: "MSSV",
       dataIndex: "createBy",
-      render: (createBy: any) => createBy.studentId,
+      render: (createBy: any) => createBy?.studentId,
       width: 50,
     },
     {
       title: "Name",
       dataIndex: "createBy",
-      render: (student: any) => student.name,
+      render: (student: any) => student?.name,
       width: 200,
     },
     {
       title: "Major",
       dataIndex: "createBy",
       render: (student: any) => (
-        <Tag color={colorMap[student.major]}>{student.major}</Tag>
+        <Tag color={colorMap[student?.major]}>{student?.major}</Tag>
       ),
       width: 50,
     },
@@ -64,25 +64,25 @@ const RequestWrapper = () => {
       title: "Request Type Specific",
       align: "center",
       render: (record: any) => {
-        if (record.typeRequest === "changeClass") {
+        if (record?.typeRequest === "changeClass") {
           return (
             <div className="text-center">
-              from <Tag color="green"> {record.fromClass?.classCode}</Tag>
+              from <Tag color="green"> {record?.fromClass?.classCode}</Tag>
               <span>&#8594;</span>
               <Tag color="blue" className=" ml-1">
-                {record.toClass?.classCode}
+                {record?.toClass?.classCode}
               </Tag>
             </div>
           );
-        } else if (record.typeRequest === "deleteFromGroup") {
+        } else if (record?.typeRequest === "deleteFromGroup") {
           return (
             <div className="text-center">
               remove{" "}
               <span className="text-primaryBlue font-semibold px-1">
                 {" "}
-                {record.studentDeleted.name}
+                {record?.studentDeleted?.name}
               </span>{" "}
-              from group {record.group.GroupName}
+              from group {record?.group?.GroupName}
             </div>
           );
         }
@@ -98,7 +98,7 @@ const RequestWrapper = () => {
             type="primary"
             className="mr-2"
             onClick={() => {
-              approveLeaveReq.mutate({ requestId: record._id });
+              approveLeaveReq.mutate({ requestId: record?._id });
             }}
           >
             Approve
@@ -106,7 +106,7 @@ const RequestWrapper = () => {
           <Button
             type="default"
             onClick={() => {
-              declineLeaveReq.mutate({ requestId: record._id });
+              declineLeaveReq.mutate({ requestId: record?._id });
             }}
           >
             Declined
@@ -119,20 +119,20 @@ const RequestWrapper = () => {
     {
       title: "MSSV",
       dataIndex: "createBy",
-      render: (createBy: any) => createBy.studentId,
+      render: (createBy: any) => createBy?.studentId,
       width: 50,
     },
     {
       title: "Name",
       dataIndex: "createBy",
-      render: (student: any) => student.name,
+      render: (student: any) => student?.name,
       width: 200,
     },
     {
       title: "Major",
       dataIndex: "createBy",
       render: (student: any) => (
-        <Tag color={colorMap[student.major]}>{student.major}</Tag>
+        <Tag color={colorMap[student?.major]}>{student?.major}</Tag>
       ),
       width: 50,
     },
@@ -140,25 +140,25 @@ const RequestWrapper = () => {
       title: "Request Type Specific",
       align: "center",
       render: (record: any) => {
-        if (record.typeRequest === "changeClass") {
+        if (record?.typeRequest === "changeClass") {
           return (
             <div className="text-center">
-              <Tag color="green"> {record.fromClass?.classCode}</Tag>
+              <Tag color="green"> {record?.fromClass?.classCode}</Tag>
               <span>&#8594;</span>
               <Tag color="blue" className=" ml-1">
                 {" "}
-                {record.toClass?.classCode}
+                {record?.toClass?.classCode}
               </Tag>
             </div>
           );
-        } else if (record.typeRequest === "deleteFromGroup") {
+        } else if (record?.typeRequest === "deleteFromGroup") {
           return (
             <div className="text-center">
               remove
               <span className="text-primaryBlue font-semibold px-1">
-                {record.studentDeleted.name}
+                {record?.studentDeleted?.name}
               </span>
-              from group {record.group.GroupName}
+              from group {record?.group?.GroupName}
             </div>
           );
         }
@@ -170,8 +170,8 @@ const RequestWrapper = () => {
       align: "center",
       render: (record: any) => {
         return (
-          <Text type={record.status == "approved" ? "success" : "danger"}>
-            {record.status}
+          <Text type={record?.status == "approved" ? "success" : "danger"}>
+            {record?.status}
           </Text>
         );
       },
@@ -186,7 +186,7 @@ const RequestWrapper = () => {
           <Table
             className="customTable"
             // pagination={}
-            dataSource={reqData?.data.pendingRequest}
+            dataSource={reqData?.data?.pendingRequest}
             columns={columnsReqPending}
           />
         </div>
@@ -198,7 +198,7 @@ const RequestWrapper = () => {
       children: (
         <div className="bg-white p-3 rounded-md">
           <Table
-            dataSource={reqData?.data.processedRequest}
+            dataSource={reqData?.data?.processedRequest}
             columns={columnsReqProcessed}
           />
         </div>

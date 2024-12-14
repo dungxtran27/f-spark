@@ -3,11 +3,13 @@ import { NotificationController, RequestController } from "../controller/index.j
 export const eventScheduler = () => {
   cron.schedule(
     "0 0 0 * * *", // Runs every day once
-    // "*/5 * * * * *",
+    // "*/10 * * * * *",
     async () => {
       try {
         //task
         await NotificationController.remindMemberTransferEnd();
+        //auto send request
+        await RequestController.sendRequestSponsorship();
         //auto check sponsorship
         await RequestController.updateIsSponsorship();
       } catch (error) {

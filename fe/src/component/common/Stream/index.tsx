@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
-import { Input } from "antd";
+import { Empty, Input } from "antd";
 import { useState } from "react";
 import {
   CLASS_WORK_TYPE,
@@ -18,7 +18,6 @@ import Submissions from "./Submissions";
 import SubmitModal from "./SubmitModal";
 import Assignment from "./Assignment";
 import Announcement from "./Announcement";
-
 
 const Stream = () => {
   const userInfo = useSelector(
@@ -99,10 +98,29 @@ const Stream = () => {
           </div>
         )}
         <div className=" flex flex-col gap-5 w-full">
-          {streamContent?.data?.data?.map((p: any) =>
-            p?.type === CLASS_WORK_TYPE.ANNOUNCEMENT
-              ? <Announcement post={p} userInfo={userInfo} upvoteAnnouncement={upvoteAnnouncement}/>
-              : <Assignment post={p} userInfo={userInfo} setOpenSubmission={setOpenSubmission} setSubmitModal={setSubmitModal}/>
+          {streamContent?.data?.data?.length > 0 ? (
+            <div className="flex flex-col gap-5 w-full">
+              {streamContent?.data?.data?.map((p: any) =>
+                p?.type === CLASS_WORK_TYPE.ANNOUNCEMENT ? (
+                  <Announcement
+                    post={p}
+                    userInfo={userInfo}
+                    upvoteAnnouncement={upvoteAnnouncement}
+                  />
+                ) : (
+                  <Assignment
+                    post={p}
+                    userInfo={userInfo}
+                    setOpenSubmission={setOpenSubmission}
+                    setSubmitModal={setSubmitModal}
+                  />
+                )
+              )}
+            </div>
+          ) : (
+            <div className="w-full h-[500px] flex items-center justify-center rounded border shadow bg-white">
+              <Empty description={"No Assignment yet"} />
+            </div>
           )}
         </div>
       </div>
@@ -113,7 +131,6 @@ const Stream = () => {
       <Submissions
         openSubmission={openSubmission}
         setOpen={setOpenSubmission}
-        
       />
       <SubmitModal
         open={submitModal.open}

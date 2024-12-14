@@ -21,4 +21,7 @@ export const authApi = {
   getActiveTerm: async () => {
     return await axios.post("api/term/active");
   },
+  signUp: async (requestBody: any) => {
+    return await axios.post(`api/auth/signup`, requestBody);
+  },
 };
