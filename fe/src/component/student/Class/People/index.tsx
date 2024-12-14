@@ -107,19 +107,19 @@ const People = () => {
           <div className="">
             <span className="font-bold">Name: </span>
             <span>
-              {classPeople?.data.data.teacher.name}
+              {classPeople?.data?.data?.teacher?.name}
             </span>
           </div>
           <div className="">
             <span className="font-bold">Email: </span>
             <span className="text-[16px]">
-              {classPeople?.data.data.teacher?.account.email}
+              {classPeople?.data.data?.teacher?.account?.email}
             </span>
           </div>
           <div className="">
             <span className="font-bold">Phone: </span>
             <span className="text-[16px]">
-              {classPeople?.data.data.teacher.phoneNumber}{" "}
+              {classPeople?.data?.data?.teacher?.phoneNumber}{" "}
             </span>
           </div>
         </div>

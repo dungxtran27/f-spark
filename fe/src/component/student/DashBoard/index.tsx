@@ -25,9 +25,9 @@ const DashBoard = () => {
     );
   }
   return (
-    <div className="p-5 w-full h-[1000px]">
+    <div className="p-5 w-full">
       <TimeLine />
-      <div className="flex flex-row h-[550px]">
+      <div className="flex flex-row">
         <div className="space-y-2 w-7/12">
           <Classes />
           <Team />

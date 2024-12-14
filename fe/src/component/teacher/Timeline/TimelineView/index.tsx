@@ -14,6 +14,7 @@ interface TimelineViewProps {
   index: number;
   endDate: string;
   startDate: string;
+  outcomeId: string;
 }
 interface Timeline {
   _id: string;
@@ -32,6 +33,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({
   index,
   endDate,
   startDate,
+  outcomeId,
 }) => {
   const { classId } = useParams();
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
@@ -43,7 +45,6 @@ const TimelineView: React.FC<TimelineViewProps> = ({
     queryFn: async () =>
       (await groupApi.getAllGroupByClassId(classId)).data.data,
   });
-
   const { data: submissionsResponse } = useQuery({
     queryKey: [QUERY_KEY.ASSIGNMENT_SUBMISSIONS, selectedGroupIds],
     queryFn: async () => {
@@ -69,7 +70,9 @@ const TimelineView: React.FC<TimelineViewProps> = ({
   };
 
   const items = data?.map((group: any) => {
-    const groupTimeline = group.timeline?.[index - 1];
+    const groupTimeline = group?.timeline?.find(
+      (dl: any) => dl?.outcome === outcomeId
+    );
 
     if (!groupTimeline) {
       return {

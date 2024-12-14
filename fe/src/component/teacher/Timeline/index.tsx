@@ -15,7 +15,6 @@ const TimelineClassWrapper: React.FC = () => {
     activeTerm?.timeLine.filter((timeline: any) => {
       return timeline.type === "outcome";
     }) ?? [];
-
   return (
     <div>
       <Tabs defaultActiveKey="0" tabPosition="left">
@@ -41,6 +40,7 @@ const TimelineClassWrapper: React.FC = () => {
                   index={adjustedIndex}
                   endDate={a.endDate}
                   startDate={a.startDate}
+                  outcomeId={a?.outcome}
                 />
               </Tabs.TabPane>
             );

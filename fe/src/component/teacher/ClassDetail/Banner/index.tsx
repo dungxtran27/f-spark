@@ -134,6 +134,7 @@ const Banner = ({ name, classId }: Props) => {
                       {moment(filteredOutcomes[currentStep]?.startDate).format(
                         "DD, MMM YYYY "
                       )}
+                      -
                       {moment(filteredOutcomes[currentStep]?.endDate).format(
                         "DD, MMM YYYY"
                       )}
@@ -158,9 +159,7 @@ const Banner = ({ name, classId }: Props) => {
                 <div>
                   <h2 className="font-bold text-md mb-2">
                     Group delay deadline{" "}
-                    <span className="text-red-500">
-                      ({countRQ.length})
-                    </span>
+                    <span className="text-red-500">({countRQ.length})</span>
                   </h2>
                   <div className="max-h-[110px] overflow-y-auto">
                     {flatRequestListDetail?.map((group: any) => (

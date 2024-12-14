@@ -116,7 +116,7 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
               </div>
               <div className="flex pt-2">
                 <p className="font-semibold text-gray-500">Tag:</p>
-                {data?.tag.map((t: any) => (
+                {data?.tag?.map((t: any) => (
                   <span className="pl-1">
                     <Tag color={colorMajorGroup[t.name]}> {t.name}</Tag>
                   </span>
@@ -274,7 +274,7 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
             <Select
               mode="multiple"
               allowClear
-              defaultValue={data?.tag.map((i: any) => ({
+              defaultValue={data?.tag?.map((i: any) => ({
                 label: i.name,
                 value: i._id,
               }))}

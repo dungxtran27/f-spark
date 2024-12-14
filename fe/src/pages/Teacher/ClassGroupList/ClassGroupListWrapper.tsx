@@ -473,6 +473,9 @@ const ClassGroupListWrapper = () => {
               components={{
                 body: { row: Row },
               }}
+              locale={{
+                emptyText: <Empty description="No Data" className="w-full"/>,
+              }}
               rowKey="_id"
               dataSource={classPeople?.data.data.unGroupStudents}
               columns={columnsStudentUngroup}
