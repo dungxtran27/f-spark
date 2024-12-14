@@ -440,7 +440,7 @@ const updateIsSponsorship = async () => {
     const activeTerm = await TermRepository.getActiveTerm();
     const currentTime = moment().toISOString();
     const endDate = activeTerm.timeLine.find((t) => t.type === "sponsorShip").endDate;
-    if (moment(endDate).isBefore(currentTime)) {      
+    if (moment(endDate).isBefore(currentTime)) {
       const requests = await RequestRepository.findRequestByTypeRequestFPT();
       const filterRequestByTerm = requests.filter((r) => r.group.term.toString() === activeTerm._id.toString());
 
@@ -468,6 +468,50 @@ const updateIsSponsorship = async () => {
   }
 };
 
+const sendRequestSponsorship = async () => {
+  try {
+    const activeTerm = await TermRepository.getActiveTerm();
+    const currentTime = moment().toISOString();
+    const startDate = activeTerm.timeLine.find((t) => t.type === "sponsorShip").startDate;
+    if (moment(startDate).isBefore(currentTime)) {
+      const groups = await GroupRepository.findGroupByOldMark();
+
+      if (!groups || groups.length === 0) {
+        return res.status(404).json({ message: "Group not found." });
+      }
+
+      const requests = await Promise.all(
+        groups.map(async (group) => {
+          const existingRequests = await RequestRepository.findRequestByTypeRequestFPTSended(group._id);
+          if (existingRequests && existingRequests.length > 0) {
+            return null;
+          } else {
+            const request = {
+              typeRequest: "FPT",
+              createBy: null,
+              actionType: null,
+              title: "Thông báo: Mở đơn xin tài trợ",
+              content: "Chào em,\nNhóm em đủ điều kiện nhận hỗ trợ kinh phí khởi nghiệp. Sinh viên đọc kỹ nội dung ở file đính kèm.\nThân mến.",
+              status: "pending",
+              attachmentUrl: "https://example.com/file.docx",
+              group: group._id,
+              upVoteYes: [],
+              upVoteNo: [],
+              totalMembers: group.teamMembers.length,
+              updatedAt: new Date().toISOString(),
+            };
+            return RequestRepository.createRequestFPT(request);
+          }
+        })
+      );
+    }
+    else {
+      return;
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 export default {
   getAllRequest,
@@ -484,5 +528,6 @@ export default {
   getAllLeaveClassRequest,
   getLeaveClassRequestOfStudent,
   createDeleteStudentFromGroupRequest,
-  updateIsSponsorship
+  updateIsSponsorship,
+  sendRequestSponsorship
 };
