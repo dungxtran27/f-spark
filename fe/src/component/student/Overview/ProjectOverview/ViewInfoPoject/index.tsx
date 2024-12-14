@@ -254,6 +254,15 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
           });
           setOpen(false);
         }}
+        afterOpenChange={(isOpen) => {
+          if (isOpen) {
+            form.setFieldsValue({
+              name: data.GroupName,
+              description: data.GroupDescription,
+              tags: data?.tag.map((i: any) => i._id),
+            });
+          }
+        }}
       >
         <Form layout="vertical" form={form}>
           <Form.Item 
