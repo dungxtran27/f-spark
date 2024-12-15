@@ -288,24 +288,18 @@ const assignClass = async (classId, teacherId) => {
     throw new Error(error.message);
   }
 };
-const getTotalTeachers = async (termCode) => {
+const getTotalTeachers = async (term) => {
   try {
+    const termObjectId = new mongoose.Types.ObjectId(term);
     const totalTeacher = await Teacher.countDocuments();
-    let termFilter = null;
-    if (termCode) {
-      const termDoc = await Term.findOne({ termCode:termCode });
-      if (termDoc) {
-        termFilter = termDoc._id; 
-      }
-    }
 
     const teachers = await Teacher.aggregate([
       {
         $lookup: {
-          from: "Classes", 
-          localField: "assignedClasses.id", 
-          foreignField: "_id", 
-          as: "assignedClassesInfo", 
+          from: "Classes",
+          localField: "assignedClasses.id",
+          foreignField: "_id",
+          as: "assignedClassesInfo",
         },
       },
       {
@@ -318,21 +312,13 @@ const getTotalTeachers = async (termCode) => {
             ],
           },
           termMatches: {
-            $cond: [
-              {
-                $and: [
-                  { $ne: [termFilter, null] }, 
-                  {
-                    $in: [
-                      termFilter,
-                      "$assignedClassesInfo.term", 
-                    ],
-                  },
-                ],
+            $anyElementTrue: {
+              $map: {
+                input: "$assignedClassesInfo",
+                as: "class",
+                in: { $eq: ["$$class.term", termObjectId] }, // So sánh chính xác với ObjectId
               },
-              true,
-              false,
-            ],
+            },
           },
         },
       },
@@ -382,6 +368,7 @@ const getTotalTeachers = async (termCode) => {
     throw new Error(`Failed to fetch teacher data: ${error.message}`);
   }
 };
+
 
 
 const getClassOfTeacher = async (teacherId) => {

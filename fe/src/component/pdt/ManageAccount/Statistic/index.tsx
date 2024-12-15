@@ -32,44 +32,34 @@ const Statistic: React.FC<{
 
   const [form] = useForm();
 
-  const { data: studentData, refetch: refetchStudentData } = useQuery({
+  const { data: studentData } = useQuery({
     queryKey: [QUERY_KEY.ALLSTUDENT, term],
     queryFn: async () => {
-      return student.getTotalStudentsByTerm({ termCode: term });
+      return student.getTotalStudentsByTerm({ term: term });
     },
-    enabled: !!term,
   });
 
-  const { data: teacherData, refetch: refetchTeacherData } = useQuery({
+  const { data: teacherData } = useQuery({
     queryKey: [QUERY_KEY.ALLTEACHER, term],
     queryFn: async () => {
-      return teacherApi.getTotalTeachers({ termCode: term });
+      return teacherApi.getTotalTeachers({ term: term });
     },
-    enabled: !!term,
   });
 
-  const { data: mentorData, refetch: refetchMentorData } = useQuery({
+  const { data: mentorData } = useQuery({
     queryKey: [QUERY_KEY.ALLMENTOR, term],
     queryFn: async () => {
-      return mentorList.getTotalMentors({ termCode: term });
+      return mentorList.getTotalMentors({ term: term });
     },
-    enabled: !!term,
   });
-
-  const handleSemesterChange = (value: string) => {
-    refetchStudentData();
-    refetchTeacherData();
-    refetchMentorData();
-  };
-
   return (
     <div className="border rounded w-full p-5 flex items-center gap-5 shadow-lg bg-white border-primary/30">
       <div className="flex items-center justify-between w-4/6">
         <div className="flex items-end gap-5">
-          <AntdStatistic title="Student" value={studentData?.data?.data?.totalStudent} prefix={<PiStudent />} />
+          <AntdStatistic title="Student" value={studentData?.data?.data?.totalStudents} prefix={<PiStudent />} />
           <div className="font-semibold">
-            <p className="text-red-500">{studentData?.data?.data?.totalStudentNoClass} Student No Class</p>
-            <p className="text-textSecondary">{studentData?.data?.data?.totalStudentHaveClass
+            <p className="text-red-500">{studentData?.data?.data?.totalStudentsNoClass} Student No Class</p>
+            <p className="text-textSecondary">{studentData?.data?.data?.totalStudentsHaveClass
             } Student Have Class</p>
           </div>
         </div>
@@ -99,17 +89,17 @@ const Statistic: React.FC<{
             <Select
               placeholder="Class"
               showSearch
+              value={term}
               options={termOptions}
               onChange={(value) => {
                 setTerm(value);
               }}
-              defaultValue={`${
-                terms?.data?.data?.find(
-                  (t: any) =>
-                    dayjs().isAfter(t?.startTime) &&
-                    dayjs().isBefore(t?.endTime)
-                )?._id
-              }`}
+              defaultValue={`${terms?.data?.data?.find(
+                (t: any) =>
+                  dayjs().isAfter(t?.startTime) &&
+                  dayjs().isBefore(t?.endTime)
+              )?._id
+                }`}
             />
           </FormItem>
         )}

@@ -207,14 +207,8 @@ const importStudent = async (req, res) => {
 };
 const getTotalStudentsByTerm = async (req, res) => {
   try {
-    const { termCode } = req.body;
-
-    const term = await TermRepository.getActiveTerm();
-    if (!term) {
-      return res.status(404).json({ message: "No active term found" });
-    }
-
-    const students = await StudentRepository.getTotalStudentsByTerm(termCode);
+    const { term } = req.body;
+    const students = await StudentRepository.getTotalStudentsByTerm(term);
     if (!students || students.length === 0) {
       return res.status(404).json({ message: "No students found for the given termCode" });
     }

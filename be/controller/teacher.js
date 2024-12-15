@@ -74,7 +74,7 @@ const getTeacherInfo = async (req, res) => {
 };
 const getTotalTeachers = async (req, res) => {
   try {
-    const { termCode } = req.body;
+    const { term } = req.body;
     // if (!termCode || typeof termCode !== "string") {
     //   return res.status(400).json({ error: "Invalid or missing termCode" });
     // }
@@ -82,7 +82,7 @@ const getTotalTeachers = async (req, res) => {
     // if (!termExists) {
     //   return res.status(404).json({ error: "Term not found" });
     // }
-    const result = await TeacherRepository.getTotalTeachers(termCode);
+    const result = await TeacherRepository.getTotalTeachers(term);
     res.status(200).json({
       data: result
     });

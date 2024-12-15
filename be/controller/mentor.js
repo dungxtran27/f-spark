@@ -116,7 +116,7 @@ const getMentorGroups = async (req, res) => {
 };
 const getTotalMentors = async (req, res) => {
   try {
-    const { termCode } = req.body;
+    const { term } = req.body;
     // if (!termCode) {
     //   return res.status(400).json({ error: "termCode is required" });
     // }
@@ -128,7 +128,9 @@ const getTotalMentors = async (req, res) => {
     // if (!termExists) {
     //   return res.status(404).json({ error: `Term code not found` });
     // }
-    const result = await MentorRepository.getTotalMentors(termCode);
+    const result = await MentorRepository.getTotalMentors(term);
+    console.log("Term ID received:", result);
+
     res.status(200).json({
       data: result
     });

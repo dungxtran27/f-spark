@@ -388,18 +388,15 @@ const getAllAccStudent = async (
         });
       }
     }
-    if (termCode) {
-      const termDoc = await Term.findOne({ termCode: termCode });      
-      if (termDoc) {
-        filterCondition.$and.push({
-          term: termDoc._id,
-        });
-      }
-    }
     if (status) {
       filterCondition.$and.push({ isActive: status });
     }
-
+    if (term) {
+      filterCondition.$and.push({
+        term: new mongoose.Types.ObjectId(term),
+      });
+    }
+    
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
@@ -408,11 +405,11 @@ const getAllAccStudent = async (
     const maxPages = Math.ceil(totalItems / limit);
 
     const students = await Student.aggregate([
-      {
-        $match: {
-          term: new mongoose.Types.ObjectId(term),
-        },
-      },
+      // {
+      //   $match: {
+      //     term: new mongoose.Types.ObjectId(term),
+      //   },
+      // },
       {
         $lookup: {
           from: "Accounts",
@@ -534,10 +531,10 @@ const bulkCreateStudentsFromExcel = async (studentsData) => {
     throw new Error(error.message);
   }
 };
-const getTotalStudentsByTerm = async (termCode) => {
+const getTotalStudentsByTerm = async (term) => {
   try {
-    const filterCondition = { "termDetails.termCode": termCode };
-
+    const termObjectId = new mongoose.Types.ObjectId(term);
+    const filterCondition = { "termDetails._id": termObjectId };
     const students = await Student.aggregate([
       {
         $lookup: {
@@ -551,31 +548,31 @@ const getTotalStudentsByTerm = async (termCode) => {
         $unwind: "$termDetails"
       },
       {
-        $match: filterCondition 
+        $match: { "termDetails._id": termObjectId },
       },
       {
         $group: {
           _id: null,
-          totalStudent: { $sum: 1 },
-          totalStudentNoClass: {
-            $sum: { $cond: [{ $eq: ["$classId", null] }, 1, 0] }
+          totalStudents: { $sum: 1 },
+          totalStudentsNoClass: {
+            $sum: { $cond: [{ $or: [{ $eq: ["$classId", null] }, { $not: ["$classId"] }] }, 1, 0] },
           },
-          totalStudentHaveClass: {
-            $sum: { $cond: [{ $eq: ["$classId", null] }, 0, 1] }
-          }
-        }
+          totalStudentsHaveClass: {
+            $sum: { $cond: [{ $and: [{ $ne: ["$classId", null] }, { $not: [{ $not: ["$classId"] }] }] }, 1, 0] },
+          },
+        },
       },
       {
         $project: {
           _id: 0,
-          totalStudent: 1,
-          totalStudentNoClass: 1,
-          totalStudentHaveClass: 1
-        }
-      }
+          totalStudents: 1,
+          totalStudentsNoClass: 1,
+          totalStudentsHaveClass: 1,
+        },
+      },
     ]);
 
-    return students[0] || { totalStudent: 0, totalStudentNoClass: 0, totalStudentHaveClass: 0 };
+    return students[0] || { totalStudents: 0, totalStudentsNoClass: 0, totalStudentsHaveClass: 0 };
   } catch (error) {
     throw new Error(`Failed to fetch students: ${error.message}`);
   }
