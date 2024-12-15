@@ -7,7 +7,6 @@ import {
   CollapseProps,
   Image,
   Input,
-  message,
   Modal,
   Popconfirm,
   Statistic,
@@ -62,8 +61,8 @@ const Return = ({ termId }: { termId: string }) => {
   const [request, setRequest] = useState<Request | null>(null);
   const [openDis, setOpenDis] = useState(false);
   const queryClient = useQueryClient();
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const imageRefs = useRef<HTMLImageElement[]>([]);
+  const [selectedFile, setSelectedFile] = useState<string>("");
+  const imageRef = useRef<HTMLImageElement>(null);
 
   const { data: returnRequest } = useQuery({
     queryKey: [QUERY_KEY.RECEIVE_SPONSOR_REQUEST],
@@ -114,13 +113,31 @@ const Return = ({ termId }: { termId: string }) => {
     mutationFn: ({
       requestId,
       returnStatus,
+      evidence,
     }: {
       requestId: string | undefined;
       returnStatus: string;
+      evidence?: string | undefined;
     }) => {
       return AccountantApi.updateReturnStatus({
         requestId: requestId,
         returnStatus: returnStatus,
+        evidence: evidence,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.RECEIVE_SPONSOR_REQUEST],
+      });
+      setOpenDis(false);
+    },
+  });
+  const updateEvidenceStatus = useMutation({
+    mutationFn: ({ requestId, status, evidenceImage }: any) => {
+      return AccountantApi.updateEvidenceStatus({
+        requestId: requestId,
+        status: status,
+        evidenceImage: evidenceImage,
       });
     },
     onSuccess: () => {
@@ -137,34 +154,23 @@ const Return = ({ termId }: { termId: string }) => {
     .filter((t: any) => t.status == "approved")
     .reduce((total: any, acc: any) => total + acc.fundUsed, 0);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
+    const file = event.target.files?.[0];
 
-    if (files.length > 0) {
-      const allowedFiles = files.filter(
-        (file) => file.type === "image/png" || file.type === "image/jpeg"
-      );
+    if (!file) {
+      setSelectedFile("");
+      imageRef.current?.setAttribute("src", "");
+      return;
+    }
 
-      if (allowedFiles.length !== files.length) {
-        message.error("Some files are not png or jpg");
-        return;
-      }
-
-      allowedFiles.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (imageRefs.current[0]) {
-            imageRefs.current[0].src = reader.result as string;
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-
-      setSelectedFiles(allowedFiles);
+    if (file.type === "image/png" || file.type === "image/jpeg") {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedFile(reader.result as string);
+        imageRef.current?.setAttribute("src", reader.result as string);
+      };
+      reader.readAsDataURL(file);
     } else {
-      setSelectedFiles([]);
-      imageRefs.current.forEach((img) => {
-        if (img) img.src = "";
-      });
+      alert("Only PNG or JPG files are allowed."); // Inform user about invalid format
     }
   };
   const columns = [
@@ -242,6 +248,7 @@ const Return = ({ termId }: { termId: string }) => {
     {
       title: "Status & Action",
       key: "statusAction",
+      align: "center",
       render: (record: any) => {
         if (
           record.group.transactions.filter((t: any) => t.status == "pending")
@@ -251,6 +258,9 @@ const Return = ({ termId }: { termId: string }) => {
         }
         if (record.returnStatus === "processed") {
           return <FaCheck color="green" />;
+        }
+        if (record.returnStatus === "sent") {
+          return <Tag color={"yellow"}>Waiting for confirm</Tag>;
         }
 
         if (record.returnStatus === "processing") {
@@ -308,6 +318,66 @@ const Return = ({ termId }: { termId: string }) => {
         }
 
         return null;
+      },
+    },
+    {
+      title: "Bill",
+      // dataIndex: "evidences",
+
+      render: (record: any) => {
+        return record?.evidences
+          .filter((e: any) => e.type == "phase2")
+          .map((ev: any) => (
+            <div className="flex">
+              {ev.status == "declined" ? (
+                <Badge count={<FcCancel />}>
+                  <Image
+                    width={100}
+                    height={100}
+                    className="object-contain"
+                    src={ev.image}
+                  />{" "}
+                </Badge>
+              ) : (
+                <>
+                  <Image
+                    width={100}
+                    height={100}
+                    className="object-contain"
+                    src={ev.image}
+                  />{" "}
+                </>
+              )}
+
+              {record.returnStatus !== "processed" &&
+                ev.status == "pending" && (
+                  <div className="flex flex-col">
+                    <Button
+                      onClick={() => {
+                        updateEvidenceStatus.mutate({
+                          requestId: record._id,
+                          status: "approved",
+                          evidenceImage: ev.image,
+                        });
+                      }}
+                    >
+                      <FaCheck color="green" />
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        updateEvidenceStatus.mutate({
+                          requestId: record._id,
+                          status: "declined",
+                          evidenceImage: ev.image,
+                        });
+                      }}
+                    >
+                      <FcCancel />
+                    </Button>
+                  </div>
+                )}
+            </div>
+          ));
       },
     },
   ];
@@ -506,7 +576,7 @@ const Return = ({ termId }: { termId: string }) => {
         height={500}
         onCancel={() => setOpenDis(false)}
         onOk={() => setOpenDis(false)}
-        title={"Remind of groups Tra Duong Nhan"}
+        title={`Remind of groups ${request?.group.GroupName}`}
         width={700}
         footer={() => (
           <>
@@ -525,8 +595,8 @@ const Return = ({ termId }: { termId: string }) => {
                 updateReturnStatus.mutate({
                   requestId: request?._id,
                   returnStatus: "processed",
+                  evidence: selectedFile,
                 });
-                setOpenDis(false);
               }}
             >
               Send
@@ -625,17 +695,21 @@ const Return = ({ termId }: { termId: string }) => {
               />
               <div className="flex flex-col">
                 <div className="flex flex-wrap mt-2 overflow-auto">
-                  {selectedFiles.map((file, index) => (
+                  {imageRef && (
                     <img
-                      key={index}
-                      ref={(el) => (imageRefs.current[index] = el!)}
+                      ref={imageRef}
                       src=""
+                      key="preview"
                       className="w-[200px] h-[200px] object-contain"
-                      alt={`Preview ${index}`}
+                      alt="Selected Image Preview"
                     />
-                  ))}
+                  )}
                 </div>
-                <input type="file" onChange={handleFileChange} />
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg"
+                  onChange={handleFileChange}
+                />
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import {
   TermRepository,
 } from "../repository/index.js";
 import { DEADLINE_TYPES } from "../utils/const.js";
+import { uploadImage } from "../utils/uploadImage.js";
 
 const createRequest = async (req, res) => {
   try {
@@ -72,11 +73,18 @@ const getTermRequest = async (req, res) => {
 
 const updateRequest = async (req, res) => {
   try {
-    const { status, requestIds, note } = req.body;
-    const result = await FundEstimationRepository.updateRequest(
-      requestIds,
+    const { file, status, requestId } = req.body;
+
+    const evidence = await uploadImage(file);
+    if (!evidence) {
+      throw new Error("Failed to upload image");
+    }
+
+    const result = await FundEstimationRepository.accountantUpdateRequest(
+      requestId,
       status,
-      note
+      evidence,
+      "phase1"
     );
     return res.status(200).json({ message: "Updated Successful" });
   } catch (error) {
@@ -132,14 +140,48 @@ const getReturn = async (req, res) => {
 };
 const updateReturnStatus = async (req, res) => {
   try {
+    let result = {};
     const { returnStatus, requestId } = req.body;
-    const result = await FundEstimationRepository.updateReturnStatus(
-      requestId,
-      returnStatus
-    );
+    if (returnStatus == "processed" || returnStatus == "sent") {
+      const { evidence } = req.body;
+
+      const evidenceImage = await uploadImage(evidence);
+      if (!evidenceImage) {
+        throw new Error("Failed to upload image");
+      }
+      result = await FundEstimationRepository.updateReturnStatuswithEvidence(
+        requestId,
+        returnStatus,
+        evidenceImage,
+        "phase2"
+      );
+    } else if (returnStatus == "processing") {
+      result = FundEstimationRepository.updateReturnStatus(
+        requestId,
+        returnStatus
+      );
+    }
     return res
       .status(200)
       .json({ message: "Updated Successful", data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const updateEvidenceStatus = async (req, res) => {
+  try {
+    const { evidenceImage, status, requestId } = req.body;
+
+    const result = await FundEstimationRepository.updateEvidenceStatus({
+      requestId,
+      status,
+      evidenceImage,
+    });
+
+    if (status == "approved") {
+      await FundEstimationRepository.updateReturnStatus(requestId, "processed");
+    }
+    return res.status(200).json({ message: "Updated Successful" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -152,4 +194,5 @@ export default {
   getDistribution,
   getReturn,
   updateReturnStatus,
+  updateEvidenceStatus,
 };

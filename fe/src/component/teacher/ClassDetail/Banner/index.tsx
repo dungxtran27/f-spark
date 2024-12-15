@@ -1,5 +1,5 @@
 import { Breadcrumb, Popover, Skeleton, Steps, StepsProps } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { classwork } from "../../../../api/ClassWork/classwork";
 import { FaEye } from "react-icons/fa6";
 import { RiCalendarScheduleFill } from "react-icons/ri";
@@ -8,8 +8,9 @@ import { RootState } from "../../../../redux/store";
 import { Term } from "../../../../model/auth";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
-import { QUERY_KEY } from "../../../../utils/const";
+import { DATE_FORMAT, QUERY_KEY } from "../../../../utils/const";
 import { requestDeadlineApi } from "../../../../api/requestDeadline/requestDeadline";
+import dayjs from "dayjs";
 
 interface Props {
   name: string;
@@ -75,17 +76,34 @@ const Banner = ({ name, classId }: Props) => {
     title: item.title,
   }));
 
+  const activeStep = filteredOutcomes.findIndex(
+    (f) => dayjs().isAfter(f.startDate) && dayjs().isBefore(f.endDate)
+  );
+  useEffect(() => {
+    setCurrentStep(activeStep);
+  }, [activeStep]);
   const customDot: StepsProps["progressDot"] = (dot, { index }) => (
     <Popover
       content={
         <div>
           <strong>{filteredOutcomes[index].title}</strong>
           <div className="text-md text-gray-500 mt-1">
-            {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")}
+            {dayjs(filteredOutcomes[index].startDate)
+            .format(
+              // DATE_FORMAT.withoutTime
+            )
+            
+            } -
+            {dayjs(filteredOutcomes[index].endDate).toISOString()
+            // .format(
+            //   DATE_FORMAT.withoutTime
+            // )
+            }
+            {/* {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")} */}
           </div>
         </div>
       }
-      trigger="click"
+      trigger="hover"
       placement="top"
     >
       {dot}
@@ -158,9 +176,7 @@ const Banner = ({ name, classId }: Props) => {
                 <div>
                   <h2 className="font-bold text-md mb-2">
                     Group delay deadline{" "}
-                    <span className="text-red-500">
-                      ({countRQ.length})
-                    </span>
+                    <span className="text-red-500">({countRQ.length})</span>
                   </h2>
                   <div className="max-h-[110px] overflow-y-auto">
                     {flatRequestListDetail?.map((group: any) => (

@@ -1,4 +1,4 @@
-import { Table } from "antd";
+import { Image, Table } from "antd";
 import styles from "../styles.module.scss";
 import classNames from "classnames";
 import { TbPigMoney } from "react-icons/tb";
@@ -53,6 +53,14 @@ const Distributing = ({ termId }: { termId: string }) => {
             openPaymentModal(record);
           }}
           className="hover:text-orange-400 cursor-pointer"
+        />
+      ),
+    },
+    {
+      title: "Bill",
+      render: (record: any) => (
+        <Image
+        //  src="re"
         />
       ),
     },

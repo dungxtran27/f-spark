@@ -41,9 +41,14 @@ const BankingInfoSchema = new Schema(
 );
 const EvidenceSchema = new Schema(
   {
+    status: {
+      type: String,
+      enum: ["pending", "approved", "declined"],
+      default: "pending",
+    },
     type: {
       type: String,
-      required: true,
+      enum: ["phase1", "phase2"],
     },
     image: {
       type: String,
@@ -66,7 +71,7 @@ const FundEstimationSchema = new Schema(
     },
     returnStatus: {
       type: String,
-      enum: ["pending", "processing", "processed"],
+      enum: ["pending", "processing", "sent", "processed"],
       default: "pending",
     },
     sender: {

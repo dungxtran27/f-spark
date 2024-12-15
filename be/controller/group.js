@@ -532,10 +532,11 @@ const getGroupStatistic = async (req, res) => {
       groupId,
       classId,
       term: new mongoose.Types.ObjectId(term),
-      status
-      }
+      status,
+    });
+    const statistic = await GroupRepository.getGroupCountsByTerm(
+      new mongoose.Types.ObjectId(term)
     );
-    const statistic = await GroupRepository.getGroupCountsByTerm(new mongoose.Types.ObjectId(term))
     console.log(statistic);
 
     return res.status(200).json({ data: groups, statistic: statistic });
@@ -599,7 +600,7 @@ const addImageToGroupGallery = async (req, res) => {
       cloudImageLinks
     );
 
-    return res.status(200).json({ message: "ok" });
+    return res.status(200).json({ message: "Upload success" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -784,7 +785,6 @@ const verifyTransaction = async (req, res) => {
       message: message,
       data: verifyTransaction,
     });
-    
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

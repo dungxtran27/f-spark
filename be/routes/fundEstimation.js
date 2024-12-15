@@ -1,6 +1,9 @@
 import express from "express";
 import { FundEstimationController } from "../controller/index.js";
 import verifyToken from "../middleware/verifyToken.js";
+import multer from "multer";
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const fundEstimationRouter = express.Router();
 fundEstimationRouter.get(
   "/getGroupRequests",
@@ -26,10 +29,15 @@ fundEstimationRouter.post(
 );
 fundEstimationRouter.patch(
   "/updateRequests",
+  // upload.single("file"),
   FundEstimationController.updateRequest
 );
 fundEstimationRouter.patch(
   "/updateReturnStatus",
   FundEstimationController.updateReturnStatus
+);
+fundEstimationRouter.post(
+  "/updateEvidenceStatus",
+  FundEstimationController.updateEvidenceStatus
 );
 export default fundEstimationRouter;

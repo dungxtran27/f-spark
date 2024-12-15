@@ -8,7 +8,7 @@ import { QUERY_KEY } from "../../../../utils/const";
 import { student } from "../../../../api/student/student";
 
 const Return = () => {
-  const { data: groupFundEstimation } = useQuery({
+  const { data: groupFundEstimation, refetch } = useQuery({
     queryKey: [QUERY_KEY.GROUP_FUND_ESTIMATIONS],
     queryFn: () => {
       return student.getGroupFundEstimation();
@@ -57,7 +57,7 @@ const Return = () => {
     </div>
   );
   const items: CollapseProps["items"] =
-    receivedEstimation.group.transactions?.map((t: any) => {
+    receivedEstimation?.group?.transactions?.map((t: any) => {
       return {
         key: t?._id,
         label: (
@@ -75,8 +75,8 @@ const Return = () => {
       };
     });
   return (
-    <div className="flex bg-white min-h-[60vh] ">
-      {receivedEstimation.returnStatus == "pending" && (
+    <div className="flex bg-white min-h-[70vh] ">
+      {receivedEstimation?.returnStatus == "pending" && (
         <>
           <div className="w-[35%] justify-center text-center place-items-center ">
             <Result
@@ -92,7 +92,7 @@ const Return = () => {
           </div>
         </>
       )}
-      {receivedEstimation.returnStatus !== "pending" && (
+      {receivedEstimation?.returnStatus !== "pending" && (
         <>
           <div className="w-full bg-white">
             <div className="p-4">
@@ -101,21 +101,21 @@ const Return = () => {
               </span>
               <span>
                 {`${
-                  receivedEstimation.group?.transactions.filter(
+                  receivedEstimation?.group?.transactions.filter(
                     (t: any) => t.status != "pending"
                   ).length
                 }
-                   / ${receivedEstimation.group?.transactions.length}`}
+                   / ${receivedEstimation?.group?.transactions.length}`}
               </span>
             </div>
-            {receivedEstimation.group.transactions.length > 0 ? (
+            {receivedEstimation?.group?.transactions.length > 0 ? (
               <Collapse items={items} accordion />
             ) : (
               <Empty description="No transaction were made" />
             )}
           </div>
           <Divider type="vertical" className="b" />
-          <Response req={receivedEstimation} />
+          <Response req={receivedEstimation} refetch={refetch} />
         </>
       )}
     </div>

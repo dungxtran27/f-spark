@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Image, message, Result, Statistic } from "antd";
+import { Button, Image, Result, Statistic } from "antd";
 import { useRef, useState } from "react";
 import AccountantApi from "../../../api/accountant";
 import { QUERY_KEY } from "../../../utils/const";
-const Response = ({ req }: { req: any }) => {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const imageRefs = useRef<HTMLImageElement[]>([]);
+import { FaClock } from "react-icons/fa6";
+const Response = ({ req, refetch }: any) => {
+  const [selectedFile, setSelectedFile] = useState<string>("");
+  const imageRef = useRef<HTMLImageElement>(null);
   const queryClient = useQueryClient();
 
   const requestFund = req?.items?.reduce(
@@ -20,59 +21,53 @@ const Response = ({ req }: { req: any }) => {
       ? Math.round(requestFund * 0.3)
       : Math.round((verifyFund - requestFund * 0.7) * -1);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
+    const file = event.target.files?.[0];
 
-    if (files.length > 0) {
-      const allowedFiles = files.filter(
-        (file) => file.type === "image/png" || file.type === "image/jpeg"
-      );
+    if (!file) {
+      setSelectedFile("");
+      imageRef.current?.setAttribute("src", "");
+      return;
+    }
 
-      if (allowedFiles.length !== files.length) {
-        message.error("Some files are not png or jpg");
-        return;
-      }
-
-      allowedFiles.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (imageRefs.current[0]) {
-            imageRefs.current[0].src = reader.result as string;
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-
-      setSelectedFiles(allowedFiles);
+    if (file.type === "image/png" || file.type === "image/jpeg") {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedFile(reader.result as string);
+        imageRef.current?.setAttribute("src", reader.result as string);
+      };
+      reader.readAsDataURL(file);
     } else {
-      setSelectedFiles([]);
-      imageRefs.current.forEach((img) => {
-        if (img) img.src = "";
-      });
+      alert("Only PNG or JPG files are allowed.");
     }
   };
   const updateReturnStatus = useMutation({
     mutationFn: ({
       requestId,
       returnStatus,
+      evidence,
     }: {
       requestId: string | undefined;
       returnStatus: string;
+      evidence?: string | undefined;
     }) => {
       return AccountantApi.updateReturnStatus({
         requestId: requestId,
         returnStatus: returnStatus,
+        evidence: evidence,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.RECEIVE_SPONSOR_REQUEST],
       });
+      refetch();
     },
   });
+
   return (
     <>
       <div className="w-[35%] bg-white">
-        {req.returnStatus === "processing" ? (
+        {req?.returnStatus === "processing" && (
           <>
             <div className="pt-4">
               <div className="flex justify-around">
@@ -122,7 +117,7 @@ const Response = ({ req }: { req: any }) => {
                       width={200}
                       height={200}
                       className="object-contain "
-                      src={`https://img.vietqr.io/image/MB-222409092002-compact2.png?amount=${
+                      src={`https:img.vietqr.io/image/MB-222409092002-compact2.png?amount=${
                         verifyFund > requestFund
                           ? Math.round(requestFund * 0.3)
                           : Math.round((verifyFund - requestFund * 0.7) * -1)
@@ -133,28 +128,33 @@ const Response = ({ req }: { req: any }) => {
                   </div>
                   <div className="flex flex-col">
                     <div className="flex flex-wrap mt-2 overflow-auto">
-                      {selectedFiles.map((file, index) => (
+                      {imageRef && (
                         <img
-                          key={index}
-                          ref={(el) => (imageRefs.current[index] = el!)}
+                          ref={imageRef}
                           src=""
+                          key="preview"
                           className="w-[200px] h-[200px] object-contain"
-                          alt={`Preview ${index}`}
+                          alt="Selected Image Preview"
                         />
-                      ))}
+                      )}
                       <Button
                         className="self-end place-content-end justify-between"
                         onClick={() => {
                           updateReturnStatus.mutate({
                             requestId: req._id,
-                            returnStatus: "processed",
+                            returnStatus: "sent",
+                            evidence: selectedFile,
                           });
                         }}
                       >
                         Send
                       </Button>
                     </div>
-                    <input type="file" onChange={handleFileChange} />
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg"
+                      onChange={handleFileChange}
+                    />
                   </div>
                 </>
               ) : (
@@ -185,44 +185,91 @@ const Response = ({ req }: { req: any }) => {
               )}
             </div>
           </>
-        ) : verifyFund > requestFund ? (
+        )}
+        {req?.returnStatus === "sent" && (
           <>
-            <div className="text-center pt-4">
-              <div>You have return amount of money.</div>
-              <span>
-                <Statistic value={Math.abs(spare)} suffix=" VNĐ" />
-              </span>
-            </div>
-
-            <Result title="Payment succes" status="success" />
+            <Image
+              width={300}
+              height={200}
+              className="object-contain place-content-center text-center justify-center"
+              src={req.evidences.find((e: any) => (e.type = "phase2")).image}
+            />
+            {req.evidences.find((e: any) => (e.type = "phase2")).status ==
+            "pending" ? (
+              <Result
+                title="Payment is verifying"
+                icon={
+                  <div className="place-items-center">
+                    <FaClock size={70} color="blue" />
+                  </div>
+                }
+                status="info"
+              />
+            ) : (
+              <>
+                <Result title="Payment decline" status="warning" />
+                <div className=" text-center">
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      updateReturnStatus.mutate({
+                        requestId: req._id,
+                        returnStatus: "processing",
+                      });
+                    }}
+                  >
+                    Send new Bill
+                  </Button>
+                </div>
+              </>
+            )}
           </>
-        ) : (
+        )}
+
+        {req?.returnStatus === "processed" && (
           <>
-            <div className="text-center pt-4">
-              <div>The school have reimbursed you the amount of</div>
-              <span>
-                <Statistic value={Math.abs(spare)} suffix=" VNĐ" />
-              </span>
-            </div>
-            <Result title="Payment succes" status="success" />
-            <div className="text-start pt-4">
-              <div>Please check your account: </div>
-              <div>
-                <span className="text-gray-500 text-sm">Account Name:</span>
-                <span>{req.bankingInfo.accountName}</span>
-              </div>
-              <div>
-                <span className="text-gray-500 text-sm">Account Number</span>
-                <span>
-                  {req?.bankingInfo.accountNumber
-                    ? req.bankingInfo.accountNumber
-                        .slice(0, -3)
-                        .replace(/./g, "*") +
-                      req.bankingInfo.accountNumber.slice(-3)
-                    : ""}
-                </span>
-              </div>
-            </div>
+            {verifyFund > requestFund ? (
+              <>
+                <div className="text-center pt-4">
+                  <div>The school have reimbursed you the amount of</div>
+                  <span>
+                    <Statistic value={Math.abs(spare)} suffix=" VNĐ" />
+                  </span>
+                </div>
+                <Result title="Payment success" status="success" />
+                <div className="text-start pt-4">
+                  <div>Please check your account: </div>
+                  <div>
+                    <span className="text-gray-500 text-sm">Account Name:</span>
+                    <span>{req?.bankingInfo.accountName}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 text-sm">
+                      Account Number
+                    </span>
+                    <span>
+                      {req?.bankingInfo.accountNumber
+                        ? req.bankingInfo.accountNumber
+                            .slice(0, -3)
+                            .replace(/./g, "*") +
+                          req.bankingInfo.accountNumber.slice(-3)
+                        : ""}
+                    </span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {" "}
+                <div className="text-center pt-4">
+                  <div>The school have received your payment</div>
+                  <span>
+                    <Statistic value={Math.abs(spare)} suffix=" VNĐ" />
+                  </span>
+                </div>
+                <Result title="Payment success" status="success" />
+              </>
+            )}
           </>
         )}
       </div>

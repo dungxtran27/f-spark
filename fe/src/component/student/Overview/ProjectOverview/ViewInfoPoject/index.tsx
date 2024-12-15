@@ -101,7 +101,11 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
               `}
             />
             <div className="">
-              <Title level={3}>{data?.GroupName}</Title>
+              {/* <span>group</span> */}
+              <Title level={3}>
+                <span className="font-semibold text-lg text-gray-500">Group:</span>{" "}
+                {data?.GroupName}
+              </Title>
               <div className="">
                 <span className="font-semibold text-gray-500">
                   Description:{" "}
