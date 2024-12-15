@@ -70,11 +70,13 @@ const Banner = ({ name, classId }: Props) => {
     (state: RootState) => state.auth.activeTerm
   ) as Term | null;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  //eslint-disable-next-line react-hooks/exhaustive-deps
   const filteredOutcomes =
     activeTerm?.timeLine.filter((item) =>
       item.deadLineFor.includes("TEACHER")
     ) ?? [];
+
+  const [currentStep, setCurrentStep] = useState(0);
 
   const items = filteredOutcomes.map((item, index) => ({
     key: item.title,
@@ -102,8 +104,6 @@ const Banner = ({ name, classId }: Props) => {
       {dot}
     </Popover>
   );
-
-  const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
     const today = moment();
