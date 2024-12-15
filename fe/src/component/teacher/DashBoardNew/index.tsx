@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Steps, Popover } from "antd";
 import type { StepsProps } from "antd";
 import Assignment from "./Assignment";
@@ -18,32 +18,47 @@ const TeacherDashBoard: React.FC = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
 
-  const handleStepChange = (step: number) => {
-    setCurrentStep(step);
-  };
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const filteredOutcomes =
     activeTerm?.timeLine.filter((timeline: any) => {
       return timeline.type === "outcome";
     }) ?? [];
 
-  const items = filteredOutcomes.map((item) => ({
+  useEffect(() => {
+    const today = moment();
+    const currentIndex = filteredOutcomes.findIndex(
+      (step) =>
+        today.isSameOrAfter(moment(step.startDate)) &&
+        today.isBefore(moment(step.endDate))
+    );
+
+    if (currentIndex !== -1) {
+      setCurrentStep(currentIndex);
+    }
+  }, [filteredOutcomes]);
+
+  const items = filteredOutcomes.map((item, index) => ({
     key: item.title,
-    title: item.title,
+    title: index === currentStep ? "" : item.title,
   }));
 
   const customDot: StepsProps["progressDot"] = (dot, { index }) => (
     <Popover
       content={
         <div>
-          <strong>{filteredOutcomes[index].title}</strong>
+          <strong className="flex justify-center">
+            {filteredOutcomes[index].title}
+          </strong>
           <div className="text-md text-gray-500 mt-1">
             {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")}
+            <span> - </span>
+            {moment(filteredOutcomes[index].endDate).format("DD MMM, YYYY")}
           </div>
         </div>
       }
       trigger="click"
-      placement="bottom"
+      placement="top"
+      open={index === currentStep}
     >
       {dot}
     </Popover>
@@ -57,12 +72,7 @@ const TeacherDashBoard: React.FC = () => {
       <div className="w-2/3 flex flex-col">
         <div className="bg-white rounded mt-1">
           <h1 className="font-bold mb-2 p-2">Timeline</h1>
-          <Steps
-            current={currentStep}
-            items={items}
-            onChange={handleStepChange}
-            progressDot={customDot}
-          />
+          <Steps current={currentStep} items={items} progressDot={customDot} />
         </div>
         <div className="flex flex-row mt-1 flex-grow">
           <Outcome infoData={infoData} />

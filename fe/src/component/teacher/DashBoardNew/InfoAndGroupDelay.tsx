@@ -60,12 +60,12 @@ const InfoAndGroupDelay = ({
   const flatRequestList =
     requestDeadlineList
       ?.flatMap((item) => item.data)
-      ?.filter((detail) => detail.status === "approved") || [];
+      ?.filter((detail) => detail.status === "pending") || [];
 
   const flatRequestListDetail =
     requestDeadlineList
       ?.flatMap((item) => item.data)
-      ?.filter((detail) => detail.status === "pending") || [];
+      ?.filter((detail) => detail.status === "approved") || [];
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -164,8 +164,8 @@ const InfoAndGroupDelay = ({
 
         <h2 className="font-bold text-lg mb-2 border-t-2 pt-5 flex items-center justify-between">
           <p>
-            <span>Group delay deadline</span>
-            <span className="text-red-500">({flatRequestList.length})</span>
+            <span>Request delay deadline</span>
+            <span className="text-red-500 ml-1">({flatRequestList.length})</span>
           </p>
           <div className="relative">
             <div
@@ -227,7 +227,7 @@ const InfoAndGroupDelay = ({
           >
             Close
           </button>
-          <h2 className="font-bold text-lg mb-4">Request Details</h2>
+          <h2 className="font-bold text-lg mb-4">Group delay deadline</h2>
           <div className="space-y-4">
             <div>
               {flatRequestListDetail.map((group, index) => (
