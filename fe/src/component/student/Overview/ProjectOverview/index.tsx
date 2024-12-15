@@ -7,28 +7,29 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
 import Gallery from "./Gallery";
-import { FloatButton } from "antd";
+import { Button, FloatButton, Result } from "antd";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { GrGallery } from "react-icons/gr";
 import { FaMap } from "react-icons/fa6";
 import { IoPersonCircle } from "react-icons/io5";
 import { MdOutlineBusiness } from "react-icons/md";
-import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 const ProjectOverviewWrapper: React.FC = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
-
+  const navigate = useNavigate();
   if (!userInfo?.group) {
     return (
-      <div className="text-lg text-center mt-60">
-        You are not included in any group, request to join one{" "}
-        <Link className="text-primaryBlue hover:underline" to={"/request"}>
-          here
-        </Link>{" "}
-        or wait for your teacher to assign yo to a group in your class
-      </div>
+      <Result
+      status="warning"
+      title="You are not currently in any group. Please submit a request to join a group."
+      extra={
+        <Button onClick={() => navigate('/request')} type="primary" key="console">
+          Go to request screen
+        </Button>
+      }
+      />
     );
   }
 

@@ -216,10 +216,18 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
                           <Button
                             type="link"
                             onClick={() => {
-                              requestDeleteStudentFromGroup.mutate({
-                                actionType: "delete",
-                                studentDeleted: member._id,
-                              });
+                              Modal.confirm({
+                                        title: "Are you sure you want to remove this member from the group?",
+                                        okText: "Yes, delete it",
+                                        okType: "danger",
+                                        cancelText: "No",
+                                        onOk: () => {
+                                          requestDeleteStudentFromGroup.mutate({
+                                            actionType: "delete",
+                                            studentDeleted: member._id,
+                                          });
+                                        },
+                                          });
                             }}
                           >
                             <MdCancelPresentation size={25} color="red" />
@@ -255,7 +263,14 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
         }}
       >
         <Form layout="vertical" form={form}>
-          <Form.Item name={"name"} label={"Group Name"}>
+          <Form.Item 
+          name={"name"} 
+          label={"Group Name"} 
+          rules={[
+            { required: true, message: "Group name is required!" },
+            { whitespace: true, message: "Group name cannot be empty!" },
+          ]}
+          >
             <Input
               showCount
               maxLength={60}
@@ -263,14 +278,35 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
               defaultValue={data.GroupName}
             />
           </Form.Item>
-          <Form.Item name={"description"} label={"Description"}>
+          <Form.Item 
+            name={"description"} 
+            label={"Description"}
+            rules={[
+              { required: true, message: "Description is required!" },
+              { whitespace: true, message: "Description cannot be empty!" },
+            ]}
+          >
             <TextArea
               rows={4}
               defaultValue={data.GroupDescription}
               maxLength={300}
             />
           </Form.Item>
-          <Form.Item name="tags" label={"Tag"}>
+          <Form.Item 
+            name="tags" 
+            label={"Tag"}
+            rules={[
+              { required: true, message: "At least one tag is required!" },
+              {
+                validator: (_, value) => {
+                  if (value && value.length > 0 && !value.includes(null)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Tags cannot be null!"));
+                },
+              },
+            ]}
+            >
             <Select
               mode="multiple"
               allowClear
