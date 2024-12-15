@@ -845,7 +845,6 @@ const getAllGroupsNoClass = async (
       ...matchCondition,
     });
     const maxPages = Math.ceil(totalItems / limit);
-    console.log(matchCondition);
     const GroupNotHaveClass = await Group.aggregate([
       {
         $match: {

@@ -179,7 +179,7 @@ const importStudent = async (req, res) => {
         term: activeTerm._id,
         email: g?.Email,
       };
-    });
+    });    
     const newStudents = await StudentRepository.bulkCreateStudentsFromExcel(
       newStudentsExcel
     );

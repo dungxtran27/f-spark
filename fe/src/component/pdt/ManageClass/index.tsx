@@ -37,11 +37,11 @@ const ManageClassWrapper = () => {
   };
 
   const { data: classData, refetch: refetchClasses } = useQuery({
-    queryKey: [QUERY_KEY.CLASSES, classCode, teacherName, category, semester],
+    queryKey: [QUERY_KEY.CLASSES, page, classCode, teacherName, category, semester],
     queryFn: async () => {
       return classApi.getClassListPagination({
-        limit: 12,
-        page: 1,
+        limit: 9,
+        page: page,
         classCode: classCode || undefined,
         teacherName: teacherName || undefined,
         category: category || undefined,
@@ -138,7 +138,7 @@ const ManageClassWrapper = () => {
             <div className="w-1/4 pr-6">
               <div className="mb-6 space-y-4">
                 <div className="bg-pendingStatus/15 border-pendingStatus rounded border shadow p-3 flex gap-3">
-                  <BsExclamationCircle className="text-pendingStatus flex-shrink-0" size={20}/>{" "}
+                  <BsExclamationCircle className="text-pendingStatus flex-shrink-0" size={20} />{" "}
                   <span className="font-semibold">
                     Dividing Students into classes starts at{" "}
                     <span className="text-pendingStatus">05 Jan 2025</span>,
@@ -229,8 +229,8 @@ const ManageClassWrapper = () => {
                             classItem.groups
                           )
                             ? classItem.groups.filter(
-                                (group: any) => group.isSponsorship === true
-                              ).length
+                              (group: any) => group.isSponsorship === true
+                            ).length
                             : 0;
                           return (
                             <ClassCard
@@ -265,6 +265,7 @@ const ManageClassWrapper = () => {
                         showTotal={(total, range) =>
                           `${range[0]}-${range[1]} of ${total} classes`
                         }
+                        pageSize={9}
                       />
                     </div>
                   </div>

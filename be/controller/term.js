@@ -227,7 +227,6 @@ const createTimelineOfTerm = async (req, res) => {
 const deleteTimelineOfTerm = async (req, res) => {
   try {
     const { timelineId, termId } = req.body;
-    console.log(timelineId);
 
     const tId = new mongoose.Types.ObjectId(timelineId)
     const termObjectId = new mongoose.Types.ObjectId(termId)

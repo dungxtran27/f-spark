@@ -473,7 +473,7 @@ const ClassGroupListWrapper = () => {
                 body: { row: Row },
               }}
               locale={{
-                emptyText: <Empty description="No Data" className="w-full"/>,
+                emptyText: <Empty description="No Data" className="w-full" />,
               }}
               rowKey="_id"
               dataSource={classPeople?.data.data.unGroupStudents}
@@ -838,26 +838,26 @@ const ClassGroupListWrapper = () => {
             Cancel
           </Button>,
           <Button
-          key="submit"
-          type="primary"
-          onClick={() => {
-            form.validateFields().then((values) => {
-              createGroup.mutate({
-                classId: classId,
-                groupName: values.groupName,
-                groupDescription: values.groupDescription,
+            key="submit"
+            type="primary"
+            onClick={() => {
+              form.validateFields().then((values) => {
+                createGroup.mutate({
+                  classId: classId,
+                  groupName: values.groupName,
+                  groupDescription: values.groupDescription,
+                });
+                handleClosecreateGroupModal();
+              }).catch((errorInfo) => {
+                console.error('Validation Failed:', errorInfo);
               });
-              handleClosecreateGroupModal();
-            }).catch((errorInfo) => {
-              console.error('Validation Failed:', errorInfo);
-            });
-          }}
-        >
-          Save
-        </Button>,
+            }}
+          >
+            Save
+          </Button>,
         ]}
       >
-        <Form form={form}>
+        <Form form={form} layout="vertical">
           <Form.Item
             label="Group Name"
             name="groupName"
@@ -872,7 +872,7 @@ const ClassGroupListWrapper = () => {
               },
             ]}
           >
-            <Input />
+            <Input count={{ show: true, max: 40 }} />
           </Form.Item>
 
           <Form.Item

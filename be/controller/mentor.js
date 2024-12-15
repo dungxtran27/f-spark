@@ -129,7 +129,6 @@ const getTotalMentors = async (req, res) => {
     //   return res.status(404).json({ error: `Term code not found` });
     // }
     const result = await MentorRepository.getTotalMentors(term);
-    console.log("Term ID received:", result);
 
     res.status(200).json({
       data: result

@@ -270,7 +270,7 @@ const AccountManagement: React.FC<{
                       ))}
                     </Select>
                   </Col>
-                  <Col span={4}>
+                  {/* <Col span={4}>
                     {terms?.data?.data && (
                       <Select
                         placeholder="Term"
@@ -288,13 +288,14 @@ const AccountManagement: React.FC<{
                           }`}
                       />
                     )}
-                  </Col>
+                  </Col> */}
                   <Col span={3}>
                     <Select
                       placeholder="Status"
                       value={statusFilter}
                       onChange={setStatusFilter}
                       className="w-full"
+                      
                     >
                       <Option value="Active">Active</Option>
                       <Option value="Deactive">Deactive</Option>
