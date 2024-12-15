@@ -31,13 +31,13 @@ const ClassCard: React.FC<ClassCardProps> = ({
   role = "teacher",
   groups = 0,
   totalMembers = 0,
-  icon = (
-    <Tooltip title="Class Information">
-      <span className="text-white text-xl cursor-pointer">
-        <ImNotification />
-      </span>
-    </Tooltip>
-  ),
+  // icon = (
+  //   <Tooltip title="Class Information">
+  //     <span className="text-white text-xl cursor-pointer">
+  //       <ImNotification />
+  //     </span>
+  //   </Tooltip>
+  // ),
   onEditClick,
   onClick,
   isSelected = false,
@@ -76,7 +76,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
         <div className="flex text-lg font-semibold">
           {classCode}
           <div className="ml-auto flex items-center">
-            {icon}
+            {/* {icon} */}
             {isMenuVisible && (
               <Dropdown overlay={menu} trigger={["click"]}>
                 <button className="text-2xl font-bold text-white-700 p-0.2 hover:text-gray-900">

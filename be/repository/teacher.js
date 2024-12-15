@@ -4,6 +4,7 @@ import Mentor from "../model/Mentor.js";
 import Student from "../model/Student.js";
 import Teacher from "../model/Teacher.js";
 import mongoose from "mongoose";
+import Term from "../model/Term.js";
 
 const getTeacherByClassId = async (classId) => {
   try {
@@ -71,7 +72,6 @@ const getAllAccTeacher = async (page, limit, searchText, status, term) => {
     if (status !== undefined) {
       filterCondition.$and.push({ "accountDetails.isActive": status });
     }
-
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
@@ -288,6 +288,89 @@ const assignClass = async (classId, teacherId) => {
     throw new Error(error.message);
   }
 };
+const getTotalTeachers = async (term) => {
+  try {
+    const termObjectId = new mongoose.Types.ObjectId(term);
+    const totalTeacher = await Teacher.countDocuments();
+
+    const teachers = await Teacher.aggregate([
+      {
+        $lookup: {
+          from: "Classes",
+          localField: "assignedClasses.id",
+          foreignField: "_id",
+          as: "assignedClassesInfo",
+        },
+      },
+      {
+        $addFields: {
+          hasAssignedClasses: {
+            $cond: [
+              { $gt: [{ $size: "$assignedClasses" }, 0] },
+              true,
+              false,
+            ],
+          },
+          termMatches: {
+            $anyElementTrue: {
+              $map: {
+                input: "$assignedClassesInfo",
+                as: "class",
+                in: { $eq: ["$$class.term", termObjectId] }, // So sánh chính xác với ObjectId
+              },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalTeacherNoClass: {
+            $sum: { $cond: [{ $eq: ["$hasAssignedClasses", false] }, 1, 0] },
+          },
+          totalTeacherHaveClass: {
+            $sum: { $cond: [{ $eq: ["$termMatches", true] }, 1, 0] },
+          },
+          teachers: {
+            $push: {
+              name: "$name",
+              assignedClasses: "$assignedClasses",
+              termMatches: "$termMatches",
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          totalTeacher: totalTeacher,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalTeacher: 1,
+          totalTeacherNoClass: 1,
+          totalTeacherHaveClass: 1,
+          teachers: 1,
+        },
+      },
+    ]);
+
+    return (
+      teachers[0] || {
+        totalTeacher,
+        totalTeacherNoClass: 0,
+        totalTeacherHaveClass: 0,
+        teachers: [],
+      }
+    );
+  } catch (error) {
+    throw new Error(`Failed to fetch teacher data: ${error.message}`);
+  }
+};
+
+
+
 const getClassOfTeacher = async (teacherId) => {
   try {
     const classList = await Teacher.findById(teacherId)
@@ -304,5 +387,7 @@ export default {
   getTeacherWithClasses,
   getTeacherAccountByClassId,
   assignClass,
+  getTotalTeachers,
+  // getClassOfTeacher
   getClassOfTeacher,
 };

@@ -23,7 +23,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -47,7 +47,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -845,14 +845,13 @@ const getAllGroupsNoClass = async (
       ...matchCondition,
     });
     const maxPages = Math.ceil(totalItems / limit);
-    console.log(matchCondition);
     const GroupNotHaveClass = await Group.aggregate([
       {
         $match: {
           $and: [{ class: { $in: [null, undefined] } }, matchCondition],
         },
       },
-      { $unwind: "$tag" },
+      { $unwind: { path: "$tag", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "TagMajors",
@@ -1257,6 +1256,14 @@ const updateGroupSponsorStatus = async ({ groupId, status }) => {
     throw new Error(error.message);
   }
 };
+const findbyId = async (groupId) => {
+  try {
+    const group = await Group.findById(groupId);
+    return group;
+  } catch (error) {
+    throw new Error("Group not found");
+  }
+}
 const getGroupCountsByTerm = async (term) => {
   try {
     const sponsorStatusCounts = await Group.aggregate([
@@ -1446,6 +1453,7 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
+  findbyId,
   updateGroupInfo,
   deleteTransaction,
   getTransactionByTransactionId,

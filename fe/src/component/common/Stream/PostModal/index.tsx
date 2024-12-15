@@ -63,7 +63,7 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
 
   return (
     <Modal
-    centered
+      centered
       title=<span className="text-lg font-semibold">
         {postType === "announcement"
           ? "Make an announcement"
@@ -72,17 +72,22 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
       open={open}
       destroyOnClose
       onCancel={() => setOpen(false)}
-      onOk={() => {
-        const { attachment, description, duration, title } =
-          form.getFieldsValue();  
-        CreateClassWork.mutate({
-          attachment: attachment?.current,
-          description: description,
-          startDate: duration? duration[0] : null,
-          dueDate: duration ? duration[1] : null,
-          title: title,
-          type: postType,
-        });
+      onOk={async () => {
+        try {
+          const values = await form.validateFields();
+          const { attachment, description, duration, title } = values;
+          CreateClassWork.mutate({
+            attachment: attachment?.current,
+            description: description,
+            startDate: duration ? duration[0] : null,
+            dueDate: duration ? duration[1] : null,
+            title: title,
+            type: postType,
+          });
+          setOpen(false);
+        } catch (error) {
+          console.error("Validation failed:", error);
+        }
       }}
     >
       <div className="w-full mt-5 flex flex-col gap-3">
@@ -108,12 +113,30 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
             </Upload>
           </FormItem>
           {postType === CLASS_WORK_TYPE.ASSIGNMENT && (
-            <FormItem name={"duration"} label={"Duration"}>
+            <FormItem
+              name={"duration"}
+              label={"Duration"}
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const now = new Date();
+                    const dueDate = value[1]?.toDate();
+                    if (dueDate && dueDate < now) {
+                      return Promise.reject(
+                        "Due date cannot be in the past. Please select a valid date."
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <DatePicker.RangePicker
                 className="w-full"
                 showTime={{ format: "HH:mm" }}
                 format="YYYY-MM-DD HH:mm"
-                placeholder={["Start Date", "Due date"]}
+                placeholder={["Start Date", "Due Date"]}
               />
             </FormItem>
           )}

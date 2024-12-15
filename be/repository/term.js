@@ -179,6 +179,13 @@ const updateTimelineOfTerm = async ({ title, type, description, startDate, endDa
     return new Error(error);
   }
 }
+const findTermByCode = async (termCode) => {
+  try {
+    return await Term.findOne({ termCode }); 
+  } catch (error) {
+    throw new Error("Error while finding term by code: " + error.message);
+  }
+};
 export default {
   getAllTerms,
   createTerms,
@@ -194,5 +201,6 @@ export default {
   getTimelineOfTerm,
   createTimelineOfTerm,
   deleteTimelineOfTerm,
-  updateTimelineOfTerm
+  updateTimelineOfTerm,
+  findTermByCode
 };

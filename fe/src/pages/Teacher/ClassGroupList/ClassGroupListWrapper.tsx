@@ -371,9 +371,8 @@ const ClassGroupListWrapper = () => {
       width: 300,
     },
     {
-      title: `Group support ${
-        currentSemester == "curr" ? " this semester" : "all semesters"
-      }`,
+      title: `Group support ${currentSemester == "curr" ? " this semester" : "all semesters"
+        }`,
       // dataIndex: "groupNumber",
       render: (rc: any) => (
         <>
@@ -474,7 +473,7 @@ const ClassGroupListWrapper = () => {
                 body: { row: Row },
               }}
               locale={{
-                emptyText: <Empty description="No Data" className="w-full"/>,
+                emptyText: <Empty description="No Data" className="w-full" />,
               }}
               rowKey="_id"
               dataSource={classPeople?.data.data.unGroupStudents}
@@ -842,19 +841,23 @@ const ClassGroupListWrapper = () => {
             key="submit"
             type="primary"
             onClick={() => {
-              createGroup.mutate({
-                classId: classId,
-                groupName: groupName,
-                groupDescription: groupDescription,
+              form.validateFields().then((values) => {
+                createGroup.mutate({
+                  classId: classId,
+                  groupName: values.groupName,
+                  groupDescription: values.groupDescription,
+                });
+                handleClosecreateGroupModal();
+              }).catch((errorInfo) => {
+                console.error('Validation Failed:', errorInfo);
               });
-              handleClosecreateGroupModal();
             }}
           >
             Save
           </Button>,
         ]}
       >
-        <Form form={form}>
+        <Form form={form} layout="vertical">
           <Form.Item
             label="Group Name"
             name="groupName"
@@ -863,9 +866,13 @@ const ClassGroupListWrapper = () => {
                 required: true,
                 message: "Please input group name!",
               },
+              {
+                max: 40,
+                message: "Group name cannot exceed 40 characters!",
+              },
             ]}
           >
-            <Input />
+            <Input count={{ show: true, max: 40 }} />
           </Form.Item>
 
           <Form.Item
