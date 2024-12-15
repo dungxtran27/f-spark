@@ -1,4 +1,5 @@
 import {
+  ClassworkRepository,
   GroupRepository,
   StudentRepository,
   TermRepository,
@@ -139,14 +140,15 @@ const importStudent = async (req, res) => {
       return res.status(400).json({ error: "No Active Term" });
     }
     const groupSet = [];
-    console.log(data);
-
     data?.map((g) => {
       if (!groupSet.find((gs) => gs?.GroupName === g["Tên dự án"])) {
         groupSet.push({
           GroupName: g["Tên dự án"],
           oldMark: g["Mark"],
           term: activeTerm._id,
+          timeline: activeTerm.timeLine
+            .filter((d) => d?.deadLineFor?.includes("STUDENT"))
+            .map(({ deadLineFor, ...rest }) => rest),
         });
       }
     });
@@ -171,12 +173,11 @@ const importStudent = async (req, res) => {
         if (!acc[s.group]) {
           acc[s.group] = [];
         }
-        
+
         acc[s.group].push(s);
       }
       return acc;
     }, {});
-    
 
     for (let key in groupedStudents) {
       const studentIds = groupedStudents[key].map((student) => student._id);
@@ -190,6 +191,17 @@ const importStudent = async (req, res) => {
   }
 };
 
+const getGroupAndClassInfo = async (req, res) => {
+  try {
+    const decodedToken = req.decodedToken;
+    const student = await StudentRepository.findByStudentIdPopulated(
+      decodedToken?.role?.id
+    );
+    return res.status(200).json({ data: student });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getStudentsInSameGroup,
   getTeacherByStudentId,
@@ -199,4 +211,5 @@ export default {
   addManyStudentNoClassToClass,
   getAllAccStudent,
   importStudent,
+  getGroupAndClassInfo,
 };

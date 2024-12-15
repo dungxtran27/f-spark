@@ -1,4 +1,4 @@
-import { Select, Input, Pagination, Modal, Button, Upload } from "antd";
+import { Select, Input, Pagination, Modal, Button, Upload, Empty } from "antd";
 import ClassCard from "./classCard";
 import TotalClassCard from "./totalClassCard";
 import StudentTable from "./studentTable";
@@ -16,6 +16,7 @@ import EmptyTerm from "../../common/EmptyTerm";
 import { IoDownloadOutline } from "react-icons/io5";
 import ImportClassesModal from "./ImportClassesModal";
 import * as XLSX from "xlsx";
+import { BsExclamationCircle } from "react-icons/bs";
 const { Option } = Select;
 interface Term {
   _id: string;
@@ -132,6 +133,14 @@ const ManageClassWrapper = () => {
             {/* Total Cards */}
             <div className="w-1/4 pr-6">
               <div className="mb-6 space-y-4">
+                <div className="bg-pendingStatus/15 border-pendingStatus rounded border shadow p-3 flex gap-3">
+                  <BsExclamationCircle className="text-pendingStatus flex-shrink-0" size={20}/>{" "}
+                  <span className="font-semibold">
+                    Dividing Students into classes starts at{" "}
+                    <span className="text-pendingStatus">05 Jan 2025</span>,
+                    after Students have finished transferring member
+                  </span>
+                </div>
                 <TotalClassCard
                   toggleStudentTable={toggleStudentTable}
                   toggleGroupTable={toggleGroupTable}
@@ -209,33 +218,42 @@ const ManageClassWrapper = () => {
                     </div>
                   </div>
                   <div className="h-full flex flex-col">
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      {classData?.data?.data?.map((classItem: any) => {
-                        const sponsorshipCount = Array.isArray(classItem.groups)
-                          ? classItem.groups.filter(
-                              (group: any) => group.isSponsorship === true
-                            ).length
-                          : 0;
-                        return (
-                          <ClassCard
-                            key={classItem._id}
-                            classCode={classItem.classCode}
-                            teacherName={
-                              classItem?.teacherDetails?.name || "No teacher"
-                            }
-                            groups={classItem.totalGroups}
-                            isSponsorship={sponsorshipCount}
-                            totalMembers={classItem?.totalStudents}
-                            onClick={() => {
-                              setSelectedClass(classItem._id);
-                              setShowClass(false);
-                            }}
-                          />
-                        );
-                      })}
-                    </div>
+                    {classData?.data?.data?.length > 0 ? (
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        {classData?.data?.data?.map((classItem: any) => {
+                          const sponsorshipCount = Array.isArray(
+                            classItem.groups
+                          )
+                            ? classItem.groups.filter(
+                                (group: any) => group.isSponsorship === true
+                              ).length
+                            : 0;
+                          return (
+                            <ClassCard
+                              key={classItem._id}
+                              classCode={classItem.classCode}
+                              teacherName={
+                                classItem?.teacherDetails?.name || "No teacher"
+                              }
+                              groups={classItem.totalGroups}
+                              isSponsorship={sponsorshipCount}
+                              totalMembers={classItem?.totalStudents}
+                              onClick={() => {
+                                setSelectedClass(classItem._id);
+                                setShowClass(false);
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <Empty
+                        description="No class created for this term"
+                        className="mt-40 min-h-[300px]"
+                      />
+                    )}
 
-                    <div className="w-full mt-5 flex justify-center">
+                    <div className="w-full flex justify-center">
                       <Pagination
                         defaultCurrent={page}
                         onChange={onChangePage}

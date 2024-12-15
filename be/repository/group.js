@@ -1051,7 +1051,7 @@ const updateTimelineForGroup = async ({ groupId, classworkId, newDate }) => {
     );
 
     const updatedTimeline = updatedGroup.timeline.find(
-      (timeline) => timeline.classworkId.toString() == classworkId
+      (timeline) => timeline?.classworkId?.toString() == classworkId
     );
     return updatedTimeline;
   } catch (error) {
@@ -1362,12 +1362,49 @@ const getGroupById = async (groupId) => {
           model: 'Account',
         },
       });
+      return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const findGroupByOldMark = async () => {
+  try {
+    const result = await Group.find({ oldMark: { $gte: 8 } });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const updateClass = async (groupId, classId) => {
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $set: { class: new mongoose.Types.ObjectId(classId) },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const updateGroupTimeLine = async (groupId, timeLine) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $set: {
+          timeline: timeLine,
+        },
+      },
+      { new: true }
+    );
     return result;
   } catch (error) {
     throw new Error(error.message);
   }
 };
 export default {
+  updateGroupTimeLine,
   updateMember,
   getGroupsOfTerm,
   createCellsOnUpdate,
@@ -1413,5 +1450,7 @@ export default {
   deleteTransaction,
   getTransactionByTransactionId,
   getGroupCountsByTerm,
-  getGroupById
+  getGroupById,
+  findGroupByOldMark,
+  updateClass,
 };

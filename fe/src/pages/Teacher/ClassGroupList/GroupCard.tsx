@@ -1,10 +1,14 @@
-import { Button, Tag, Tooltip } from "antd";
+import { Button, Popover, Tag, Tooltip } from "antd";
 import { FaUserGroup, FaUserGraduate, FaLock } from "react-icons/fa6";
 import { colorMajorGroup, ROLE } from "../../../utils/const";
 import { FaCoins, FaLockOpen } from "react-icons/fa";
 import style from "../MentorList/style.module.scss";
 import classNames from "classnames";
 import { useDroppable } from "@dnd-kit/core";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Term } from "../../../model/auth";
+import moment from "moment";
 
 const GroupCard = ({
   info,
@@ -23,6 +27,19 @@ const GroupCard = ({
   //     onDrop(activeId);
   //   },
   // });
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const lockGroup = activeTerm?.timeLine?.find(
+    (item) => item.type === "teacherLockGroup"
+  );
+
+  const isLockGroupExpired = lockGroup?.endDate
+    ? moment().isAfter(moment(lockGroup.endDate))
+    : false;
+
   const { isOver, setNodeRef } = useDroppable({
     id: info._id,
   });
@@ -118,17 +135,37 @@ const GroupCard = ({
           </Button>
         )}
       </div>
-      <div className="mt-1">
-        <span className="text-gray-500 pr-2 ">Tag: </span>
+      <div className="mt-1 h-16">
+        <span className="text-gray-500 pr-2 h-4">Tag: </span>
         {info.tag.map((t: any) => (
           <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
         ))}
       </div>
-      <div className="w-full flex justify-end" onClick={handleLock}>
-        {info?.lock ? (
-          <FaLock className={classNames(style.customIcon1)} />
+      <div
+        className="w-full flex justify-end text-purple-500"
+        onClick={handleLock}
+      >
+        {isLockGroupExpired ? (
+          <Popover
+            title={
+              <span className="text-red-500">
+                {`Expiration at ${moment(lockGroup?.endDate).format(
+                  "MMMM Do YYYY"
+                )}`}
+              </span>
+            }
+            placement="top"
+          >
+            <FaLock color="gray" />
+          </Popover>
         ) : (
-          <FaLockOpen className={classNames(style.customIcon2)} />
+          <div onClick={handleLock}>
+            {info?.lock ? (
+              <FaLock className={classNames(style.customIcon1)} />
+            ) : (
+              <FaLockOpen className={classNames(style.customIcon2)} />
+            )}
+          </div>
         )}
       </div>
     </div>

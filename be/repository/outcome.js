@@ -16,6 +16,14 @@ const getOutcome = async () =>{
         throw new Error(error.message)
     }
 }
+const findById = async (outcomeId) =>{
+    try {
+        const result = await Outcome.findById(outcomeId)
+        return result
+    } catch (error) {
+        throw new Error(error.message)
+    }
+}
 const createOutcome = async ({title, description, gradingCriteria}) => {
     try {
         const formattedGradingCriteria = gradingCriteria.map((item) => ({
@@ -76,5 +84,6 @@ export default {
     createOutcome,
     getOutcome,
     deleteOutcome,
-    updateOutcome
+    updateOutcome,
+    findById
 }

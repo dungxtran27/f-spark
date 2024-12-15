@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Avatar } from "antd";
+import { Avatar, Empty } from "antd";
 import {
   DATE_FORMAT,
   NOTIFICATION_ACTION_TYPE,
@@ -286,14 +286,20 @@ const Team = () => {
     );
   };
   return (
-    <div className="bg-white p-4 rounded shadow mr-2 h-[500px]">
+    <div className="bg-white p-4 rounded shadow mr-2 max-h-[500px] min-h-[300px]">
       <div className="flex items-center justify-between border-b-2 border-gray-300 pb-2 mb-2">
         <h3 className="text-lg font-bold p-1">
           Group ({groupNoti?.data?.data.length})
         </h3>
       </div>
       <div className="space-y-4 overflow-y-auto h-[412px] pr-2">
-        {groupNoti?.data?.data.map((item: any) => notificationCard(item))}
+        {
+          groupNoti?.data?.data.length > 0 ? (
+            groupNoti?.data?.data.map((item: any) => notificationCard(item))
+          ): (<div className="w-full h-full flex items-center justify-center">
+            <Empty />
+          </div>)
+        }
       </div>
     </div>
   );

@@ -3,8 +3,25 @@
 @tailwind components;
 @tailwind utilities;
 .quill {
-  .ql-editor{
+  .ql-editor {
     height: 150px;
   }
 }
 
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  margin: 0 3px;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  background: #9c9c9c;
+  border-radius: 10px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb:horizontal:hover {
+  background: #7e7e7e;
+}
+::-webkit-scrollbar:horizontal {
+  height: 5px;
+}

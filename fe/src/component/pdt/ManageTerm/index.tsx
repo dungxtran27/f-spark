@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Select, Button, Modal, Skeleton, Empty, Popover } from "antd";
+import { Select, Button, Modal, Skeleton, Empty, Popover, Steps } from "antd";
 import { QUERY_KEY } from "../../../utils/const";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { term } from "../../../api/term/term";
@@ -9,7 +9,9 @@ import { RootState } from "../../../redux/store";
 import { Term } from "../../../model/auth";
 import CreateTermModal from "./CreateTermModal";
 import EmptyTerm from "../../common/EmptyTerm";
-
+import dayjs from "dayjs";
+import classNames from "classnames";
+import styles from "./styles.module.scss";
 const { Option } = Select;
 
 const formatDate = (date: string) => {
@@ -229,7 +231,7 @@ const TermWrapper: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-white rounded h-96 shadow-md">
+                <div className="bg-white rounded shadow-md">
                   {isIncoming ? (
                     <Button
                       type="primary"
@@ -239,48 +241,99 @@ const TermWrapper: React.FC = () => {
                       Delete term
                     </Button>
                   ) : (
-                    <div className="p-5 ml-5 mt-5"></div>
+                    <></>
                   )}
-                  <div className="flex items-center justify-between h-full">
-                    {data?.data?.timeLine.map((step: any, index: number) => {
-                      const stepStartDate = moment(step.startDate);
-                      const stepEndDate = moment(step.endDate);
-                      return (
-                        <div
-                          key={`${step._id}-${index}`}
-                          className="flex flex-col items-center relative w-full"
-                        >
-                          {step.description && (
-                            <Popover
-                              content={
-                                <div className="h-[50px] w-[500px]">
-                                  {step.description}
+                  <div
+                    className={classNames(
+                      "h-full p-5 flex flex-col gap-5",
+                      styles.customTimeLine
+                    )}
+                  >
+                    <span className="text-lg font-semibold">
+                      Important Setup
+                    </span>
+                    <Steps
+                      current={2}
+                      items={[
+                        {
+                          title: "Create Term",
+                        },
+                        {
+                          title: "Add Student data",
+                        },
+                        {
+                          title: "Dividing Classes",
+                        },
+                        {
+                          title: "Term Start",
+                        },
+                        {
+                          title: "Term end",
+                        },
+                      ]}
+                    />
+                    <span className="text-lg font-semibold">
+                      {activeTerm?.termCode}'s Timeline
+                    </span>
+                    <div className="flex items-center justify-between h-full overflow-x-auto pb-5">
+                      {data?.data?.timeLine.map((step: any, index: number) => {
+                        const stepStartDate = moment(step.startDate);
+                        const stepEndDate = moment(step.endDate);
+                        return (
+                          <div
+                            key={`${step._id}-${index}`}
+                            className="flex flex-col items-center relative w-full"
+                          >
+                            {step.description && (
+                              <Popover
+                                content={
+                                  <div className="h-[50px] w-[500px]">
+                                    {step.description}
+                                  </div>
+                                }
+                                title="Description"
+                                trigger="click"
+                                placement="top"
+                              >
+                                <div className="rounded-full text-xl w-16 h-16 flex items-center justify-center text-white bg-purple-500 hover:bg-purple-400">
+                                  {data?.data?.timeLine.indexOf(step) + 1}
                                 </div>
-                              }
-                              title="Description"
-                              trigger="click"
-                              placement="top"
-                            >
-                              <div className="rounded-full text-xl w-16 h-16 flex items-center justify-center text-white bg-purple-500 hover:bg-purple-400">
-                                {data?.data?.timeLine.indexOf(step) + 1}
+                                {data?.data?.timeLine.indexOf(step) <
+                                  data?.data?.timeLine.length - 1 && (
+                                  <div className="absolute top-8 transform left-24 w-full h-0.5 bg-purple-500"></div>
+                                )}
+                              </Popover>
+                            )}
+                            <div className="text-center mt-2 text-gray-600 w-36 h-24">
+                              <span className={`font-semibold`}>
+                                {step.title}{" "}
+                                {dayjs().isAfter(step?.startDate) &&
+                                  dayjs().isBefore(step?.endDate) && (
+                                    <span className="font-normal text-red-500">
+                                      (Ongoing)
+                                    </span>
+                                  )}
+                              </span>
+                              <br />
+                              <div>
+                                <p className="font-semibold">
+                                  Start:{" "}
+                                  <span className="font-normal">
+                                    {formatDate(stepStartDate.toString())}{" "}
+                                  </span>
+                                </p>
+                                <p className="font-semibold">
+                                  End:{" "}
+                                  <span className="font-normal">
+                                    {formatDate(stepEndDate.toString())}{" "}
+                                  </span>
+                                </p>
                               </div>
-                              {data?.data?.timeLine.indexOf(step) <
-                                data?.data?.timeLine.length - 1 && (
-                                <div className="absolute top-8 transform left-24 w-full h-0.5 bg-purple-500"></div>
-                              )}
-                            </Popover>
-                          )}
-                          <div className="text-center mt-2 text-gray-600 w-36 h-24">
-                            <span className="font-semibold ">{step.title}</span>
-                            <br />
-                            <span>
-                              {formatDate(stepStartDate.toString())} -{" "}
-                              {formatDate(stepEndDate.toString())}
-                            </span>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
