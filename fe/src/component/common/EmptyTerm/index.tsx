@@ -15,7 +15,7 @@ const EmptyTerm = ({ setSemester }: { setSemester?: (value: any) => void }) => {
   });
   const termOptions = termData?.data?.data?.map((t: any) => {
     return {
-      value: t?.termCode,
+      value: t?._id,
       label: t?.termCode,
     };
   });

@@ -17,25 +17,47 @@ const TimeLine = () => {
     setCurrentStep(step);
   };
 
-  const filteredOutcomes = activeTerm?.timeLine ?? [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const filteredOutcomes =
+    activeTerm?.timeLine.filter((item) =>
+      item.deadLineFor.includes("STUDENT")
+    ) ?? [];
 
-  const items = filteredOutcomes.map((item) => ({
+  useEffect(() => {
+    const today = moment();
+    const currentIndex = filteredOutcomes.findIndex(
+      (step) =>
+        today.isSameOrAfter(moment(step.startDate)) &&
+        today.isBefore(moment(step.endDate))
+    );
+
+    if (currentIndex !== -1) {
+      setCurrentStep(currentIndex);
+    }
+  }, [filteredOutcomes]);
+
+  const items = filteredOutcomes.map((item, index) => ({
     key: item.title,
-    title: item.title,
+    title: index === currentStep ? "" : item.title,
   }));
 
   const customDot: StepsProps["progressDot"] = (dot, { index }) => (
     <Popover
       content={
         <div>
-          <strong>{filteredOutcomes[index].title}</strong>
+          <strong className="flex justify-center">
+            {filteredOutcomes[index].title}
+          </strong>
           <div className="text-md text-gray-500 mt-1">
             {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")}
+            <span> - </span>
+            {moment(filteredOutcomes[index].endDate).format("DD MMM, YYYY")}
           </div>
         </div>
       }
       trigger="click"
-      placement="bottom"
+      placement="top"
+      open={index === currentStep}
     >
       {dot}
     </Popover>

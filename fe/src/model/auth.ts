@@ -17,6 +17,7 @@ export interface Account {
 }
 
 export interface Deadline {
+  deadLineFor: any;
   _id?: string;
   title?: string;
   description?: string;
