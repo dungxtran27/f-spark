@@ -6,6 +6,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const studentRouter = express.Router();
 studentRouter.get('/viewStudentByGroup', verifyToken, StudentController.getStudentsInSameGroup);
+studentRouter.get('/viewStudentGroupInfo', verifyToken, StudentController.getGroupAndClassInfo);
 studentRouter.get("/getTeacherByStudentId", verifyToken, StudentController.getTeacherByStudentId)
 studentRouter.get('/getAllStudentByClassId', verifyToken, StudentController.getAllStudentByClassId);
 studentRouter.get('/:classId', verifyToken, StudentController.getAllStudentUnGroupByClassId);

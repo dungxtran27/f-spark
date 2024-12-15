@@ -4,6 +4,7 @@ import Class from "../model/Class.js";
 import Teacher from "../model/Teacher.js";
 import Mentor from "../model/Mentor.js";
 import Term from "../model/Term.js";
+import Group from "../model/Group.js";
 const findStudentByAccountId = async (accountId) => {
   try {
     const student = await Student.findOne({
@@ -134,7 +135,13 @@ const findById = async (studentId) => {
     throw new Error(error.message);
   }
 };
-const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) => {
+const getAllStudentsNoClass = async (
+  page,
+  limit,
+  searchText,
+  termCode,
+  major
+) => {
   try {
     const students = await Student.find()
       .populate({
@@ -143,7 +150,7 @@ const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) =
       })
       .populate({
         path: "group",
-        select: "GroupName",
+        select: "GroupName _id",
       })
       .populate({
         path: "classId",
@@ -155,7 +162,7 @@ const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) =
       studentId: student.studentId,
       major: student.major,
       email: student.account?.email,
-      group: student.group?.GroupName,
+      group: student.group,
       classId: student.classId?.classCode,
       updatedAt: student.updatedAt,
     }));
@@ -163,7 +170,6 @@ const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) =
     const queryNotHaveClass = {
       classId: { $in: [null, undefined] },
       group: { $in: [null, undefined] },
-
     };
     let filterCondition = { $and: [] };
     if (searchText) {
@@ -176,9 +182,7 @@ const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) =
     }
     if (termCode) {
       filterCondition.$and.push({
-        $or: [
-          { termCode: { $regex: termCode, $options: "i" } },
-        ],
+        $or: [{ termCode: { $regex: termCode, $options: "i" } }],
       });
     }
     if (major && Array.isArray(major)) {
@@ -200,64 +204,64 @@ const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) =
             $and: [
               { classId: { $in: [null, undefined] } },
               { group: { $in: [null, undefined] } },
-            ]
-          }
+            ],
+          },
         },
         {
           $lookup: {
             from: "Accounts",
             localField: "account",
             foreignField: "_id",
-            as: "accountDetails"
-          }
+            as: "accountDetails",
+          },
         },
         {
           $unwind: {
             path: "$accountDetails",
-            preserveNullAndEmptyArrays: true
-          }
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $lookup: {
             from: "Groups",
             localField: "group",
             foreignField: "_id",
-            as: "groupDetails"
-          }
+            as: "groupDetails",
+          },
         },
         {
           $unwind: {
             path: "$groupDetails",
-            preserveNullAndEmptyArrays: true
-          }
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $lookup: {
             from: "Classes",
             localField: "classId",
             foreignField: "_id",
-            as: "classDetails"
-          }
+            as: "classDetails",
+          },
         },
         {
           $unwind: {
             path: "$classDetails",
-            preserveNullAndEmptyArrays: true
-          }
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $lookup: {
             from: "Term",
             localField: "term",
             foreignField: "_id",
-            as: "termDetails"
-          }
+            as: "termDetails",
+          },
         },
         {
           $unwind: {
             path: "$termDetails",
-            preserveNullAndEmptyArrays: true
-          }
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
           $project: {
@@ -272,11 +276,11 @@ const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) =
             termCode: "$termDetails.termCode",
             isActive: 1,
             createdAt: 1,
-            updatedAt: 1
-          }
+            updatedAt: 1,
+          },
         },
         {
-          $match: filterCondition // Apply the search text filter to the data
+          $match: filterCondition, // Apply the search text filter to the data
         },
         {
           $skip: (page - 1) * limit,
@@ -289,9 +293,11 @@ const getAllStudentsNoClass = async (page, limit, searchText, termCode, major) =
             name: 1,
           },
         },
-      ]
-    ])
-    const totalItems = searchText ? StudentNotHaveClass.length : await Student.countDocuments(StudentNotHaveClass);
+      ],
+    ]);
+    const totalItems = searchText
+      ? StudentNotHaveClass.length
+      : await Student.countDocuments(StudentNotHaveClass);
     const maxPages = Math.ceil(totalItems / limit);
     const isLastPage = page >= maxPages;
 
@@ -348,7 +354,14 @@ const addManyStudentNoClassToClass = async (studentIds, classId) => {
   }
 };
 
-const getAllAccStudent = async (page, limit, searchText, classId, status, termCode) => {
+const getAllAccStudent = async (
+  page,
+  limit,
+  searchText,
+  classId,
+  status,
+  term
+) => {
   try {
     let filterCondition = { $and: [] };
 
@@ -395,6 +408,11 @@ const getAllAccStudent = async (page, limit, searchText, classId, status, termCo
     const maxPages = Math.ceil(totalItems / limit);
 
     const students = await Student.aggregate([
+      {
+        $match: {
+          term: new mongoose.Types.ObjectId(term),
+        },
+      },
       {
         $lookup: {
           from: "Accounts",
@@ -450,6 +468,7 @@ const getAllAccStudent = async (page, limit, searchText, classId, status, termCo
           group: "$groupDetails.name",
           accountEmail: "$accountDetails.email",
           classId: "$classDetails.classCode",
+          classDetail: "$classDetails",
           isActive: 1,
           createdAt: 1,
           updatedAt: 1,
@@ -483,10 +502,11 @@ const findStudentDetailByAccountId = async (accountId) => {
   try {
     const student = await Student.findOne({
       account: accountId,
-    }).populate({
-      path: "group",
-      select: "_id GroupName",
     })
+      .populate({
+        path: "group",
+        select: "_id GroupName",
+      })
       .populate({
         path: "classId",
         select: "_id teacher classCode",
@@ -509,7 +529,7 @@ const getAllStudentByGroupId = async (groupId) => {
 const bulkCreateStudentsFromExcel = async (studentsData) => {
   try {
     const result = await Student.insertMany(studentsData, { ordered: false });
-    return result
+    return result;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -565,7 +585,43 @@ const findStudentsByIds = async (studentIds) => {
 };
 
 
+
+const findByStudentId = async (studentId) => {
+  try {
+    const result = await Student.findOne({
+      studentId: studentId,
+    }).populate({ path: "classId" });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const findByStudentIdPopulated = async (studentId) => {
+  try {
+    const result = await Student.findById(studentId)
+      .populate({ path: "classId" })
+      .populate({ path: "group" });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const updateClass = async (studentId, classId) => {
+  try {
+    const result = await Student.findByIdAndUpdate(studentId, {
+      $set: {
+        classId: new mongoose.Types.ObjectId(classId),
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
+  findByStudentId,
   bulkCreateStudentsFromExcel,
   findStudentByAccountId,
   getStudentsByGroup,
@@ -580,5 +636,7 @@ export default {
   findStudentDetailByAccountId,
   getAllStudentByGroupId,
   getTotalStudentsByTerm,
-  findStudentsByIds
+  findStudentsByIds,
+  updateClass,
+  findByStudentIdPopulated
 };

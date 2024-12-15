@@ -96,7 +96,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                 </span>
               </div>
 
-              <div className="ml-3">
+              {/* <div className="ml-3">
                 <div className="border-l-2 border-gray-500 pl-1">
                   <div
                     className="p-1 rounded-md border-2 border-transparent hover:border-red-500 hover:bg-red-100 hover:shadow-md"
@@ -125,7 +125,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
                     </span>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {/* Class full student */}

@@ -136,6 +136,10 @@ const BusinessModelCanvas: React.FC<BusinessModelCanvasProps> = ({
 
   const handleSubmit = async () => {
     if (activeSection) {
+      if(tempText == ''){
+        message.error("Content cannot be empty!");
+        return;
+      }
       const content = tempText;
       let color = "";
 
@@ -436,7 +440,7 @@ const BusinessModelCanvas: React.FC<BusinessModelCanvasProps> = ({
       </div>
       <Modal
         centered
-        title="Chỉnh sửa nội dung"
+        title="Update content"
         open={isModalVisible}
         onOk={handleSubmit}
         onCancel={handleCancel}

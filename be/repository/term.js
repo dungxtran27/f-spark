@@ -34,7 +34,7 @@ const getActiveTerm = async () => {
     const activeTerm = await Term.findOne({
       startTime: { $lt: currentTime },
       endTime: { $gt: currentTime },
-    });
+    }).exec();
     return activeTerm;
   } catch (error) {
     throw new Error(error.message);

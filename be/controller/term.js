@@ -21,31 +21,61 @@ const createTerm = async (req, res) => {
       return res.status(400).json({ error: "The new term cannot begin before the old term ends" });
     }
 
-    const startOfTerm = moment(startTime).add(1, "month");
+    const startOfTerm = moment(startTime).add(30, "days");
     const timeline = [
+      {
+        title: "Create Student Account",
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
+        startDate: startTime,
+        endDate: moment(startTime).add(7, "days"),
+        type: DEADLINE_TYPES.STUDENT_ACCOUNT_CREATE,
+        deadLineFor: ['ADMIN']
+      },
       {
         title: "Member Transfer",
         description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
-        startDate: startTime,
-        endDate: moment(startTime).add(14, "days"),
+        startDate: moment(startTime).add(8, "days"),
+        endDate: moment(startTime).add(15, "days"),
         type: DEADLINE_TYPES.MEMBERS_TRANSFER,
+        deadLineFor: ['STUDENT']
       },
       {
-        title: "Sponsorship",
+        title: "Sponsorship Vote",
         description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
-        startDate: moment(startTime).add(15, "days"),
-        endDate: moment(startTime).add(1, "months"),
-        type: DEADLINE_TYPES.SPONSOR_SHIP,
+        startDate: moment(startTime).add(16, "days"),
+        endDate: moment(startTime).add(20, "days"),
+        type: DEADLINE_TYPES.SPONSOR_SHIP_VOTE,
+        deadLineFor: ['STUDENT']
+      },
+      {
+        title: "Sponsorship Finalized",
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
+        startDate: moment(startTime).add(20, "days"),
+        endDate: moment(startTime).add(23, "days"),
+        type: DEADLINE_TYPES.SPONSORSHIP_FINALIZED,
+        deadLineFor: ['HOS', 'STUDENT']
       },
       {
         title: "Dividing Classes",
         description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
-        startDate: moment(startTime).add(15, "days"),
-        endDate: moment(startTime).add(1, "months"),
-        type: DEADLINE_TYPES.MEMBERS_TRANSFER,
+        startDate: moment(startTime).add(16, "days"),
+        endDate: moment(startTime).add(30, "days"),
+        type: DEADLINE_TYPES.DIVIDING_CLASSES,
+        deadLineFor: ['ADMIN', 'STUDENT']
+      },
+      {
+        title: "Fund estimation",
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
+        startDate: moment(startTime).add(23, "days"),
+        endDate: moment(startTime).add(30, "days"),
+        type: DEADLINE_TYPES.FUND_ESTIMATION,
+        deadLineFor: ['ACCOUNTANT', 'STUDENT']
       },
       {
         title: "Teacher Lock Group",
@@ -54,6 +84,25 @@ const createTerm = async (req, res) => {
         startDate: startOfTerm,
         endDate: moment(startOfTerm).add(2, "weeks"),
         type: DEADLINE_TYPES.TEACHER_LOCK_GROUP,
+        deadLineFor: ['TEACHER']
+      },
+      {
+        title: "Fund Distribution",
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
+        startDate: startOfTerm,
+        endDate: moment(startOfTerm).add(2, "weeks"),
+        type: DEADLINE_TYPES.FUND_DISTRIBUTION,
+        deadLineFor: ['ACCOUNTANT', 'STUDENT']
+      },
+      {
+        title: "Fund Return",
+        description:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras bibendum lacinia ullamcorper. Curabitur ex sem, pharetra in pellentesque at, tempor eu est. ",
+        startDate: endTime,
+        endDate: moment(endTime).add(2, "weeks"),
+        type: DEADLINE_TYPES.FUND_RETURN,
+        deadLineFor: ['ACCOUNTANT', 'STUDENT']
       },
     ];
 
@@ -64,7 +113,8 @@ const createTerm = async (req, res) => {
         startDate: moment(startOfTerm).add(4 * (o?.index - 1), "weeks"),
         endDate: moment(startOfTerm).add(4 * o?.index, "weeks"),
         type: DEADLINE_TYPES.OUTCOME,
-        outcome: o?._id
+        outcome: o?._id,
+        deadLineFor: ['TEACHER', 'STUDENT']
       });
     });
 

@@ -35,7 +35,7 @@ const Login = () => {
       dispatch(login(data.data.data));
       switch (data.data.data?.role) {
         case ROLE.student:
-          navigate("/projectOverview");
+          navigate("/dashboard");
           break;
         case ROLE.teacher:
           navigate("/teacher/dashboard");

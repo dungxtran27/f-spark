@@ -265,7 +265,8 @@ const getClassTeacherAndgroupInfo = async (req, res) => {
         StudentRepository.getAllStudentUngroupByClassId(classId),
         ClassRepository.findClassById(classId),
       ]);
-
+      console.log(classId);
+      
     const studentData = {
       teacher: classInfo.teacher,
       groupStudent,
@@ -803,6 +804,20 @@ const deleteTransaction = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const getGroupById = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    if (!groupId) {
+      return res.status(400).json({ error: "Bad request" });
+    }
+    const group = await GroupRepository.getGroupById(groupId);
+
+    return res.status(200).json({ data: group });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupsOfTerm,
   createJourneyRow,
@@ -841,4 +856,5 @@ export default {
   // findbyId,
   updateGroupInfo,
   deleteTransaction,
+  getGroupById
 };

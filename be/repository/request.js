@@ -418,6 +418,17 @@ const findRequestByTypeRequestFPT = async () => {
   });
 };
 
+const findRequestByTypeRequestFPTSended = async (groupId) => {
+  return Request.find({ typeRequest: "FPT", group: groupId }).populate({
+    path: "group",
+    select: "teamMembers term",
+  });
+};
+
+const createRequestFPT = async (request) => {
+  return Request.create(request);
+};
+
 const findRequestById = async (requestId) => {
   return Request.findOne({ _id: requestId }).populate({
     path: "group",
@@ -538,5 +549,7 @@ export default {
   approveDeleteStudentRequest,
   findRequestByTypeRequestFPT,
   approveRequestIsSponsorship,
-  declineRequestIsSponsorship
+  declineRequestIsSponsorship,
+  createRequestFPT,
+  findRequestByTypeRequestFPTSended
 };

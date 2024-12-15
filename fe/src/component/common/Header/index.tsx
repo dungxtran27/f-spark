@@ -4,17 +4,24 @@ import { Popover, Tooltip } from "antd";
 import { useSelector } from "react-redux";
 import { UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { authApi } from "../../../api/auth";
 import { BiExit } from "react-icons/bi";
-import { ROLE } from "../../../utils/const";
+import { QUERY_KEY, ROLE } from "../../../utils/const";
 import { FaChevronDown } from "react-icons/fa";
 import Notification from "./Notification";
+import { student } from "../../../api/student/student";
 
 const Header = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
+  const { data: groupAndClass } = useQuery({
+    queryKey: [QUERY_KEY.GROUPS_OF_CLASS],
+    queryFn: () => {
+      return student.getGroupAndClass();
+    },
+  });
   const logOutMutation = useMutation({
     mutationFn: () => authApi.logOut(),
     onSuccess: () => {
@@ -27,7 +34,9 @@ const Header = () => {
         }
         localStorage.clear();
         setInterval(() => {
-          window.location.href = `${role === ROLE.student ? '' : `/${role.toLowerCase()}`}/login`;
+          window.location.href = `${
+            role === ROLE.student ? "" : `/${role.toLowerCase()}`
+          }/login`;
         }, 1000);
       }
     },
@@ -41,14 +50,30 @@ const Header = () => {
     >
       <Tooltip
         className="max-w-[70%]"
-        title={"GD1715_AD / Ăn vặt kiểu Nhật - Maneki chan"}
+        title={`${
+          groupAndClass?.data?.data?.group &&
+          groupAndClass?.data?.data?.group?.GroupName
+        } ${
+          groupAndClass?.data?.data?.group &&
+          groupAndClass?.data?.data?.classId &&
+          "/"
+        } ${
+          groupAndClass?.data?.data?.classId &&
+          groupAndClass?.data?.data?.classId?.classCode
+        }`}
       >
-        {/* <span className="text-[16px] font-semibold truncate">
-          GD1715_AD / Ăn vặt kiểu Nhật - Maneki chan
-        </span> */}
+        <span className="text-[16px] font-semibold truncate">
+          {groupAndClass?.data?.data?.group &&
+            groupAndClass?.data?.data?.group?.GroupName}{" "}
+          {groupAndClass?.data?.data?.group &&
+            groupAndClass?.data?.data?.classId &&
+            "/"}{" "}
+          {groupAndClass?.data?.data?.classId &&
+            groupAndClass?.data?.data?.classId?.classCode}
+        </span>
       </Tooltip>
       <div className="flex items-center gap-3">
-        <Notification/>
+        <Notification />
         <div className="mr-4 flex items-center px-3">
           <div className="rounded cursor-pointer w-full flex items-center py-1 justify-between px-3">
             <div className="flex items-center gap-3">

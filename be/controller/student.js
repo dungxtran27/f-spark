@@ -1,5 +1,4 @@
 import {
-  ClassRepository,
   GroupRepository,
   StudentRepository,
   TermRepository,
@@ -63,14 +62,14 @@ const getAllStudentUnGroupByClassId = async (req, res) => {
 
 const getAllAccStudent = async (req, res) => {
   try {
-    const { page, limit, searchText, classId, status, termCode } = req.body;
+    const { page, limit, searchText, classId, status, term } = req.body;
     const students = await StudentRepository.getAllAccStudent(
       page,
       limit,
       searchText,
       classId,
       status,
-      termCode
+      term
     );
     return res.status(200).json({ data: students });
   } catch (error) {
@@ -152,6 +151,9 @@ const importStudent = async (req, res) => {
     const sheet = workbook.Sheets[sheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
     const activeTerm = await TermRepository.getActiveTerm();
+    if (!activeTerm) {
+      return res.status(400).json({ error: "No Active Term" });
+    }
     const groupSet = [];
     data?.map((g) => {
       if (!groupSet.find((gs) => gs?.GroupName === g["Tên dự án"])) {
@@ -159,6 +161,9 @@ const importStudent = async (req, res) => {
           GroupName: g["Tên dự án"],
           oldMark: g["Mark"],
           term: activeTerm._id,
+          timeline: activeTerm.timeLine
+            .filter((d) => d?.deadLineFor?.includes("STUDENT"))
+            .map(({ deadLineFor, ...rest }) => rest),
         });
       }
     });
@@ -169,22 +174,26 @@ const importStudent = async (req, res) => {
         studentId: g?.RollNumber,
         gen: g?.RollNumber?.slice(2, 4),
         major: g?.Major,
-        group: newGroups.find((ng) => ng?.GroupName === g["Tên dự án"])._id,
+        group:
+          newGroups.find((ng) => ng?.GroupName === g["Tên dự án"])?._id || null,
         term: activeTerm._id,
         email: g?.Email,
       };
     });
-
     const newStudents = await StudentRepository.bulkCreateStudentsFromExcel(
       newStudentsExcel
     );
     const groupedStudents = newStudents.reduce((acc, s) => {
-      if (!acc[s?.group]) {
-        acc[s?.group] = [];
+      if (s?.group != null) {
+        if (!acc[s.group]) {
+          acc[s.group] = [];
+        }
+
+        acc[s.group].push(s);
       }
-      acc[s?.group].push(s);
       return acc;
     }, {});
+
     for (let key in groupedStudents) {
       const studentIds = groupedStudents[key].map((student) => student._id);
       await GroupRepository.updateMember(key, studentIds);
@@ -227,6 +236,17 @@ const getTotalStudentsByTerm = async (req, res) => {
 // };
 
 
+const getGroupAndClassInfo = async (req, res) => {
+  try {
+    const decodedToken = req.decodedToken;
+    const student = await StudentRepository.findByStudentIdPopulated(
+      decodedToken?.role?.id
+    );
+    return res.status(200).json({ data: student });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getStudentsInSameGroup,
   getTeacherByStudentId,
@@ -238,4 +258,5 @@ export default {
   importStudent,
   getTotalStudentsByTerm,
   // findById
+  getGroupAndClassInfo,
 };

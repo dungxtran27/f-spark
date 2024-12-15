@@ -63,7 +63,6 @@ const Router = () => {
         {/* TM */}
         <Route path="/hos/timeline" element={<DashboardTM/>} />
         <Route path="/hos/groups" element={<ManageClassTM/>} />
-        <Route path="/hos/mentors" element={<></>} />
       </Routes>
     </BrowserRouter>
   );
