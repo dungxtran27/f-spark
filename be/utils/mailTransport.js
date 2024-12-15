@@ -6,8 +6,8 @@ const transporter = nodeMailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: "chuquyson123@gmail.com",
-    pass: "hibgqwbhzpytuwtn",
+    user: "phuc1237799@gmail.com",
+    pass: "axzo fzzx rlka snsm",
   },
 });
 const sendMail = async (toEmail, subject, text, html) => {
@@ -153,7 +153,7 @@ const sendConfirmEmail = async (email, userId) => {
       "                    <p class='button-container'>\n" +
       "                      <a href='" +
       url +
-      "                    ' class='button'>Activate your TuneHub account</a>\n" +
+      "                    ' class='button'>Activate your account</a>\n" +
       "                    </p>\n" +
       "                    <p>We are thrilled to welcome you,<br />The LucentChart team</p>\n" +
       "                  </table>\n" +
@@ -180,7 +180,7 @@ const sendConfirmEmail = async (email, userId) => {
       "</html>\n\n";
     const mailres = await sendMail(
       email,
-      "LucentChart-Finish setting up you TuneHub account",
+      "LucentChart-Finish setting up you account",
       "Almost there mate, just one more step and we are up and ready",
       emailHtml
     );

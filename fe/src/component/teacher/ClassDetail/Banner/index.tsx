@@ -33,14 +33,16 @@ const Banner = ({ name, classId }: Props) => {
     },
   });
 
-  const flatRequestListDetail =
-    requestDeadlineList
-      ?.filter((detail: any) => detail.status === "pending")
-      .slice(0, 2) || [];
-
-  const countRQ =
+  const flatRequestListPD =
     requestDeadlineList?.filter((detail: any) => detail.status === "pending") ||
     [];
+
+  const flatRequestListAP =
+    requestDeadlineList?.filter(
+      (detail: any) => detail.status === "approved"
+    ) || [];
+
+  const countRQ = flatRequestListAP?.length + flatRequestListPD?.length;
 
   const statsArray = {
     data123: [
@@ -69,11 +71,17 @@ const Banner = ({ name, classId }: Props) => {
     (state: RootState) => state.auth.activeTerm
   ) as Term | null;
 
-  const filteredOutcomes = activeTerm?.timeLine ?? [];
+  //eslint-disable-next-line react-hooks/exhaustive-deps
+  const filteredOutcomes =
+    activeTerm?.timeLine.filter((item) =>
+      item.deadLineFor.includes("TEACHER")
+    ) ?? [];
 
-  const items = filteredOutcomes.map((item) => ({
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const items = filteredOutcomes.map((item, index) => ({
     key: item.title,
-    title: item.title,
+    title: index === currentStep ? "" : item.title,
   }));
 
   const activeStep = filteredOutcomes.findIndex(
@@ -86,31 +94,36 @@ const Banner = ({ name, classId }: Props) => {
     <Popover
       content={
         <div>
-          <strong>{filteredOutcomes[index].title}</strong>
+          <strong className="flex justify-center">
+            {filteredOutcomes[index].title}
+          </strong>
           <div className="text-md text-gray-500 mt-1">
-            {dayjs(filteredOutcomes[index].startDate)
-            .format(
-              // DATE_FORMAT.withoutTime
-            )
-            
-            } -
-            {dayjs(filteredOutcomes[index].endDate).toISOString()
-            // .format(
-            //   DATE_FORMAT.withoutTime
-            // )
-            }
-            {/* {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")} */}
+            {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")}
+            <span> - </span>
+            {moment(filteredOutcomes[index].endDate).format("DD MMM, YYYY")}
           </div>
         </div>
       }
       trigger="hover"
       placement="top"
+      open={index === currentStep}
     >
       {dot}
     </Popover>
   );
 
-  const [currentStep, setCurrentStep] = useState(0);
+  useEffect(() => {
+    const today = moment();
+    const currentIndex = filteredOutcomes.findIndex(
+      (step) =>
+        today.isSameOrAfter(moment(step.startDate)) &&
+        today.isBefore(moment(step.endDate))
+    );
+
+    if (currentIndex !== -1) {
+      setCurrentStep(currentIndex);
+    }
+  }, [filteredOutcomes]);
 
   const handleStepChange = (step: number) => {
     setCurrentStep(step);
@@ -130,7 +143,7 @@ const Banner = ({ name, classId }: Props) => {
           <Skeleton active className="w-full" />
         ) : (
           <>
-            <div className="bg-gray-100 p-4 rounded mb-2">
+            <div className="bg-gray-100 p-4 rounded mb-2 overflow-auto">
               <h1 className="font-bold mb-2">Time</h1>
               <Steps
                 current={currentStep}
@@ -152,6 +165,7 @@ const Banner = ({ name, classId }: Props) => {
                       {moment(filteredOutcomes[currentStep]?.startDate).format(
                         "DD, MMM YYYY "
                       )}
+                      -
                       {moment(filteredOutcomes[currentStep]?.endDate).format(
                         "DD, MMM YYYY"
                       )}
@@ -175,34 +189,22 @@ const Banner = ({ name, classId }: Props) => {
               <div className="rounded-md shadow-sm bg-gray-100 w-1/3 p-2">
                 <div>
                   <h2 className="font-bold text-md mb-2">
-                    Group delay deadline{" "}
-                    <span className="text-red-500">({countRQ.length})</span>
+                    Request delay deadline{" "}
+                    <span className="text-red-500">({countRQ})</span>
                   </h2>
-                  <div className="max-h-[110px] overflow-y-auto">
-                    {flatRequestListDetail?.map((group: any) => (
-                      <div className="bg-gray-200 rounded p-2 mb-2 space-y-1">
-                        <span
-                          className="font-semibold mr-3 px-1 w-14 rounded"
-                          style={{ backgroundColor: "rgb(180,180,187)" }}
-                        >
-                          {group.groupId?.GroupName || "Unknown Group"}
-                        </span>
-                        <span className="text-sm">
-                          <span className="font-semibold">Date: </span>
-                          <span className="font-semibold">
-                            {group.dueDate
-                              ? new Date(group.dueDate).toLocaleDateString()
-                              : "N/A"}
-                          </span>{" "}
-                          <span className="text-xl font-extralight">→ </span>
-                          <span className="text-blue-500">
-                            {group.newDate
-                              ? new Date(group.newDate).toLocaleDateString()
-                              : "N/A"}
-                          </span>
-                        </span>
-                      </div>
-                    ))}
+                  <div className="max-h-[110px] space-y-2">
+                    <p className="mt-3">
+                      <span className="text-gray-600">Request pending: </span>
+                      <span className="font-medium text-[18px]">
+                        {flatRequestListPD?.length}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="text-gray-600">Request approved: </span>
+                      <span className="font-medium text-[18px]">
+                        {flatRequestListAP?.length}
+                      </span>
+                    </p>
                   </div>
                 </div>
               </div>

@@ -62,13 +62,14 @@ const getAllStudentUnGroupByClassId = async (req, res) => {
 
 const getAllAccStudent = async (req, res) => {
   try {
-    const { page, limit, searchText, classId, status } = req.body;
+    const { page, limit, searchText, classId, status, term } = req.body;
     const students = await StudentRepository.getAllAccStudent(
       page,
       limit,
       searchText,
       classId,
-      status
+      status,
+      term
     );
     return res.status(200).json({ data: students });
   } catch (error) {
@@ -116,8 +117,22 @@ const addManyStudentNoClassToClass = async (req, res) => {
     if (!classId) {
       return res.status(400).json({ message: "Class ID must be provided." });
     }
-    console.log(studentIds, classId);
-
+    // const classExists = await ClassRepository.findClassById(classId);
+    // if (!classExists) {
+    //   return res.status(404).json({ message: `Class not found.` });
+    // }
+    // const students = await StudentRepository.findStudentsByIds(studentIds);
+    // if (students.length !== studentIds.length) {
+    //   const missingStudents = studentIds.filter(id => !students.some(student => student._id.toString() === id));
+    //   return res.status(404).json({ message: `Students with IDs ${missingStudents.join(", ")} not found.` });
+    // }
+    // const studentsAlreadyInClass = students.filter(student => student.classId);
+    // if (studentsAlreadyInClass.length > 0) {
+    //   const studentNames = studentsAlreadyInClass.map(student => student.name);
+    //   return res.status(400).json({
+    //     message: `The following students are already assigned to a class: ${studentNames.join(", ")}`
+    //   });
+    // }
     const updatedStudents =
       await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
     return res.status(200).json({
@@ -136,6 +151,9 @@ const importStudent = async (req, res) => {
     const sheet = workbook.Sheets[sheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
     const activeTerm = await TermRepository.getActiveTerm();
+    if (!activeTerm) {
+      return res.status(400).json({ error: "No Active Term" });
+    }
     const groupSet = [];
     data?.map((g) => {
       if (!groupSet.find((gs) => gs?.GroupName === g["Tên dự án"])) {
@@ -143,6 +161,9 @@ const importStudent = async (req, res) => {
           GroupName: g["Tên dự án"],
           oldMark: g["Mark"],
           term: activeTerm._id,
+          timeline: activeTerm.timeLine
+            .filter((d) => d?.deadLineFor?.includes("STUDENT"))
+            .map(({ deadLineFor, ...rest }) => rest),
         });
       }
     });
@@ -153,22 +174,26 @@ const importStudent = async (req, res) => {
         studentId: g?.RollNumber,
         gen: g?.RollNumber?.slice(2, 4),
         major: g?.Major,
-        group: newGroups.find((ng) => ng?.GroupName === g["Tên dự án"])._id,
+        group:
+          newGroups.find((ng) => ng?.GroupName === g["Tên dự án"])?._id || null,
         term: activeTerm._id,
         email: g?.Email,
       };
-    });
-
+    });    
     const newStudents = await StudentRepository.bulkCreateStudentsFromExcel(
       newStudentsExcel
     );
     const groupedStudents = newStudents.reduce((acc, s) => {
-      if (!acc[s?.group]) {
-        acc[s?.group] = [];
+      if (s?.group != null) {
+        if (!acc[s.group]) {
+          acc[s.group] = [];
+        }
+
+        acc[s.group].push(s);
       }
-      acc[s?.group].push(s);
       return acc;
     }, {});
+
     for (let key in groupedStudents) {
       const studentIds = groupedStudents[key].map((student) => student._id);
       await GroupRepository.updateMember(key, studentIds);
@@ -180,7 +205,42 @@ const importStudent = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getTotalStudentsByTerm = async (req, res) => {
+  try {
+    const { term } = req.body;
+    const students = await StudentRepository.getTotalStudentsByTerm(term);
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: "No students found for the given termCode" });
+    }
 
+    return res.status(200).json({
+      data: students
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+// const findById = async (studentId) => {
+//   try {
+//     const student = await StudentRepository.findById(studentId);
+//     return student
+//   } catch (error) {
+//     throw new Error("Student not found");
+//   }
+// };
+
+
+const getGroupAndClassInfo = async (req, res) => {
+  try {
+    const decodedToken = req.decodedToken;
+    const student = await StudentRepository.findByStudentIdPopulated(
+      decodedToken?.role?.id
+    );
+    return res.status(200).json({ data: student });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getStudentsInSameGroup,
   getTeacherByStudentId,
@@ -190,4 +250,7 @@ export default {
   addManyStudentNoClassToClass,
   getAllAccStudent,
   importStudent,
+  getTotalStudentsByTerm,
+  // findById
+  getGroupAndClassInfo,
 };

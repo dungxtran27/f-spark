@@ -14,6 +14,7 @@ const getClassWorkByStudent = async ({ userId }) => {
     }
     const classWorks = await ClassWork.find({
       classId: classId,
+      type: { $in: ["announcement", "assignment"] },
     }).lean();
     return classWorks;
   } catch (error) {
@@ -39,6 +40,7 @@ const getOutcomes = async (classId, isTeacher) => {
           };
         })
       );
+      
       return outcomeWithSubmissions;
     }
     return outcomeList;
@@ -361,12 +363,12 @@ const getLatestAssignmentSubmissionsCount = async (classId) => {
 
 const getClassworkByClassworkId = async (classworkId) => {
   try {
-    const classwork = await ClassWork.findById(classworkId)
-    return classwork
+    const classwork = await ClassWork.findById(classworkId);
+    return classwork;
   } catch (error) {
     throw new Error(error.message);
   }
-}
+};
 
 const getTotalClassWork = async ({ startDate, endDate, teacherId }) => {
   try {
@@ -380,26 +382,41 @@ const getTotalClassWork = async ({ startDate, endDate, teacherId }) => {
       throw new Error("Invalid endDate");
     }
 
-
     const start = new Date(`${startDate}T00:00:00.000Z`);
     const end = new Date(`${endDate}T23:59:59.999Z`);
 
     const classWorks = await ClassWork.find({
       classId: { $in: classIds },
-      type: { $in: ['outcome', 'assignment', 'announcement'] },
+      type: { $in: ["outcome", "assignment", "announcement"] },
       startDate: { $gte: start },
       dueDate: { $lte: end },
     });
 
     const groupedClassWorks = await Promise.all(
       classIds.map(async (classId) => {
-        const className = classes.find((cls) => cls._id.toString() === classId.toString())?.classCode || 'Unknown';
-        const assignments = classWorks.filter((work) => work.classId.toString() === classId.toString() && work.type === 'assignment');
-        const announcements = classWorks.filter((work) => work.classId.toString() === classId.toString() && work.type === 'announcement');
-        const outcomes = classWorks.filter((work) => work.classId.toString() === classId.toString() && work.type === 'outcome');
+        const className =
+          classes.find((cls) => cls._id.toString() === classId.toString())
+            ?.classCode || "Unknown";
+        const assignments = classWorks.filter(
+          (work) =>
+            work.classId.toString() === classId.toString() &&
+            work.type === "assignment"
+        );
+        const announcements = classWorks.filter(
+          (work) =>
+            work.classId.toString() === classId.toString() &&
+            work.type === "announcement"
+        );
+        const outcomes = classWorks.filter(
+          (work) =>
+            work.classId.toString() === classId.toString() &&
+            work.type === "outcome"
+        );
         const totalGroups = await Group.countDocuments({ class: classId });
         const outcomeIds = outcomes.map((outcome) => outcome._id);
-        const totalSubmissions = await Submission.countDocuments({ classworkId: { $in: outcomeIds } });
+        const totalSubmissions = await Submission.countDocuments({
+          classworkId: { $in: outcomeIds },
+        });
         const totalStudents = await Student.countDocuments({ classId });
 
         return {
@@ -418,8 +435,12 @@ const getTotalClassWork = async ({ startDate, endDate, teacherId }) => {
       })
     );
 
-    const totalCountAssignments = classWorks.filter((work) => work.type === 'assignment').length;
-    const totalCountAnnouncements = classWorks.filter((work) => work.type === 'announcement').length;
+    const totalCountAssignments = classWorks.filter(
+      (work) => work.type === "assignment"
+    ).length;
+    const totalCountAnnouncements = classWorks.filter(
+      (work) => work.type === "announcement"
+    ).length;
 
     return {
       groupedClassWorks,
@@ -435,10 +456,9 @@ const getTotalClassWork = async ({ startDate, endDate, teacherId }) => {
 
 const getTotalClassWorkByClassId = async ({ classId }) => {
   try {
-
     const classworks = await ClassWork.find({
       classId: classId,
-      type: "outcome"
+      type: "outcome",
     }).select("_id");
     const classworkIds = classworks.map((cw) => cw._id);
 
@@ -469,8 +489,7 @@ const getTotalClassWorkByClassId = async ({ classId }) => {
   } catch (error) {
     throw new Error(error.message);
   }
-}
-
+};
 
 export default {
   getClassWorkByStudent,
@@ -488,5 +507,5 @@ export default {
   getOutcomesOfClasses,
   getClassworkByClassworkId,
   getTotalClassWork,
-  getTotalClassWorkByClassId
+  getTotalClassWorkByClassId,
 };

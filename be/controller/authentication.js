@@ -6,12 +6,13 @@ import {
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { sendConfirmEmail } from "../utils/mailTransport.js";
+import { sendConfirmEmail, sendMail } from "../utils/mailTransport.js";
 import jwksClient from "jwks-rsa";
 import emailTemplate from "../utils/emailTemplate.js";
 import { io } from "../index.js";
 import { ROLE_NAME } from "../utils/const.js";
 import { StudentRepository } from "../repository/index.js";
+import { uploadImage } from "../utils/uploadImage.js";
 const client = jwksClient({
   jwksUri: "https://www.googleapis.com/oauth2/v3/certs",
   requestHeaders: {
@@ -39,38 +40,60 @@ const authenticate = async (req, res) => {
 };
 const signUp = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword } = req.body;
-    if (
-      firstName.length == 0 ||
-      lastName.length == 0 ||
-      email.length == 0 ||
-      password.length == 0
-    ) {
+    const { name, studentId, generation, profession, termCode, email, password, img } = req.body;
+
+    if (!name || !studentId || !generation || !profession || !termCode || !email || !password) {
       return res
         .status(400)
-        .json({ error: "Please fill out all the mandatory field" });
+        .json({ error: "Please fill out all the mandatory fields" });
     }
-    if (confirmPassword !== password) {
-      return res
-        .status(400)
-        .json({ error: "Password does not match confirm password" });
+
+    let imgLink;
+    if (!img) {
+      imgLink = "https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-8.jpg"
+    } else {
+      imgLink = await uploadImage(img);
+      if (imgLink) {
+        return res
+          .status(400)
+          .json({ error: "Upload Failed !" });
+      }
     }
-    const existingUser = await AuthenticateRepository.getUserByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ error: "Email is taken" });
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
     }
+
+    const term = await AuthenticateRepository.getUserByTerm({ termCode });
+    if (!term) {
+      return res.status(400).json({ error: "Account student does not in this term" });
+    }
+
+    const existingUser = await AuthenticateRepository.getUserByEmail({ name, studentId, generation, email, profession });
+    if (!existingUser) {
+      return res.status(400).json({ error: "Your information is incorrect" });
+    }
+
+    const accountExist = await AuthenticateRepository.findAccount(email);
+    if (accountExist) {
+      return res.status(400).json({ error: "Account student is exist" });
+    }
+
     const salt = bcrypt.genSaltSync(parseInt(process.env.SALT_ROUND));
     const hashedPassword = bcrypt.hashSync(password, salt);
+
     const newUser = await AuthenticateRepository.addUser({
-      firstName,
-      lastName,
       email,
       hashedPassword,
+      imgLink
     });
-    await sendConfirmEmail(email, newUser._id);
+
+    await sendMail(email, newUser._id);
+
     return res.status(201).json({
       message:
-        "Sign up successfully, go to your email to confirm signing up. The email will expire in an hour",
+        "Sign up successfully. Please check your email to confirm your account. The email will expire in an hour.",
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -155,7 +178,12 @@ const login = async (req, res) => {
         userDetail.role = ROLE_NAME.admin;
         break;
       case ROLE_NAME.headOfSubject:
-        userDetail.account = existingAccount;
+        if (req.body.email !== "headofsubject@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
+        userDetail.account = existingAccount
         userDetail.role = ROLE_NAME.headOfSubject;
         break;
       case ROLE_NAME.accountant:

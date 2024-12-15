@@ -16,14 +16,14 @@ import { Badge } from "antd";
 
 export const StudentRoutes = [
   {
-    route: "/projectOverview",
-    page: "Project Overview",
-    icon: <FaChartPie size={20} />,
-  },
-  {
     route: "/dashboard",
     page: "DashBoard",
     icon: <BiSolidDashboard size={20} />,
+  },
+  {
+    route: "/projectOverview",
+    page: "Project Overview",
+    icon: <FaChartPie size={20} />,
   },
   {
     route: "/tasks",
@@ -118,12 +118,7 @@ export const HeadOfSubjectRouter = [
     route: "/hos/groups",
     page: "Groups",
     icon: <FaTasks size={20} />,
-  },
-  {
-    route: "/hos/mentors",
-    page: "Requests",
-    icon: <FaPeopleGroup size={20} />,
-  },
+  }
 ];
 export const AccountantRouter = [
   {

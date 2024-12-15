@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {  Button, Modal, Skeleton, Tag, Empty, Table } from "antd";
+import { Button, Modal, Skeleton, Tag, Empty, Table } from "antd";
 import { IoPerson } from "react-icons/io5";
 import { requestList } from "../../../api/request/request";
 import { colorMap, QUERY_KEY } from "../../../utils/const";
@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
 import { FaCheck, FaTimes } from "react-icons/fa";
+import { BsExclamationCircle } from "react-icons/bs";
 
 interface Request {
   _id: string;
@@ -32,8 +33,8 @@ interface Request {
 
 const RequestJoinGroup = () => {
   const queryClient = useQueryClient();
-const [modalRequestId, setModalRequestId] = useState<string | null>(null);
-const [modalType, setModalType] = useState<"accept" | "reject" | null>(null);
+  const [modalRequestId, setModalRequestId] = useState<string | null>(null);
+  const [modalType, setModalType] = useState<"accept" | "reject" | null>(null);
 
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
@@ -68,21 +69,18 @@ const [modalType, setModalType] = useState<"accept" | "reject" | null>(null);
     },
   });
 
- 
-const handleModal = (requestId: string, action: "accept" | "reject") => {
-  setModalRequestId(requestId);
-  setModalType(action);
-};
+  const handleModal = (requestId: string, action: "accept" | "reject") => {
+    setModalRequestId(requestId);
+    setModalType(action);
+  };
 
-
-
-const handleConfirm = () => {
-  if (!modalRequestId || modalType === null) return;
-  const voteType = modalType === "accept" ? "yes" : "no";
-  voteMutation.mutate({ requestId: modalRequestId, voteType });
-  setModalRequestId(null);
-  setModalType(null);
-};
+  const handleConfirm = () => {
+    if (!modalRequestId || modalType === null) return;
+    const voteType = modalType === "accept" ? "yes" : "no";
+    voteMutation.mutate({ requestId: modalRequestId, voteType });
+    setModalRequestId(null);
+    setModalType(null);
+  };
 
   const renderVoteIcons = (request: Request) => {
     const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
@@ -279,12 +277,44 @@ const handleConfirm = () => {
         closable={false}
       >
         <div className="text-center">
+          <div className="flex justify-center">
+            <BsExclamationCircle className="text-pendingStatus" size={50} />
+          </div>
           <p className="text-lg font-semibold">
             Are you sure about this choice?
           </p>
           <div className="flex justify-center space-x-4 mt-4">
             <Button onClick={() => setModalRequestId(null)}>No</Button>
-            <Button type="primary" onClick={handleConfirm}>
+            <Button
+              type="primary"
+              onClick={() => {
+                Modal.confirm({
+                  title: "Confirm",
+                  content: "Your choice will decide this vote. Are you sure",
+                  centered: true,
+                  footer: (
+                    <>
+                      <Button
+                        onClick={() => Modal.destroyAll()}
+                        style={{ marginLeft: 8 }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="primary"
+                        onClick={() => {
+                          handleConfirm();
+                          Modal.destroyAll();
+                        }}
+                        style={{ marginLeft: 8 }}
+                      >
+                        Confirm
+                      </Button>
+                    </>
+                  ),
+                });
+              }}
+            >
               Yes
             </Button>
           </div>

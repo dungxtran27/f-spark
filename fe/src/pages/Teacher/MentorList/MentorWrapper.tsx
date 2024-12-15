@@ -270,9 +270,9 @@ const MentorListWrapper = () => {
         </Tooltip>
       </div>
       <p className="ml-4 mb-4">
-        Total mentor found: {mentorData?.data.totalItems}
+        Total mentor found: {mentorData?.data.totalItems} mentors
       </p>
-      <div className="mentor_wrapper flex flex-wrap w-10/12 ml-2">
+      <div className="mentor_wrapper flex flex-wrap w-full px-2">
         {mentorData?.data.data.map((md: any) => (
           <div key={md._id} className="w-full sm:w-1/2 lg:w-1/3 px-2 mb-2">
             <MentorCard

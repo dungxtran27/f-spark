@@ -23,7 +23,7 @@ const createJourneyRow = async ({ groupId, name }) => {
     );
     const newRow =
       updatedGroup.customerJourneyMap.rows[
-        updatedGroup.customerJourneyMap.rows.length - 1
+      updatedGroup.customerJourneyMap.rows.length - 1
       ];
     return newRow;
   } catch (error) {
@@ -47,7 +47,7 @@ const createJourneyCol = async ({ groupId, name }) => {
     );
     const newCol =
       updatedGroup.customerJourneyMap.cols[
-        updatedGroup.customerJourneyMap.cols.length - 1
+      updatedGroup.customerJourneyMap.cols.length - 1
       ];
     return newCol;
   } catch (error) {
@@ -845,14 +845,13 @@ const getAllGroupsNoClass = async (
       ...matchCondition,
     });
     const maxPages = Math.ceil(totalItems / limit);
-    console.log(matchCondition);
     const GroupNotHaveClass = await Group.aggregate([
       {
         $match: {
           $and: [{ class: { $in: [null, undefined] } }, matchCondition],
         },
       },
-      { $unwind: "$tag" },
+      { $unwind: { path: "$tag", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "TagMajors",
@@ -912,6 +911,7 @@ const getAllGroupsNoClass = async (
           term: 1,
           termCode: 1,
           teamMemberCount: { $size: "$teamMembers" },
+          class: 1,
         },
       },
       {
@@ -934,7 +934,7 @@ const getAllGroupsNoClass = async (
     });
     const isLastPage = page >= maxPages;
     const group = await Group.find()
-      .select("GroupName leader tag teamMembers isSponsorship term")
+      .select("GroupName leader tag teamMembers isSponsorship term class")
       .populate({
         path: "teamMembers",
         select: "name",
@@ -1050,7 +1050,7 @@ const updateTimelineForGroup = async ({ groupId, classworkId, newDate }) => {
     );
 
     const updatedTimeline = updatedGroup.timeline.find(
-      (timeline) => timeline.classworkId.toString() == classworkId
+      (timeline) => timeline?.classworkId?.toString() == classworkId
     );
     return updatedTimeline;
   } catch (error) {
@@ -1256,6 +1256,14 @@ const updateGroupSponsorStatus = async ({ groupId, status }) => {
     throw new Error(error.message);
   }
 };
+const findbyId = async (groupId) => {
+  try {
+    const group = await Group.findById(groupId);
+    return group;
+  } catch (error) {
+    throw new Error("Group not found");
+  }
+}
 const getGroupCountsByTerm = async (term) => {
   try {
     const sponsorStatusCounts = await Group.aggregate([
@@ -1350,8 +1358,71 @@ const verifyTransaction = async (groupId, transactionId, status) => {
     throw new Error(error.message);
   }
 };
+const getGroupById = async (groupId) => {
+  try {
+    const result = await Group.findById(groupId)
+    .populate('tag class leader term mentor')
+    .populate({
+        path: 'class',
+        populate: {
+          path: 'teacher',
+          model: 'Teacher',
+          populate: {
+            path: 'account',
+            model: 'Account', 
+          },
+        },
+      })
+      .populate({
+        path: 'teamMembers',
+        populate: {
+          path: 'account',
+          model: 'Account',
+        },
+      });
+      return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+const findGroupByOldMark = async () => {
+  try {
+    const result = await Group.find({ oldMark: { $gte: 8 } });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
+const updateClass = async (groupId, classId) => {
+  try {
+    const result = await Group.findByIdAndUpdate(groupId, {
+      $set: { class: new mongoose.Types.ObjectId(classId) },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const updateGroupTimeLine = async (groupId, timeLine) => {
+  try {
+    const result = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $set: {
+          timeline: timeLine,
+        },
+      },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
+  updateGroupTimeLine,
   updateMember,
   getGroupsOfTerm,
   createCellsOnUpdate,
@@ -1393,9 +1464,13 @@ export default {
   getGroupByClassId,
   getGroupStatistic,
   updateGroupSponsorStatus,
+  findbyId,
   updateGroupInfo,
   deleteTransaction,
   getTransactionByTransactionId,
   verifyTransaction,
   getGroupCountsByTerm,
+  getGroupById,
+  findGroupByOldMark,
+  updateClass,
 };

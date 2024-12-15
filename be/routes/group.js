@@ -154,4 +154,5 @@ groupRouter.post(
   verifyToken,
   GroupController.verifyTransaction
 );
+groupRouter.get("/getGroupById/:groupId", GroupController.getGroupById);
 export default groupRouter;

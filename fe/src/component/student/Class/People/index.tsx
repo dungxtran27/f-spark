@@ -45,7 +45,7 @@ const People = () => {
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
 
-  const classID = "670bb40cd6dcc64ee8cf7c90";
+  const classID = userInfo?.classId;
   const [groupDetailModal, setgroupDetailModal] = useState(false);
 
   const handleOpengroupDetailModal = () => {
@@ -96,7 +96,7 @@ const People = () => {
       <span className="text-[16px] font-semibold">Teachers</span>
       <div className="flex pt-1">
         <img
-          className="h-[12rem] w-[9rem] object-cover"
+          className="w-[9rem] aspect-square object-cover border"
           src={
             classPeople?.data.data.teacher?.account.profilePicture ||
             "https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg"
@@ -106,20 +106,20 @@ const People = () => {
         <div className="pl-5">
           <div className="">
             <span className="font-bold">Name: </span>
-            <span className="text-[18px]">
-              {classPeople?.data.data.teacher.name}
+            <span>
+              {classPeople?.data?.data?.teacher?.name}
             </span>
           </div>
           <div className="">
-            <span className="font-bold">Name: </span>
+            <span className="font-bold">Email: </span>
             <span className="text-[16px]">
-              {classPeople?.data.data.teacher?.account.email}
+              {classPeople?.data.data?.teacher?.account?.email}
             </span>
           </div>
           <div className="">
-            <span className="font-bold">Name: </span>
+            <span className="font-bold">Phone: </span>
             <span className="text-[16px]">
-              {classPeople?.data.data.teacher.phoneNumber}{" "}
+              {classPeople?.data?.data?.teacher?.phoneNumber}{" "}
             </span>
           </div>
         </div>
@@ -140,18 +140,19 @@ const People = () => {
             />
           ))}
         </div>
-        <div>
+        <div className="flex gap-2">
           <Popover
             content={TeacherPopoverContent}
-            trigger="hover"
+            trigger="click"
             placement="leftTop"
+
           >
             <Button>
               <FaChalkboardTeacher size={16} />
             </Button>
           </Popover>
           <Popover
-            className=" mt-3"
+            className=""
             content={ungroupStudentPopoverContent}
             trigger="click"
             placement="leftTop"

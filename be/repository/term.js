@@ -34,7 +34,7 @@ const getActiveTerm = async () => {
     const activeTerm = await Term.findOne({
       startTime: { $lt: currentTime },
       endTime: { $gt: currentTime },
-    });
+    }).exec();
     return activeTerm;
   } catch (error) {
     throw new Error(error.message);
@@ -185,7 +185,13 @@ const getTermByTermId = async (termId) => {
     const term = await Term.findById(termId);
     return term;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message);  }
+};
+const findTermByCode = async (termCode) => {
+  try {
+    return await Term.findOne({ termCode }); 
+  } catch (error) {
+    throw new Error("Error while finding term by code: " + error.message);
   }
 };
 export default {
@@ -205,4 +211,5 @@ export default {
   deleteTimelineOfTerm,
   updateTimelineOfTerm,
   getTermByTermId,
+  findTermByCode
 };

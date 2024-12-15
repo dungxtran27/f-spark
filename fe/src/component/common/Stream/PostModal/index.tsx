@@ -119,12 +119,30 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
             </Upload>
           </FormItem>
           {postType === CLASS_WORK_TYPE.ASSIGNMENT && (
-            <FormItem name={"duration"} label={"Duration"}>
+            <FormItem
+              name={"duration"}
+              label={"Duration"}
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const now = new Date();
+                    const dueDate = value[1]?.toDate();
+                    if (dueDate && dueDate < now) {
+                      return Promise.reject(
+                        "Due date cannot be in the past. Please select a valid date."
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <DatePicker.RangePicker
                 className="w-full"
                 showTime={{ format: "HH:mm" }}
                 format="YYYY-MM-DD HH:mm"
-                placeholder={["Start Date", "Due date"]}
+                placeholder={["Start Date", "Due Date"]}
               />
             </FormItem>
           )}

@@ -154,8 +154,17 @@ const CustomerPersonas: React.FC<CustomerPersonasProps> = ({ groupId }) => {
 
   const handleDeletePersona = () => {
     if (editingPersona?._id) {
-      deleteCustomerPersona.mutate(editingPersona._id);
-      setIsModalVisible(false);
+      Modal.confirm({
+          title: "Are you sure you want to delete this customer personas?",
+          content: "Once deleted, the data cannot be recovered.",
+          okText: "Yes, delete it",
+          okType: "danger",
+          cancelText: "No",
+          onOk: () => {
+            deleteCustomerPersona.mutate(editingPersona._id);
+            setIsModalVisible(false);
+          },
+            });
     }
   };
 

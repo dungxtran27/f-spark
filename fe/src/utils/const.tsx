@@ -206,11 +206,6 @@ export const OVERVIEW_TABS = [
   { key: "overview", label: "Overview", children: <Overview /> },
   { key: "outcome", label: "Outcome", children: <Outcome /> },
 ];
-export const MANAGEACCOUNT_TABS = [
-  { key: "student", label: "Student", children: <AccountManagement /> },
-  { key: "teacher", label: "Teacher", children: <Teacher /> },
-  { key: "mentor", label: "Mentor", children: <Mentor /> },
-];
 export const TASK_TYPE = {
   CLASS_WORK: "Class work",
   GROUP_WORK: "Group task",
@@ -269,14 +264,18 @@ export const QUERY_KEY = {
   TERM_TIMELINE: "timelineOfTerm",
   CLASS_DETAIL: "classDetail",
   NO_GROUP_STUDENTS_OF_CLASS: "noGroupStudentsOfClass",
+  ALLTEACHER:"allTeacher",
+  ALLMENTOR:"allMentor",
   All_OUTCOMES: "allOutcome",
   GROUP_FUND_ESTIMATIONS: "groupFundEstimation",
   ACTIVE_SPONSOR_REQUEST: "activeSponsorRequest",
   APPROVED_SPONSOR_REQUEST: "approvedSponsorRequest",
   RECEIVE_SPONSOR_REQUEST: "receivedSponsorRequest",
   GALLERY: "gallery",
-  DASHBOARD_NEW: "new dash board",
-  DASHBOARD_REQUEST: "request dash board",
+  DASHBOARD_NEW:"new dash board",
+  DASHBOARD_REQUEST:"request dash board",
+  SIGN_UP: "sign up",
+  GROUP_AND_CLASS: "groupAndClass"
 };
 export const colorMap: Record<string, string> = {
   SE: "cyan",

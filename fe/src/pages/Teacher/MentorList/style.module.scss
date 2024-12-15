@@ -27,6 +27,10 @@
   color: rgb(5, 5, 5);
   scale: 1.1;
   transition: all 200ms ease-in-out;
+  -webkit-transition: all 200ms ease-in-out;
+  -moz-transition: all 200ms ease-in-out;
+  -ms-transition: all 200ms ease-in-out;
+  -o-transition: all 200ms ease-in-out;
 }
 .deleteBtn {
   background-color: red !important;
@@ -37,3 +41,4 @@
   color: rgb(255, 255, 255) !important;
   transition: all 200ms ease-in-out !important;
 }
+

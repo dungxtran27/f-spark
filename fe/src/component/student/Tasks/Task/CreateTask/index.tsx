@@ -144,7 +144,8 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
     <Modal
       title={mode === "CREATE" ? "Create Task" : "Update Task"}
       open={open}
-      onOk={() => {
+      onOk={async () => {
+        await form.validateFields();
         createTask.mutate({
           assignee: assignee,
           description: description,

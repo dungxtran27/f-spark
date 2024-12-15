@@ -7,20 +7,30 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { UserInfo } from "../../../../model/auth";
 import Gallery from "./Gallery";
-import { FloatButton } from "antd";
+import { Button, FloatButton, Result } from "antd";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { GrGallery } from "react-icons/gr";
 import { FaMap } from "react-icons/fa6";
 import { IoPersonCircle } from "react-icons/io5";
 import { MdOutlineBusiness } from "react-icons/md";
-
+import { useNavigate } from "react-router-dom";
 const ProjectOverviewWrapper: React.FC = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
-
+  const navigate = useNavigate();
   if (!userInfo?.group) {
-    return <div> abc </div>;
+    return (
+      <Result
+      status="warning"
+      title="You are not currently in any group. Please submit a request to join a group."
+      extra={
+        <Button onClick={() => navigate('/request')} type="primary" key="console">
+          Go to request screen
+        </Button>
+      }
+      />
+    );
   }
 
   return (

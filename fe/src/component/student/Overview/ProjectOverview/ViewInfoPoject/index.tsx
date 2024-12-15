@@ -26,6 +26,9 @@ import { FaEdit } from "react-icons/fa";
 import { groupApi } from "../../../../../api/group/group";
 import { mentorList } from "../../../../../api/mentor/mentor";
 import TextArea from "antd/es/input/TextArea";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../../redux/store";
+import { UserInfo } from "../../../../../model/auth";
 const { Title, Text } = Typography;
 
 interface ViewInfoPojectProps {
@@ -36,7 +39,9 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
-
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
     queryFn: async () =>
@@ -114,7 +119,7 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
               </div>
               <div className="flex pt-2">
                 <p className="font-semibold text-gray-500">Tag:</p>
-                {data?.tag.map((t: any) => (
+                {data?.tag?.map((t: any) => (
                   <span className="pl-1">
                     <Tag color={colorMajorGroup[t.name]}> {t.name}</Tag>
                   </span>
@@ -179,13 +184,15 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
                         <div className="flex flex-col">
                           <div className="flex items-center">
                             <Text
-                              className={`text-gray-600 text-center ${
+                              className={`text-gray-600 font-bold text-center ${
                                 member?.account?._id === userId
                                   ? "!text-blue-500 font-semibold"
                                   : ""
                               } `}
                             >
-                              {member.name}
+                              {member?._id === userInfo?._id
+                                ? "You"
+                                : member.name}
                             </Text>
                             {data.leader === member?._id ? (
                               <span className="pl-2">
@@ -212,10 +219,18 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
                           <Button
                             type="link"
                             onClick={() => {
-                              requestDeleteStudentFromGroup.mutate({
-                                actionType: "delete",
-                                studentDeleted: member._id,
-                              });
+                              Modal.confirm({
+                                        title: "Are you sure you want to remove this member from the group?",
+                                        okText: "Yes, delete it",
+                                        okType: "danger",
+                                        cancelText: "No",
+                                        onOk: () => {
+                                          requestDeleteStudentFromGroup.mutate({
+                                            actionType: "delete",
+                                            studentDeleted: member._id,
+                                          });
+                                        },
+                                          });
                             }}
                           >
                             <MdCancelPresentation size={25} color="red" />
@@ -251,7 +266,14 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
         }}
       >
         <Form layout="vertical" form={form}>
-          <Form.Item name={"name"} label={"Group Name"}>
+          <Form.Item 
+          name={"name"} 
+          label={"Group Name"} 
+          rules={[
+            { required: true, message: "Group name is required!" },
+            { whitespace: true, message: "Group name cannot be empty!" },
+          ]}
+          >
             <Input
               showCount
               maxLength={60}
@@ -259,18 +281,39 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
               defaultValue={data.GroupName}
             />
           </Form.Item>
-          <Form.Item name={"description"} label={"Description"}>
+          <Form.Item 
+            name={"description"} 
+            label={"Description"}
+            rules={[
+              { required: true, message: "Description is required!" },
+              { whitespace: true, message: "Description cannot be empty!" },
+            ]}
+          >
             <TextArea
               rows={4}
               defaultValue={data.GroupDescription}
               maxLength={300}
             />
           </Form.Item>
-          <Form.Item name="tags" label={"Tag"}>
+          <Form.Item 
+            name="tags" 
+            label={"Tag"}
+            rules={[
+              { required: true, message: "At least one tag is required!" },
+              {
+                validator: (_, value) => {
+                  if (value && value.length > 0 && !value.includes(null)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Tags cannot be null!"));
+                },
+              },
+            ]}
+            >
             <Select
               mode="multiple"
               allowClear
-              defaultValue={data?.tag.map((i: any) => ({
+              defaultValue={data?.tag?.map((i: any) => ({
                 label: i.name,
                 value: i._id,
               }))}

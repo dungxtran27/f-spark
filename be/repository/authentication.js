@@ -1,4 +1,6 @@
+import Account from "../model/Account.js";
 import User from "../model/RegisteredUser.js";
+import Student from "../model/Student.js";
 
 const authenticate = async () => {
   try {
@@ -8,27 +10,80 @@ const authenticate = async () => {
   }
 };
 const addUser = async ({
-  firstName,
-  lastName,
   email,
   hashedPassword,
+  imgLink
 }) => {
   try {
-    const existingUser = await User.findOne({ email: email }).exec();
-    if (existingUser) {
-      throw new Error("The email has already been registered !!");
-    }
-    const result = await User.create({
-      first_name: firstName,
-      last_name: lastName,
+    const accountNew = await Account.create({
       email: email,
       password: hashedPassword,
+      profilePicture: imgLink
     });
-    return result._doc;
+    const student = await findByEmail(email);
+    const studentId = student._id;
+
+    const updatedStudent = await Student.findByIdAndUpdate(
+      studentId,
+      { account: accountNew._id },
+      { new: true }
+    );
+    return {
+      accountNew,
+      updatedStudent,
+    };
   } catch (error) {
     throw new Error(error.message);
   }
 };
+const getUserByTerm = async ({ termCode }) => {
+  try {
+    const existingUser = await Student.findOne({ term: termCode }).exec();
+    return existingUser;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const getUserByEmail = async ({ name, studentId, generation, email, profession }) => {
+  try {
+    const user = await Student.findOne({ email }).exec();
+
+    if (!user) {
+      throw new Error("User not found: No user matches the provided email.");
+    }
+
+    if (user.name !== name) {
+      throw new Error("Name is incorrect.");
+    }
+
+    if (user.studentId !== studentId) {
+      throw new Error("Student ID is incorrect.");
+    }
+
+    if (user.gen !== generation) {
+      throw new Error("Generation is incorrect.");
+    }
+
+    if (user.major !== profession) {
+      throw new Error("Major is incorrect.");
+    }
+
+    return user;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+
+const findByEmail = async (email) => {
+  return await Student.findOne({ email: email }).exec();
+};
+
+const findAccount = async (email) => {
+  return await Account.findOne({ email: email }).exec();
+};
+
 const verifyUser = async (userId) => {
   try {
     const unverifiedUser = await User.findById(userId).exec();
@@ -62,17 +117,6 @@ const getUserById = async (userId) => {
     throw new Error(error.message);
   }
 };
-const getUserByEmail = async (email) => {
-  try {
-    const existingUser = await User.findOne({ email: email }).exec();
-    return existingUser;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-const findByEmail = async (email) => {
-  return await User.findOne({ email: email }).exec();
-};
 
 const generateResetToken = async (userId, role) => {
   return jwt.sign({ userId, role }, process.env.RESET_TOKEN_SECRET, { expiresIn: '1h' });
@@ -84,5 +128,7 @@ export default {
   getUserById,
   getUserByEmail,
   findByEmail,
-  generateResetToken
+  generateResetToken,
+  getUserByTerm,
+  findAccount
 };

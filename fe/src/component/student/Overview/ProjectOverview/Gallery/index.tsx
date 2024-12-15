@@ -43,7 +43,7 @@ const Gallery: React.FC<GalleryProps> = ({ groupId }) => {
   });
 
   return (
-    <div className="p-2 space-y-2 bg-white rounded">
+    <div className="p-4 space-y-2 bg-white rounded">
       <div className="flex justify-between">
         <div className="text-xl font-semibold">
           Gallery ({gallery?.data.data.gallery.length})
@@ -82,7 +82,7 @@ const Gallery: React.FC<GalleryProps> = ({ groupId }) => {
               )}
             </>
           ) : (
-            <Empty description={"No image uploaded"} />
+            <Empty description={"No image uploaded"} className="mx-auto"/>
           )}
         </div>
       </Image.PreviewGroup>

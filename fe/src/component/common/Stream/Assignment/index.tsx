@@ -8,6 +8,7 @@ import classNames from "classnames";
 import styles from "../style.module.scss";
 import DOMPurify from "dompurify";
 import { TiAttachment } from "react-icons/ti";
+import moment from "moment";
 interface Props {
   post: any;
   userInfo: any;
@@ -32,8 +33,14 @@ const Assignment = ({
             <span className="font-medium">
               {userInfo?.role === ROLE.teacher ? "You" : "Teacher"}
             </span>
-            <span className="text-textSecondary">
-              {dayjs(post?.createdAt).format(DATE_FORMAT.withYearAndTime)}
+            <span>
+              <span className="text-textSecondary">
+                {dayjs(post?.startDate).format(DATE_FORMAT.withYear)}
+              </span>
+              <span className="text-textSecondary"> - </span>
+              <span className="text-textSecondary">
+                {dayjs(post?.dueDate).format(DATE_FORMAT.withYear)}
+              </span>
             </span>
           </div>
         </div>
@@ -158,27 +165,34 @@ const Assignment = ({
           <Empty description={"You have not submitted your answer"} />
         )}
       </div>
-      {userInfo?.role === ROLE.student && !post?.mySubmission && (
-        <div className="flex items-center mt-5 gap-3">
-          <img
-            src={userInfo?.account?.profilePicture}
-            className="aspect-square w-[40px] object-cover object-center rounded-full border-2 border-primary"
-          />
-          <Input
-            size="large"
-            placeholder="Add your submission here"
-            onFocus={(e) => {
-              setSubmitModal({
-                open: true,
-                classworkId: post?._id,
-              });
-              e.target.blur();
-            }}
-          />
-          {/* <GrAttachment size={20} /> */}
-          {/* <IoSend size={20} /> */}
-        </div>
-      )}
+      {userInfo?.role === ROLE.student &&
+        !post?.mySubmission &&
+        !moment().isAfter(moment(post?.dueDate)) && (
+          <div className="flex items-center mt-5 gap-3">
+            <img
+              src={userInfo?.account?.profilePicture}
+              className="aspect-square w-[40px] object-cover object-center rounded-full border-2 border-primary"
+            />
+            <Input
+              size="large"
+              placeholder="Add your submission here"
+              onFocus={(e) => {
+                setSubmitModal({
+                  open: true,
+                  classworkId: post?._id,
+                });
+                e.target.blur();
+              }}
+            />
+          </div>
+        )}
+
+      {userInfo?.role === ROLE.student &&
+        moment().isAfter(moment(post?.dueDate)) && (
+          <div className="text-red-500 font-medium mt-3">
+            The submission is closed. The due date is over.
+          </div>
+        )}
     </div>
   );
 };

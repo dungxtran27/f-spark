@@ -29,12 +29,32 @@ const createRequest = async (req, res) => {
       groupId,
       actionType
     );
-
     if (!actionType) {
       return res.status(400).json({
         error: "Invalid action type.",
       });
     }
+    // if (!studentId) {
+    //   return res.status(400).json({
+    //     error: "Student ID is missing or invalid.",
+    //   });
+    // }
+    // const student = await StudentRepository.findById(studentId);
+    // if (!student) {
+    //   return res.status(404).json({
+    //     error: "Student not found",
+    //   });
+    // }
+    // if (!groupId) {
+    //   return res.status(400).json({
+    //     error: "Group ID is missing or invalid.",
+    //   });
+    // }
+    // if (!actionType || !["join", "leave", "delete"].includes(actionType)) {
+    //   return res.status(400).json({
+    //     error: "Invalid or missing action type. Valid action types are: 'join', 'leave', or 'delete'.",
+    //   });
+    // }
 
     if (existingRequest) {
       return res.status(400).json({
@@ -415,6 +435,8 @@ const createDeleteStudentFromGroupRequest = async (req, res) => {
         error: "Request already exists for this student and group.",
       });
     }
+    console.log(groupId, studentId);
+    
     const group = await RequestRepository.findGroupForLeaveRequest(
       groupId,
       studentId
@@ -477,6 +499,51 @@ const updateIsSponsorship = async () => {
   }
 };
 
+const sendRequestSponsorship = async () => {
+  try {
+    const activeTerm = await TermRepository.getActiveTerm();
+    const currentTime = moment().toISOString();
+    const startDate = activeTerm.timeLine.find((t) => t.type === "sponsorShip").startDate;
+    if (moment(startDate).isBefore(currentTime)) {
+      const groups = await GroupRepository.findGroupByOldMark();
+
+      if (!groups || groups.length === 0) {
+        return res.status(404).json({ message: "Group not found." });
+      }
+
+      const requests = await Promise.all(
+        groups.map(async (group) => {
+          const existingRequests = await RequestRepository.findRequestByTypeRequestFPTSended(group._id);
+          if (existingRequests && existingRequests.length > 0) {
+            return null;
+          } else {
+            const request = {
+              typeRequest: "FPT",
+              createBy: null,
+              actionType: null,
+              title: "Thông báo: Mở đơn xin tài trợ",
+              content: "Chào em,\nNhóm em đủ điều kiện nhận hỗ trợ kinh phí khởi nghiệp. Sinh viên đọc kỹ nội dung ở file đính kèm.\nThân mến.",
+              status: "pending",
+              attachmentUrl: "https://example.com/file.docx",
+              group: group._id,
+              upVoteYes: [],
+              upVoteNo: [],
+              totalMembers: group.teamMembers.length,
+              updatedAt: new Date().toISOString(),
+            };
+            return RequestRepository.createRequestFPT(request);
+          }
+        })
+      );
+    }
+    else {
+      return;
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   getAllRequest,
   voteGroup,
@@ -493,4 +560,5 @@ export default {
   getLeaveClassRequestOfStudent,
   createDeleteStudentFromGroupRequest,
   updateIsSponsorship,
+  sendRequestSponsorship
 };
