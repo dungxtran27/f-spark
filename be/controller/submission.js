@@ -8,9 +8,10 @@ import {
 import mongoose from "mongoose";
 import { CLASS_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
 import { userSocketMap, io } from "../index.js";
+import { uploadFile } from "../utils/uploadFile.js";
 const createSubmission = async (req, res) => {
   try {
-    const { attachment, content } = req.body;
+    const { attachment, content, fileName } = req.body;
     if (attachment?.length === 0 && content?.length === 0) {
       return res
         .status(400)
@@ -18,26 +19,28 @@ const createSubmission = async (req, res) => {
     }
     const classworkId = req.query.classworkId;
     const studentId = req.decodedToken.role.id;
-
+    const attatchementLink = await uploadFile(attachment, fileName);
+    if (!attatchementLink)
+      return res.status(400).json({ error: "Upload failed. please try again" });
     const createSubmiss = await SubmissionRepository.createSubmission({
       groupId: req.groupId,
       studentId,
       classworkId,
-      attachment,
+      attachment: attatchementLink,
       content,
     });
 
     const classwork = await ClassworkRepository.getClassworkByClassworkId(
       new mongoose.Types.ObjectId(classworkId)
-    )
+    );
     const student = await StudentRepository.findStudentByAccountId(
       new mongoose.Types.ObjectId(req.decodedToken.account)
-    )
+    );
     const teacher = await TeacherRepository.getTeacherAccountByClassId(
       new mongoose.Types.ObjectId(student.classId)
-    )
-    
-    if(createSubmiss) {
+    );
+
+    if (createSubmiss) {
       const notificationData = {
         class: student.classId,
         sender: studentId,
@@ -50,20 +53,20 @@ const createSubmission = async (req, res) => {
           actionType: CLASS_NOTIFICATION_ACTION_TYPE.CREATE_SUBMISSION,
           newVersion: classwork,
           priorVersion: createSubmiss,
-          extraUrl: `/class/${student.classId}`
-        }
-      }
+          extraUrl: `/class/${student.classId}`,
+        },
+      };
       await NotificationRepository.createNotification({
         data: notificationData,
-      })
+      });
       const socketIds = userSocketMap[teacher?.account.toString()];
-        if (socketIds) {
-          io.to(socketIds).emit(
-            "newNotification",
-            `Assignment ${classwork?.title} has a new submission`
-          );
-        }
-    }    
+      if (socketIds) {
+        io.to(socketIds).emit(
+          "newNotification",
+          `Assignment ${classwork?.title} has a new submission`
+        );
+      }
+    }
 
     return res
       .status(201)
@@ -84,7 +87,7 @@ const addGrade = async (req, res) => {
       submissionId: new mongoose.Types.ObjectId(submissionId),
       grade,
       criteria: criteriaObjectIds,
-    });    
+    });
     if (updateGrade) {
       const notificationData = {
         group: updateGrade?.group,
@@ -105,7 +108,7 @@ const addGrade = async (req, res) => {
       });
       const studentsOfGroup = await StudentRepository.getStudentsByGroup(
         updateGrade?.group
-      );      
+      );
       studentsOfGroup.forEach((s) => {
         const socketIds = userSocketMap[s?.account?.toString()];
         if (socketIds) {
@@ -140,21 +143,23 @@ const getSubmissionsOfClassWork = async (req, res) => {
 const getSubmissionsByGroup = async (req, res) => {
   try {
     const { groupId } = req.query;
-        if (!groupId) {
-      return res.status(400).json({ message: 'groupId is required' });
+    if (!groupId) {
+      return res.status(400).json({ message: "groupId is required" });
     }
-    const submissions = await SubmissionRepository.getSubmissionsByGroupId(groupId);
+    const submissions = await SubmissionRepository.getSubmissionsByGroupId(
+      groupId
+    );
     return res.status(200).json({ data: submissions || [] });
   } catch (error) {
-    return res.status(500).json({ message: 'An error occurred: ' + error.message });
+    return res
+      .status(500)
+      .json({ message: "An error occurred: " + error.message });
   }
 };
-
-
 
 export default {
   createSubmission,
   addGrade,
   getSubmissionsOfClassWork,
-  getSubmissionsByGroup
+  getSubmissionsByGroup,
 };

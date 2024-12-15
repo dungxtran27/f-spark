@@ -3,7 +3,7 @@ import "react-quill/dist/quill.snow.css";
 import styles from "./styles.module.scss";
 interface Props {
   onChange: (value: any) => void;
-  placeHolder: string;
+  placeHolder?: string;
 }
 const QuillEditor = ({
   onChange,

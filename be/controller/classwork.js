@@ -9,6 +9,7 @@ import moment from "moment";
 import { CLASS_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
 import _ from "lodash";
 import { io, userSocketMap } from "../index.js";
+import { uploadFile } from "../utils/uploadFile.js";
 const getClassWorkByStudent = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -127,15 +128,23 @@ const deleteClasswork = async (req, res) => {
 const createClassWork = async (req, res) => {
   try {
     const { classId } = req.params;
-    const { title, description, attachment, startDate, dueDate, type } =
-      req.body;
-    if (!title || !type) {
-      return res.status(400).json({ error: "Bad request !" });
-    }
-    const classwork = await ClassworkRepository.createClassWork({
+    const {
       title,
       description,
       attachment,
+      fileName,
+      startDate,
+      dueDate,
+      type,
+    } = req.body;
+    if (!title || !type) {
+      return res.status(400).json({ error: "Bad request !" });
+    }
+    const attatchementLink = await uploadFile(attachment, fileName);
+    const classwork = await ClassworkRepository.createClassWork({
+      title,
+      description,
+      attachment: attatchementLink,
       startDate:
         startDate && type === "assignment" ? startDate : moment().toISOString(),
       dueDate,
@@ -230,7 +239,11 @@ const getTotalClassWork = async (req, res) => {
     if (!teacherId) {
       return res.status(400).json({ error: "Bad request !" });
     }
-    const result = await ClassworkRepository.getTotalClassWork({ startDate, endDate, teacherId });
+    const result = await ClassworkRepository.getTotalClassWork({
+      startDate,
+      endDate,
+      teacherId,
+    });
     return res.status(201).json({ data: result });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -243,7 +256,9 @@ const getTotalClassWorkByClassId = async (req, res) => {
     if (!classId) {
       return res.status(400).json({ error: "Bad request !" });
     }
-    const result = await ClassworkRepository.getTotalClassWorkByClassId({ classId });
+    const result = await ClassworkRepository.getTotalClassWorkByClassId({
+      classId,
+    });
     return res.status(201).json({ data: result });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -261,5 +276,5 @@ export default {
   upvoteAnnouncement,
   getClassStatistics,
   getTotalClassWork,
-  getTotalClassWorkByClassId
+  getTotalClassWorkByClassId,
 };

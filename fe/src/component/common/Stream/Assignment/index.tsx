@@ -20,7 +20,6 @@ const Assignment = ({
   setOpenSubmission,
   setSubmitModal,
 }: Props) => {
-
   return (
     <div className="w-full p-5 border  rounded bg-white shadow-md">
       <div className="flex items-center justify-between">
@@ -74,7 +73,9 @@ const Assignment = ({
             <div className="flex items-center group text-primaryBlue">
               <TiAttachment size={20} />
               <span className="group-hover: underline">
-                {post?.attachment[0]}
+                <a download href={post?.attachment[0]}>
+                  download
+                </a>
               </span>
             </div>
           </span>

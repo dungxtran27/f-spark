@@ -1,25 +1,29 @@
 import { PassThrough } from "stream";
 import cloudinary from "./cloudinary.js";
 
-export const uploadImage = async (file) => {
+export const uploadFile = async (file, fileName) => {
   if (!file) {
     console.error("Invalid file data");
     return;
   }
 
   try {
-    //  base64
-    if (typeof file === "string" && file.startsWith("data:image")) {
+    // Base64
+    if (typeof file === "string" && file.startsWith("data:")) {
       const result = await cloudinary.uploader.upload(file, {
-        resource_type: "image",
+        resource_type: "raw",
+        public_id: fileName, // Set the public ID to the file name
       });
       return result.secure_url;
     }
 
-    // buffer
+    // Buffer
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { resource_type: "image" },
+        {
+          resource_type: "raw",
+          public_id: fileName, // Set the public ID to the file name
+        },
         (error, result) => {
           if (error) {
             console.error("Upload Error:", error);
