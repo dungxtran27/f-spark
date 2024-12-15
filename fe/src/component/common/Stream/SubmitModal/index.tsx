@@ -36,6 +36,7 @@ const SubmitModal = ({ open, setOpen, classworkId }: Props) => {
   const props: UploadProps = {
     name: "file",
     multiple: true,
+    accept: ".docx,.pdf,.xlsx",
     customRequest: handleFileChange,
   };
   const createSubmission = useMutation({

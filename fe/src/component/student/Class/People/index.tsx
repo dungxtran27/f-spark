@@ -98,7 +98,7 @@ const People = () => {
         <img
           className="w-[9rem] aspect-square object-cover border"
           src={
-            classPeople?.data.data.teacher?.account.profilePicture ||
+            classPeople?.data?.data?.teacher?.account?.profilePicture ||
             "https://static.vecteezy.com/system/resources/thumbnails/003/337/584/small/default-avatar-photo-placeholder-profile-icon-vector.jpg"
           }
           alt=""
@@ -113,7 +113,7 @@ const People = () => {
           <div className="">
             <span className="font-bold">Email: </span>
             <span className="text-[16px]">
-              {classPeople?.data.data?.teacher?.account?.email}
+              {classPeople?.data?.data?.teacher?.account?.email}
             </span>
           </div>
           <div className="">
@@ -128,10 +128,10 @@ const People = () => {
   );
   return (
     <>
-      <div>{classPeople?.data.data.groupStudent.length} groups</div>
+      <div>{classPeople?.data.data?.groupStudent.length} groups</div>
       <div className=" w-full rounded-md p-3 flex">
         <div className="flex flex-wrap ">
-          {classPeople?.data.data.groupStudent.map((s: any) => (
+          {classPeople?.data.data?.groupStudent.map((s: any) => (
             <GroupCard
               info={s}
               handleOpengroupDetailModal={handleOpengroupDetailModal}
@@ -231,7 +231,7 @@ const People = () => {
                         ) : (
                           <img
                             src={
-                              s?.account.profilePicture ||
+                              s?.account?.profilePicture ||
                               "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
                             }
                             className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
