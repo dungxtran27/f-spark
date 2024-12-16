@@ -1,4 +1,12 @@
-import { DatePicker, Form, Input, Modal, Select, UploadProps } from "antd";
+import {
+  DatePicker,
+  Form,
+  Input,
+  message,
+  Modal,
+  Select,
+  UploadProps,
+} from "antd";
 import FormItem from "antd/es/form/FormItem";
 import React, { useEffect, useState } from "react";
 import {
@@ -57,6 +65,13 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
   const attachment = Form.useWatch(CREATE_TASK_FILTER.attachment, form);
 
   const [fileName, setFileName] = useState<string>("");
+  const beforeUpload = (file: File) => {
+    const isLt2M = file.size / 1024 / 1024 < 5; //5mb
+    if (!isLt2M) {
+      message.error("File must be smaller than 5MB!");
+    }
+    return isLt2M;
+  };
   const handleFileChange = async (info: any) => {
     const file = info.file;
     setFileName(file.name);
@@ -72,6 +87,7 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
     multiple: false,
     accept: ".docx,.pdf,.xlsx",
     customRequest: handleFileChange,
+    beforeUpload,
   };
   const createTask = useMutation({
     mutationFn: ({
