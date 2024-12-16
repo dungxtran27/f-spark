@@ -27,10 +27,8 @@ const Request = () => {
       </div>
     </div>
   ) : (
-    <div className="bg-gray-100 flex flex-col items-center justify-center m-2 space-y-3">
-      <div className="bg-white rounded-md shadow-md flex flex-row space-x-3 w-full">
+    <div className="flex flex-col items-center justify-center">
         <SendRequestJoinGroup />
-      </div>
     </div>
   );
 };

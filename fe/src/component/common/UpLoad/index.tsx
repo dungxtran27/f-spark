@@ -28,7 +28,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onClose }) => {
   const mutation = useMutation({
     mutationFn: async () => {
       if (selectedFiles.length === 0) {
-        throw new Error("No files selected");
+        message.error("Please select some images before upload");
+        return;
       }
 
       const formData = new FormData();
@@ -95,14 +96,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onClose }) => {
 
   return (
     <div className="flex flex-col">
-      <input type="file" multiple onChange={handleFileChange} />
+      <input
+        type="file"
+        accept="image/png, image/jpeg"
+        multiple
+        onChange={handleFileChange}
+      />
       <div className="flex flex-wrap mt-2 overflow-auto h-[50vh]">
         {selectedFiles.map((file, index) => (
           <img
             key={index}
             ref={(el) => (imageRefs.current[index] = el!)}
             src=""
-            className="w-[200px] h-[200px]"
+            className="w-[200px] h-[200px] object-contain"
             alt={`Preview ${index}`}
           />
         ))}

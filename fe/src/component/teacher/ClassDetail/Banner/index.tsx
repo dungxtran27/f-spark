@@ -8,8 +8,9 @@ import { RootState } from "../../../../redux/store";
 import { Term } from "../../../../model/auth";
 import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
-import { QUERY_KEY } from "../../../../utils/const";
+import { DATE_FORMAT, QUERY_KEY } from "../../../../utils/const";
 import { requestDeadlineApi } from "../../../../api/requestDeadline/requestDeadline";
+import dayjs from "dayjs";
 
 interface Props {
   name: string;
@@ -83,6 +84,12 @@ const Banner = ({ name, classId }: Props) => {
     title: index === currentStep ? "" : item.title,
   }));
 
+  const activeStep = filteredOutcomes.findIndex(
+    (f) => dayjs().isAfter(f.startDate) && dayjs().isBefore(f.endDate)
+  );
+  useEffect(() => {
+    setCurrentStep(activeStep);
+  }, [activeStep]);
   const customDot: StepsProps["progressDot"] = (dot, { index }) => (
     <Popover
       content={
@@ -97,7 +104,7 @@ const Banner = ({ name, classId }: Props) => {
           </div>
         </div>
       }
-      trigger="click"
+      trigger="hover"
       placement="top"
       open={index === currentStep}
     >

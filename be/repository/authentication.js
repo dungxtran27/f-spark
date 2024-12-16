@@ -11,12 +11,14 @@ const authenticate = async () => {
 };
 const addUser = async ({
   email,
-  hashedPassword
+  hashedPassword,
+  imgLink
 }) => {
   try {
     const accountNew = await Account.create({
       email: email,
       password: hashedPassword,
+      profilePicture: imgLink
     });
     const student = await findByEmail(email);
     const studentId = student._id;
@@ -84,14 +86,14 @@ const findAccount = async (email) => {
 
 const verifyUser = async (userId) => {
   try {
-    const unverifiedUser = await User.findById(userId).exec();
+    const unverifiedUser = await Account.findById(userId).exec();
     if (!unverifiedUser) {
       throw new Error("Not found!!");
     }
     if (unverifiedUser.verify) {
       throw new Error("The user has already been verified!!");
     }
-    const result = await User.findOneAndUpdate(
+    const result = await Account.findOneAndUpdate(
       { _id: userId },
       { $set: { verify: true } },
       { new: true }

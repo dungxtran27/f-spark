@@ -6,12 +6,13 @@ import {
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { sendConfirmEmail, sendMail } from "../utils/mailTransport.js";
+import { sendConfirmEmail } from "../utils/mailTransport.js";
 import jwksClient from "jwks-rsa";
 import emailTemplate from "../utils/emailTemplate.js";
 import { io } from "../index.js";
 import { ROLE_NAME } from "../utils/const.js";
 import { StudentRepository } from "../repository/index.js";
+import { uploadImage } from "../utils/uploadImage.js";
 const client = jwksClient({
   jwksUri: "https://www.googleapis.com/oauth2/v3/certs",
   requestHeaders: {
@@ -39,12 +40,40 @@ const authenticate = async (req, res) => {
 };
 const signUp = async (req, res) => {
   try {
-    const { name, studentId, generation, profession, termCode, email, password } = req.body;
+    const {
+      name,
+      studentId,
+      generation,
+      profession,
+      termCode,
+      email,
+      password,
+      img,
+    } = req.body;
 
-    if (!name || !studentId || !generation || !profession || !termCode || !email || !password) {
+    if (
+      !name ||
+      !studentId ||
+      !generation ||
+      !profession ||
+      !termCode ||
+      !email ||
+      !password
+    ) {
       return res
         .status(400)
         .json({ error: "Please fill out all the mandatory fields" });
+    }
+
+    let imgLink;
+    if (!img) {
+      imgLink =
+        "https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-8.jpg";
+    } else {
+      imgLink = await uploadImage(img);
+      if (!imgLink) {
+        return res.status(400).json({ error: "Upload Failed !" });
+      }
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -54,10 +83,18 @@ const signUp = async (req, res) => {
 
     const term = await AuthenticateRepository.getUserByTerm({ termCode });
     if (!term) {
-      return res.status(400).json({ error: "Account student does not in this term" });
+      return res
+        .status(400)
+        .json({ error: "Account student does not in this term" });
     }
 
-    const existingUser = await AuthenticateRepository.getUserByEmail({ name, studentId, generation, email, profession });
+    const existingUser = await AuthenticateRepository.getUserByEmail({
+      name,
+      studentId,
+      generation,
+      email,
+      profession,
+    });
     if (!existingUser) {
       return res.status(400).json({ error: "Your information is incorrect" });
     }
@@ -72,10 +109,11 @@ const signUp = async (req, res) => {
 
     const newUser = await AuthenticateRepository.addUser({
       email,
-      hashedPassword
+      hashedPassword,
+      imgLink,
     });
-
-    await sendMail(email, newUser._id);
+    const userId = newUser.accountNew._id
+    await sendConfirmEmail(email, userId);
 
     return res.status(201).json({
       message:
@@ -91,6 +129,7 @@ const verifyUser = async (req, res) => {
     const token = req.params.token;
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
     const { userId } = decodedToken;
+
     const result = await AuthenticateRepository.verifyUser(userId);
     return res
       .status(200)
@@ -123,10 +162,13 @@ const login = async (req, res) => {
     if (!passwordMatch) {
       return res.status(400).json({ error: "Bad Credential" });
     }
-    let userDetail = {};
-    console.log(role);
 
-    switch (role) {      
+    if (!existingAccount.verify) {
+      return res.status(400).json({ error: "The account is not verified, please check your email again !" });
+    }
+    
+    let userDetail = {};
+    switch (role) {
       case ROLE_NAME.student:
         const student = await StudentRepository.findStudentByAccountId(
           existingAccount._id
@@ -169,15 +211,21 @@ const login = async (req, res) => {
             error: "Unauthorized !!!",
           });
         }
-        userDetail.account = existingAccount
+        userDetail.account = existingAccount;
         userDetail.role = ROLE_NAME.headOfSubject;
+        break;
+      case ROLE_NAME.accountant:
+        if (req.body.email !== "accountant@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
+        userDetail.account = existingAccount;
+        userDetail.role = ROLE_NAME.accountant;
         break;
       default:
         return res.status(500).json({ error: "Bad request" });
     }
-    // if (!existingAccount.verify) {
-    //   return res.status(400).json({ error: "The account is not verified!" });
-    // }
     const socket = io.sockets.sockets.get(req.body.socketId);
     if (socket) {
       socket.accountId = existingAccount._id.toString();

@@ -6,6 +6,7 @@ import {
 import XLSX from "xlsx";
 import { GROUP_NOTIFICATION_ACTION_TYPE } from "../utils/const.js";
 import { io, userSocketMap } from "../index.js";
+import { uploadFile } from "../utils/uploadFile.js";
 const createTask = async (req, res) => {
   try {
     const decodedToken = req.decodedToken;
@@ -14,6 +15,7 @@ const createTask = async (req, res) => {
       taskName,
       description,
       attachment,
+      fileName,
       status,
       assignee,
       classwork,
@@ -27,11 +29,12 @@ const createTask = async (req, res) => {
     if (!taskName || !assignee || taskName === "" || !taskType || !priority) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+    const fileLink = await uploadFile(attachment, fileName);
     const taskData = {
       taskType: taskType,
       taskName,
       description,
-      attachment: attachment,
+      attachment: fileLink,
       status: status || "Pending",
       assignee: assignee,
       group: req.groupId,
@@ -183,8 +186,6 @@ export const updateTask = async (req, res) => {
 
     if (decodedToken?.role?.id !== task?.assignee?._id.toString()) {
       const socketIds = userSocketMap[task?.assignee?.account?._id.toString()];
-      // console.log(userSocketMap, socketIds);
-
       io.to(socketIds).emit(
         "newNotification",
         `Your task ${task?.taskName} has been updated. Check it out !`

@@ -1,6 +1,5 @@
 import {
   Button,
-  Divider,
   Input,
   InputNumber,
   InputNumberProps,
@@ -65,7 +64,36 @@ const FirstStep = ({ termId }: { termId: string }) => {
       });
     },
   });
-
+  const detailColumns = [
+    {
+      title: "Type",
+      dataIndex: "type",
+      render: (t: string) => {
+        return <span>{t}</span>;
+      },
+    },
+    {
+      title: "Content",
+      dataIndex: "content",
+      render: (t: number) => {
+        return <span>{t}</span>;
+      },
+    },
+    {
+      title: "Amount (vnđ)",
+      dataIndex: "amount",
+      render: (t: number) => {
+        return <span>{t.toLocaleString()}</span>;
+      },
+    },
+    {
+      title: "Note",
+      dataIndex: "note",
+      render: (t: string) => {
+        return <span>{t}</span>;
+      },
+    },
+  ];
   const columns = [
     {
       title: "Group Name",
@@ -117,6 +145,24 @@ const FirstStep = ({ termId }: { termId: string }) => {
           <span>
             {dayjs(record?.createdAt).format(DATE_FORMAT.withoutTime)}
           </span>
+        );
+      },
+    },
+    {
+      title: "Detail",
+      render: (_: any, record: any) => {
+        return (
+          <Popover
+            content={
+              <Table
+                dataSource={record.items}
+                columns={detailColumns}
+                pagination={false}
+              />
+            }
+          >
+            <span className="text-blue-500">view</span>
+          </Popover>
         );
       },
     },
@@ -207,7 +253,6 @@ const FirstStep = ({ termId }: { termId: string }) => {
       return AccountantApi.getActiveSponsorRequest(termId);
     },
   });
-
   const FilterContent = () => {
     const [statusFilter, setStatusFilter] = useState("pending");
     return (
@@ -311,26 +356,26 @@ const FirstStep = ({ termId }: { termId: string }) => {
         <Table
           dataSource={activeSponsorRequest?.data?.data}
           columns={columns}
-          rowSelection={rowSelection}
+          // rowSelection={rowSelection}
           bordered
-          expandable={{
-            expandedRowRender: (record) => (
-              <div>
-                <Table
-                  columns={fundEstimationColumn}
-                  dataSource={record?.items}
-                  pagination={false}
-                />
-                <Divider />
-                <span className="font-semibold">
-                  Total:{" "}
-                  {record?.items
-                    ?.reduce((total: any, acc: any) => total + acc.amount, 0)
-                    .toLocaleString()}
-                </span>
-              </div>
-            ),
-          }}
+          // expandable={{
+          //   expandedRowRender: (record) => (
+          //     <div>
+          //       <Table
+          //         columns={fundEstimationColumn}
+          //         dataSource={record?.items}
+          //         pagination={false}
+          //       />
+          //       <Divider />
+          //       <span className="font-semibold">
+          //         Total:{" "}
+          //         {record?.items
+          //           ?.reduce((total: any, acc: any) => total + acc.amount, 0)
+          //           .toLocaleString()}
+          //       </span>
+          //     </div>
+          //   ),
+          // }}
         />
       </div>
       <DeclineModal

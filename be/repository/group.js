@@ -1346,7 +1346,18 @@ const deleteTransaction = async (groupId, transactionId) => {
     throw new Error(error.message);
   }
 };
-
+const verifyTransaction = async (groupId, transactionId, status) => {
+  try {
+    const result = await Group.findOneAndUpdate(
+      { _id: groupId, "transactions._id": transactionId },
+      { $set: { "transactions.$.status": status } },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 const getGroupById = async (groupId) => {
   try {
     const result = await Group.findById(groupId)
@@ -1457,6 +1468,7 @@ export default {
   updateGroupInfo,
   deleteTransaction,
   getTransactionByTransactionId,
+  verifyTransaction,
   getGroupCountsByTerm,
   getGroupById,
   findGroupByOldMark,

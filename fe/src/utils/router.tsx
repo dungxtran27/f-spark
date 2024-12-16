@@ -26,6 +26,7 @@ import DashboardTM from "../pages/TM/DashBoard";
 import Money from "../pages/Student/Money";
 import AccountantPage from "../pages/Accountant";
 import ManageTerm from "../pages/PDT/ManageTerm";
+import ConfirmSignUp from "../pages/Auth/SignUp/confirmSignUp";
 const Router = () => {
   return (
     <BrowserRouter>
@@ -58,11 +59,15 @@ const Router = () => {
         <Route path="/manageAccount" element={<AccountManagementPage />} />
         <Route path="/teacherProfile/:id" element={<TeacherProfile />} />
         <Route path="/mentorProfile/:id" element={<MentorProfile />} />
-        <Route path="/accountant" element={<AccountantPage />} />
         <Route path="/manageTerms" element={<ManageTerm />} />
         {/* TM */}
-        <Route path="/hos/timeline" element={<DashboardTM/>} />
-        <Route path="/hos/groups" element={<ManageClassTM/>} />
+        <Route path="/hos/timeline" element={<DashboardTM />} />
+        <Route path="/hos/groups" element={<ManageClassTM />} />
+        <Route path="/hos/mentors" element={<></>} />
+
+        {/* Accountant */}
+        <Route path="/accountant" element={<AccountantPage />} />
+        <Route path="/confirmSignUp/:token" element={<ConfirmSignUp />} />
       </Routes>
     </BrowserRouter>
   );

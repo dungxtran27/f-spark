@@ -7,6 +7,7 @@ import {
   TermRepository,
 } from "../repository/index.js";
 import { DEADLINE_TYPES } from "../utils/const.js";
+import { uploadImage } from "../utils/uploadImage.js";
 
 const createRequest = async (req, res) => {
   try {
@@ -75,17 +76,31 @@ const getTermRequest = async (req, res) => {
 const updateRequest = async (req, res) => {
   try {
     const { status, requestIds, note } = req.body;
-    // const validStatuses = ["pending", "approved", "declined", "received"];
-    // if (!status || !validStatuses.includes(status)) {
-    //   return res.status(400).json({ error: "Invalid status. It must be one of the following: pending, approved, declined, received." });
-    // }
-    // if (!Array.isArray(requestIds) || requestIds.some(id => !mongoose.Types.ObjectId.isValid(id))) {
-    //   return res.status(400).json({ error: "Invalid requestIds. They must be an array of valid ObjectIds." });
-    // }
+
     const result = await FundEstimationRepository.updateRequest(
       requestIds,
       status,
       note
+    );
+    return res.status(200).json({ message: "Updated Successful" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const accountantUpdateRequest = async (req, res) => {
+  try {
+    const { file, status, requestId } = req.body;
+
+    const evidence = await uploadImage(file);
+    if (!evidence) {
+      throw new Error("Failed to upload image");
+    }
+
+    const result = await FundEstimationRepository.accountantUpdateRequest(
+      requestId,
+      status,
+      evidence,
+      "phase1"
     );
     return res.status(200).json({ message: "Updated Successful" });
   } catch (error) {
@@ -124,10 +139,77 @@ const getDistribution = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getReturn = async (req, res) => {
+  try {
+    const { termId } = req.params;
+    const term = await TermRepository.findById(termId);
+    const request = await FundEstimationRepository.findTermsRequest(
+      term?.startTime,
+      term?.endTime,
+      "received"
+    );
+    const approvedRequest = request?.filter((r) => r?.status === "received");
+    return res.status(200).json({ data: approvedRequest });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const updateReturnStatus = async (req, res) => {
+  try {
+    let result = {};
+    const { returnStatus, requestId } = req.body;
+    if (returnStatus == "processed" || returnStatus == "sent") {
+      const { evidence } = req.body;
+
+      const evidenceImage = await uploadImage(evidence);
+      if (!evidenceImage) {
+        throw new Error("Failed to upload image");
+      }
+      result = await FundEstimationRepository.updateReturnStatuswithEvidence(
+        requestId,
+        returnStatus,
+        evidenceImage,
+        "phase2"
+      );
+    } else if (returnStatus == "processing") {
+      result = FundEstimationRepository.updateReturnStatus(
+        requestId,
+        returnStatus
+      );
+    }
+    return res
+      .status(200)
+      .json({ message: "Updated Successful", data: result });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const updateEvidenceStatus = async (req, res) => {
+  try {
+    const { evidenceImage, status, requestId } = req.body;
+
+    const result = await FundEstimationRepository.updateEvidenceStatus({
+      requestId,
+      status,
+      evidenceImage,
+    });
+
+    if (status == "approved") {
+      await FundEstimationRepository.updateReturnStatus(requestId, "processed");
+    }
+    return res.status(200).json({ message: "Updated Successful" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 export default {
   getGroupRequest,
   getTermRequest,
   createRequest,
   updateRequest,
   getDistribution,
+  getReturn,
+  updateReturnStatus,
+  updateEvidenceStatus,
+  accountantUpdateRequest,
 };
