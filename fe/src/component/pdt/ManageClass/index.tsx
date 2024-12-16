@@ -45,7 +45,7 @@ const ManageClassWrapper = () => {
         classCode: classCode || undefined,
         teacherName: teacherName || undefined,
         category: category || undefined,
-        termCode: semester,
+        term: semester,
       });
     },
   });
@@ -59,8 +59,8 @@ const ManageClassWrapper = () => {
     (t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
   );
   useEffect(() => {
-    if (activeTerm?.termCode) {
-      setSemester(activeTerm.termCode);
+    if (activeTerm?._id) {
+      setSemester(activeTerm._id);
     }
   }, [activeTerm]);
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,15 +177,16 @@ const ManageClassWrapper = () => {
                 <div>
                   <div className="flex mb-4 justify-between">
                     <div className="flex items-center space-x-3">
-                      <span>Semester:</span>
+                      <span>Term:</span>
                       <Select
+                        defaultValue={semester}
                         value={semester}
                         onChange={handleSemesterChange}
                         className="w-24"
                         allowClear
                       >
                         {termData?.data?.data.map((term: Term) => (
-                          <Option key={term.termCode} value={term.termCode}>
+                          <Option key={term._id} value={term._id}>
                             {term.termCode} {/* Display termCode */}
                           </Option>
                         ))}

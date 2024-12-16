@@ -221,7 +221,7 @@ const getAllClass = async (
   classCode,
   teacherName,
   category,
-  termCode
+  term
 ) => {
   try {
     let filterCondition = {
@@ -252,17 +252,80 @@ const getAllClass = async (
         $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }],
       });
     }
-    if (termCode) {
+    if (term) {
       filterCondition.$and.push({
-        $or: [{ termCode: { $regex: termCode, $options: "i" } }],
+        term: new mongoose.Types.ObjectId(term),
       });
     }
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
 
-    const totalItems = await Class.countDocuments();
-    const maxPages = Math.ceil(totalItems / limit);
+    const totalItems = await Class.aggregate([
+      {
+        $lookup: {
+          from: "Teachers",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacherDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$teacherDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "_id",
+          foreignField: "class",
+          as: "groups",
+        },
+      },
+      {
+        $lookup: {
+          from: "Students",
+          localField: "_id",
+          foreignField: "classId",
+          as: "students",
+        },
+      },
+      {
+        $addFields: {
+          totalStudents: { $size: "$students" },
+          totalGroups: { $size: "$groups" },
+        },
+      },
+      {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$termDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          termCode: "$termDetails.termCode",
+        },
+      },
+      {
+        $match: filterCondition, 
+      },
+      {
+        $count: "totalItems", 
+      },
+    ]);
+    const totalItemsCount = totalItems.length > 0 ? totalItems[0].totalItems : 0;
+    const maxPages = Math.ceil(totalItemsCount / limit);
 
     const classes = await Class.aggregate([
       {
@@ -353,7 +416,7 @@ const getAllClass = async (
         $match: filterCondition,
       },
       {
-        $sort: { totalStudents: 1 }, // Sắp xếp tăng dần theo totalStudents
+        $sort: { totalStudents: 1 },
       },
       {
         $skip: (page - 1) * limit,
@@ -366,7 +429,7 @@ const getAllClass = async (
     const isLastPage = page >= maxPages;
     return {
       classes,
-      totalItems,
+      totalItems: totalItemsCount,
       maxPages,
       isLastPage,
       pageSize: limit,
@@ -377,13 +440,18 @@ const getAllClass = async (
   }
 };
 
-const getAllClassMissStudent = async () => {
+const getAllClassMissStudent = async (term) => {
   try {
     const filterCondition = {
       $and: [
         { $or: [{ totalGroups: { $lt: 5 } }, { totalStudents: { $lt: 30 } }] },
       ],
     };
+    if (term) {
+      filterCondition.$and.push({
+        term: new mongoose.Types.ObjectId(term),
+      });
+    }
     const classes = await Class.aggregate([
       {
         $lookup: {
@@ -421,11 +489,27 @@ const getAllClassMissStudent = async () => {
           as: "students",
         },
       },
+  
       {
         $addFields: {
           totalStudents: { $size: "$students" },
         },
       },
+        {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$termDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
       {
         $group: {
           _id: "$_id",
@@ -436,12 +520,19 @@ const getAllClassMissStudent = async () => {
           groups: { $push: "$groups" },
           students: { $push: "$students" },
           totalStudents: { $first: "$totalStudents" },
+          term: { $first: "$term" },
+          termDetails: { $first: "$termDetails" },
+          termCode: {
+            $first: "$termDetails.termCode",
+          },
         },
       },
       {
         $project: {
           classCode: 1,
           isActive: 1,
+           term: 1,
+          termCode: 1,
           teacherDetails: { name: 1, email: 1 },
           groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
           totalGroups: { $size: "$groups" },
@@ -458,11 +549,16 @@ const getAllClassMissStudent = async () => {
   }
 };
 
-const getAllClassFullStudent = async () => {
+const getAllClassFullStudent = async (term) => {
   try {
     const filterCondition = {
       $and: [{ totalGroups: { $gte: 5 } }, { totalStudents: { $gte: 30 } }],
     };
+    if (term) {
+      filterCondition.$and.push({
+        term: new mongoose.Types.ObjectId(term),
+      });
+    }
     const classes = await Class.aggregate([
       {
         $lookup: {
@@ -500,11 +596,27 @@ const getAllClassFullStudent = async () => {
           as: "students",
         },
       },
+  
       {
         $addFields: {
           totalStudents: { $size: "$students" },
         },
       },
+        {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$termDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
       {
         $group: {
           _id: "$_id",
@@ -515,12 +627,19 @@ const getAllClassFullStudent = async () => {
           groups: { $push: "$groups" },
           students: { $push: "$students" },
           totalStudents: { $first: "$totalStudents" },
+          term: { $first: "$term" },
+          termDetails: { $first: "$termDetails" },
+          termCode: {
+            $first: "$termDetails.termCode",
+          },
         },
       },
       {
         $project: {
           classCode: 1,
           isActive: 1,
+           term: 1,
+          termCode: 1,
           teacherDetails: { name: 1, email: 1 },
           groups: { GroupName: 1, mentor: 1, isSponsorship: 1, teamMembers: 1 },
           totalGroups: { $size: "$groups" },
@@ -575,7 +694,7 @@ const createClass = async ({
       });
       outcomeOfClass.push(newClasswork)
     }
-    return {newClass: result._doc, outcomesClasswork: outcomeOfClass};
+    return { newClass: result._doc, outcomesClasswork: outcomeOfClass };
   } catch (error) {
     throw new Error(error.message);
   }
@@ -592,7 +711,7 @@ const getClassByTermCode = async (termId) => {
   }
 }
 
-const findByClassCode = async (classCode) =>{
+const findByClassCode = async (classCode) => {
   try {
     const existingClass = await Class.findOne({
       classCode: classCode

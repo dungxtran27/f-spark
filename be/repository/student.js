@@ -534,7 +534,6 @@ const bulkCreateStudentsFromExcel = async (studentsData) => {
 const getTotalStudentsByTerm = async (term) => {
   try {
     const termObjectId = new mongoose.Types.ObjectId(term);
-    const filterCondition = { "termDetails._id": termObjectId };
     const students = await Student.aggregate([
       {
         $lookup: {
@@ -634,6 +633,21 @@ const addStudent = async ({ name, studentId, email, group, major, gen, activeTer
     throw new Error(error.message);
   }
 };
+
+const checkStudentExists = async ({ studentId, email }) => {
+  try {
+    const student = await Student.findOne({
+      $or: [
+        { studentId },
+        { email }
+      ]
+    });
+    return student ? true : false;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export default {
   findByStudentId,
   bulkCreateStudentsFromExcel,
@@ -653,5 +667,6 @@ export default {
   findStudentsByIds,
   updateClass,
   findByStudentIdPopulated,
-  addStudent
+  addStudent,
+  checkStudentExists
 };

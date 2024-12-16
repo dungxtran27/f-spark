@@ -29,9 +29,6 @@ const Statistic: React.FC<{
   const activeTerm = terms?.data?.data?.find(
     (t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
   );
-
-  const [form] = useForm();
-
   const { data: studentData } = useQuery({
     queryKey: [QUERY_KEY.ALLSTUDENT, term],
     queryFn: async () => {
@@ -87,7 +84,7 @@ const Statistic: React.FC<{
         {activeTerm && (
           <FormItem name={"term"} label={"Term"} className="w-[200px]">
             <Select
-              placeholder="Class"
+              placeholder="Term"
               showSearch
               value={term}
               options={termOptions}

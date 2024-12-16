@@ -245,21 +245,26 @@ const addStudent = async (req, res) => {
   try {
     const { name, studentId, email, group, major, gen } = req.body;
     if (!name || !studentId || !email || !major || !gen) {
-      return res.status(400).json({ error: "Tất cả các trường đều là bắt buộc." });
+      return res.status(400).json({ error: "All fields is required." });
+    }
+    const existingStudentByStudentId = await StudentRepository.checkStudentExists({ studentId });
+    if (existingStudentByStudentId) {
+      return res.status(400).json({ error: "Student ID already exists." });
+    }
+    const existingStudentByEmail = await StudentRepository.checkStudentExists({ email });
+    if (existingStudentByEmail) {
+      return res.status(400).json({ error: "Email already exists." });
     }
     const activeTerm = await TermRepository.getActiveTerm();
     if (!activeTerm) {
       return res.status(404).json({ error: "No active term found." });
     }
-    // Kiểm tra xem có nhóm hay không
     let newStudent;
     if (group) {
-      // Nếu có nhóm, kiểm tra xem nhóm có lớp không
       const existingGroup = await GroupRepository.findGroupById({ groupId: group });
       if (!existingGroup) {
-        return res.status(404).json({ error: "Nhóm không tồn tại." });
+        return res.status(404).json({ error: "Group not found." });
       }
-
       const groupClass = existingGroup.class;
       newStudent = await StudentRepository.addStudent({
         name,
@@ -270,13 +275,10 @@ const addStudent = async (req, res) => {
         gen,
         activeTerm: activeTerm._id,
       });
-
-      // Nếu nhóm có lớp, thêm sinh viên vào lớp
       if (groupClass) {
         await StudentRepository.addManyStudentNoClassToClass([newStudent._id], groupClass._id);
       }
     } else {
-      // Nếu không có nhóm, chỉ tạo sinh viên mà không thêm vào lớp
       newStudent = await StudentRepository.addStudent({
         name,
         studentId,
@@ -287,8 +289,7 @@ const addStudent = async (req, res) => {
         activeTerm: activeTerm._id,
       });
     }
-
-    return res.status(201).json({ message: "Thêm sinh viên thành công.", data: newStudent });
+    return res.status(201).json({ message: "Add student successfully!", data: newStudent });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

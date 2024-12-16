@@ -32,14 +32,14 @@ const AddStudentModal = ({ isOpen, setIsOpen }: Props) => {
       setIsOpen(false);
     },
   });
-  
+
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       addStudent({
         ...values,
-        activeTerm: activeTerm?._id, 
+        activeTerm: activeTerm?._id,
       });
     } catch (error) {
       console.error("Validation failed:", error);
@@ -127,10 +127,20 @@ const AddStudentModal = ({ isOpen, setIsOpen }: Props) => {
               required: true,
               message: "Gen is required",
             },
+            {
+              validator: (_, value) => {
+                const numValue = parseFloat(value);
+                if (isNaN(numValue) || numValue <= 0) {
+                  return Promise.reject(new Error("Gen must be a number greater than 0"));
+                }
+                return Promise.resolve();
+              },
+            },
           ]}
         >
           <Input type="number" size="middle" />
         </FormItem>
+
         <FormItem name="group" label="Group">
           <Select
             size="middle"

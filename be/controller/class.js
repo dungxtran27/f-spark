@@ -91,7 +91,7 @@ const getAllClasses = async (req, res) => {
 };
 const getAllClass = async (req, res) => {
   try {
-    const { page, limit, classCode, teacherName, category, termCode } =
+    const { page, limit, classCode, teacherName, category, term } =
       req.body;
     const [data, dataMissStudent, dataFullStudent] = await Promise.all([
       ClassRepository.getAllClass(
@@ -100,10 +100,10 @@ const getAllClass = async (req, res) => {
         classCode,
         teacherName,
         category,
-        termCode
+        term
       ),
-      ClassRepository.getAllClassMissStudent(),
-      ClassRepository.getAllClassFullStudent(),
+      ClassRepository.getAllClassMissStudent(term),
+      ClassRepository.getAllClassFullStudent(term),
     ]);
     return res.status(200).json({
       data: data.classes,
