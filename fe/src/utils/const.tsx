@@ -301,6 +301,7 @@ export const NOTIFICATION_ACTION_TYPE = {
   DELETE_TASK: "DeleteTask",
   RESPONSE_REQUEST_DEADLINE: "responseRequestDeadline",
   REMIND_GROUP_SUBMIT: "RemindGroupSubmit",
+  RESPONSE_REQUEST_SPONSOR:"ResponseRequestSponsor"
 };
 export const CLASS_NOTIFICATION_ACTION_TYPE = {
   CREATE_ANNOUNCEMENT: "CreateAnnouncement",

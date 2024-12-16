@@ -185,7 +185,7 @@ const remindGroupSubmitOutcome = async (req, res) => {
         sender: req.decodedToken.role.id,
         group: groupId,
         senderType: "Teacher",
-        type: "Group",
+        type: "Class",
         action: {
           action: `remind group submit outcome`,
           target: classworkId,

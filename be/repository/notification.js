@@ -4,6 +4,7 @@ import Task from "../model/Task.js";
 import mongoose from "mongoose";
 import Student from "../model/Student.js";
 import Account from "../model/Account.js";
+import Group from "../model/Group.js";
 const createNotification = async ({ data }) => {
   try {
     const result = await Notification.create({
@@ -140,6 +141,7 @@ const getStudentClassNotification = async (classId) => {
         path: "sender",
         populate: { path: "account", select: "-password" },
       })
+      .populate({ path: "group", select: "GroupName" })
       .populate({
         path: "class",
         select: "_id classCode",

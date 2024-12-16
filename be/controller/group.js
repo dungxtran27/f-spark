@@ -257,7 +257,6 @@ const getClassTeacherAndgroupInfo = async (req, res) => {
         StudentRepository.getAllStudentUngroupByClassId(classId),
         ClassRepository.findClassById(classId),
       ]);
-      console.log(classId);
       
     const studentData = {
       teacher: classInfo.teacher,
@@ -537,7 +536,6 @@ const getGroupStatistic = async (req, res) => {
       }
     );
     const statistic = await GroupRepository.getGroupCountsByTerm(new mongoose.Types.ObjectId(term))
-    console.log(statistic);
 
     return res.status(200).json({ data: groups, statistic: statistic });
   } catch (error) {
@@ -654,14 +652,15 @@ const updateGroupSponsorStatus = async (req, res) => {
       groupId,
       status,
     });
+    
     if (groupUpdate) {
       const notificationData = {
         class: groupUpdate.class,
-        receivers: members,
-        //sender: req.decodedToken.role.id,
+        receivers: members,        
+        sender: req.decodedToken.account,
         group: groupId,
-        senderType: "Head Of Subject",
-        type: "Group",
+        senderType: "Teacher",
+        type: "Class",
         action: {
           action: `request for funding`,
           target: groupId,
