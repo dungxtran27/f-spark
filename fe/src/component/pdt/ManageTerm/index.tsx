@@ -32,8 +32,7 @@ const TermWrapper: React.FC = () => {
   ) as Term | null;
 
   const defaultTerm = activeTerm?._id;
-  console.log(defaultTerm);
-  
+
   const [selectedTerm, setSelectedTerm] = useState(defaultTerm);
 
   const { data: selectTerm } = useQuery({

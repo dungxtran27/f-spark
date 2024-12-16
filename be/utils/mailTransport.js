@@ -145,17 +145,17 @@ const sendConfirmEmail = async (email, userId) => {
       "              <tr>\n" +
       "                <td class='content-body content-margin'>\n" +
       "                  <table role='presentation'>\n" +
-      "                    <h1>Confirm your TuneHub account</h1>\n" +
+      "                    <h1>Confirm your account</h1>\n" +
       "                    <p>Hi there,</p>\n" +
       "                    <p>\n" +
-      "                      We are glad that you have choosen LucentChart to accompany you making your ideas reality. \uD83E\uDD1E\uD83D\uDE22\uD83E\uDD14,  Click on the link bellow to finish setting your account !!!\n" +
+      "                      We are glad that you have choosen Fspark to accompany you making your ideas reality. \uD83E\uDD1E\uD83D\uDE22\uD83E\uDD14,  Click on the link bellow to finish setting your account !!!\n" +
       "                    </p>\n" +
       "                    <p class='button-container'>\n" +
       "                      <a href='" +
       url +
       "                    ' class='button'>Activate your account</a>\n" +
       "                    </p>\n" +
-      "                    <p>We are thrilled to welcome you,<br />The LucentChart team</p>\n" +
+      "                    <p>We are thrilled to welcome you,<br />The Fspark team</p>\n" +
       "                  </table>\n" +
       "                </td>\n" +
       "              </tr>\n" +
@@ -165,7 +165,7 @@ const sendConfirmEmail = async (email, userId) => {
       "                  <table role='presentation'>\n" +
       "                    <tr>\n" +
       "                      <td>\n" +
-      "                        <p>&copy; LucentChart<br /></p>\n" +
+      "                        <p>&copy; Fspark<br /></p>\n" +
       "                      </td>\n" +
       "                    </tr>\n" +
       "                  </table>\n" +
@@ -180,7 +180,7 @@ const sendConfirmEmail = async (email, userId) => {
       "</html>\n\n";
     const mailres = await sendMail(
       email,
-      "LucentChart-Finish setting up you account",
+      "Fspark setting up you account",
       "Almost there mate, just one more step and we are up and ready",
       emailHtml
     );

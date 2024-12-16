@@ -51,62 +51,111 @@ const CreateTermModal = ({ isOpen, setIsOpen }: ModalProps) => {
       });
     },
   });
-  const generateTimeline = (startTime: moment.Moment) => {
-    const startOfTerm = startTime.clone().add(1, "month");
+  const generateTimeline = (
+    startTime: moment.Moment,
+    endTime: moment.Moment
+  ) => {
 
-    const timeline: TimeLine[] = [
+    const startOfTerm = startTime.clone().add(30, "days");
+    
+    const timeline = [
+      {
+        title: "Create Student Account",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        startDate: startTime.clone().toISOString(),
+        endDate: startTime.clone().add(7, "days").toISOString(),
+        type: "STUDENT_ACCOUNT_CREATE",
+        _id: "0",
+      },
       {
         title: "Member Transfer",
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-        startDate: startTime.toISOString(),
-        endDate: startTime.clone().add(14, "days").toISOString(),
+        startDate: startTime.clone().add(8, "days").toISOString(),
+        endDate: startTime.clone().add(15, "days").toISOString(),
         type: "MEMBERS_TRANSFER",
         _id: "1",
       },
       {
-        title: "Sponsorship",
+        title: "Sponsorship Vote",
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-        startDate: startTime.clone().add(15, "days").toISOString(),
-        endDate: startTime.clone().add(1, "months").toISOString(),
-        type: "SPONSOR_SHIP",
+        startDate: startTime.clone().add(16, "days").toISOString(),
+        endDate:startTime.clone().add(20, "days").toISOString(),
+        type: "SPONSORSHIP_VOTE",
         _id: "2",
+      },
+      {
+        title: "Sponsorship Finalized",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        startDate: startTime.clone().add(20, "days").toISOString(),
+        endDate: startTime.clone().add(23, "days").toISOString(),
+        type: "SPONSORSHIP_FINALIZED",
+        _id: "3",
       },
       {
         title: "Dividing Classes",
         description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-        startDate: startTime.clone().add(15, "days").toISOString(),
-        endDate: startTime.clone().add(1, "months").toISOString(),
-        type: "MEMBERS_TRANSFER",
-        _id: "3",
+        startDate: startTime.clone().add(16, "days").toISOString(),
+        endDate: startTime.clone().add(30, "days").toISOString(),
+        type: "DIVIDING_CLASSES",
+        _id: "4",
       },
-    ];
-
-    timeline.push(
       {
-        title: `Outcome 1`,
-        description: "Outcome description 1",
-        startDate: startOfTerm.toISOString(),
+        title: "Fund Estimation",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        startDate: startTime.clone().add(23, "days").toISOString(),
+        endDate: startTime.clone().add(30, "days").toISOString(),
+        type: "FUND_ESTIMATION",
+        _id: "5",
+      },
+      {
+        title: "Teacher Lock Group",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        startDate: startOfTerm.clone().toISOString(),
+        endDate: startOfTerm.clone().add(2, "weeks").toISOString(),
+        type: "TEACHER_LOCK_GROUP",
+        _id: "6",
+      },
+      {
+        title: "Fund Distribution",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        startDate: startOfTerm.clone().toISOString(),
+        endDate: startOfTerm.clone().add(2, "weeks").toISOString(),
+        type: "FUND_DISTRIBUTION",
+        _id: "7",
+      },
+      {
+        title: "Fund Return",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        startDate: endTime.clone().toISOString(),
+        endDate: endTime.clone().add(2, "weeks").toISOString(),
+        type: "FUND_RETURN",
+        _id: "8",
+      },
+      {
+        title: "Outcome 1",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        startDate: startOfTerm.clone().toISOString(),
         endDate: startOfTerm.clone().add(4, "weeks").toISOString(),
         type: "OUTCOME",
-        _id: "1",
+        _id: "9",
       },
       {
-        title: `Outcome 2`,
-        description: "Outcome description 2",
+        title: "Outcome 2",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         startDate: startOfTerm.clone().add(4, "weeks").toISOString(),
         endDate: startOfTerm.clone().add(8, "weeks").toISOString(),
         type: "OUTCOME",
-        _id: "2",
+        _id: "10",
       },
       {
-        title: `Outcome 3`,
-        description: "Outcome description 3",
+        title: "Outcome 3",
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         startDate: startOfTerm.clone().add(8, "weeks").toISOString(),
         endDate: startOfTerm.clone().add(12, "weeks").toISOString(),
         type: "OUTCOME",
-        _id: "3",
-      }
-    );
+        _id: "11",
+      },
+    ];
 
     return timeline;
   };
@@ -155,17 +204,25 @@ const CreateTermModal = ({ isOpen, setIsOpen }: ModalProps) => {
   };
   const handleStartDateChange = (value: moment.Moment | null) => {
     if (value) {
-      setStartDate(value);
-      const newEndDate = value.clone().add(4, "month");
+      const newStartDate = value.clone();
+      setStartDate(newStartDate);
+      
+      const newEndDate = newStartDate.clone().add(4, "month");
       setEndDate(newEndDate);
       form.setFieldsValue({ endDate: newEndDate });
 
-      const generatedTimeline = generateTimeline(value);
+      const generatedTimeline = generateTimeline(newStartDate, newEndDate);
       setPreviewTimeline(generatedTimeline);
     }
   };
+  
   return (
-    <Modal open={isOpen} onCancel={() => setIsOpen(false)} footer={null}>
+    <Modal
+      open={isOpen}
+      onCancel={() => setIsOpen(false)}
+      footer={null}
+      style={{ top: "5px" }}
+    >
       <p className="font-bold mb-3">Create Timeline :</p>
       <Form form={form} onFinish={handleSave}>
         <Form.Item
