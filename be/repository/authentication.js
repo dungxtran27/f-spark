@@ -11,12 +11,14 @@ const authenticate = async () => {
 };
 const addUser = async ({
   email,
-  hashedPassword
+  hashedPassword,
+  imgLink
 }) => {
   try {
     const accountNew = await Account.create({
       email: email,
       password: hashedPassword,
+      profilePicture: imgLink
     });
     const student = await findByEmail(email);
     const studentId = student._id;

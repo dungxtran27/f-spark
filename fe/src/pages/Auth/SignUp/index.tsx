@@ -1,12 +1,10 @@
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Form,
-  GetProp,
   Input,
   InputNumber,
-  message,
   Select,
   Steps,
   Upload,
@@ -178,8 +176,27 @@ const PersonalInfo: React.FC<{ form: FormInstance }> = ({ form }) => {
       label: <span>International bussiness</span>,
     },
   ];
-  const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>("");
+
+  let base64String = "";
+
+  const [avatar, setAvatar] = useState<string | null>(null);
+
+  const handleFileChange = async (info: any) => {
+    const file = info.file;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      base64String = reader.result as string;
+      setAvatar(base64String);
+      form.setFieldValue("img", base64String);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const props: UploadProps = {
+    name: "file",
+    multiple: false,
+    customRequest: handleFileChange,
+  };
   return (
     <div className="pl-8 pt-5">
       <p className="text-2xl font-bold">Personal Info</p>
@@ -270,13 +287,24 @@ const PersonalInfo: React.FC<{ form: FormInstance }> = ({ form }) => {
             </div>
           </div>
           <div className="pl-10">
-            <Form.Item label={"Profile picture"}>
-              <AvatarUpload
-                loading={loading}
-                imageUrl={imageUrl}
-                setLoading={setLoading}
-                setImageUrl={setImageUrl}
-              />
+            <Form.Item label={"Profile picture"} name="img">
+              <Upload {...props}>
+                {avatar ? (
+                  <img
+                    src={form.getFieldValue("img")}
+                    alt="avatar"
+                    style={{ width: "250px", aspectRatio: "1" }}
+                  />
+                ) : (
+                  <button
+                    style={{ border: 0, background: "none" }}
+                    type="button"
+                  >
+                    {avatar ? <></> : <PlusOutlined />}
+                    <div style={{ marginTop: 8 }}>Upload</div>
+                  </button>
+                )}
+              </Upload>
             </Form.Item>
           </div>
         </div>
@@ -347,68 +375,5 @@ const Finish = () => (
     </span>
   </div>
 );
-
-interface uploadProps {
-  loading: boolean;
-  imageUrl: string;
-  setLoading(value: boolean): void;
-  setImageUrl(value: string): void;
-}
-const AvatarUpload = ({
-  loading,
-  imageUrl,
-  setImageUrl,
-  setLoading,
-}: uploadProps) => {
-  type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-  const getBase64 = (img: FileType, callback: (url: string) => void) => {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => callback(reader.result as string));
-    reader.readAsDataURL(img);
-  };
-  const beforeUpload = (file: FileType) => {
-    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
-    if (!isJpgOrPng) {
-      message.error("You can only upload JPG/PNG file!");
-    }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      message.error("Image must smaller than 2MB!");
-    }
-    return isJpgOrPng && isLt2M;
-  };
-  const handleChange: UploadProps["onChange"] = (info) => {
-    if (info.file.status === "uploading") {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === "done") {
-      getBase64(info.file.originFileObj as FileType, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
-    }
-  };
-  return (
-    <Upload
-      name="avatar"
-      listType="picture-card"
-      className="avatar-uploader"
-      showUploadList={false}
-      action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
-      beforeUpload={beforeUpload}
-      onChange={handleChange}
-    >
-      {imageUrl ? (
-        <img src={imageUrl} alt="avatar" style={{ width: "100%" }} />
-      ) : (
-        <button style={{ border: 0, background: "none" }} type="button">
-          {loading ? <LoadingOutlined /> : <PlusOutlined />}
-          <div style={{ marginTop: 8 }}>Upload</div>
-        </button>
-      )}
-    </Upload>
-  );
-};
 
 export default SignUp;

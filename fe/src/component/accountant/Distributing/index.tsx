@@ -1,4 +1,4 @@
-import { Table, Tag } from "antd";
+import { Image, Table } from "antd";
 import styles from "../styles.module.scss";
 import classNames from "classnames";
 import { TbPigMoney } from "react-icons/tb";
@@ -12,7 +12,7 @@ const Distributing = ({ termId }: { termId: string }) => {
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const openPaymentModal = (request: any) => {
     setPaymentOpen(true);
-    setSelectedRequest(request)
+    setSelectedRequest(request);
   };
   const columns = [
     {
@@ -45,44 +45,6 @@ const Distributing = ({ termId }: { termId: string }) => {
       ),
     },
     {
-      title: "Account Number",
-      render: (_: any, record: any) => (
-        <span className="font-semibold">
-          {record?.bankingInfo?.accountNumber}
-        </span>
-      ),
-    },
-    {
-      title: "Bank",
-      render: (_: any, record: any) => (
-        <span className="font-semibold">{record?.bankingInfo?.bankCode}</span>
-      ),
-    },
-    {
-      title: "Bank Owner",
-      render: (_: any, record: any) => (
-        <span className="font-semibold">
-          {record?.bankingInfo?.accountName}
-        </span>
-      ),
-    },
-    {
-      title: "branch",
-      render: (_: any, record: any) => (
-        <span className="font-semibold">{record?.bankingInfo?.branch}</span>
-      ),
-    },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (_: any, record: any) => (
-    //     <Tag color={record?.status == "Pending" ? "gold" : "green"}>
-    //       {record?.status}
-    //     </Tag>
-    //   ),
-    // },
-    {
       title: "Action",
       render: (_: any, record: any) => (
         <TbPigMoney
@@ -94,6 +56,14 @@ const Distributing = ({ termId }: { termId: string }) => {
         />
       ),
     },
+    {
+      title: "Bill",
+      render: (record: any) => (
+        <Image
+        //  src="re"
+        />
+      ),
+    },
   ];
 
   const { data: approvedRequest } = useQuery({
@@ -102,7 +72,6 @@ const Distributing = ({ termId }: { termId: string }) => {
       return AccountantApi.getApprovedSponsorRequest(termId);
     },
   });
-
   return (
     <div className={classNames(styles.customTable, "p-3 bg-white rounded")}>
       <Table dataSource={approvedRequest?.data?.data} columns={columns} />

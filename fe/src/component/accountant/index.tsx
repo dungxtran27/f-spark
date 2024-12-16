@@ -13,7 +13,7 @@ const AccountantWrapper = ({ termId }: { termId: string }) => {
       case 1:
         return <Distributing termId={termId} />;
       case 2:
-        return <Return />;
+        return <Return termId={termId} />;
     }
   };
   return (

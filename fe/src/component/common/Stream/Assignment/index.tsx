@@ -80,7 +80,9 @@ const Assignment = ({
             <div className="flex items-center group text-primaryBlue">
               <TiAttachment size={20} />
               <span className="group-hover: underline">
-                {post?.attachment[0]}
+                <a download href={post?.attachment[0]}>
+                  download
+                </a>
               </span>
             </div>
           </span>

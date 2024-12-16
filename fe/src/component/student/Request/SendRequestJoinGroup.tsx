@@ -10,6 +10,7 @@ import {
   Modal,
   Pagination,
   Popover,
+  Result,
   Skeleton,
   Table,
   Tag,
@@ -27,6 +28,8 @@ import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdCancelPresentation } from "react-icons/md";
 import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
+import moment from "moment";
+import { TbClockX } from "react-icons/tb";
 
 interface Leader {
   name: string;
@@ -187,7 +190,7 @@ const RequestJoinGroup: React.FC = () => {
   const content = <Table dataSource={requestData} columns={column} />;
   const totalItems = dataGroup?.totalItems || 0;
   return (
-    <div className="p-6">
+    <div className="p-3">
       {userInfo?.classId && (
         <>
           <h2 className="text-xl font-semibold mb-4">Change Class</h2>
@@ -277,16 +280,16 @@ const RequestJoinGroup: React.FC = () => {
       ) : (
         <>
           {dayjs().isAfter(dayjs(deadlineRequestJoinGroup)) ? (
-            <div className="p-4 bg-white rounded shadow-md border border-red-500/50 bg-red-500/15">
-              <h2 className="text-2xl font-bold text-red-500">
-                Deadline Passed
-              </h2>
-              <p className="mt-2 text-gray-700">
-                The deadline for requesting to join the group over due.
-              </p>
-            </div>
+            <Result
+              icon={
+                <div className="place-items-center text-red-500">
+                  <TbClockX size={100} />
+                </div>
+              }
+              title={`The deadline for requesting to join the group over due.!${moment(deadlineRequestJoinGroup).format()}`}
+            />
           ) : (
-            <>
+            <div className="bg-white rounded-md shadow-md w-full p-4">
               <h2 className="text-xl font-semibold mb-4">Join Group</h2>
               <div className="flex flex-row mb-2 space-x-2 justify-end">
                 <Input
@@ -306,7 +309,7 @@ const RequestJoinGroup: React.FC = () => {
                     groupId={project.groupId}
                     groupName={project.groupName}
                     leader={
-                      project.leader
+                      project.leader?.name
                         ? {
                             name: project.leader.name,
                             studentId: project.leader.studentId,
@@ -329,7 +332,7 @@ const RequestJoinGroup: React.FC = () => {
                   showTotal={(total) => `Total ${total} group`}
                 />
               </div>
-            </>
+            </div>
           )}
         </>
       )}

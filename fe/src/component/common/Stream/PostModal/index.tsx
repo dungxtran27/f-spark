@@ -9,38 +9,42 @@ import {
 } from "antd";
 import QuillEditor from "../../QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
-import { useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { CreateClassWorkProps } from "../../../../model/class";
 import { classApi } from "../../../../api/Class/class";
 import { useParams } from "react-router-dom";
 import FormItem from "antd/es/form/FormItem";
 import { CLASS_WORK_TYPE } from "../../../../utils/const";
+import { useState } from "react";
 interface Props {
   open: boolean;
   setOpen: (value: boolean) => void;
   postType: string;
 }
 const PostModal = ({ open, setOpen, postType }: Props) => {
-  const uploadedFiles = useRef<string[]>([]);
+  const [fileName, setFileName] = useState<string>("");
+  const [form] = Form.useForm();
+  const handleFileChange = async (info: any) => {
+    const file = info.file;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      form.setFieldValue("attachment", base64String);
+    };
+    reader.readAsDataURL(file);
+  };
   const props: UploadProps = {
     name: "file",
-    multiple: true,
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    onChange(info) {
-      if (uploadedFiles?.current && info.file?.status !== "uploading") {
-        uploadedFiles.current.push(
-          "https://www.youtube.com/watch?v=eAs7NGvjiiI"
-        );
-        form.setFieldValue("attachment", uploadedFiles);
-      }
-    },
+    multiple: false,
+    customRequest: handleFileChange,
   };
   const { classId } = useParams();
   const CreateClassWork = useMutation({
     mutationFn: ({
       attachment,
       description,
+      fileName,
       dueDate,
       startDate,
       title,
@@ -48,6 +52,7 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
     }: CreateClassWorkProps) => {
       return classApi.createClassWork(classId, {
         attachment,
+        fileName,
         description,
         dueDate,
         startDate,
@@ -55,8 +60,11 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
         type,
       });
     },
+    onSuccess: () => {
+      setOpen(false);
+    },
   });
-  const [form] = Form.useForm();
+
   const setDescription = (value: any) => {
     form.setFieldValue("description", value);
   };
@@ -64,30 +72,28 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
   return (
     <Modal
       centered
-      title=<span className="text-lg font-semibold">
-        {postType === "announcement"
-          ? "Make an announcement"
-          : "Create new assignment"}
-      </span>
+      title={
+        <span className="text-lg font-semibold">
+          {postType === "announcement"
+            ? "Make an announcement"
+            : "Create new assignment"}
+        </span>
+      }
       open={open}
       destroyOnClose
       onCancel={() => setOpen(false)}
-      onOk={async () => {
-        try {
-          const values = await form.validateFields();
-          const { attachment, description, duration, title } = values;
-          CreateClassWork.mutate({
-            attachment: attachment?.current,
-            description: description,
-            startDate: duration ? duration[0] : null,
-            dueDate: duration ? duration[1] : null,
-            title: title,
-            type: postType,
-          });
-          setOpen(false);
-        } catch (error) {
-          console.error("Validation failed:", error);
-        }
+      onOk={() => {
+        const { attachment, description, duration, title } =
+          form.getFieldsValue();
+        CreateClassWork.mutate({
+          attachment: attachment,
+          description: description,
+          fileName: fileName,
+          startDate: duration ? duration[0] : null,
+          dueDate: duration ? duration[1] : null,
+          title: title,
+          type: postType,
+        });
       }}
     >
       <div className="w-full mt-5 flex flex-col gap-3">

@@ -265,7 +265,7 @@ const getClassTeacherAndgroupInfo = async (req, res) => {
         StudentRepository.getAllStudentUngroupByClassId(classId),
         ClassRepository.findClassById(classId),
       ]);
-      
+
     const studentData = {
       teacher: classInfo.teacher,
       groupStudent,
@@ -575,10 +575,11 @@ const getGroupStatistic = async (req, res) => {
       groupId,
       classId,
       term: new mongoose.Types.ObjectId(term),
-      status
-      }
+      status,
+    });
+    const statistic = await GroupRepository.getGroupCountsByTerm(
+      new mongoose.Types.ObjectId(term)
     );
-    const statistic = await GroupRepository.getGroupCountsByTerm(new mongoose.Types.ObjectId(term))
 
     return res.status(200).json({ data: groups, statistic: statistic });
   } catch (error) {
@@ -644,7 +645,7 @@ const addImageToGroupGallery = async (req, res) => {
       cloudImageLinks
     );
 
-    return res.status(200).json({ message: "ok" });
+    return res.status(200).json({ message: "Upload success" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -727,7 +728,8 @@ const updateGroupSponsorStatus = async (req, res) => {
         if (socketIds) {
           io.to(socketIds).emit(
             "newNotification",
-            `Your request sponsor has been ${statusBoolean ? "accepted" : "rejected"
+            `Your request sponsor has been ${
+              statusBoolean ? "accepted" : "rejected"
             }.`
           );
         }
@@ -802,7 +804,44 @@ const deleteTransaction = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
+const verifyTransaction = async (req, res) => {
+  try {
+    const { groupId, transactionId, status } = req.body;
+    if (!groupId || !transactionId || !status) {
+      return res.status(400).json({ error: "Bad request" });
+    }
+    const foundTransaction =
+      await GroupRepository.getTransactionByTransactionId(
+        groupId,
+        transactionId
+      );
+    if (!foundTransaction) {
+      return res.status(400).json({ error: "Transaction not found" });
+    }
+    if (
+      foundTransaction.status == "approved" ||
+      foundTransaction.status == "rejected"
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Transaction is verified, cannot modify" });
+    }
+    const verifyTransaction = await GroupRepository.verifyTransaction(
+      groupId,
+      transactionId,
+      status
+    );
+    let message = "";
+    if (status == "approved") message = "Approve transaction success";
+    if (status == "rejected") message = "Reject transaction success";
+    return res.status(200).json({
+      message: message,
+      data: verifyTransaction,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 const getGroupById = async (req, res) => {
   try {
     const { groupId } = req.params;
@@ -854,5 +893,6 @@ export default {
   // findbyId,
   updateGroupInfo,
   deleteTransaction,
-  getGroupById
+  verifyTransaction,
+  getGroupById,
 };

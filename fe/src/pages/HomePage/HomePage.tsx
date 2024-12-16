@@ -30,6 +30,9 @@ const HomePage = () => {
           case ROLE.headOfSubject:
             navigate("/hos/timeline");
             break;
+          case ROLE.accountant:
+            navigate("/accountant");
+            break;
           default:
             navigate("/");
             break;
