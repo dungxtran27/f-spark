@@ -199,6 +199,7 @@ const PersonalInfo: React.FC<{ form: FormInstance }> = ({ form }) => {
   const props: UploadProps = {
     name: "file",
     multiple: false,
+    accept: ".png,.jpg",
     customRequest: handleFileChange,
   };
   return (

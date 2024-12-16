@@ -23,7 +23,7 @@ import { useForm } from "antd/es/form/Form";
 import QuillEditor from "../../../../common/QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
 import { notificationApi } from "../../../../../api/notification/notification";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 interface Props {
   _id: string;
@@ -64,19 +64,22 @@ const Submissions = ({
     },
     enabled: !!fClassid,
   });
-  const uploadedFiles = useRef<string[]>([]);
+  const [fileName, setFileName] = useState<string>("");
+  const handleFileChange = async (info: any) => {
+    const file = info.file;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      form.setFieldValue("attachment", base64String);
+    };
+    reader.readAsDataURL(file);
+  };
   const props: UploadProps = {
     name: "file",
-    multiple: true,
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    onChange(info) {
-      if (uploadedFiles?.current && info.file?.status !== "uploading") {
-        uploadedFiles.current.push(
-          "https://www.youtube.com/watch?v=eAs7NGvjiiI"
-        );
-        form.setFieldValue("attachment", uploadedFiles);
-      }
-    },
+    multiple: false,
+    accept: ".docx,.pdf,.xlsx",
+    customRequest: handleFileChange,
   };
   const setSubmissionContent = (value: string) => {
     form.setFieldValue("content", value);
@@ -85,32 +88,34 @@ const Submissions = ({
     mutationFn: ({
       attachment,
       content,
+      fileName,
     }: {
       attachment: any;
       content: string;
+      fileName: string;
     }) => {
       return classApi.createOutcomeSubmission(outcome?._id, userInfo?.group, {
-        attachment: attachment?.current,
+        attachment: attachment,
         content: content,
+        fileName: fileName,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY?.TEACHER_OUTCOMES_LIST],
       });
-      setIsFormVisible(false);      
+      setIsFormVisible(false);
     },
-    
   });
   const groupsOfClass = groups?.data?.data?.groupStudent;
 
   const remindGroup = (groupId, outcomeId) => {
     const data = {
       groupId: groupId,
-      classworkId: outcomeId
-    }
-    notificationApi.remindGroupSubmitOutcome(data)
-  }
+      classworkId: outcomeId,
+    };
+    notificationApi.remindGroupSubmitOutcome(data);
+  };
   const items: CollapseProps["items"] = groupsOfClass?.map((g: any) => {
     const s = submissions?.find((gs) => gs?.group?._id === g?._id);
     return {
@@ -175,9 +180,13 @@ const Submissions = ({
         </div>
       ) : (
         <div className="w-full flex justify-center">
-          <Button onClick={() => {
-            remindGroup(g?._id,outcome?._id)
-          }}>Remind group</Button>
+          <Button
+            onClick={() => {
+              remindGroup(g?._id, outcome?._id);
+            }}
+          >
+            Remind group
+          </Button>
         </div>
       ),
     };
@@ -208,19 +217,24 @@ const Submissions = ({
               <span className="font-medium">Attachment: </span>
               <div className="flex items-center group text-primaryBlue">
                 <TiAttachment size={20} />
-                <span className="group-hover: underline">
-                  {groupSubmission?.attachment[0]}
-                </span>
+                <a
+                  download
+                  href={groupSubmission?.attachment[0]}
+                  className="group-hover: underline"
+                >
+                  download
+                </a>
               </div>
             </div>
             <div className="flex items-center mt-3">
               <span className="font-medium flex items-center gap-3">
                 Grade:{" "}
                 <span
-                  className={`${groupSubmission?.grade
+                  className={`${
+                    groupSubmission?.grade
                       ? "text-okStatus"
                       : "text-pendingStatus"
-                    }`}
+                  }`}
                 >
                   {groupSubmission?.grade
                     ? groupSubmission?.grade
@@ -236,7 +250,7 @@ const Submissions = ({
           layout="vertical"
           onFinish={() => {
             const { attachment, content } = form.getFieldsValue();
-            createSubmission.mutate({ attachment, content });
+            createSubmission.mutate({ attachment, content, fileName });
           }}
         >
           <Form.Item

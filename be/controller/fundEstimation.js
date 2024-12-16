@@ -75,6 +75,20 @@ const getTermRequest = async (req, res) => {
 
 const updateRequest = async (req, res) => {
   try {
+    const { status, requestIds, note } = req.body;
+
+    const result = await FundEstimationRepository.updateRequest(
+      requestIds,
+      status,
+      note
+    );
+    return res.status(200).json({ message: "Updated Successful" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+const accountantUpdateRequest = async (req, res) => {
+  try {
     const { file, status, requestId } = req.body;
     let evidence;
     if (file) {
@@ -199,4 +213,5 @@ export default {
   getReturn,
   updateReturnStatus,
   updateEvidenceStatus,
+  accountantUpdateRequest,
 };
