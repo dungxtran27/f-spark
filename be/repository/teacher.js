@@ -380,6 +380,20 @@ const getClassOfTeacher = async (teacherId) => {
   }
 }
 
+const createTeacher = async ({name, phoneNumber, account, salutation}) => {
+  try {
+    const teacher = await Teacher.create({
+      name: name,
+      phoneNumber: phoneNumber,
+      account: account,
+      salutation: salutation
+    })
+    return teacher
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
 export default {
   getTeacherByClassId,
   findByAccountId,
@@ -390,4 +404,5 @@ export default {
   getTotalTeachers,
   // getClassOfTeacher
   getClassOfTeacher,
+  createTeacher
 };

@@ -1,4 +1,5 @@
-import { ClassRepository, TeacherRepository, TermRepository } from "../repository/index.js";
+import account from "../repository/account.js";
+import { AccountRepository, ClassRepository, TeacherRepository, TermRepository } from "../repository/index.js";
 import mongoose from "mongoose";
 const getTeacherByClassId = async (req, res) => {
   try {
@@ -91,9 +92,25 @@ const getTotalTeachers = async (req, res) => {
   }
 };
 
+const createTeacher = async (req,res) => {
+  try {
+    const {name, phoneNumber, email, profilePicture, salutation} = req.body;
+    const newAccount = await AccountRepository.createAccount({email, profilePicture})
+    const account = newAccount._id
+    const teacher = await TeacherRepository.createTeacher({name, phoneNumber, account, salutation})
+    res.status(200).json({
+      data: teacher,
+      message: 'Created Teacher'
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
 export default {
   getTeacherByClassId,
   getAllAccTeacher,
   getTeacherInfo,
-  getTotalTeachers
+  getTotalTeachers,
+  createTeacher
 };
