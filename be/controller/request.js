@@ -481,17 +481,16 @@ const updateIsSponsorship = async () => {
         const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
         const requestId = request._id;
         const groupId = request.group._id;
+        const group = await GroupRepository.findGroupById(groupId)
         if (totalVotes === totalMembers) {
-          console.log("...");
 
-          if (totalYesVotes === totalMembers) {
+          if (totalYesVotes === totalMembers && group?.sponsorStatus === 'normal') {
             await RequestRepository.approveRequestIsSponsorship(
               groupId,
               requestId
             );
           }
         } else {
-          console.log("?");
           await RequestRepository.declineRequestIsSponsorship(requestId);
         }
       }

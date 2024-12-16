@@ -35,7 +35,7 @@ const RequestFPT = () => {
   const userId = userInfo?._id ?? "";
   const groupId = userInfo?.group ?? "";
   const deadlineRequestFPT =
-    activeTerm?.timeLine?.find((t) => t.type === "sponsorShip")?.endDate ?? "";
+    activeTerm?.timeLine?.find((t) => t.type === "sponsorShipVote")?.endDate ?? "";
 
   const { data: requestData, isLoading } = useQuery<Request[]>({
     queryKey: [QUERY_KEY.REQUESTS, groupId],

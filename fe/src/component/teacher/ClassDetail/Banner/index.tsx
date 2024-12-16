@@ -79,9 +79,10 @@ const Banner = ({ name, classId }: Props) => {
 
   const [currentStep, setCurrentStep] = useState(0);
 
-  const items = filteredOutcomes.map((item, index) => ({
+  const items = filteredOutcomes.map((item) => ({
     key: item.title,
-    title: index === currentStep ? "" : item.title,
+    title: item.title,
+    subTitle: `${dayjs(item?.startDate).format(DATE_FORMAT.withYear)} - ${dayjs(item?.endDate).format(DATE_FORMAT.withYear)}`
   }));
 
   const activeStep = filteredOutcomes.findIndex(
@@ -97,16 +98,14 @@ const Banner = ({ name, classId }: Props) => {
           <strong className="flex justify-center">
             {filteredOutcomes[index].title}
           </strong>
-          <div className="text-md text-gray-500 mt-1">
-            {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")}
-            <span> - </span>
-            {moment(filteredOutcomes[index].endDate).format("DD MMM, YYYY")}
+          <div className="text-md text-gray-500 mt-1 w-[300px]">
+            {filteredOutcomes[index]?.description}
           </div>
         </div>
       }
       trigger="hover"
       placement="top"
-      open={index === currentStep}
+      // open={index === currentStep}
     >
       {dot}
     </Popover>
