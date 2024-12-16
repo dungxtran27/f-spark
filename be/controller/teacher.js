@@ -1,6 +1,7 @@
 import account from "../repository/account.js";
 import { AccountRepository, ClassRepository, TeacherRepository, TermRepository } from "../repository/index.js";
 import mongoose from "mongoose";
+import { sendConfirmEmail } from "../utils/mailTransport.js";
 const getTeacherByClassId = async (req, res) => {
   try {
     const classId = req.params.classId;
