@@ -1,0 +1,47 @@
+@use "../../../../styles/variable" as var;
+.customTab {
+  background-color: red;
+  :global {
+    .ant-tabs-tab-btn {
+      font-size: 14px;
+      color: red;
+    }
+  }
+}
+.taskBoard {
+  :global {
+    .ant-table-wrapper table {
+      border: 1px solid rgba($color: var.$primary-color, $alpha: 0.5);
+    }
+  }
+  :global {
+    .ant-table-wrapper .ant-table {
+      border-radius: none;
+    }
+    .ant-table-wrapper .ant-table-footer {
+      border: 1px solid rgba($color: var.$primary-color, $alpha: 0.5);
+      border-top: none;
+    }
+  }
+}
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  margin: 0 3px
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #a8a8a8;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #7e7e7e;
+}
+  

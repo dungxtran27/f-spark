@@ -136,13 +136,20 @@ const OutcomeDetail = ({
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
+  const handleFileChange = async (info: any) => {
+    const file = info.file.originFileObj;
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      setUploadedFile(base64String);
+    };
+    reader.readAsDataURL(file);
+  };
   const props: UploadProps = {
     name: "file",
     multiple: false,
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    onChange(info) {
-      setUploadedFile([info?.file]);
-    },
+    accept: ".docx,.pdf,.xlsx",
+    customRequest: handleFileChange,
   };
   const createSubmission = useMutation({
     mutationFn: ({ attachment, classworkId }: CreateSubmissionProps) => {
@@ -232,8 +239,7 @@ const OutcomeDetail = ({
                     type="primary"
                     onClick={() => {
                       createSubmission.mutate({
-                        attachment:
-                          "https://www.youtube.com/watch?v=cP7_ZDpcBsQ",
+                        attachment: uploadedFile,
                         classworkId: oc._id,
                       });
                     }}

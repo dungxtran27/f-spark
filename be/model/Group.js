@@ -1,4 +1,60 @@
 import mongoose, { Schema } from "mongoose";
+const TimelineSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: false,
+    },
+    description: {
+      type: String,
+      required: false,
+    },
+    startDate: {
+      type: Date,
+      required: false,
+    },
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    editAble: {
+      type: Boolean,
+    },
+
+    type: {
+      type: String,
+      required: true,
+    },
+    outcome: {
+      type: Schema.Types.ObjectId,
+      ref: "Outcome",
+    },
+    classworkId: {
+      type: Schema.Types.ObjectId,
+      ref: "Classwork",
+    },
+  },
+  { timestamps: true }
+);
+
+const customerPersona = new Schema({
+  detail: {
+    age: { type: Number, default: null },
+    name: { type: String, default: null },
+    jobTitle: { type: String, default: null },
+    relationshipStatus: {
+      type: String,
+      enum: ["Độc thân", "Đã kết hôn", "Đã ly hôn", "Góa phụ"],
+      default: "Độc thân",
+    },
+    address: { type: String, default: null },
+    income: { type: Number, default: null },
+    image: { type: String, default: null },
+  },
+  bio: { type: String, default: null },
+  needs: [{ type: String, default: null }],
+});
+
 const ColSchema = new Schema({
   name: {
     type: String,
@@ -62,6 +118,28 @@ const CanvasCellsSchema = new Schema({
     default: "default content",
   },
 });
+const TransactionSchema = new Schema(
+  {
+    title: {
+      type: String,
+    },
+    fundUsed: {
+      type: Number,
+    },
+    evidence: {
+      type: [String],
+    },
+    status: {
+      type: String,
+      required: false,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 const GroupSchema = new Schema(
   {
     GroupName: {
@@ -71,16 +149,14 @@ const GroupSchema = new Schema(
     mentor: {
       type: Schema.Types.ObjectId,
       ref: "Mentor",
-      required: true,
+      required: false,
     },
     GroupDescription: {
       type: String,
-      required: true,
     },
     class: {
       type: Schema.Types.ObjectId,
       ref: "Class",
-      required: true,
     },
     customerJourneyMap: {
       type: CustomerJourneyMapSchema,
@@ -142,53 +218,70 @@ const GroupSchema = new Schema(
         ],
       },
     },
-    customerPersonas: [
-      {
-        detail: {
-          age: { type: Number, default: null },
-          name: { type: String, default: null },
-          jobTitle: { type: String, default: null },
-          relationshipStatus: {
-            type: String,
-            enum: ['Độc thân', 'Đã kết hôn', 'Đã ly hôn', 'Góa phụ'],
-            default: "Độc thân",
-          },
-          address: { type: String, default: null },
-          income: { type: Number, default: null },
-          image: { type: String, default: null },
-        },
-        bio: { type: String, default: null },
-        needs: [{ type: String, default: null }],
-      }
-    ],
+    customerPersonas: [customerPersona],
     isSponsorship: {
       type: Boolean,
       default: false,
-      require: true,
+    },
+    sponsorStatus: {
+      type: String,
+      required: false,
+      enum: ["normal", "pending", "sponsored"],
+      default: "normal",
     },
     teamMembers: [
       {
         type: Schema.Types.ObjectId,
         ref: "Student",
         required: false,
-      }
+      },
     ],
     tag: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'TagMajor',
-        required: true,
-      }
+        ref: "TagMajor",
+      },
     ],
     leader: {
       type: Schema.Types.ObjectId,
-      ref: 'Student',
-      required: true
+      ref: "Student",
+      required: false,
     },
     groupImage: {
       type: String,
-      required: false
-    }
+      required: false,
+    },
+    lock: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    oldMark: {
+      type: Number,
+      required: false,
+    },
+    term: {
+      type: Schema.Types.ObjectId,
+      ref: "Term",
+      require: true,
+    },
+    timeline: [TimelineSchema],
+    term: {
+      type: Schema.Types.ObjectId,
+      ref: "Term",
+      required: true,
+    },
+    transactions: {
+      type: [TransactionSchema],
+      default: [],
+    },
+    gallery: [
+      {
+        type: String,
+        required: false,
+        default: [],
+      },
+    ],
   },
   { timestamps: true, collection: "Groups" }
 );

@@ -8,14 +8,13 @@ import {
   Select,
   Button,
   Input,
+  Skeleton,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { customerJourneyMapApi } from "../../../../../api/apiOverview/customerJourneyMap";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import TextArea from "antd/es/input/TextArea";
-import { UserInfo } from "../../../../../model/auth";
-import { RootState } from "../../../../../redux/store";
-import { useSelector } from "react-redux";
+
 import { QUERY_KEY } from "../../../../../utils/const";
 
 const { Title } = Typography;
@@ -38,17 +37,9 @@ interface Cell {
   col: string;
   content: string;
 }
-
-// interface CustomerJourneyMapData {
-//   cols: Cols[];
-//   rows: Rows[];
-//   cells: Cell[];
-// }
-
-// interface ErrorResponse {
-//   error: string;
-// }
-
+interface CustomerJourneyMapProps {
+  groupId: string; 
+}
 const colorOptions = [
   "#b2e5c6",
   "#add998",
@@ -90,13 +81,7 @@ function lightenColor(color: string, percent: number) {
   );
 }
 
-const CustomerJourneyMap: React.FC = () => {
-  const userInfo = useSelector(
-    (state: RootState) => state.auth.userInfo
-  ) as UserInfo | null;
-
-  const groupId = userInfo?.group ?? "";
-
+const CustomerJourneyMap: React.FC<CustomerJourneyMapProps> = ({groupId}) => {
   const [isRowModalVisible, setIsRowModalVisible] = useState(false);
   const [isColModalVisible, setIsColModalVisible] = useState(false);
   const [isCellModalVisible, setIsCellModalVisible] = useState(false);
@@ -107,7 +92,7 @@ const CustomerJourneyMap: React.FC = () => {
   const [newColColor, setNewColColor] = useState("");
   const [cellContent, setCellContent] = useState("");
   const queryClient = useQueryClient();
-  const { data: customerJourneyMapData } = useQuery({
+  const { data: customerJourneyMapData, isLoading } = useQuery({
     queryKey: [QUERY_KEY.GROUP_CUSTOMER_JOURNEY_MAP, groupId],
     queryFn: async () => {
       return await customerJourneyMapApi.getGroupData(groupId);
@@ -328,7 +313,10 @@ const CustomerJourneyMap: React.FC = () => {
   };
 
   const handleEditRow = () => {
-    if (currentRow) {
+    if(newColName == ''){
+      message.error("Row name cannot be empty!");
+    }
+    if (currentRow && newColName != '') {
       editRowMutation.mutate({
         rowId: currentRow._id,
         rowName: newColName,
@@ -337,15 +325,26 @@ const CustomerJourneyMap: React.FC = () => {
   };
 
   const handleEditCell = () => {
-    if (currentCell) {
+    if(cellContent == ''){
+      message.error("Content cannot be empty!");
+    }
+    if (currentCell && cellContent != '') {
       editCellMutation.mutate({
         cellId: currentCell._id,
         content: cellContent,
       });
     }
   };
+
+  if (isLoading)
+    return (
+      <div className="bg-white rounded p-4">
+        <Skeleton />
+      </div>
+    );
+
   return (
-    <div className="bg-white p-4 w-full rounded-lg mb-6">
+    <div className="bg-white p-4 w-full rounded">
       <Title level={4} className="text-xl font-bold mb-5">
         Customer Journey Map
       </Title>
@@ -462,6 +461,7 @@ const CustomerJourneyMap: React.FC = () => {
         <div className="flex-1"></div>
       </div>
       <Modal
+        centered
         title="Edit Column"
         open={isColModalVisible}
         onOk={handleEditColumn}
@@ -511,6 +511,7 @@ const CustomerJourneyMap: React.FC = () => {
         />
       </Modal>
       <Modal
+        centered
         title="Edit Row"
         open={isRowModalVisible}
         onOk={handleEditRow}
@@ -532,6 +533,7 @@ const CustomerJourneyMap: React.FC = () => {
         />
       </Modal>
       <Modal
+        centered
         title="Edit Cell Content"
         open={isCellModalVisible}
         onOk={handleEditCell}

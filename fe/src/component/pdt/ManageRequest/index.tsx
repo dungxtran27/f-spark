@@ -1,97 +1,224 @@
-import { Button, Table, Tabs, TabsProps, Tag } from "antd";
-import classNames from "classnames";
-import styles from "../../teacher/ClassDetail/styles.module.scss";
-import { colorMap } from "../../../utils/const";
+import { Button, Typography, Table, Tabs, TabsProps, Tag } from "antd";
+import styles from "../ManageAccount/styles.module.scss";
+import { colorMap, QUERY_KEY } from "../../../utils/const";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { requestList } from "../../../api/request/request";
+import { ColumnsType } from "antd/es/table";
+import Statistic from "./Statistic";
+const { Text } = Typography;
 const RequestWrapper = () => {
-  const reqData = [
-    {
-      _id: "1",
-      student: { studentId: "123456", _id: "1", name: "haha", major: "SE" },
-      classFrom: { _id: "1", name: "Se1714" },
-      classTo: { _id: "2", name: "Se1725" },
-      status: false,
+  const { data: reqData } = useQuery({
+    queryKey: [QUERY_KEY?.REQUEST_LEAVE_CLASS],
+    queryFn: async () => {
+      return requestList?.getLeaveClassRequest();
     },
-    {
-      _id: "2",
-      student: { studentId: "12333", _id: "1", name: "haha2", major: "SE" },
-      classFrom: { _id: "1", name: "Se1714" },
-      classTo: { _id: "2", name: "Se1725" },
-      status: true,
+  });
+
+  const queryClient = useQueryClient();
+  const approveLeaveReq = useMutation({
+    mutationFn: ({ requestId }: any) =>
+      requestList?.approveLeaveRequest({
+        requestId: requestId,
+      }),
+
+    onSuccess: () => {
+      queryClient?.invalidateQueries({
+        queryKey: [QUERY_KEY?.REQUEST_LEAVE_CLASS],
+      });
     },
-    {
-      _id: "3",
-      student: { studentId: "44444", _id: "1", name: "haha3", major: "SE" },
-      classFrom: { _id: "1", name: "Se1714" },
-      classTo: { _id: "2", name: "Se1725" },
-      status: true,
+  });
+  const declineLeaveReq = useMutation({
+    mutationFn: ({ requestId }: any) =>
+      requestList?.declineLeaveRequest({
+        requestId: requestId,
+      }),
+
+    onSuccess: () => {
+      queryClient?.invalidateQueries({
+        queryKey: [QUERY_KEY?.REQUEST_LEAVE_CLASS],
+      });
     },
-    {
-      _id: "4",
-      student: { studentId: "6666", _id: "1", name: "haha4", major: "SE" },
-      classFrom: { _id: "1", name: "Se1714" },
-      classTo: { _id: "2", name: "Se1725" },
-      status: true,
-    },
-    {
-      _id: "5",
-      student: { studentId: "5555", _id: "1", name: "haha5", major: "SE" },
-      classFrom: { _id: "1", name: "Se1714" },
-      classTo: { _id: "2", name: "Se1725" },
-      status: false,
-    },
-  ];
-  const columnsReq = [
+  });
+  const columnsReqPending: ColumnsType<any> = [
     {
       title: "MSSV",
-      dataIndex: "student",
-      render: (student: any) => student.studentId,
+      dataIndex: "createBy",
+      render: (createBy: any) => createBy?.studentId,
       width: 50,
     },
     {
       title: "Name",
-      dataIndex: "student",
-      render: (student: any) => student.name,
+      dataIndex: "createBy",
+      render: (student: any) => student?.name,
       width: 200,
     },
     {
       title: "Major",
-      dataIndex: "student",
+      dataIndex: "createBy",
       render: (student: any) => (
-        <Tag color={colorMap[student.major]}>{student.major}</Tag>
+        <Tag color={colorMap[student?.major]}>{student?.major}</Tag>
       ),
       width: 50,
     },
     {
-      title: "Move",
-      render: (record: any) => (
-        <>
-          from <Tag color="green"> {record.classFrom.name}</Tag> to{"  "}
-          <Tag color="blue"> {record.classTo.name}</Tag>
-        </>
-      ),
+      title: "Request Type Specific",
+      align: "center",
+      render: (record: any) => {
+        if (record?.typeRequest === "changeClass") {
+          return (
+            <div className="text-center">
+              from <Tag color="green"> {record?.fromClass?.classCode}</Tag>
+              <span>&#8594;</span>
+              <Tag color="blue" className=" ml-1">
+                {record?.toClass?.classCode}
+              </Tag>
+            </div>
+          );
+        } else if (record?.typeRequest === "deleteFromGroup") {
+          return (
+            <div className="text-center">
+              remove{" "}
+              <span className="text-primaryBlue font-semibold px-1">
+                {" "}
+                {record?.studentDeleted?.name}
+              </span>{" "}
+              from group {record?.group?.GroupName}
+            </div>
+          );
+        }
+      },
     },
+
     {
       title: "Action",
-      render: (student: any) => (
-        <>
-          <Button type="primary"> Approve</Button>
-          <Button type="default"> Approve</Button>
-        </>
+      align: "center",
+      render: (record: any) => (
+        <div className="">
+          <Button
+            type="primary"
+            className="mr-2"
+            onClick={() => {
+              approveLeaveReq.mutate({ requestId: record?._id });
+            }}
+          >
+            Approve
+          </Button>
+          <Button
+            type="default"
+            onClick={() => {
+              declineLeaveReq.mutate({ requestId: record?._id });
+            }}
+          >
+            Declined
+          </Button>
+        </div>
       ),
+    },
+  ];
+  const columnsReqProcessed: ColumnsType<any> = [
+    {
+      title: "MSSV",
+      dataIndex: "createBy",
+      render: (createBy: any) => createBy?.studentId,
+      width: 50,
+    },
+    {
+      title: "Name",
+      dataIndex: "createBy",
+      render: (student: any) => student?.name,
+      width: 200,
+    },
+    {
+      title: "Major",
+      dataIndex: "createBy",
+      render: (student: any) => (
+        <Tag color={colorMap[student?.major]}>{student?.major}</Tag>
+      ),
+      width: 50,
+    },
+    {
+      title: "Request Type Specific",
+      align: "center",
+      render: (record: any) => {
+        if (record?.typeRequest === "changeClass") {
+          return (
+            <div className="text-center">
+              <Tag color="green"> {record?.fromClass?.classCode}</Tag>
+              <span>&#8594;</span>
+              <Tag color="blue" className=" ml-1">
+                {" "}
+                {record?.toClass?.classCode}
+              </Tag>
+            </div>
+          );
+        } else if (record?.typeRequest === "deleteFromGroup") {
+          return (
+            <div className="text-center">
+              remove
+              <span className="text-primaryBlue font-semibold px-1">
+                {record?.studentDeleted?.name}
+              </span>
+              from group {record?.group?.GroupName}
+            </div>
+          );
+        }
+      },
+    },
+
+    {
+      title: "Status",
+      align: "center",
+      render: (record: any) => {
+        return (
+          <Text type={record?.status == "approved" ? "success" : "danger"}>
+            {record?.status}
+          </Text>
+        );
+      },
     },
   ];
   const items: TabsProps["items"] = [
-    { key: "pending", label: "Pending" },
-    { key: "approved", label: "Approved" },
+    {
+      key: "pending",
+      label: "Pending",
+      children: (
+        <div className="bg-white p-3 rounded-md">
+          <Table
+            className="customTable"
+            // pagination={}
+            dataSource={reqData?.data?.pendingRequest}
+            columns={columnsReqPending}
+          />
+        </div>
+      ),
+    },
+    {
+      key: "approved",
+      label: "Processed",
+      children: (
+        <div className="bg-white p-3 rounded-md">
+          <Table
+            dataSource={reqData?.data?.processedRequest}
+            columns={columnsReqProcessed}
+          />
+        </div>
+      ),
+    },
   ];
 
   return (
-    <>
-      <div className={classNames(styles.customTabs)}>
-        <Tabs items={items} defaultActiveKey="pending" />
+    <div className="p-5">
+      <div className="">
+        <Statistic />
+        <div className="">
+          <Tabs
+            items={items}
+            defaultActiveKey="pending"
+            className={styles.customTab}
+          />
+        </div>
       </div>
-      <Table dataSource={reqData} columns={columnsReq} />
-    </>
+    </div>
   );
 };
 export default RequestWrapper;

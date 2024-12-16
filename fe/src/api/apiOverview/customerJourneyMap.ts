@@ -1,6 +1,5 @@
 import axios from "../../utils/axiosUtil";
 
-
 export const customerJourneyMapApi = {
   createColumn: async (groupId: string) => {
     return await axios.post(`api/group/createColumn?groupId=${groupId}`);

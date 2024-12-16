@@ -1,100 +1,88 @@
-import { Button, Checkbox, Modal } from "antd";
+import { Modal, Table } from "antd";
 import { useState } from "react";
-import StudentTableNoAction from "./studentTableNoAction";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEY } from "../../../utils/const";
+import { groupApi } from "../../../api/group/group";
 
-const GroupTableNoAction = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
-  const data = [
+const GroupTableNoAction = ({
+  classId,
+  isOpen,
+  setIsOpen,
+}: {
+  classId: string;
+  isOpen: boolean;
+  setIsOpen: (value: any) => void;
+}) => {
+  const [selectedGroups, setSelectedGroups] = useState([]);
+  const queryClient = useQueryClient()
+  const { data: groupsData } = useQuery({
+    queryKey: [QUERY_KEY.NO_CLASS_GROUPS],
+    queryFn: async () => {
+      return groupApi.getAllGroupsNoClass();
+    },
+  });
+  const columns = [
     {
-      groupName: "banh ca oreo",
-      major: ["F&B", "Nông sản"],
-      teamMembers: 5,
+      title: "Group",
+      dataIndex: "GroupName",
     },
     {
-      groupName: "banh ca oreo",
-      major: ["F&B", "Nông sản"],
-      teamMembers: 5,
+      title: "Majors",
+      dataIndex: "majors",
     },
     {
-      groupName: "banh ca oreo",
-      major: ["F&B", "Công nghệ"],
-      teamMembers: 5,
+      title: "Team members",
+      dataIndex: "members",
     },
   ];
-
+  const data = groupsData?.data?.data?.mappedNoClassGroups?.map((g: any) => {
+    return {
+      key: g?._id,
+      GroupName: g?.GroupName,
+      majors: g?.majors,
+      members: g?.members?.length,
+    };
+  });
+  const AddGroupMutation = useMutation({
+    mutationFn: () => {
+      return groupApi.addGroupToClass({
+        groupIds: selectedGroups,
+        classId: classId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.NO_CLASS_GROUPS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS_OF_CLASS] });
+    },
+  });
+  const rowSelection = {
+    onChange: (selectedRowKeys: any) => {
+      setSelectedGroups(selectedRowKeys);
+    },
+    getCheckboxProps: (record: any) => ({
+      name: record.name,
+    }),
+  };
   return (
-    <div className="bg-white shadow-md rounded-md p-4">
-      <table className="w-full table-auto">
-        <thead>
-          <tr className="bg-gray-200 text-left">
-            <th className="p-2">
-              <Checkbox />
-            </th>
-            <th className="p-2">Group</th>
-            <th className="p-2">Major</th>
-            <th className="p-2">TeamMembers</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((group, index) => (
-            <tr className="border-b" key={index}>
-              <td className="p-2">
-                <Checkbox />
-              </td>
-              <td className="p-2">{group.groupName}</td>
-              <td className="p-2">
-                {group.major.map((maj, idx) => (
-                  <span
-                    key={idx}
-                    className=" px-2 py-1 m-1 rounded-lg mt-1"
-                    style={{
-                      backgroundColor:
-                        maj === "Nông sản"
-                          ? "rgba(255, 255, 0, 0.4)"
-                          : maj === "Công nghệ"
-                          ? "rgba(0, 128, 0, 0.4)"
-                          : "rgba(255, 0, 0, 0.4)",
-                    }}
-                  >
-                    {maj}
-                  </span>
-                ))}
-              </td>
-              <td className="p-2 font-semibold text-lg">{group.teamMembers}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <Modal
-        title="Student UnGroup"
-        open={isModalVisible}
-        onCancel={handleCancel}
-        closable={false}
-        footer={[
-          <Button key="cancel" onClick={handleCancel}>
-            Cancel
-          </Button>,
-          <Button key="save" type="primary" onClick={handleCancel}>
-            Save
-          </Button>,
-        ]}
-        width={900}
-        bodyStyle={{
-          maxHeight: 400,
-          overflowY: "auto",
-        }}
-      >
-        <div className="w-full">
-          <StudentTableNoAction />
-        </div>
-      </Modal>
-    </div>
+    <Modal
+      centered
+      title="Group not have class"
+      open={isOpen}
+      onCancel={() => setIsOpen(false)}
+      closable={false}
+      width={900}
+      bodyStyle={{
+        maxHeight: 400,
+        overflowY: "auto",
+      }}
+      onOk={()=>{AddGroupMutation.mutate()}}
+    >
+      <Table
+        columns={columns}
+        dataSource={data}
+        rowSelection={{ type: "checkbox", ...rowSelection }}
+      />
+    </Modal>
   );
 };
 

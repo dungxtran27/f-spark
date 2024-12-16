@@ -1,10 +1,10 @@
 .search_tag_bar {
   width: 19.5rem !important;
-  padding-left: 0.5rem;
+  // padding-left: ;
 }
 .filter_bar {
   margin-top: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   margin-left: 1rem;
   display: flex;
 }
@@ -12,3 +12,33 @@
   width: 19.5rem !important;
   padding-left: 0.5rem;
 }
+.customIcon1,
+.customIcon2 {
+  color: #e5e7eb;
+}
+.customIcon1:hover {
+  color: red;
+  scale: 1.1;
+  transition: all;
+  transition: all 200ms ease-in-out;
+}
+
+.customIcon2:hover {
+  color: rgb(5, 5, 5);
+  scale: 1.1;
+  transition: all 200ms ease-in-out;
+  -webkit-transition: all 200ms ease-in-out;
+  -moz-transition: all 200ms ease-in-out;
+  -ms-transition: all 200ms ease-in-out;
+  -o-transition: all 200ms ease-in-out;
+}
+.deleteBtn {
+  background-color: red !important;
+  color: white !important;
+}
+.deleteBtn:hover {
+  background-color: rgb(240, 93, 93) !important;
+  color: rgb(255, 255, 255) !important;
+  transition: all 200ms ease-in-out !important;
+}
+

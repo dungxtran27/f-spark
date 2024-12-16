@@ -1,7 +1,7 @@
 import { Button, Form, Modal, Upload, UploadProps } from "antd";
 import QuillEditor from "../../QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
-import { useRef } from "react";
+import {  useState } from "react";
 import { classApi } from "../../../../api/Class/class";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
@@ -11,11 +11,22 @@ import { useMutation } from "@tanstack/react-query";
 interface Props {
   open: any;
   setOpen: (value: any) => void;
-  classworkId: string|null;
+  classworkId: string | null;
 }
 const SubmitModal = ({ open, setOpen, classworkId }: Props) => {
   const [form] = Form.useForm();
-  const uploadedFiles = useRef<string[]>([]);
+  const [fileName, setFileName] = useState<string>("");
+
+  const handleFileChange = async (info: any) => {
+    const file = info.file;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      form.setFieldValue("attachment", base64String);
+    };
+    reader.readAsDataURL(file);
+  };
   const setSubmissionContent = (value: string) => {
     form.setFieldValue("content", value);
   };
@@ -25,32 +36,32 @@ const SubmitModal = ({ open, setOpen, classworkId }: Props) => {
   const props: UploadProps = {
     name: "file",
     multiple: true,
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    onChange(info) {
-      if (uploadedFiles?.current && info.file?.status !== "uploading") {
-        uploadedFiles.current.push(
-          "https://www.youtube.com/watch?v=eAs7NGvjiiI"
-        );
-        form.setFieldValue("attachment", uploadedFiles);
-      }
-    },
+    accept: ".docx,.pdf,.xlsx",
+    customRequest: handleFileChange,
   };
   const createSubmission = useMutation({
     mutationFn: ({
       attachment,
       content,
+      fileName,
     }: {
       attachment: any;
       content: string;
+      fileName: string;
     }) => {
       return classApi.createSubmission(classworkId, userInfo?.group, {
         attachment: attachment,
         content: content,
+        fileName: fileName,
       });
+    },
+    onSuccess: () => {
+      setOpen(false);
     },
   });
   return (
     <Modal
+      centered
       open={open}
       title={"Submit your answer"}
       onCancel={() => {
@@ -60,10 +71,13 @@ const SubmitModal = ({ open, setOpen, classworkId }: Props) => {
         });
       }}
       destroyOnClose
-      onOk={()=>{
-        const { attachment, content } =
-          form.getFieldsValue();  
-        createSubmission.mutate({attachment: attachment?.current, content: content})
+      onOk={() => {
+        const { attachment, content } = form.getFieldsValue();
+        createSubmission.mutate({
+          attachment: attachment,
+          content: content,
+          fileName: fileName,
+        });
       }}
     >
       <Form layout="vertical" form={form}>

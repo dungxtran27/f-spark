@@ -11,7 +11,12 @@ import SubmissionController from "./submission.js";
 import TaskController from "./task.js";
 import TimeBlockController from "./timeblock.js";
 import TagMajorController from "./tagmajor.js";
-
+import RequestController from "./request.js";
+import NotificationController from "./notification.js";
+import TermController from "./term.js";
+import RequestDeadlineController from "./requestDeadline.js";
+import OutcomeController from "./outcome.js"
+import FundEstimationController from "./fundEstimation.js";
 export {
   AuthenticationController,
   UserController,
@@ -25,5 +30,11 @@ export {
   SubmissionController,
   TaskController,
   TimeBlockController,
-  TagMajorController
+  TagMajorController,
+  NotificationController,
+  RequestController,
+  TermController,
+  RequestDeadlineController,
+  OutcomeController,
+  FundEstimationController,
 };

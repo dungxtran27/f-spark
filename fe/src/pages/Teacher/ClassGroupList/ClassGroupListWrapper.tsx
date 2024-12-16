@@ -1,9 +1,26 @@
-import { Button, Modal, Tag, Select, Space, Input, Table } from "antd";
+import {
+  Button,
+  Modal,
+  Tag,
+  Select,
+  // Space,
+  Input,
+  Table,
+  Tooltip,
+  Form,
+  message,
+  Empty,
+} from "antd";
 const { Search } = Input;
 
 import { useState } from "react";
 
-import { colorMap, colorMajorGroup, QUERY_KEY } from "../../../utils/const";
+import {
+  colorMap,
+  colorMajorGroup,
+  QUERY_KEY,
+  CREATE_GROUP_DATA,
+} from "../../../utils/const";
 import classNames from "classnames";
 import style from "../MentorList/style.module.scss";
 import type { GetProps, SelectProps } from "antd";
@@ -12,11 +29,61 @@ import { classApi } from "../../../api/Class/class";
 import { mentorList } from "../../../api/mentor/mentor";
 import { student } from "../../../api/student/student";
 import GroupCard from "./GroupCard";
-import { FaEdit, FaStar } from "react-icons/fa";
+import { FaEdit, FaPlus, FaShareSquare, FaStar } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { Term, UserInfo } from "../../../model/auth";
+import { RootState } from "../../../redux/store";
+import { useParams } from "react-router-dom";
+import { groupApi } from "../../../api/group/group";
 
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  PointerSensor,
+  useDraggable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+
+import { CSS } from "@dnd-kit/utilities";
+import { MdOutlineFilterListOff } from "react-icons/md";
+import moment from "moment";
+
+interface RowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+  "data-row-key": string;
+}
+const Row: React.FC<Readonly<RowProps>> = (props) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: props["data-row-key"],
+    });
+
+  const style: React.CSSProperties = {
+    ...props.style,
+    transform: CSS.Translate.toString(transform),
+
+    cursor: "move",
+    ...(isDragging ? { position: "absolute", zIndex: "99" } : {}),
+  };
+
+  return (
+    <tr
+      {...props}
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+    />
+  );
+};
 interface reqBodyAssignMentorToGroup {
   mentorId: string;
   groupId: string;
+}
+interface reqBodyCreateGroup {
+  classId: string | undefined;
+  groupName: string;
+  groupDescription: string;
 }
 
 interface MentorData {
@@ -44,7 +111,7 @@ interface Account {
   studentId?: string; // Optional, as studentId might not be present for all accounts
 }
 interface Group {
-  ProjectImage: string;
+  groupImage: string;
   GroupDescription: string;
   GroupName: string;
   isSponsorship: boolean;
@@ -55,8 +122,17 @@ interface Group {
   _id: string;
 }
 const ClassGroupListWrapper = () => {
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
+  const [form] = Form.useForm();
+  const groupName = Form.useWatch(CREATE_GROUP_DATA.groupName, form);
+  const groupDescription = Form.useWatch(
+    CREATE_GROUP_DATA.groupDescription,
+    form
+  );
   const [group, setGroup] = useState<Group>({
-    ProjectImage: "",
+    groupImage: "",
     GroupDescription: "",
     GroupName: "",
     isSponsorship: false,
@@ -66,7 +142,19 @@ const ClassGroupListWrapper = () => {
     teamMembers: [],
     _id: "",
   });
-  //random add modal
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const lockGroup = activeTerm?.timeLine?.find(
+    (item) => item.type === "teacherLockGroup"
+  );
+
+  const isLockGroupExpired = lockGroup?.endDate
+    ? moment().isAfter(moment(lockGroup.endDate))
+    : false;
+  //drag
 
   //add mentor modal
   const [AddMentorModal, setAddMentorModal] = useState(false);
@@ -99,6 +187,8 @@ const ClassGroupListWrapper = () => {
 
   const [tagSearch, setTagSearch] = useState([]);
   const [nameSeacrh, setNameSeacrh] = useState("");
+  const [currentSemester, setNameCurrentSemester] = useState("curr");
+  const [order, setOrder] = useState("up");
   const handleChange = (value: any) => {
     setTagSearch(value);
   };
@@ -112,15 +202,26 @@ const ClassGroupListWrapper = () => {
   const handleClosegroupDetailModal = () => {
     setgroupDetailModal(false);
   };
+  const [createGroupModal, setcreateGroupModal] = useState(false);
 
-  const classID = "670bb40cd6dcc64ee8cf7c90";
+  const handleOpencreateGroupModal = () => {
+    setcreateGroupModal(true);
+  };
+
+  const handleClosecreateGroupModal = () => {
+    setcreateGroupModal(false);
+  };
+
+  const { classId } = useParams();
+
   //handle classData
   const { data: classPeople } = useQuery({
-    queryKey: [classID],
+    queryKey: [classId],
     queryFn: async () => {
-      return await classApi.getclassDetailPeople(classID);
+      return classApi.getclassDetailPeople(classId);
     },
   });
+  // console.log(classPeople);
 
   const { data: tagData } = useQuery({
     queryKey: [QUERY_KEY.TAGDATA],
@@ -136,13 +237,21 @@ const ClassGroupListWrapper = () => {
     })
   );
   const { data: mentorData } = useQuery({
-    queryKey: [QUERY_KEY.MENTORLIST, tagSearch, nameSeacrh],
+    queryKey: [
+      QUERY_KEY.MENTORLIST,
+      tagSearch,
+      nameSeacrh,
+      currentSemester,
+      order,
+    ],
     queryFn: async () => {
       return mentorList.getMentorListPagination({
-        limit: 27,
+        limit: 20,
         page: 1,
         tagIds: tagSearch,
         name: nameSeacrh,
+        term: currentSemester,
+        order: order,
       });
     },
   });
@@ -155,7 +264,7 @@ const ClassGroupListWrapper = () => {
       }),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [classID] });
+      queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
   // assign leader to group
@@ -166,12 +275,13 @@ const ClassGroupListWrapper = () => {
         groupId: groupId,
       }),
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [classID] });
-      setGroup(group);
+    onSuccess: (data) => {
+      setGroup(data.data.group);
+      queryClient.invalidateQueries({ queryKey: [classId] });
     },
   });
   // assign mentor to group
+
   const assignMentorToGroup = useMutation({
     mutationFn: ({ mentorId, groupId }: reqBodyAssignMentorToGroup) =>
       student.assignmentorToGroup({
@@ -179,9 +289,60 @@ const ClassGroupListWrapper = () => {
         groupId: groupId,
       }),
 
+    onSuccess: (data) => {
+      setGroup(data?.data.data.group);
+
+      queryClient.invalidateQueries({ queryKey: [classId] });
+    },
+  });
+  const createGroup = useMutation({
+    mutationFn: ({
+      groupName,
+      classId,
+      groupDescription,
+    }: reqBodyCreateGroup) =>
+      groupApi.createGroup({
+        groupName: groupName,
+        classId: classId,
+        groupDescription: groupDescription,
+      }),
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [classID] });
-      setGroup(group);
+      queryClient.invalidateQueries({ queryKey: [classId] });
+    },
+  });
+  const deleteStudentFromGroup = useMutation({
+    mutationFn: ({ groupId, studentId }: reqBodyAddStudentToGroup) =>
+      groupApi.deleteStudentFromGroup({
+        groupId: groupId,
+        studentId: studentId,
+      }),
+
+    onSuccess: (data) => {
+      setGroup(data.data.group);
+      queryClient.invalidateQueries({ queryKey: [classId] });
+    },
+  });
+  const ungroup = useMutation({
+    mutationFn: ({ groupId }: any) =>
+      groupApi.ungroup({
+        groupId: groupId,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [classId] });
+    },
+  });
+
+  const lockOrUnlockGroup = useMutation({
+    mutationFn: ({ groupId }: any) =>
+      groupApi.lockOrUnlockGroup({
+        groupId: groupId,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [classId],
+      });
     },
   });
 
@@ -210,10 +371,43 @@ const ClassGroupListWrapper = () => {
       width: 300,
     },
     {
-      title: "Group supporting",
-      dataIndex: "groupNumber",
+      title: `Group support ${currentSemester == "curr" ? " this semester" : "all semesters"
+        }`,
+      // dataIndex: "groupNumber",
+      render: (rc: any) => (
+        <>
+          <span>
+            <span className="text-blue-600 font-medium">
+              {rc.assignedGroupLength}
+            </span>{" "}
+            groups:{" "}
+          </span>
+          {rc.groups.map((g: any) => (
+            <span className="shadow p-1 bg-slate-50 rounded-sm leading-8 ml-1">
+              {g.groupName}
+            </span>
+          ))}
+        </>
+      ),
     },
   ];
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 1,
+      },
+    })
+  );
+
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (over === null) message.warning("please drag student to group you want");
+    else {
+      addStudentToGroupSelected.mutate({
+        groupId: over.id.toString(),
+        studentId: active.id.toString(),
+      });
+    }
+  };
 
   type SearchProps = GetProps<typeof Input.Search>;
   const onSearch: SearchProps["onSearch"] = (value) => setNameSeacrh(value);
@@ -222,92 +416,180 @@ const ClassGroupListWrapper = () => {
     {
       title: "Name",
       dataIndex: "name",
-      width: 300,
+      width: 200,
+    },
+    {
+      title: "MSSV",
+      dataIndex: "studentId",
+      width: 100,
     },
     {
       title: "Major",
       dataIndex: "major",
+      width: 50,
       render: (major: string) => <Tag color={colorMap[major]}>{major}</Tag>,
     },
   ];
+  // console.log("c", group);
 
   return (
     <>
-      <div className=" px-3">
-        <div className="text-lg font-semibold ">Groups</div>
-
-        <div className=" flex  justify-between">
-          <div className="flex flex-wrap ">
-            {classPeople?.data.data.groupStudent.map((s: any) => (
-              <GroupCard
-                info={s}
-                handleOpenAddMentorModal={handleOpenAddMentorModal}
-                handleOpengroupDetailModal={handleOpengroupDetailModal}
-                setGroup={setGroup}
-              />
-            ))}
-          </div>
-          <Table
-            dataSource={classPeople?.data.data.unGroupStudents}
-            columns={columnsStudentUngroup}
-          />
+      <div className=" px-0.1">
+        <div className="text-lg font-semibold ">
+          <span>{classPeople?.data.data.groupStudent.length}</span>
+          <span className="pl-1 pr-3">Groups</span>
+          <span>
+            <Tooltip placement="top" title={"Create group"}>
+              <Button type="primary" onClick={handleOpencreateGroupModal}>
+                <FaPlus />
+              </Button>
+            </Tooltip>
+          </span>
         </div>
+        <DndContext sensors={sensors} onDragEnd={onDragEnd}>
+          <div className=" flex  justify-between pt-2 ">
+            <div className="flex flex-wrap   w-full">
+              {classPeople?.data.data.groupStudent.map((s: any) => (
+                <GroupCard
+                  info={s}
+                  handleLock={() => {
+                    if (!isLockGroupExpired) {
+                      lockOrUnlockGroup.mutate({ groupId: s._id });
+                    }
+                  }}
+                  handleOpenAddMentorModal={handleOpenAddMentorModal}
+                  handleOpengroupDetailModal={handleOpengroupDetailModal}
+                  setGroup={setGroup}
+                  setTagSearch={setTagSearch}
+                  role={userInfo?.role}
+                />
+              ))}
+            </div>
+
+            <Table
+              className="w-[40%] shadow"
+              size="small"
+              components={{
+                body: { row: Row },
+              }}
+              locale={{
+                emptyText: <Empty description="No Data" className="w-full" />,
+              }}
+              rowKey="_id"
+              dataSource={classPeople?.data.data.unGroupStudents}
+              columns={columnsStudentUngroup}
+              pagination={{ pageSize: 10 }}
+              scroll={{ y: 55 * 5 }}
+            />
+          </div>
+        </DndContext>
       </div>
 
       {/* modal add mentor */}
       <Modal
+        centered
+        className="z-40"
         open={AddMentorModal}
         onCancel={handleCloseAddMentorModal}
-        width={1000}
+        width={1200}
         footer={[
           <Button key="back" onClick={handleCloseAddMentorModal}>
             Close
           </Button>,
         ]}
       >
-        <Space
+        {/* <Space
           className={classNames(style.filter_bar)}
           style={{ width: "100%" }}
           direction="horizontal"
-        >
-          <p>Major</p>
-          <Select
-            mode="multiple"
-            allowClear
-            className={classNames(style.search_tag_bar)}
-            placeholder="Please select"
-            maxTagCount={3}
-            onChange={handleChange}
-            options={options}
-          />{" "}
-          <p>Search</p>
-          <Search
-            className={classNames(style.search_name_bar)}
-            placeholder="input search text"
-            onSearch={onSearch}
-            enterButton
+        > */}
+        <div className={classNames(style.filter_bar)}>
+          <div>
+            <p>Major</p>
+            <Select
+              mode="multiple"
+              defaultValue={tagSearch}
+              allowClear
+              className={classNames(style.search_tag_bar)}
+              placeholder="Select major"
+              maxTagCount={"responsive"}
+              onChange={handleChange}
+              options={options}
+            />
+          </div>
+          <div>
+            <p className="pl-3">Search</p>
+            <Search
+              className={classNames(style.search_name_bar)}
+              placeholder="Enter mentor name here"
+              onSearch={onSearch}
+              enterButton
+            />
+          </div>
+          <div className="ml-2">
+            <p>Filter by</p>
+            <Select
+              defaultValue="curr"
+              style={{ width: 140 }}
+              onChange={setNameCurrentSemester}
+              options={[
+                { value: "curr", label: "This semester" },
+                { value: "all", label: "All Semester" },
+              ]}
+            />
+          </div>
+          <div className="ml-2">
+            <p>Order</p>
+            <Select
+              defaultValue="down"
+              style={{ width: 140 }}
+              onChange={setOrder}
+              options={[
+                { value: "down", label: "Ascending" },
+                { value: "up", label: "Descending" },
+              ]}
+            />
+          </div>
+          <Tooltip title={"clear all filter"}>
+            <Button
+              className="ml-2 self-end"
+              onClick={() => {
+                setTagSearch([]);
+                setNameSeacrh("");
+                setOrder("up");
+                setNameCurrentSemester("curr");
+                // setPage(1);
+              }}
+            >
+              <MdOutlineFilterListOff />
+            </Button>
+          </Tooltip>
+        </div>
+        {mentorData?.data.data.length > 0 ? (
+          <Table
+            dataSource={mentorData?.data.data}
+            columns={columnsMentor}
+            onRow={(record: MentorData) => {
+              return {
+                onClick: () => {
+                  setmentorSelected(record);
+                  setConfirmContent("mentor");
+                  handleOpenconfirm();
+                },
+              };
+            }}
+            pagination={{
+              pageSize: 4,
+              total: mentorData?.data.data.length, // Set the total number of rows
+            }}
           />
-        </Space>
-        <Table
-          dataSource={mentorData?.data.data}
-          columns={columnsMentor}
-          onRow={(record: MentorData) => {
-            return {
-              onClick: () => {
-                setmentorSelected(record);
-                setConfirmContent("mentor");
-                handleOpenconfirm();
-              },
-            };
-          }}
-          pagination={{
-            pageSize: 4,
-            total: mentorData?.data.data.length, // Set the total number of rows
-          }}
-        />
+        ) : (
+          <Empty description={"No matching mentor "} />
+        )}
       </Modal>
       {/* modal group detail */}
       <Modal
+        centered
         open={groupDetailModal}
         onCancel={handleClosegroupDetailModal}
         width={1000}
@@ -315,118 +597,157 @@ const ClassGroupListWrapper = () => {
           <Button key="back" onClick={handleClosegroupDetailModal}>
             Close
           </Button>,
+          // <Button
+          //   key="submit"
+          //   type="primary"
+          //   onClick={handleClosegroupDetailModal}
+          // >
+          //   Save
+          // </Button>,
           <Button
-            key="submit"
-            type="primary"
-            onClick={handleClosegroupDetailModal}
+            className={classNames(style.deleteBtn)}
+            onClick={() => {
+              setConfirmContent("delete");
+              handleOpenconfirm();
+            }}
           >
-            Save
+            Delete
           </Button>,
         ]}
       >
-        {Object.keys(group).length === 0 ? (
+        {group && Object.keys(group).length === 0 ? (
           <>none</>
         ) : (
           <div className="flex">
             <div className="max-w-[50%] min-w-[50%]">
               <div className="flex pb-1">
                 <span className="font-semibold text-[16px] pb-1 ">
-                  {group.GroupName} {" - "}
+                  {group?.GroupName}
                 </span>
-                {group.mentor == null ? (
-                  <p>
-                    <Button
-                      onClick={() => {
-                        handleOpenAddMentorModal();
-                      }}
-                      className="bg-red-500 text-white px-2 ml-2 rounded"
-                    >
-                      assign mentor
-                    </Button>
-                  </p>
-                ) : (
-                  <p className="flex self-center items-center">
-                    <p>{group.mentor.name} </p>{" "}
-                    <FaEdit
-                      size={20}
-                      className="pl-2"
-                      onClick={handleOpenAddMentorModal}
-                    />
-                  </p>
-                )}
               </div>
-
               <img
                 src={
-                  group.ProjectImage ||
+                  group?.groupImage ||
                   "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
                 }
-                className="h-[200px] w-full object-cover"
+                className="h-[200px] w-full object-cover mb-2"
                 alt=""
               />
+              {group?.mentor == null ? (
+                <>
+                  <span>Mentor:</span>
+                  <Button
+                    onClick={() => {
+                      handleOpenAddMentorModal();
+                    }}
+                    className="bg-red-500 text-white px-2 ml-2 rounded"
+                  >
+                    assign
+                  </Button>
+                </>
+              ) : (
+                <div className="flex self-center items-center">
+                  <p>Mentor:</p>
+                  <p className="pl-1 font-semibold text-[14px]">
+                    {group?.mentor?.name}{" "}
+                  </p>
+                  <FaEdit
+                    size={23}
+                    className="pl-2"
+                    onClick={handleOpenAddMentorModal}
+                  />
+                </div>
+              )}
               <div className="mt-3">
-                Tags:{" "}
-                {group.tag?.map((t) => (
+                Tags:
+                {group?.tag?.map((t) => (
                   <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
                 ))}
               </div>
               <div className="line-clamp-[3] mt-2">
-                Description: {group.GroupDescription}
+                Description: {group?.GroupDescription}
               </div>
             </div>
             <div className=" min-w-[50%]  pt-5 pl-5">
-              {group?.teamMembers.map((s: any) => (
-                <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
-                  <div className="flex items- justify-between">
-                    <div className="flex items-center">
-                      {s.account === null ? (
-                        <img
-                          src={
-                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
-                          }
-                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                          alt=""
-                        />
-                      ) : (
-                        <img
-                          src={
-                            s?.account.profilePicture ||
-                            "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
-                          }
-                          className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
-                          alt=""
-                        />
-                      )}
-                      <p className="ml-3"> {s?.name}</p>
-                      <Tag
-                        color={colorMap[s?.major]}
-                        className="ml-3 h-auto w-auto"
-                      >
-                        {s.major}
-                      </Tag>
-                      {group?.leader == s._id && (
-                        <FaStar color="red" size={20} className="pl-2" />
-                      )}
+              {group?.teamMembers.length > 0 ? (
+                <>
+                  {group?.teamMembers.map((s: any) => (
+                    <div className="flex  bg-white mt-1 p-1 shadow rounded-sm pl-4">
+                      <div className="flex  justify-between w-full">
+                        <div className="flex items-center">
+                          {s.account === null ? (
+                            <img
+                              src={
+                                "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                              }
+                              className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                              alt=""
+                            />
+                          ) : (
+                            <img
+                              src={
+                                s?.account?.profilePicture ||
+                                "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:quality(100)/2023_11_15_638356379609544030_startup-bia.jpg"
+                              }
+                              className="rounded-full w-[35px] object-cover object-center border border-primary/50 aspect-square"
+                              alt=""
+                            />
+                          )}
+                          <p className="ml-3"> {s?.name}</p>
+                          <Tag
+                            color={colorMap[s?.major]}
+                            className="ml-3 h-auto w-auto"
+                          >
+                            {s.major}
+                          </Tag>
+                          {group?.leader == s._id && <FaStar color="red" />}
+                        </div>
+                        <div className="flex items-center">
+                          <Tooltip
+                            placement="top"
+                            title="Assign this student as leader"
+                          >
+                            <FaStar
+                              size={18}
+                              onClick={() => {
+                                setCstudentSelected(s);
+                                setConfirmContent("leader");
+                                handleOpenconfirm();
+                              }}
+                              className={classNames(style.customIcon1)}
+                            />
+                          </Tooltip>
+                          <Tooltip
+                            placement="top"
+                            title="Move student from group"
+                            className="ml-1"
+                          >
+                            <FaShareSquare
+                              size={18}
+                              onClick={() => {
+                                setCstudentSelected(s);
+                                setConfirmContent("remove");
+                                handleOpenconfirm();
+                              }}
+                              className={classNames(style.customIcon2)}
+                            />
+                          </Tooltip>
+                        </div>
+                      </div>
                     </div>
-                    <FaStar
-                      size={20}
-                      // color="gray"
-                      onClick={() => {
-                        setCstudentSelected(s);
-                        setConfirmContent("leader");
-                        handleOpenconfirm();
-                      }}
-                      className="hover:text-red-500 hover:scale-110  "
-                    />
-                  </div>
-                </div>
-              ))}
+                  ))}
+                </>
+              ) : (
+                <Empty />
+              )}
             </div>
           </div>
         )}
       </Modal>
       {/* modal confirm */}
       <Modal
+        centered
+        className="z-50"
         title={"Confirm"}
         open={confirm}
         onCancel={handleCloseconfirm}
@@ -441,16 +762,35 @@ const ClassGroupListWrapper = () => {
               switch (confirmContent) {
                 case "leader":
                   assignLeaderToGroup.mutate({
-                    groupId: group._id,
-                    studentId: studentSelected._id,
+                    groupId: group?._id,
+                    studentId: studentSelected?._id,
                   });
                   handleCloseconfirm();
                   break;
-                case "mentor":
-                  assignMentorToGroup.mutate({
-                    mentorId: mentorSelected._id,
-                    groupId: group._id,
+                case "remove":
+                  deleteStudentFromGroup.mutate({
+                    groupId: group?._id,
+                    studentId: studentSelected?._id,
                   });
+                  handleCloseconfirm();
+                  break;
+                case "delete":
+                  ungroup.mutate({
+                    groupId: group?._id,
+                  });
+                  handleCloseconfirm();
+                  handleClosegroupDetailModal();
+                  break;
+                case "mentor":
+                  // console.log("1",group);
+
+                  assignMentorToGroup.mutate({
+                    mentorId: mentorSelected?._id,
+                    groupId: group?._id,
+                  });
+                  // console.log("2", group);
+
+                  handleCloseAddMentorModal();
                   handleCloseconfirm();
                   break;
 
@@ -459,22 +799,95 @@ const ClassGroupListWrapper = () => {
               }
             }}
           >
-            Save
+            Confirm
           </Button>,
         ]}
       >
         {confirmContent == "mentor" && (
           <>
-            You want to add {mentorSelected.name} as mentor for group :{" "}
-            {group.GroupName}
+            you want to add {mentorSelected.name} as mentor for group :
+            {group?.GroupName}
           </>
         )}
         {confirmContent == "leader" && (
           <>
-            You want to add {studentSelected.name} as leader for group :{" "}
-            {group.GroupName}
+            you want to add {studentSelected?.name} as leader for group :
+            {group?.GroupName}
           </>
         )}
+        {confirmContent == "remove" && (
+          <>
+            You want to remove {studentSelected?.name}from group :
+            {group?.GroupName}?
+          </>
+        )}
+        {confirmContent == "delete" && (
+          <>
+            You want to Delete {group?.GroupName}? This Action cannot be undo.
+          </>
+        )}
+      </Modal>
+      {/* modal create group */}
+      <Modal
+        centered
+        title={"Create New Group"}
+        open={createGroupModal}
+        onCancel={handleClosecreateGroupModal}
+        footer={[
+          <Button key="back" onClick={handleClosecreateGroupModal}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={() => {
+              form.validateFields().then((values) => {
+                createGroup.mutate({
+                  classId: classId,
+                  groupName: values.groupName,
+                  groupDescription: values.groupDescription,
+                });
+                handleClosecreateGroupModal();
+              }).catch((errorInfo) => {
+                console.error('Validation Failed:', errorInfo);
+              });
+            }}
+          >
+            Save
+          </Button>,
+        ]}
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="Group Name"
+            name="groupName"
+            rules={[
+              {
+                required: true,
+                message: "Please input group name!",
+              },
+              {
+                max: 40,
+                message: "Group name cannot exceed 40 characters!",
+              },
+            ]}
+          >
+            <Input count={{ show: true, max: 40 }} />
+          </Form.Item>
+
+          <Form.Item
+            label="Group Description"
+            name="groupDescription"
+            rules={[
+              {
+                required: true,
+                message: "Please input group description!",
+              },
+            ]}
+          >
+            <Input.TextArea />
+          </Form.Item>
+        </Form>
       </Modal>
 
       {/* modal add member to group */}

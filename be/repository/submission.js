@@ -5,7 +5,7 @@ const createSubmission = async ({
   attachment,
   groupId,
   classworkId,
-  content
+  content,
 }) => {
   try {
     const newSubmission = await Submission.create({
@@ -13,8 +13,9 @@ const createSubmission = async ({
       attachment: attachment,
       group: groupId,
       classworkId: classworkId,
-      content: content
+      content: content,
     }).then((result) => result.populate("student"));
+
     return newSubmission;
   } catch (error) {
     return new Error(error.message);
@@ -25,13 +26,14 @@ const getSubmissionsOfGroup = async (outcomeIds, groupId) => {
     const submissions = await Submission.find({
       classworkId: { $in: outcomeIds },
       group: groupId,
-    }).populate({
-      path: "student",
-    }).populate({
-      path: "group",
-      select: "GroupName"
     })
-    ;
+      .populate({
+        path: "student",
+      })
+      .populate({
+        path: "group",
+        select: "GroupName",
+      });
     return submissions;
   } catch (error) {
     return new Error(error.message);
@@ -51,7 +53,11 @@ const addGrade = async ({ submissionId, grade, criteria }) => {
       { new: true }
     )
       .populate("student")
-      .populate("group");
+      .populate("group")
+      .populate({
+        path: "classworkId",
+        select: "title _id classId",
+      });
     return updatedSubmission;
   } catch (error) {
     return new Error(error.message);
@@ -74,9 +80,9 @@ const getSubmissionsOfClassWork = async (classWorkId, studentId) => {
       classworkId: classWorkId,
       student: { $ne: studentId },
     }).populate({
-      path: 'student',
+      path: "student",
       populate: {
-        path: 'account',
+        path: "account",
       },
     });
     return result;
@@ -84,10 +90,34 @@ const getSubmissionsOfClassWork = async (classWorkId, studentId) => {
     return new Error(error.message);
   }
 };
+const getSubmissionsByGroupId = async (groupId) => {
+  try {
+    const submissions = await Submission.find({ group: groupId })
+      .populate({
+        path: 'group',  // Populate the group field
+        select: 'timeline',  // Select only the timeline field from the Group model
+      })
+      .populate('classworkId')  // Populating classworkId as before
+      .exec();
+    return submissions;
+  } catch (error) {
+    throw new Error("Error fetching submissions: " + error.message);
+  }
+};
+const getSubmissionById = async (submissionId) => {
+  try {
+    const submission = await Submission.findById(submissionId);
+    return submission;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 export default {
   createSubmission,
   getSubmissionsOfGroup,
   addGrade,
   findSubmissionOfStudent,
-  getSubmissionsOfClassWork
+  getSubmissionsOfClassWork,
+  getSubmissionsByGroupId,
+  getSubmissionById
 };

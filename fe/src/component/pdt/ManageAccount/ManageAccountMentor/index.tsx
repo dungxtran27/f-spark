@@ -1,208 +1,270 @@
 import React, { useState } from "react";
-import { AutoComplete, Button, Select, Row, Col, Table, Tag, Divider, Popover } from "antd";
-import { SearchOutlined, UserDeleteOutlined, CloseCircleOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  AutoComplete,
+  Button,
+  Select,
+  Row,
+  Col,
+  Table,
+  Tag,
+  Divider,
+  Popover,
+  Pagination,
+} from "antd";
+import {
+  SearchOutlined,
+  UserDeleteOutlined,
+  CloseCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
 import { Link } from "react-router-dom";
-import { colorMajorGroup } from "../../../../utils/const";
+import { colorMajorGroup, QUERY_KEY } from "../../../../utils/const";
+import { useQuery } from "@tanstack/react-query";
+import { Admin } from "../../../../api/manageAccoount";
 
 const { Option } = Select;
 
 interface Tag {
-    _id: string;
-    name: string;
+  _id: string;
+  name: string;
 }
 interface Mentor {
-    id: number;
-    name: string;
-    email: string;
-    tags: Tag[];
-    phoneNumber: string;
-    status: "Active" | "Deactive";
+  _id: any;
+  id: number;
+  name: string;
+  email: string;
+  tag: Tag[];
+  phoneNumber: string;
+  status: boolean;
 }
 
-const data: Mentor[] = [
-    { id: 1, name: "Nguyen Trung Hieu", tags: [{ _id: "1", name: "Ky Thuat" }], email: "hieuyd1234@fe.com", phoneNumber: "0123456789", status: "Active" },
-    { id: 2, name: "Nguyen Van A", tags: [{ _id: "2", name: "Kinh Te" }], email: "vana1231@fe.com", phoneNumber: "0123456789", status: "Deactive" },
-    { id: 3, name: "Tran Thi B", tags: [{ _id: "3", name: "Khoa Hoc" }, { _id: "4", name: "Ky Thuat" }], email: "btran1232@fe.com", phoneNumber: "0123456789", status: "Active" },
-    { id: 4, name: "Nguyen Trung Hieu A", tags: [{ _id: "5", name: "Ky Thuat" }], email: "hieuyd1233@fe.com", phoneNumber: "0123456789", status: "Active" },
-    { id: 5, name: "Nguyen Van C", tags: [{ _id: "6", name: "Kinh Te" }, { _id: "7", name: "Khoa Hoc" }, { _id: "8", name: "Ky Thuat" }], email: "vana1234@fe.com", phoneNumber: "0123456789", status: "Deactive" },
-];
-
 const Mentor: React.FC = () => {
-    const [itemsPerPage] = useState(10);
-    const [searchText, setSearchText] = useState("");
-    const [tagFilter, setTagFitler] = useState<string | undefined>(undefined);
-    const [statusFilter, setStatusFilter] = useState<string | undefined>("Active");
-    const [autoCompleteOptions, setAutoCompleteOptions] = useState<AutoCompleteProps['options']>([]);
+  const [page, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [searchText, setSearchText] = useState("");
+  const [tagFilter, setTagFitler] = useState<string | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<boolean>(true);
+  const [autoCompleteOptions, setAutoCompleteOptions] = useState<
+    AutoCompleteProps["options"]
+  >([]);
 
-    const handleSearch = () => {
-    };
+  const handleSearch = () => {
+    setCurrentPage(1);
+  };
 
-    const handleAutoCompleteSearch = (input: string) => {
-        const normalizedInput = input.toLowerCase();
-        const filteredOptions = data
-            .filter(mentor =>
-                mentor.name.toLowerCase().includes(normalizedInput) ||
-                mentor.email.toLowerCase().includes(normalizedInput)
-            )
-            .map(mentor => ({
-                value: mentor.name,
-                label: `${mentor.name} (${mentor.tags})`
-            }));
-        setAutoCompleteOptions(filteredOptions);
-    };
+  const { data: mentorData } = useQuery({
+    queryKey: [QUERY_KEY.MENTORLIST, page, searchText],
+    queryFn: async () => {
+      return Admin.getMentor({
+        limit: 10,
+        page: page || 1,
+        searchText: searchText || null,
+      });
+    },
+  });
 
-    const handleClearFilters = () => {
-        setSearchText("");
-        setTagFitler(undefined);
-        setStatusFilter("Active");
-    };
+  const data: Mentor[] = Array.isArray(mentorData?.data?.data?.mentors)
+    ? mentorData?.data?.data?.mentors
+    : [];
 
-    const columns: ColumnsType<Mentor> = [
-        { title: "#", dataIndex: "id", key: "id" },
-        {
-            title: "Name",
-            dataIndex: "name",
-            key: "name",
-            render: (text: string) => (
-                <Link to={`/manageAccount/mentor/profile/${text}`} style={{ fontWeight: 'bold' }}>
-                    {text}
-                </Link>
-            ),
-        },
-        {
-            title: "Tag",
-            dataIndex: "tags",
-            key: "tags",
-            render: (tags: Tag[]) => {
-                if (tags.length === 0) return null;
-                const firstTag = tags[0];
-                // Nội dung hiển thị trong Popover khi hover vào tag đầu tiên
-                const popoverContent = (
-                    <div>
-                        {tags.map((tag) => (
-                            <Tag key={tag._id} color={colorMajorGroup[tag.name] || "default"}>
-                                {tag.name}
-                            </Tag>
-                        ))}
-                    </div>
-                );
-                return (
-                    <Popover content={popoverContent} trigger="hover">
-                        <Tag color={colorMajorGroup[firstTag.name] || "default"}>
-                            {firstTag.name} {tags.length > 1 && `+${tags.length - 1}`}
-                        </Tag>
-                    </Popover>
-                );
-            },
-        },
-        { title: "Email", dataIndex: "email", key: "email" },
-        { title: "PhoneNumber", dataIndex: "phoneNumber", key: "phoneNumber" },
-        { title: "Status", dataIndex: "status", key: "status", render: (status: string) => (<Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>), },
-        { title: "Actions", key: "actions", render: () => (<UserDeleteOutlined style={{ fontSize: "18px", cursor: "pointer" }} title="Ban Account" />), },
-    ];
+  const handleAutoCompleteSearch = (input: string) => {
+    const normalizedInput = input.toLowerCase();
+    const filteredOptions = data
+      .filter(
+        (mentor) =>
+          mentor.name.toLowerCase().includes(normalizedInput) ||
+          mentor.email.toLowerCase().includes(normalizedInput)
+      )
+      .map((mentor) => ({
+        value: mentor.email.toLowerCase().includes(normalizedInput)
+          ? mentor.email
+          : mentor.name,
+        label: mentor.email.toLowerCase().includes(normalizedInput)
+          ? mentor.email
+          : mentor.name,
+      }));
+    setAutoCompleteOptions(filteredOptions);
+  };
 
+  const handleClearFilters = () => {
+    setSearchText("");
+    setTagFitler(undefined);
+    setStatusFilter(true);
+  };
 
-    const sortedData = [...data]
-        .sort((a, b) => {
-            return (a.status === "Active" ? -1 : 1) - (b.status === "Active" ? -1 : 1);
-        })
-        .map((Mentor, index) => ({
-            ...Mentor,
-            id: index + 1,
-        }));
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
+  const totalItems = mentorData?.data?.data?.totalItems || 0;
 
-    return (
-        <div className="p-4 bg-white rounded-lg shadow-md">
-            <Row
-                gutter={[16, 16]}
-                className="mb-4"
-                justify="space-between"
-            >
-                <Col flex="auto">
-                    <Row gutter={[16, 16]}>
-                        <Col span={6}>
-                            <AutoComplete
-                                placeholder="Search name, email..."
-                                value={searchText}
-                                onChange={setSearchText}
-                                onSearch={handleAutoCompleteSearch}
-                                options={autoCompleteOptions}
-                                className="w-full"
-                            />
-                        </Col>
-                        <Col span={3}>
-                            <Select
-                                placeholder="Tag"
-                                value={tagFilter}
-                                onChange={setTagFitler}
-                                className="w-full"
-                                allowClear
-                            >
-                                {Array.from(new Set(data.flatMap(mentor => mentor.tags.map(tag => tag.name)))).map(tag => (
-                                    <Option key={tag} value={tag}>
-                                        {tag}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Col>
-                        <Col span={4}>
-                            <Select
-                                placeholder="Status"
-                                value={statusFilter}
-                                onChange={setStatusFilter}
-                                className="w-full"
-                            >
-                                <Option value="Active">Active</Option>
-                                <Option value="Deactive">Deactive</Option>
-                            </Select>
-                        </Col>
-                        <Col span={4}>
-                            <Button
-                                icon={<CloseCircleOutlined />}
-                                onClick={handleClearFilters}
-                                className="w-full"
-                            >
-                                Clear
-                            </Button>
-                        </Col>
-                        <Col span={4}>
-                            <Button
-                                type="primary"
-                                icon={<SearchOutlined />}
-                                onClick={handleSearch}
-                                className="w-full"
-                            >
-                                Search
-                            </Button>
-                        </Col>
-                    </Row>
-                </Col>
-                <Divider type="vertical" className="h-full" />
-                <Col flex="none" className="flex justify-end">
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        className="mr-2"
-                    >
-                        Create Mentor
-                    </Button>
-                    <Button type="default" icon={<UploadOutlined />}>
-                        Add File
-                    </Button>
-                </Col>
-            </Row>
-            <Table
-                columns={columns}
-                dataSource={sortedData}
-                pagination={{ pageSize: itemsPerPage }}
-                rowKey="id"
-                className="rounded-md"
-            />
-        </div>
-    );
+  const columns: ColumnsType<Mentor> = [
+    {
+      title: "#",
+      dataIndex: "_id",
+      key: "_id",
+      render: (_, __, index) => (page - 1) * itemsPerPage + index + 1,
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      render: (text: string, record) => (
+        <Link
+          to={`/mentorProfile/${record._id}`}
+          style={{ fontWeight: "bold" }}
+        >
+          {text}
+        </Link>
+      ),
+    },
+    {
+      title: "Tag",
+      dataIndex: "tag",
+      key: "tag",
+      render: (tags: Tag[]) => {
+        if (tags.length === 0) return null;
+        const firstTag = tags[0];
+        const popoverContent = (
+          <div>
+            {tags.map((tag) => (
+              <Tag key={tag._id} color={colorMajorGroup[tag.name] || "default"}>
+                {tag.name}
+              </Tag>
+            ))}
+          </div>
+        );
+        return (
+          <Popover content={popoverContent} trigger="hover">
+            <Tag color={colorMajorGroup[firstTag.name] || "default"}>
+              {firstTag.name} {tags.length > 1 && `+${tags.length - 1}`}
+            </Tag>
+          </Popover>
+        );
+      },
+    },
+    { title: "Email", dataIndex: "email", key: "email" },
+    { title: "PhoneNumber", dataIndex: "phoneNumber", key: "phoneNumber" },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: () => (
+        <UserDeleteOutlined
+          style={{ fontSize: "18px", cursor: "pointer" }}
+          title="Ban Account"
+        />
+      ),
+    },
+  ];
+
+  return (
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <Row gutter={[16, 16]} className="mb-4" justify="space-between">
+        <Col flex="auto">
+          <Row gutter={[16, 16]}>
+            <Col span={6}>
+              <AutoComplete
+                placeholder="Search name, email..."
+                value={searchText}
+                onChange={setSearchText}
+                onSearch={handleAutoCompleteSearch}
+                options={autoCompleteOptions}
+                className="w-full"
+              />
+            </Col>
+            <Col span={3}>
+              <Select
+                mode="multiple"
+                placeholder="Tag"
+                value={tagFilter}
+                onChange={setTagFitler}
+                className="w-full"
+                allowClear
+              >
+                {Array.from(
+                  new Set(
+                    data.flatMap((mentor) =>
+                      mentor.tag.map((tag: any) => tag.name)
+                    )
+                  )
+                ).map((tag) => (
+                  <Option key={tag} value={tag}>
+                    {tag}
+                  </Option>
+                ))}
+              </Select>
+            </Col>
+            <Col span={4}>
+              <Select
+                placeholder="Status"
+                value={statusFilter}
+                onChange={setStatusFilter}
+                className="w-full"
+              >
+                <Option value="Active">Active</Option>
+                <Option value="Deactive">Deactive</Option>
+              </Select>
+            </Col>
+            <Col span={4}>
+              <Button
+                icon={<CloseCircleOutlined />}
+                onClick={handleClearFilters}
+                className="w-full"
+              >
+                Clear
+              </Button>
+            </Col>
+            <Col span={4}>
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+                className="w-full"
+              >
+                Search
+              </Button>
+            </Col>
+          </Row>
+        </Col>
+        <Divider type="vertical" className="h-full" />
+        <Col flex="none" className="flex justify-end">
+          <Button type="primary" icon={<PlusOutlined />} className="mr-2">
+            Create Mentor
+          </Button>
+          <Button type="default" icon={<UploadOutlined />}>
+            Add File
+          </Button>
+        </Col>
+      </Row>
+      <Table
+        columns={columns}
+        dataSource={data}
+        pagination={false}
+        rowKey="id"
+        className="rounded-md"
+      />
+      <div className="flex justify-center mt-4">
+        <Pagination
+          current={page}
+          pageSize={itemsPerPage}
+          total={totalItems}
+          onChange={handlePageChange}
+          showTotal={(total) => `Total ${total} mentors`}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default Mentor;

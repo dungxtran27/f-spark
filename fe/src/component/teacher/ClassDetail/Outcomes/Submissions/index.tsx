@@ -22,7 +22,8 @@ import DOMPurify from "dompurify";
 import { useForm } from "antd/es/form/Form";
 import QuillEditor from "../../../../common/QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
-import { useRef } from "react";
+import { notificationApi } from "../../../../../api/notification/notification";
+import { useState } from "react";
 
 interface Props {
   _id: string;
@@ -38,40 +39,47 @@ const Submissions = ({
   setOpenModal,
   groupSubmission,
   outcome,
+  classID,
 }: {
   submissions?: Props[] | undefined;
   groupSubmission?: any;
   gradingCriteria: any[];
   outcome: any;
+  classID: any;
   setOpenModal: (submission: any) => void;
 }) => {
   const [form] = useForm();
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
+  const [isFormVisible, setIsFormVisible] = useState(true);
   const isTeacher = userInfo?.role === ROLE.teacher;
   const { classId } = useParams();
+  const fClassid = classId ? classId : classID;
   const queryClient = useQueryClient();
   const { data: groups } = useQuery({
-    queryKey: [QUERY_KEY.GROUPS_OF_CLASS, classId],
+    queryKey: [QUERY_KEY.GROUPS_OF_CLASS, fClassid],
     queryFn: () => {
-      return classApi.getGroupOfClass(classId);
+      return classApi.getGroupOfClass(fClassid);
     },
-    enabled: !!classId,
+    enabled: !!fClassid,
   });
-  const uploadedFiles = useRef<string[]>([]);
+  const [fileName, setFileName] = useState<string>("");
+  const handleFileChange = async (info: any) => {
+    const file = info.file;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      form.setFieldValue("attachment", base64String);
+    };
+    reader.readAsDataURL(file);
+  };
   const props: UploadProps = {
     name: "file",
-    multiple: true,
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    onChange(info) {
-      if (uploadedFiles?.current && info.file?.status !== "uploading") {
-        uploadedFiles.current.push(
-          "https://www.youtube.com/watch?v=eAs7NGvjiiI"
-        );
-        form.setFieldValue("attachment", uploadedFiles);
-      }
-    },
+    multiple: false,
+    accept: ".docx,.pdf,.xlsx",
+    customRequest: handleFileChange,
   };
   const setSubmissionContent = (value: string) => {
     form.setFieldValue("content", value);
@@ -80,22 +88,34 @@ const Submissions = ({
     mutationFn: ({
       attachment,
       content,
+      fileName,
     }: {
       attachment: any;
       content: string;
+      fileName: string;
     }) => {
       return classApi.createOutcomeSubmission(outcome?._id, userInfo?.group, {
         attachment: attachment,
         content: content,
+        fileName: fileName,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY?.TEACHER_OUTCOMES_LIST],
       });
+      setIsFormVisible(false);
     },
   });
   const groupsOfClass = groups?.data?.data?.groupStudent;
+
+  const remindGroup = (groupId, outcomeId) => {
+    const data = {
+      groupId: groupId,
+      classworkId: outcomeId,
+    };
+    notificationApi.remindGroupSubmitOutcome(data);
+  };
   const items: CollapseProps["items"] = groupsOfClass?.map((g: any) => {
     const s = submissions?.find((gs) => gs?.group?._id === g?._id);
     return {
@@ -160,16 +180,25 @@ const Submissions = ({
         </div>
       ) : (
         <div className="w-full flex justify-center">
-          <Button>Remind group</Button>
+          <Button
+            onClick={() => {
+              remindGroup(g?._id, outcome?._id);
+            }}
+          >
+            Remind group
+          </Button>
         </div>
       ),
     };
   });
+
   return (
     <div className="pt-5">
       {isTeacher ? (
         submissions && submissions?.length > 0 ? (
-          <Collapse items={items} />
+          <>
+            <Collapse items={items} />
+          </>
         ) : (
           <Empty description={"No Submissions yet"} />
         )
@@ -188,9 +217,13 @@ const Submissions = ({
               <span className="font-medium">Attachment: </span>
               <div className="flex items-center group text-primaryBlue">
                 <TiAttachment size={20} />
-                <span className="group-hover: underline">
-                  {groupSubmission?.attachment[0]}
-                </span>
+                <a
+                  download
+                  href={groupSubmission?.attachment[0]}
+                  className="group-hover: underline"
+                >
+                  download
+                </a>
               </div>
             </div>
             <div className="flex items-center mt-3">
@@ -211,37 +244,46 @@ const Submissions = ({
             </div>
           </div>
         </div>
-      ) : (
-        <div>
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={() => {
-              const { attachment, content } = form.getFieldsValue();
-              createSubmission.mutate({ attachment, content });
-            }}
+      ) : isFormVisible ? (
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={() => {
+            const { attachment, content } = form.getFieldsValue();
+            createSubmission.mutate({ attachment, content, fileName });
+          }}
+        >
+          <Form.Item
+            name={"content"}
+            label={"Content"}
+            rules={[{ required: true, message: "Content is required" }]}
           >
-            <Form.Item name={"content"} label={"Content"}>
-              <QuillEditor onChange={setSubmissionContent} />
-            </Form.Item>
-            <Form.Item name="attachment" label={"Attachment"}>
-              <Upload {...props}>
-                <Button icon={<UploadOutlined />}>Click to Upload</Button>
-              </Upload>
-            </Form.Item>
-            <Form.Item className="flex justify-end">
-              <Button
-                onClick={() => {
-                  form.submit();
-                }}
-              >
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </div>
+            <QuillEditor onChange={setSubmissionContent} />
+          </Form.Item>
+          <Form.Item
+            name="attachment"
+            label={"Attachment"}
+            rules={[{ required: true, message: "Attachment is required" }]}
+          >
+            <Upload {...props}>
+              <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            </Upload>
+          </Form.Item>
+          <Form.Item className="flex justify-end">
+            <Button
+              onClick={() => {
+                form.submit();
+              }}
+            >
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
+      ) : (
+        <div>Submission successful!</div>
       )}
     </div>
   );
 };
+
 export default Submissions;

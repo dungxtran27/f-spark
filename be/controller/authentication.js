@@ -12,6 +12,7 @@ import emailTemplate from "../utils/emailTemplate.js";
 import { io } from "../index.js";
 import { ROLE_NAME } from "../utils/const.js";
 import { StudentRepository } from "../repository/index.js";
+import { uploadImage } from "../utils/uploadImage.js";
 const client = jwksClient({
   jwksUri: "https://www.googleapis.com/oauth2/v3/certs",
   requestHeaders: {
@@ -39,38 +40,84 @@ const authenticate = async (req, res) => {
 };
 const signUp = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword } = req.body;
+    const {
+      name,
+      studentId,
+      generation,
+      profession,
+      termCode,
+      email,
+      password,
+      img,
+    } = req.body;
+
     if (
-      firstName.length == 0 ||
-      lastName.length == 0 ||
-      email.length == 0 ||
-      password.length == 0
+      !name ||
+      !studentId ||
+      !generation ||
+      !profession ||
+      !termCode ||
+      !email ||
+      !password
     ) {
       return res
         .status(400)
-        .json({ error: "Please fill out all the mandatory field" });
+        .json({ error: "Please fill out all the mandatory fields" });
     }
-    if (confirmPassword !== password) {
+
+    let imgLink;
+    if (!img) {
+      imgLink =
+        "https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-8.jpg";
+    } else {
+      imgLink = await uploadImage(img);
+      if (!imgLink) {
+        return res.status(400).json({ error: "Upload Failed !" });
+      }
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    const term = await AuthenticateRepository.getUserByTerm({ termCode });
+    if (!term) {
       return res
         .status(400)
-        .json({ error: "Password does not match confirm password" });
+        .json({ error: "Account student does not in this term" });
     }
-    const existingUser = await AuthenticateRepository.getUserByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ error: "Email is taken" });
+
+    const existingUser = await AuthenticateRepository.getUserByEmail({
+      name,
+      studentId,
+      generation,
+      email,
+      profession,
+    });
+    if (!existingUser) {
+      return res.status(400).json({ error: "Your information is incorrect" });
     }
+
+    const accountExist = await AuthenticateRepository.findAccount(email);
+    if (accountExist) {
+      return res.status(400).json({ error: "Account student is exist" });
+    }
+
     const salt = bcrypt.genSaltSync(parseInt(process.env.SALT_ROUND));
     const hashedPassword = bcrypt.hashSync(password, salt);
+
     const newUser = await AuthenticateRepository.addUser({
-      firstName,
-      lastName,
       email,
       hashedPassword,
+      imgLink,
     });
-    await sendConfirmEmail(email, newUser._id);
+    const userId = newUser.accountNew._id
+    await sendConfirmEmail(email, userId);
+
     return res.status(201).json({
       message:
-        "Sign up successfully, go to your email to confirm signing up. The email will expire in an hour",
+        "Sign up successfully. Please check your email to confirm your account. The email will expire in an hour.",
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -82,6 +129,7 @@ const verifyUser = async (req, res) => {
     const token = req.params.token;
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
     const { userId } = decodedToken;
+
     const result = await AuthenticateRepository.verifyUser(userId);
     return res
       .status(200)
@@ -99,9 +147,11 @@ const verifyUser = async (req, res) => {
 const login = async (req, res) => {
   try {
     const role = req.body.role;
+
     const existingAccount = await AccountRepository.findAccountByEmail(
       req.body.email
     );
+
     if (!existingAccount) {
       return res.status(400).json({ error: "Email not found" });
     }
@@ -112,6 +162,11 @@ const login = async (req, res) => {
     if (!passwordMatch) {
       return res.status(400).json({ error: "Bad Credential" });
     }
+
+    if (!existingAccount.verify) {
+      return res.status(400).json({ error: "The account is not verified, please check your email again !" });
+    }
+    
     let userDetail = {};
     switch (role) {
       case ROLE_NAME.student:
@@ -142,15 +197,35 @@ const login = async (req, res) => {
       case ROLE_NAME.startUpDepartment:
         return res.status(404).json({ error: "Unimplemented" });
       case ROLE_NAME.admin:
+        if (req.body.email !== "admin@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
         userDetail.account = existingAccount;
         userDetail.role = ROLE_NAME.admin;
-        break
+        break;
+      case ROLE_NAME.headOfSubject:
+        if (req.body.email !== "headofsubject@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
+        userDetail.account = existingAccount;
+        userDetail.role = ROLE_NAME.headOfSubject;
+        break;
+      case ROLE_NAME.accountant:
+        if (req.body.email !== "accountant@gmail.com") {
+          return res.status(403).json({
+            error: "Unauthorized !!!",
+          });
+        }
+        userDetail.account = existingAccount;
+        userDetail.role = ROLE_NAME.accountant;
+        break;
       default:
         return res.status(500).json({ error: "Bad request" });
     }
-    // if (!existingAccount.verify) {
-    //   return res.status(400).json({ error: "The account is not verified!" });
-    // }
     const socket = io.sockets.sockets.get(req.body.socketId);
     if (socket) {
       socket.accountId = existingAccount._id.toString();
@@ -440,7 +515,8 @@ const googleLogin = async (req, res) => {
               );
               if (!student) {
                 return res.status(404).json({
-                  error: "No such student found matched with provided credential",
+                  error:
+                    "No such student found matched with provided credential",
                 });
               }
               userDetail = student.toObject();
@@ -453,7 +529,8 @@ const googleLogin = async (req, res) => {
               );
               if (!teacher) {
                 return res.status(404).json({
-                  error: "No such teacher found matched with provided credential",
+                  error:
+                    "No such teacher found matched with provided credential",
                 });
               }
               userDetail = teacher.toObject();

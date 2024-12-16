@@ -1,12 +1,53 @@
-import { Button, Tag, Tooltip } from "antd";
-import { FaUserGroup, FaUserGraduate } from "react-icons/fa6";
-import { colorMajorGroup } from "../../../utils/const";
+import { Button, Popover, Tag, Tooltip } from "antd";
+import { FaUserGroup, FaUserGraduate, FaLock } from "react-icons/fa6";
+import { colorMajorGroup, ROLE } from "../../../utils/const";
+import { FaCoins, FaLockOpen } from "react-icons/fa";
+import style from "../MentorList/style.module.scss";
+import classNames from "classnames";
+import { useDroppable } from "@dnd-kit/core";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Term } from "../../../model/auth";
+import moment from "moment";
+
 const GroupCard = ({
   info,
   handleOpenAddMentorModal,
+  handleLock,
   handleOpengroupDetailModal,
   setGroup,
-}: any) => {
+  setTagSearch,
+  role,
+}: any | string) => {
+  // const { setNodeRef } = useDroppable({
+  //   id: info.id,
+  //   accept: { type: "row" },
+  //   onDrop: (event) => {
+  //     const { activeId } = event;
+  //     onDrop(activeId);
+  //   },
+  // });
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const lockGroup = activeTerm?.timeLine?.find(
+    (item) => item.type === "teacherLockGroup"
+  );
+
+  const isLockGroupExpired = lockGroup?.endDate
+    ? moment().isAfter(moment(lockGroup.endDate))
+    : false;
+
+  const { isOver, setNodeRef } = useDroppable({
+    id: info._id,
+  });
+  const style1 = {
+    border: isOver ? "1px solid #22c55e" : undefined,
+    boxShadow: isOver ? "0px 5px 15px ##4ade80" : undefined,
+  };
+
   const hasAtLeastTwoMajors = (students: any) => {
     const uniqueMajors = new Set();
 
@@ -20,69 +61,112 @@ const GroupCard = ({
 
     return false;
   };
-
   return (
-    <div className="flex-auto bg-white px-5 py-3 mx-2 mt-3 min-w-[30%] max-w-[25%] shadow">
-      <div className="flex items-center ">
-        <div
-          className="font-semibold pr-3 text-[16px] hover:text-purple-600"
-          onClick={() => {
-            setGroup(info);
-            handleOpengroupDetailModal();
-          }}
-        >
-          {info.GroupName}
+    <div
+      ref={setNodeRef}
+      style={style1}
+      // className="flex-grow basis-25 bg-white rounded-sm px-3 py-2 mr-2 mb-1 w-[25%] max-w-[35%] h-36 shadow"
+      className="flex flex-col bg-white rounded-sm px-2 py-2 mr-2 mb-2 shadow-md w-full  max-w-[32%]"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center ">
+          <div
+            className="font-semibold pr-3 text-[16px] hover:text-purple-600 cursor-pointer"
+            onClick={() => {
+              setGroup(info);
+              setTagSearch(info?.tag.map((t: any) => t._id));
+              handleOpengroupDetailModal();
+            }}
+          >
+            {info.GroupName}
+          </div>
         </div>
-        {4 <= info.teamMembers.length && info.teamMembers.length <= 6 ? (
+        <div className="flex self-start items-center">
+          {" "}
+          {4 <= info.teamMembers.length && info.teamMembers.length <= 6 ? (
+            <Tooltip
+              placement="top"
+              title={`${info.teamMembers.length} students`}
+            >
+              <FaUserGroup color={"gray"} />
+            </Tooltip>
+          ) : (
+            <Tooltip placement="top" title="4 < Students < 6">
+              <FaUserGroup color="red" />
+            </Tooltip>
+          )}
+          <span className="text-gray-600 pr-2"> {info.teamMembers.length}</span>
           <Tooltip
             placement="top"
-            title={`${info.teamMembers.length} students`}
+            title={
+              hasAtLeastTwoMajors(info.teamMembers)
+                ? "Team has 2 majors above"
+                : "Team has < 2 majors"
+            }
           >
-            <FaUserGroup color={"gray"} />
+            <FaUserGraduate
+              color={hasAtLeastTwoMajors(info.teamMembers) ? "gray" : "red"}
+            />
           </Tooltip>
-        ) : (
-          <Tooltip placement="top" title="Student not enough">
-            <FaUserGroup color="red" />
-          </Tooltip>
-        )}
-
-        <span className="text-gray-600 pr-2"> {info.teamMembers.length}</span>
-        <Tooltip
-          placement="top"
-          title={
-            hasAtLeastTwoMajors(info.teamMembers)
-              ? "team has 2 major above"
-              : "team doesn't have enough major"
-          }
-        >
-          <FaUserGraduate
-            color={hasAtLeastTwoMajors(info.teamMembers) ? "gray" : "red"}
-          />
-        </Tooltip>
+          {info.isSponsorship && (
+            <Tooltip placement="top" title={"funded"} className="pl-1">
+              <FaCoins color="orange" size={20} />
+            </Tooltip>
+          )}
+        </div>
       </div>
-      <div className="pt-2">
-        <span className="text-gray-500">mentor: </span>
+      <div className="py-2">
+        <span className="text-gray-500">Mentor: </span>
         {info?.mentor?.name ? (
           <span className="font-semibold text-[14px]">
             {info?.mentor?.name}
           </span>
+        ) : role === ROLE.student ? (
+          <>No mentor</>
         ) : (
           <Button
             onClick={() => {
               handleOpenAddMentorModal();
               setGroup(info);
             }}
-            className="bg-red-500 text-white px-2 ml-2 rounded"
+            className=" text-white hover:text-red-600 border-red-600 bg-red-600 px-1 h-7 ml-1  "
           >
-            assign
+            <span> Assign</span>
           </Button>
-        )}{" "}
+        )}
       </div>
-      <div className="mt-1">
-        <span className="text-gray-500 pr-2 ">tag:</span>
+      <div className="mt-1 h-16">
+        <span className="text-gray-500 pr-2 h-4">Tag: </span>
         {info.tag.map((t: any) => (
           <Tag color={colorMajorGroup[t.name]}>{t.name}</Tag>
         ))}
+      </div>
+      <div
+        className="w-full flex justify-end text-purple-500"
+        onClick={handleLock}
+      >
+        {isLockGroupExpired ? (
+          <Popover
+            title={
+              <span className="text-red-500">
+                {`Expiration at ${moment(lockGroup?.endDate).format(
+                  "MMMM Do YYYY"
+                )}`}
+              </span>
+            }
+            placement="top"
+          >
+            <FaLock color="gray" />
+          </Popover>
+        ) : (
+          <div onClick={handleLock}>
+            {info?.lock ? (
+              <FaLock className={classNames(style.customIcon1)} />
+            ) : (
+              <FaLockOpen className={classNames(style.customIcon2)} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

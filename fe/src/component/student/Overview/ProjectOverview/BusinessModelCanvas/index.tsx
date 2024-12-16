@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Col, Card, Typography, Tooltip, Modal, Input, message } from "antd";
+import {
+  Col,
+  Card,
+  Typography,
+  Tooltip,
+  Modal,
+  Input,
+  message,
+  Skeleton,
+} from "antd";
 import {
   ApartmentOutlined,
   BulbOutlined,
@@ -13,9 +22,6 @@ import {
 import { businessModelCanvas } from "../../../../../api/apiOverview/businessModelCanvas";
 import { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../../redux/store";
-import { UserInfo } from "../../../../../model/auth";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -23,8 +29,12 @@ const { TextArea } = Input;
 interface ErrorResponse {
   error: string;
 }
-
-const BusinessModelCanvas: React.FC = () => {
+interface BusinessModelCanvasProps {
+  groupId: string;
+}
+const BusinessModelCanvas: React.FC<BusinessModelCanvasProps> = ({
+  groupId,
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [tempText, setTempText] = useState("");
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -39,18 +49,18 @@ const BusinessModelCanvas: React.FC = () => {
   const [channelsText, setChannelsText] = useState("");
   const [revenueStreamsText, setRevenueStreamsText] = useState("");
   const [costStructureText, setCostStructureText] = useState("");
-  
 
-  const userInfo = useSelector(
-    (state: RootState) => state.auth.userInfo
-  ) as UserInfo | null;
+  const [isLoading, setIsLoading] = useState(true);
 
-  const groupId = userInfo?.group ?? "";
   const fetchSections = async () => {
+    setIsLoading(true);
     try {
       const response = await businessModelCanvas.getBusinessModelCanvas(
         groupId
       );
+      if (response) {
+        setIsLoading(false);
+      }
       const sections = response.data.data.businessModelCanvas.sections;
       setKeyPartnersText(
         sections.find((section: any) => section.name === "Key Partner")
@@ -116,9 +126,6 @@ const BusinessModelCanvas: React.FC = () => {
       message.success("updated successfully");
       fetchSections();
     },
-    onError: () => {
-      message.error("Failed to update");
-    },
   });
 
   const showModal = (sectionName: string, content: string) => {
@@ -129,6 +136,10 @@ const BusinessModelCanvas: React.FC = () => {
 
   const handleSubmit = async () => {
     if (activeSection) {
+      if(tempText == ''){
+        message.error("Content cannot be empty!");
+        return;
+      }
       const content = tempText;
       let color = "";
 
@@ -192,8 +203,15 @@ const BusinessModelCanvas: React.FC = () => {
     setTempText(e.target.value);
   };
 
+  if (isLoading)
+    return (
+      <div className="bg-white rounded-lg p-4">
+        <Skeleton />
+      </div>
+    );
+
   return (
-    <div className="bg-white p-8 mt-5 rounded-lg flex flex-col justify-center mb-6">
+    <div className="bg-white p-4 mt-5 rounded flex flex-col justify-center">
       <Title level={4} className="font-bold">
         Business Model Canvas
       </Title>
@@ -201,10 +219,10 @@ const BusinessModelCanvas: React.FC = () => {
         <div className="justify-center flex flex-row">
           <Col span={4} className="mr-3">
             <Card className="bg-yellow-200 h-full">
-              <Title level={4} className="flex items-center justify-between">
+              <Title level={5} className="flex items-center justify-between">
                 Key Partners
                 <TeamOutlined
-                  style={{ fontSize: "36px", marginLeft: "10px" }}
+                  style={{ fontSize: "30px", marginLeft: "10px" }}
                 />
               </Title>
               <Tooltip
@@ -224,10 +242,10 @@ const BusinessModelCanvas: React.FC = () => {
           </Col>
           <Col span={4}>
             <Card className="bg-yellow-200 h-48 mb-4">
-              <Title level={4} className="flex items-center justify-between">
+              <Title level={5} className="flex items-center justify-between">
                 Key Activities
                 <CheckCircleOutlined
-                  style={{ fontSize: "36px", marginLeft: "10px" }}
+                  style={{ fontSize: "30px", marginLeft: "10px" }}
                 />
               </Title>
               <Tooltip
@@ -245,10 +263,10 @@ const BusinessModelCanvas: React.FC = () => {
               </Tooltip>
             </Card>
             <Card className="bg-yellow-200 h-48">
-              <Title level={4} className="flex items-center justify-between">
+              <Title level={5} className="flex items-center justify-between">
                 Key Resources
                 <ApartmentOutlined
-                  style={{ fontSize: "36px", marginLeft: "10px" }}
+                  style={{ fontSize: "30px", marginLeft: "10px" }}
                 />
               </Title>
               <Tooltip
@@ -267,11 +285,14 @@ const BusinessModelCanvas: React.FC = () => {
             </Card>
           </Col>
           <Col span={4}>
-            <Card className="bg-purple-300 mr-3 ml-3 h-full flex flex-col justify-center items-center">
-              <Title level={4} className="flex items-center justify-between">
+            <Card className="bg-purple-300 mr-3 ml-3 h-full flex  ">
+              <div className="flex">
+
+              <Title level={5} className="flex items-center justify-between">
                 Value Proposition
               </Title>
-              <BulbOutlined style={{ fontSize: "36px" }} />
+              <BulbOutlined style={{ fontSize: "30px" }} />
+              </div>
               <Tooltip
                 title={
                   <span style={{ color: "#000000" }}>
@@ -293,10 +314,10 @@ const BusinessModelCanvas: React.FC = () => {
           </Col>
           <Col span={4}>
             <Card className="bg-red-300 h-48 mb-4">
-              <Title level={4} className="flex items-center justify-between">
+              <Title level={5} className="flex items-center justify-between">
                 Customer Relationships
                 <CommentOutlined
-                  style={{ fontSize: "36px", marginLeft: "10px" }}
+                  style={{ fontSize: "30px", marginLeft: "10px" }}
                 />
               </Title>
               <Tooltip
@@ -321,9 +342,9 @@ const BusinessModelCanvas: React.FC = () => {
               </Tooltip>
             </Card>
             <Card className="bg-red-300 h-48">
-              <Title level={4} className="flex items-center justify-between">
+              <Title level={5} className="flex items-center justify-between">
                 Customer Segments
-                <CarOutlined style={{ fontSize: "36px", marginLeft: "10px" }} />
+                <CarOutlined style={{ fontSize: "30px", marginLeft: "10px" }} />
               </Title>
               <Tooltip
                 title={
@@ -346,10 +367,10 @@ const BusinessModelCanvas: React.FC = () => {
           </Col>
           <Col span={4}>
             <Card className="bg-red-300 h-full ml-3">
-              <Title level={4} className="flex items-center justify-between">
+              <Title level={5} className="flex items-center justify-between">
                 Channels
                 <TeamOutlined
-                  style={{ fontSize: "36px", marginLeft: "10px" }}
+                  style={{ fontSize: "30px", marginLeft: "10px" }}
                 />
               </Title>
               <Tooltip
@@ -368,11 +389,11 @@ const BusinessModelCanvas: React.FC = () => {
         </div>
         <div className="justify-center flex flex-row mt-2">
           <Col span={10}>
-            <Card className="bg-green-300 h-36 mr-2">
-              <Title level={4} className="flex items-center justify-between">
+            <Card className="bg-green-300 h-36 mr-2 -ml-2">
+              <Title level={5} className="flex items-center justify-between">
                 Revenue Streams
                 <FileTextOutlined
-                  style={{ fontSize: "36px", marginLeft: "10px" }}
+                  style={{ fontSize: "30px", marginLeft: "10px" }}
                 />
               </Title>
               <Tooltip
@@ -393,11 +414,11 @@ const BusinessModelCanvas: React.FC = () => {
             </Card>
           </Col>
           <Col span={10}>
-            <Card className="bg-green-300 h-36 ml-2">
-              <Title level={4} className="flex items-center justify-between">
+            <Card className="bg-green-300 h-36 ml-2 -mr-2">
+              <Title level={5} className="flex items-center justify-between">
                 Cost Structure
                 <DollarCircleOutlined
-                  style={{ fontSize: "36px", marginLeft: "10px" }}
+                  style={{ fontSize: "30px", marginLeft: "10px" }}
                 />
               </Title>
               <Tooltip
@@ -418,7 +439,8 @@ const BusinessModelCanvas: React.FC = () => {
         </div>
       </div>
       <Modal
-        title="Chỉnh sửa nội dung"
+        centered
+        title="Update content"
         open={isModalVisible}
         onOk={handleSubmit}
         onCancel={handleCancel}

@@ -1,18 +1,33 @@
-import { FaChartPie } from "react-icons/fa6";
-import { FaTasks, FaRegCalendarAlt } from "react-icons/fa";
+import { FaChartPie, FaMoneyBill } from "react-icons/fa6";
+import { FaTasks } from "react-icons/fa";
 import { FaBookJournalWhills, FaPeopleGroup, FaSchool } from "react-icons/fa6";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { SiGoogleclassroom } from "react-icons/si";
-import { BiSolidUserAccount } from "react-icons/bi";
+import {
+  BiMoneyWithdraw,
+  BiSolidDashboard,
+  BiSolidUserAccount,
+} from "react-icons/bi";
+import { RiMailSendFill } from "react-icons/ri";
+import { IoTime } from "react-icons/io5";
+import { Badge } from "antd";
+
+
+
 export const StudentRoutes = [
+  {
+    route: "/dashboard",
+    page: "DashBoard",
+    icon: <BiSolidDashboard size={20} />,
+  },
   {
     route: "/projectOverview",
     page: "Project Overview",
     icon: <FaChartPie size={20} />,
   },
   {
-    route: "/dashboard",
-    page: "DashBoard",
+    route: "/tasks",
+    page: "Tasks",
     icon: <FaTasks size={20} />,
   },
   {
@@ -21,14 +36,19 @@ export const StudentRoutes = [
     icon: <FaBookJournalWhills size={20} />,
   },
   {
-    route: "/timeline",
-    page: "Timeline",
-    icon: <FaRegCalendarAlt size={20} />,
+    route: "/request",
+    page: "Request",
+    icon: <RiMailSendFill size={20} />,
+  },
+  {
+    route: "/money",
+    page: "SponsorShip",
+    icon: <BiMoneyWithdraw size={20} />,
   },
 ];
 export const TeacherRoutes = [
   {
-    route: "/teacher_dashboard",
+    route: "/teacher/dashboard",
     page: "Teacher Dashboard",
     icon: <FaSchool size={20} />,
   },
@@ -43,17 +63,30 @@ export const TeacherRoutes = [
     icon: <FaPeopleGroup size={20} />,
   },
 ];
-
 export const AdminRoutes = [
   {
     route: "/manageClass",
     page: "Manage Class",
-    icon: <SiGoogleclassroom  size={20} />,
+    icon: <SiGoogleclassroom size={20} />,
   },
   {
     route: "/manageAccount",
-    page: "Mange Account",
-    icon: <BiSolidUserAccount  />,
+    page: "Manage Account",
+    icon: <BiSolidUserAccount size={20} />,
+  },
+  {
+    route: "/manageRequest",
+    page: "Requests",
+    icon: (
+      <Badge count={2}>
+        <BiSolidUserAccount size={20} />
+      </Badge>
+    ),
+  },
+  {
+    route: "/manageTerms",
+    page: "Terms",
+    icon: <IoTime size={20} />,
   },
 ];
 
@@ -74,4 +107,24 @@ export const SecondaryMenu = [
   //   icon: <SlBell size={20} />,
   //   badge: <Badge count={10} />,
   // },
+];
+export const HeadOfSubjectRouter = [
+  {
+    route: "/hos/timeline",
+    page: "Timeline",
+    icon: <FaChartPie size={20} />,
+  },
+  {
+    route: "/hos/groups",
+    page: "Groups",
+    icon: <FaTasks size={20} />,
+  }
+];
+export const AccountantRouter = [
+  {
+    route: "/accountant",
+    page: "Money",
+    icon: <FaMoneyBill size={20} />,
+  },
+ 
 ];

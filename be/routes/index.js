@@ -11,6 +11,12 @@ import SubmissionRouter from "./submission.js";
 import TaskRouter from "./task.js";
 import TimeBlockRouter from "./timeblock.js";
 import TagMajorRouter from "./tagmajor.js";
+import RequestRouter from "./request.js";
+import NotificationRouter from "./notification.js";
+import TermRouter from "./term.js"
+import RequestDeadlineRouter from "./requestDeadline.js";
+import OutcomeRouter from "./outcome.js";
+import FundEstimationRouter from "./fundEstimation.js";
 export {
   AuthenticationRouter,
   UserRouter,
@@ -24,5 +30,11 @@ export {
   SubmissionRouter,
   TaskRouter,
   TimeBlockRouter,
-  TagMajorRouter
+  TagMajorRouter,
+  RequestRouter,
+  NotificationRouter,
+  TermRouter,
+  RequestDeadlineRouter,
+  OutcomeRouter,
+  FundEstimationRouter,
 };
