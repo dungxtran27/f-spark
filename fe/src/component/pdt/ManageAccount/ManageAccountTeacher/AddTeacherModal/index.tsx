@@ -30,6 +30,8 @@ const AddTeacherModal = ({ isOpen, setIsOpen }: Props) => {
           salutation: values.salutation
         });
         setIsOpen(false)
+        form.resetFields();
+        setImageData('')
       }).catch((errorInfo) => {
         console.error('Validation Failed:', errorInfo);
       });
