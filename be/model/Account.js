@@ -15,6 +15,14 @@ const AccountSchema = new Schema(
       type: String,
       required: false,
     },
+    active: {
+      type: Schema.Types.Boolean,
+      default: true,
+    },
+    verify: {
+      type: Schema.Types.Boolean,
+      default: false,
+    },
   },
   { timestamps: true, collection: "Accounts" }
 );

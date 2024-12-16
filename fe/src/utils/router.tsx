@@ -26,6 +26,7 @@ import DashboardTM from "../pages/TM/DashBoard";
 import Money from "../pages/Student/Money";
 import AccountantPage from "../pages/Accountant";
 import ManageTerm from "../pages/PDT/ManageTerm";
+import ConfirmSignUp from "../pages/Auth/SignUp/confirmSignUp";
 const Router = () => {
   return (
     <BrowserRouter>
@@ -63,6 +64,7 @@ const Router = () => {
         {/* TM */}
         <Route path="/hos/timeline" element={<DashboardTM/>} />
         <Route path="/hos/groups" element={<ManageClassTM/>} />
+        <Route path="/confirmSignUp/:token" element={<ConfirmSignUp />} />
       </Routes>
     </BrowserRouter>
   );

@@ -15,7 +15,6 @@ import React, { useState } from "react";
 import { FaRegUserCircle } from "react-icons/fa";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdLockPerson } from "react-icons/md";
-import { TbPassword } from "react-icons/tb";
 import { authApi } from "../../../api/auth";
 import { QUERY_KEY } from "../../../utils/const";
 import { useDispatch, useSelector } from "react-redux";
@@ -42,6 +41,7 @@ const SignUp: React.FC = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.SIGN_UP],
       });
+      setCurrentStep((prev) => prev + 1);
     },
   });
 
@@ -81,13 +81,7 @@ const SignUp: React.FC = () => {
     },
     {
       title: "Confirm your account",
-      description: "idk",
-      icon: <TbPassword />,
-      content: <ConfirmAccount />,
-    },
-    {
-      title: "Finish",
-      description: "Start working on your ideas",
+      description: "Finish setup account",
       icon: <FaCircleCheck />,
       content: <Finish />,
     },
@@ -100,7 +94,11 @@ const SignUp: React.FC = () => {
         ...prev,
         ...currentValues,
       }));
-      setCurrentStep((prev) => prev + 1);
+      if (currentStep === 1) {
+        await handleSignUp();
+      } else {
+        setCurrentStep((prev) => prev + 1);
+      }
     } catch (error: any) {
       error.error("Please complete all required fields before continuing.");
     }
@@ -131,27 +129,29 @@ const SignUp: React.FC = () => {
           <Form form={form} layout="vertical">
             {steps[currentStep].content}
             <div className="flex w-1/2 justify-end mt-5">
-              {currentStep > 0 && (
+              {currentStep > 0 && currentStep !== 2 && (
                 <Button onClick={prev} className="rounded-full px-10 py-3">
                   Previous
                 </Button>
               )}
-              {currentStep < steps.length - 1 ? (
-                <Button
-                  type="primary"
-                  onClick={next}
-                  className="bg-primary text-white rounded-full px-10 py-3 ml-20"
-                >
-                  Next
-                </Button>
-              ) : (
+              {currentStep === 1 ? (
                 <Button
                   type="primary"
                   onClick={handleSignUp}
-                  className="bg-primary text-white rounded-full px-10 py-3 ml-20"
+                  className="bg-primary text-white rounded-full px-10 py-3 ml-5"
                 >
                   Submit
                 </Button>
+              ) : (
+                currentStep < steps.length - 1 && (
+                  <Button
+                    type="primary"
+                    onClick={next}
+                    className="bg-primary text-white rounded-full px-10 py-3 ml-5"
+                  >
+                    Next
+                  </Button>
+                )
               )}
             </div>
           </Form>
@@ -356,19 +356,18 @@ const CreateAccount = () => (
   </div>
 );
 
-const ConfirmAccount = () => (
-  <div className="pl-8 pt-5">
-    <p>Please check your email to confirm your account.</p>
-  </div>
-);
-
 const Finish = () => (
   <div className="pl-8 pt-5">
-    <span>
+    <p className="text-lg text-gray-800 font-medium">
       Congratulations! Your account setup is complete.
+    </p>
+    <span className="text-gray-600 mt-2 mr-2">
+      Please check your email to confirm your account.
+    </span>
+    <span>
       <a
         href="/STUDENT/login"
-        className="text-primary underline hover:text-primary-dark ml-1"
+        className="inline-block mt-4 text-primary font-semibold underline hover:text-primary-dark transition-colors"
       >
         Go to Login
       </a>
