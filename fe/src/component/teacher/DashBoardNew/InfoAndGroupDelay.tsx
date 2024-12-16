@@ -9,6 +9,7 @@ import { QUERY_KEY } from "../../../utils/const";
 import { dashBoard } from "../../../api/dashboard/dashboard";
 import { requestDeadlineApi } from "../../../api/requestDeadline/requestDeadline";
 import { Link } from "react-router-dom";
+import { Empty } from "antd";
 
 const InfoAndGroupDelay = ({
   setInfoData,
@@ -165,7 +166,9 @@ const InfoAndGroupDelay = ({
         <h2 className="font-bold text-lg mb-2 border-t-2 pt-5 flex items-center justify-between">
           <p>
             <span>Request delay deadline</span>
-            <span className="text-red-500 ml-1">({flatRequestList.length})</span>
+            <span className="text-red-500 ml-1">
+              ({flatRequestList.length})
+            </span>
           </p>
           <div className="relative">
             <div
@@ -180,40 +183,49 @@ const InfoAndGroupDelay = ({
           </div>
         </h2>
         <div className="max-h-[272px] overflow-y-auto">
-          {flatRequestList.map((group, index) => (
-            <div key={index} className="bg-gray-200 rounded p-2 mb-2 space-y-1">
-              <p className="font-semibold">
-                <Link
-                  to={`/class/${group?.classId}`}
-                  className="px-1 w-14 rounded mr-1 hover:text-blue-700 hover:underline"
-                  style={{ backgroundColor: "rgb(180,180,187)" }}
+          {flatRequestList.length !== 0 ? (
+            <>
+              {flatRequestList.map((group, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-200 rounded p-2 mb-2 space-y-1"
                 >
-                  {group.groupId?.GroupName || "Unknown Group"}
-                </Link>
-                ({group.classworkId?.title || "Unknown Outcome"})
-              </p>
-              <p className="text-sm">
-                <span className="font-semibold">Date: </span>
-                <span className="font-semibold">
-                  {group.dueDate
-                    ? new Date(group.dueDate).toLocaleDateString()
-                    : "N/A"}
-                </span>{" "}
-                <span className="text-xl font-extralight">→ </span>
-                <span className="text-blue-500">
-                  {group.newDate
-                    ? new Date(group.newDate).toLocaleDateString()
-                    : "N/A"}
-                </span>
-              </p>
-              <p className="text-sm">
-                <span className="font-semibold">Status: </span>
-                <span className="font-semibold text-green-500">
-                  {group.status}
-                </span>
-              </p>
-            </div>
-          ))}
+                  <p className="font-semibold">
+                    <Link
+                      to={`/class/${group?.classId}`}
+                      className="px-1 w-14 rounded mr-1 hover:text-blue-700 hover:underline"
+                      style={{ backgroundColor: "rgb(180,180,187)" }}
+                    >
+                      {group.groupId?.GroupName || "Unknown Group"}
+                    </Link>
+                    ({group.classworkId?.title || "Unknown Outcome"})
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-semibold">Date: </span>
+                    <span className="font-semibold">
+                      {group.dueDate
+                        ? new Date(group.dueDate).toLocaleDateString()
+                        : "N/A"}
+                    </span>{" "}
+                    <span className="text-xl font-extralight">→ </span>
+                    <span className="text-blue-500">
+                      {group.newDate
+                        ? new Date(group.newDate).toLocaleDateString()
+                        : "N/A"}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-semibold">Status: </span>
+                    <span className="font-semibold text-green-500">
+                      {group.status}
+                    </span>
+                  </p>
+                </div>
+              ))}
+            </>
+          ) : (
+            <Empty description={"No request"} />
+          )}
         </div>
       </div>
       {isDrawerOpen && (
@@ -230,49 +242,55 @@ const InfoAndGroupDelay = ({
           <h2 className="font-bold text-lg mb-4">Group delay deadline</h2>
           <div className="space-y-4">
             <div>
-              {flatRequestListDetail.map((group, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-200 rounded p-2 mb-2 space-y-1"
-                >
-                  <p className="font-semibold">
-                    <Link
-                      to={`/class/${group?.classId}`}
-                      className="px-1 w-14 rounded mr-1 hover:text-blue-700 hover:underline"
-                      style={{ backgroundColor: "rgb(180,180,187)" }}
+              {flatRequestListDetail.length !== 0 ? (
+                <>
+                  {flatRequestListDetail.map((group, index) => (
+                    <div
+                      key={index}
+                      className="bg-gray-200 rounded p-2 mb-2 space-y-1"
                     >
-                      {group.groupId?.GroupName || "Unknown Group"}
-                    </Link>
-                    ({group.classworkId?.title || "Unknown Outcome"})
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-semibold">Due Date: </span>
-                    <span className="text-[16px]">
-                      {group.dueDate
-                        ? new Date(group.dueDate).toLocaleDateString()
-                        : "N/A"}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="font-semibold">New Date: </span>
-                    <span className="text-blue-500">
-                      {group.newDate
-                        ? new Date(group.newDate).toLocaleDateString()
-                        : "N/A"}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="font-semibold">Reason: </span>
-                    {group.reason || "No reason provided"}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Status: </span>
-                    <span className="text-red-500">
-                      {group.status || "N/A"}
-                    </span>
-                  </p>
-                </div>
-              ))}
+                      <p className="font-semibold">
+                        <Link
+                          to={`/class/${group?.classId}`}
+                          className="px-1 w-14 rounded mr-1 hover:text-blue-700 hover:underline"
+                          style={{ backgroundColor: "rgb(180,180,187)" }}
+                        >
+                          {group.groupId?.GroupName || "Unknown Group"}
+                        </Link>
+                        ({group.classworkId?.title || "Unknown Outcome"})
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-semibold">Due Date: </span>
+                        <span className="text-[16px]">
+                          {group.dueDate
+                            ? new Date(group.dueDate).toLocaleDateString()
+                            : "N/A"}
+                        </span>
+                      </p>
+                      <p>
+                        <span className="font-semibold">New Date: </span>
+                        <span className="text-blue-500">
+                          {group.newDate
+                            ? new Date(group.newDate).toLocaleDateString()
+                            : "N/A"}
+                        </span>
+                      </p>
+                      <p>
+                        <span className="font-semibold">Reason: </span>
+                        {group.reason || "No reason provided"}
+                      </p>
+                      <p>
+                        <span className="font-semibold">Status: </span>
+                        <span className="text-red-500">
+                          {group.status || "N/A"}
+                        </span>
+                      </p>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <Empty description={"No group"} />
+              )}
             </div>
           </div>
         </div>
