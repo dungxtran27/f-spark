@@ -20,6 +20,7 @@ const createSubmission = async (req, res) => {
     const classworkId = req.query.classworkId;
     const studentId = req.decodedToken.role.id;
     const attatchementLink = await uploadFile(attachment, fileName);
+
     if (!attatchementLink)
       return res.status(400).json({ error: "Upload failed. please try again" });
     const createSubmiss = await SubmissionRepository.createSubmission({

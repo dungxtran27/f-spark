@@ -40,9 +40,26 @@ const authenticate = async (req, res) => {
 };
 const signUp = async (req, res) => {
   try {
-    const { name, studentId, generation, profession, termCode, email, password, img } = req.body;
+    const {
+      name,
+      studentId,
+      generation,
+      profession,
+      termCode,
+      email,
+      password,
+      img,
+    } = req.body;
 
-    if (!name || !studentId || !generation || !profession || !termCode || !email || !password) {
+    if (
+      !name ||
+      !studentId ||
+      !generation ||
+      !profession ||
+      !termCode ||
+      !email ||
+      !password
+    ) {
       return res
         .status(400)
         .json({ error: "Please fill out all the mandatory fields" });
@@ -50,13 +67,12 @@ const signUp = async (req, res) => {
 
     let imgLink;
     if (!img) {
-      imgLink = "https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-8.jpg"
+      imgLink =
+        "https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-8.jpg";
     } else {
       imgLink = await uploadImage(img);
-      if (imgLink) {
-        return res
-          .status(400)
-          .json({ error: "Upload Failed !" });
+      if (!imgLink) {
+        return res.status(400).json({ error: "Upload Failed !" });
       }
     }
 
@@ -67,10 +83,18 @@ const signUp = async (req, res) => {
 
     const term = await AuthenticateRepository.getUserByTerm({ termCode });
     if (!term) {
-      return res.status(400).json({ error: "Account student does not in this term" });
+      return res
+        .status(400)
+        .json({ error: "Account student does not in this term" });
     }
 
-    const existingUser = await AuthenticateRepository.getUserByEmail({ name, studentId, generation, email, profession });
+    const existingUser = await AuthenticateRepository.getUserByEmail({
+      name,
+      studentId,
+      generation,
+      email,
+      profession,
+    });
     if (!existingUser) {
       return res.status(400).json({ error: "Your information is incorrect" });
     }
@@ -86,7 +110,7 @@ const signUp = async (req, res) => {
     const newUser = await AuthenticateRepository.addUser({
       email,
       hashedPassword,
-      imgLink
+      imgLink,
     });
     const userId = newUser.accountNew._id
     await sendConfirmEmail(email, userId);
@@ -187,7 +211,7 @@ const login = async (req, res) => {
             error: "Unauthorized !!!",
           });
         }
-        userDetail.account = existingAccount
+        userDetail.account = existingAccount;
         userDetail.role = ROLE_NAME.headOfSubject;
         break;
       case ROLE_NAME.accountant:

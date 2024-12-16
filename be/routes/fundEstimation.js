@@ -33,6 +33,10 @@ fundEstimationRouter.patch(
   FundEstimationController.updateRequest
 );
 fundEstimationRouter.patch(
+  "/accountantUpdateRequest",
+  FundEstimationController.accountantUpdateRequest
+);
+fundEstimationRouter.patch(
   "/updateReturnStatus",
   FundEstimationController.updateReturnStatus
 );

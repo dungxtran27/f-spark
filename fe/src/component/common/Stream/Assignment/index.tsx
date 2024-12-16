@@ -146,7 +146,7 @@ const Assignment = ({
                     post?.mySubmission?.attachment?.map((a: any) => {
                       <div className="flex items-center group text-primaryBlue">
                         <TiAttachment size={20} />
-                        <span className="group-hover: underline">{a}</span>
+                        <span className="group-hover: underline">ppp</span>
                       </div>;
                     })}
                 </div>
