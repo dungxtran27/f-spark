@@ -39,6 +39,7 @@ const NotificationSchema = new Schema(
     },
     group: {
       type: SchemaTypes.ObjectId,
+      ref: "Group",
       default: null,
     },
     sender: {
@@ -48,7 +49,7 @@ const NotificationSchema = new Schema(
     },
     senderType: { 
       type: String, 
-      enum: ['Student', 'Teacher', 'System','Head Of Subject'],
+      enum: ['Student', 'Teacher', 'System','HeadOfSubject'],
       required: true 
     },
     type: {
