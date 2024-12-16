@@ -63,21 +63,20 @@ const Group = () => {
     (t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
   );
   useEffect(() => {
-    if (activeTerm?.termCode) {
-      setSemester(activeTerm.termCode);
+    if (activeTerm?._id) {
+      setSemester(activeTerm._id);
     }
   }, [activeTerm]);
 
   const { data: groupData, refetch: refetchGroups } = useQuery({
-    queryKey: [QUERY_KEY.ALLGROUP, { tagFilter, search, page, semester }],
+    queryKey: [QUERY_KEY.ALLGROUP,  tagFilter, search, page, semester ],
     queryFn: async () => {
       return groupApi.getAllGroupsNoClass({
-        semester,
         tag: tagFilter,
         GroupName: search,
         page,
         limit: 10,
-        termCode: semester,
+        term: semester,
       });
     },
   });
@@ -88,11 +87,12 @@ const Group = () => {
     },
   });
   const { data: classData, refetch: refetchClasses } = useQuery({
-    queryKey: [QUERY_KEY.CLASSES],
+    queryKey: [QUERY_KEY.CLASSES, term],
     queryFn: async () => {
       return classApi.getClassListPagination({
         limit: 12,
         page: 1,
+        term: activeTerm._id
       });
     },
   });
@@ -191,7 +191,7 @@ const Group = () => {
               className="w-24"
             >
               {termData?.data?.data.map((term: Term) => (
-                <Option key={term.termCode} value={term.termCode}>
+                <Option key={term._id} value={term._id}>
                   {term.termCode} {/* Display termCode */}
                 </Option>
               ))}

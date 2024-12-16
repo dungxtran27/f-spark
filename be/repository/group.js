@@ -807,7 +807,7 @@ const getAllGroupsNoClass = async (
   tag,
   page = 1,
   limit = 10,
-  termCode
+  term
 ) => {
   try {
     page = parseInt(page, 10);
@@ -831,9 +831,9 @@ const getAllGroupsNoClass = async (
     }
     let filterCondition = { $and: [] };
 
-    if (termCode) {
+    if (term) {
       filterCondition.$and.push({
-        $or: [{ termCode: { $regex: termCode, $options: "i" } }],
+        term: new mongoose.Types.ObjectId(term),
       });
     }
     if (filterCondition.$and.length === 0) {
@@ -843,6 +843,7 @@ const getAllGroupsNoClass = async (
     const totalItems = await Group.countDocuments({
       class: { $in: [null, undefined] },
       ...matchCondition,
+      ...filterCondition
     });
     const maxPages = Math.ceil(totalItems / limit);
     const GroupNotHaveClass = await Group.aggregate([
@@ -944,9 +945,11 @@ const getAllGroupsNoClass = async (
         select: "name",
       })
       .lean();
-    const totalGroup = await Group.countDocuments(group);
+    const totalGroup = await Group.countDocuments({
+      ...filterCondition,
+    });
     const countGroupNotHaveClass = await Group.countDocuments({
-      class: { $in: [null, undefined] },
+      class: { $in: [null, undefined] }, ...filterCondition
     });
     return {
       group,
@@ -1361,15 +1364,15 @@ const verifyTransaction = async (groupId, transactionId, status) => {
 const getGroupById = async (groupId) => {
   try {
     const result = await Group.findById(groupId)
-    .populate('tag class leader term mentor')
-    .populate({
+      .populate('tag class leader term mentor')
+      .populate({
         path: 'class',
         populate: {
           path: 'teacher',
           model: 'Teacher',
           populate: {
             path: 'account',
-            model: 'Account', 
+            model: 'Account',
           },
         },
       })
@@ -1380,7 +1383,7 @@ const getGroupById = async (groupId) => {
           model: 'Account',
         },
       });
-      return result;
+    return result;
   } catch (error) {
     throw new Error(error.message);
   }

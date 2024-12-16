@@ -79,7 +79,7 @@ const getAllAccStudent = async (req, res) => {
 
 const getAllStudentsNoClass = async (req, res) => {
   try {
-    const { page, limit, searchText, termCode, major } = req.body;
+    const { page, limit, searchText, term, major } = req.body;
     const {
       students,
       totalStudent,
@@ -90,7 +90,7 @@ const getAllStudentsNoClass = async (req, res) => {
       page,
       limit,
       searchText,
-      termCode,
+      term,
       major
     );
     return res.status(200).json({
@@ -179,7 +179,7 @@ const importStudent = async (req, res) => {
         term: activeTerm._id,
         email: g?.Email,
       };
-    });    
+    });
     const newStudents = await StudentRepository.bulkCreateStudentsFromExcel(
       newStudentsExcel
     );
@@ -241,6 +241,60 @@ const getGroupAndClassInfo = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const addStudent = async (req, res) => {
+  try {
+    const { name, studentId, email, group, major, gen } = req.body;
+    if (!name || !studentId || !email || !major || !gen) {
+      return res.status(400).json({ error: "All fields is required." });
+    }
+    const existingStudentByStudentId = await StudentRepository.checkStudentExists({ studentId });
+    if (existingStudentByStudentId) {
+      return res.status(400).json({ error: "Student ID already exists." });
+    }
+    const existingStudentByEmail = await StudentRepository.checkStudentExists({ email });
+    if (existingStudentByEmail) {
+      return res.status(400).json({ error: "Email already exists." });
+    }
+    const activeTerm = await TermRepository.getActiveTerm();
+    if (!activeTerm) {
+      return res.status(404).json({ error: "No active term found." });
+    }
+    let newStudent;
+    if (group) {
+      const existingGroup = await GroupRepository.findGroupById({ groupId: group });
+      if (!existingGroup) {
+        return res.status(404).json({ error: "Group not found." });
+      }
+      const groupClass = existingGroup.class;
+      newStudent = await StudentRepository.addStudent({
+        name,
+        studentId,
+        email,
+        group,
+        major,
+        gen,
+        activeTerm: activeTerm._id,
+      });
+      if (groupClass) {
+        await StudentRepository.addManyStudentNoClassToClass([newStudent._id], groupClass._id);
+      }
+    } else {
+      newStudent = await StudentRepository.addStudent({
+        name,
+        studentId,
+        email,
+        group,
+        major,
+        gen,
+        activeTerm: activeTerm._id,
+      });
+    }
+    return res.status(201).json({ message: "Add student successfully!", data: newStudent });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   getStudentsInSameGroup,
   getTeacherByStudentId,
@@ -253,4 +307,5 @@ export default {
   getTotalStudentsByTerm,
   // findById
   getGroupAndClassInfo,
+  addStudent
 };
