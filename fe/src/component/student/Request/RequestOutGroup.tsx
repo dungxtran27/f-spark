@@ -134,7 +134,7 @@ const RequestOutGroup = () => {
       ) : filteredRequests.length === 0 ? (
         <>
           <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-semibold">Out Group</span>
+            <span className="text-lg font-semibold">Leave group</span>
             {!dayjs().isAfter(dayjs(deadlineRequestOutGroup), "day") ? (
               <Button
                 type="primary"
@@ -154,7 +154,7 @@ const RequestOutGroup = () => {
       ) : (
         <>
           <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-semibold">Out group</span>
+            <span className="text-lg font-semibold">Leave Group</span>
             {!dayjs().isAfter(dayjs(deadlineRequestOutGroup)) ? (
               <Button
                 type="primary"

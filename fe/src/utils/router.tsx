@@ -58,11 +58,15 @@ const Router = () => {
         <Route path="/manageAccount" element={<AccountManagementPage />} />
         <Route path="/teacherProfile/:id" element={<TeacherProfile />} />
         <Route path="/mentorProfile/:id" element={<MentorProfile />} />
-        <Route path="/accountant" element={<AccountantPage />} />
         <Route path="/manageTerms" element={<ManageTerm />} />
         {/* TM */}
-        <Route path="/hos/timeline" element={<DashboardTM/>} />
-        <Route path="/hos/groups" element={<ManageClassTM/>} />
+        <Route path="/hos/timeline" element={<DashboardTM />} />
+        <Route path="/hos/groups" element={<ManageClassTM />} />
+        <Route path="/hos/mentors" element={<></>} />
+
+        {/* Accountant */}
+
+        <Route path="/accountant" element={<AccountantPage />} />
       </Routes>
     </BrowserRouter>
   );

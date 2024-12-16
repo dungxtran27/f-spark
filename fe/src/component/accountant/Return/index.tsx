@@ -1,649 +1,720 @@
 import classNames from "classnames";
 import styles from "../styles.module.scss";
-import { Button, Table, Tag } from "antd";
-import { Link } from "react-router-dom";
-import { TbPigMoney } from "react-icons/tb";
-const Return = () => {
+import {
+  Badge,
+  Button,
+  Collapse,
+  CollapseProps,
+  Image,
+  Input,
+  Modal,
+  Popconfirm,
+  Statistic,
+  Table,
+  Tag,
+} from "antd";
+
+import { useRef, useState } from "react";
+import dayjs from "dayjs";
+import { FaCheck } from "react-icons/fa6";
+import { FcCancel } from "react-icons/fc";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import AccountantApi from "../../../api/accountant";
+import { QUERY_KEY } from "../../../utils/const";
+import { groupApi } from "../../../api/group/group";
+interface Transaction {
+  _id: string;
+  status: string;
+  fundUsed: number;
+  evidence: string[];
+}
+
+interface Group {
+  _id: string;
+  GroupName: string;
+  transactions: Transaction[];
+}
+interface Item {
+  amount: number;
+  content: string;
+  type: string;
+}
+interface BankingInfo {
+  _id: string;
+  accountName: string;
+  accountNumber: string;
+  bankCode: string;
+  branch: string;
+}
+interface Request {
+  _id: string;
+  status: string;
+  returnStatus: string;
+  bankingInfo: BankingInfo;
+  group: Group;
+  items: Item;
+}
+
+const Return = ({ termId }: { termId: string }) => {
+  const [open, setOpen] = useState(false);
+  const [openRemind, setOpenRemind] = useState(false);
+  const [request, setRequest] = useState<Request | null>(null);
+  const [openDis, setOpenDis] = useState(false);
+  const queryClient = useQueryClient();
+  const [selectedFile, setSelectedFile] = useState<string>("");
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  const { data: returnRequest } = useQuery({
+    queryKey: [QUERY_KEY.RECEIVE_SPONSOR_REQUEST],
+    queryFn: () => {
+      return AccountantApi.getReturnSponsorRequest(termId);
+    },
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "processing":
+        return "blue";
+      case "pending":
+        return "yellow";
+      case "processed":
+        return "green";
+      default:
+        return "yellow";
+    }
+  };
+  const verifyTransaction = useMutation({
+    mutationFn: ({
+      transactionId,
+      status,
+    }: {
+      transactionId: string;
+      status: string;
+    }) => {
+      return groupApi.verifyTransaction({
+        groupId: request?.group?._id,
+        transactionId: transactionId,
+        status: status,
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.RECEIVE_SPONSOR_REQUEST],
+      });
+
+      const { _id, GroupName, transactions } = data.data.data;
+      setRequest((prevReq) => {
+        if (!prevReq) return prevReq;
+        return { ...prevReq, group: { _id, GroupName, transactions } };
+      });
+    },
+  });
+  const updateReturnStatus = useMutation({
+    mutationFn: ({
+      requestId,
+      returnStatus,
+      evidence,
+    }: {
+      requestId: string | undefined;
+      returnStatus: string;
+      evidence?: string | undefined;
+    }) => {
+      return AccountantApi.updateReturnStatus({
+        requestId: requestId,
+        returnStatus: returnStatus,
+        evidence: evidence,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.RECEIVE_SPONSOR_REQUEST],
+      });
+      setOpenDis(false);
+    },
+  });
+  const updateEvidenceStatus = useMutation({
+    mutationFn: ({ requestId, status, evidenceImage }: any) => {
+      return AccountantApi.updateEvidenceStatus({
+        requestId: requestId,
+        status: status,
+        evidenceImage: evidenceImage,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.RECEIVE_SPONSOR_REQUEST],
+      });
+    },
+  });
+  const requestFund = request?.items?.reduce(
+    (total: any, acc: any) => total + acc.amount,
+    0
+  );
+  const verifyFund = request?.group.transactions
+    .filter((t: any) => t.status == "approved")
+    .reduce((total: any, acc: any) => total + acc.fundUsed, 0);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      setSelectedFile("");
+      imageRef.current?.setAttribute("src", "");
+      return;
+    }
+
+    if (file.type === "image/png" || file.type === "image/jpeg") {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedFile(reader.result as string);
+        imageRef.current?.setAttribute("src", reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert("Only PNG or JPG files are allowed."); // Inform user about invalid format
+    }
+  };
   const columns = [
     {
       title: "Group Name",
-      dataIndex: "GroupName",
+      dataIndex: "group",
       key: "GroupName",
+      render: (g: any) => <p>{g.GroupName}</p>,
+    },
+
+    {
+      title: "Total Fund (VNĐ)",
+      dataIndex: "items",
+      render: (item: any) => (
+        <p>
+          {item
+            ?.reduce((total: any, acc: any) => total + acc.amount, 0)
+            .toLocaleString()}
+        </p>
+      ),
     },
     {
-      title: "Total Fund",
-      dataIndex: "totalFund",
+      title: "Fund Provided (VNĐ)",
+      dataIndex: "items",
       key: "totalFund",
+      render: (item: any) => (
+        <p>
+          {(
+            item?.reduce((total: any, acc: any) => total + acc.amount, 0) * 0.7
+          ).toLocaleString()}
+        </p>
+      ),
     },
     {
-      title: "Fund used",
-      dataIndex: "fundUsed",
-      key: "fundUsed",
-    },
-    {
-      title: "Remaining",
-      dataIndex: "remaining",
+      title: "Evidence",
       key: "remaining",
-      render: (_: any, record: any) => {
+      render: (record: any) => {
         return (
-          <span
-            className={`${
-              record?.remaining < 0 ? "text-red-500" : "text-green-500"
-            } font-semibold`}
+          <Badge
+            count={
+              record.group.transactions.filter(
+                (transaction: any) => transaction.status == "pending"
+              ).length
+            }
           >
-            <span className="text-2xl">
-              {record?.remaining < 0 ? "↓" : "↑"}
-            </span>
-            {record?.remaining}
-          </span>
+            <Button
+              type="default"
+              onClick={() => {
+                setRequest(record);
+                setOpen(true);
+              }}
+            >
+              verify
+            </Button>
+          </Badge>
         );
       },
     },
     {
-      title: "Bank Number",
-      dataIndex: "bankNumber",
+      title: "Fund verified (vnđ)",
       key: "bankNumber",
+      dataIndex: "group",
+      render: (g: any) => {
+        return (
+          <Input
+            disabled
+            value={g.transactions
+              .filter((t: any) => t.status == "approved")
+              ?.reduce((total: any, acc: any) => total + acc.fundUsed, 0)
+              .toLocaleString()}
+          />
+        );
+      },
     },
     {
-      title: "Bank Number",
-      dataIndex: "bank",
-      key: "bank",
+      title: "Status & Action",
+      key: "statusAction",
+      align: "center",
+      render: (record: any) => {
+        if (
+          record.group.transactions.filter((t: any) => t.status == "pending")
+            .length > 0
+        ) {
+          return <>You need to verify all evidence</>;
+        }
+        if (record.returnStatus === "processed") {
+          return <FaCheck color="green" />;
+        }
+        if (record.returnStatus === "sent") {
+          return <Tag color={"yellow"}>Waiting for confirm</Tag>;
+        }
+
+        if (record.returnStatus === "processing") {
+          return (
+            <Tag color={getStatusColor(record.returnStatus)}>
+              {record.returnStatus}
+            </Tag>
+          );
+        }
+        // if
+        if (
+          record.group.transactions
+            .filter((t: any) => t.status == "approved")
+            ?.reduce((total: any, acc: any) => total + acc.fundUsed, 0) >
+          record.items?.reduce(
+            (total: any, acc: any) => total + acc.amount,
+            0
+          ) *
+            0.7
+        ) {
+          return (
+            <Button
+              type="default"
+              onClick={() => {
+                setRequest(record);
+                setOpenDis(true);
+              }}
+            >
+              Disbursement
+            </Button>
+          );
+        }
+
+        if (
+          record.group.transactions
+            .filter((t: any) => t.status == "approved")
+            ?.reduce((total: any, acc: any) => total + acc.fundUsed, 0) <
+          record.items?.reduce(
+            (total: any, acc: any) => total + acc.amount,
+            0
+          ) *
+            0.7
+        ) {
+          return (
+            <Button
+              type="primary"
+              onClick={() => {
+                setRequest(record);
+                setOpenRemind(true);
+              }}
+            >
+              Remind Group
+            </Button>
+          );
+        }
+
+        return null;
+      },
     },
     {
-      title: "Bank Owner",
-      dataIndex: "bankOwner",
-      key: "bankOwner",
-    },
-    {
-      title: "Bank Number",
-      dataIndex: "bankNumber",
-      key: "bankNumber",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (_: any, record: any) => (
-        <Tag color={record?.status == "Pending" ? "gold" : "green"}>
-          {record?.status}
-        </Tag>
-      ),
-    },
-    {
-      title: "Action",
-      render: (_: any, record: any) =>
-        record?.remaining < 0 ? (
-          <Button>Remind Group</Button>
-        ) : (
-          <Link
-            to={
-              "https://sandbox.vnpayment.vn/paymentv2/Ncb/Transaction/Index.html?token=07a0b7a5cad641ecbfd131fef9c3d361"
-            }
-          >
-            <TbPigMoney
-              size={25}
-              className="hover:text-orange-400 cursor-pointer"
-            />
-          </Link>
-        ),
-    },
-  ];
-  const dataSource = [
-    {
-      key: "1",
-      GroupName: "Group 1 - Fund Allocation",
-      totalFund: 5000000,
-      fundUsed: 2000000,
-      remaining: 3000000,
-      bankNumber: "123456789",
-      bank: "Bank A",
-      bankOwner: "John Doe",
-      status: "Processed",
-    },
-    {
-      key: "2",
-      GroupName: "Group 2 - Project Fund",
-      totalFund: 3000000,
-      fundUsed: 1500000,
-      remaining: 1500000,
-      bankNumber: "987654321",
-      bank: "Bank B",
-      bankOwner: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      key: "3",
-      GroupName: "Group 3 - Operational Fund",
-      totalFund: 10000000,
-      fundUsed: 4000000,
-      remaining: 6000000,
-      bankNumber: "1122334455",
-      bank: "Bank C",
-      bankOwner: "Mike Johnson",
-      status: "Processed",
-    },
-    {
-      key: "4",
-      GroupName: "Group 4 - Research Fund",
-      totalFund: 15000000,
-      fundUsed: 5000000,
-      remaining: 10000000,
-      bankNumber: "5566778899",
-      bank: "Bank D",
-      bankOwner: "Sarah Brown",
-      status: "Pending",
-    },
-    {
-      key: "5",
-      GroupName: "Group 5 - Innovation Fund",
-      totalFund: 2000000,
-      fundUsed: 500000,
-      remaining: 1500000,
-      bankNumber: "6677889900",
-      bank: "Bank E",
-      bankOwner: "David White",
-      status: "Processed",
-    },
-    {
-      key: "6",
-      GroupName: "Group 6 - Strategic Fund",
-      totalFund: 7000000,
-      fundUsed: 4000000,
-      remaining: 3000000,
-      bankNumber: "1122334455",
-      bank: "Bank F",
-      bankOwner: "Emily Davis",
-      status: "Pending",
-    },
-    {
-      key: "7",
-      GroupName: "Group 7 - Expansion Fund",
-      totalFund: 8000000,
-      fundUsed: 2000000,
-      remaining: 6000000,
-      bankNumber: "9988776655",
-      bank: "Bank G",
-      bankOwner: "Paul Wilson",
-      status: "Processed",
-    },
-    {
-      key: "8",
-      GroupName: "Group 8 - Education Fund",
-      totalFund: 10000000,
-      fundUsed: 3000000,
-      remaining: 7000000,
-      bankNumber: "1233211234",
-      bank: "Bank H",
-      bankOwner: "Anna Clark",
-      status: "Pending",
-    },
-    {
-      key: "9",
-      GroupName: "Group 9 - Infrastructure Fund",
-      totalFund: 6000000,
-      fundUsed: 2500000,
-      remaining: 3500000,
-      bankNumber: "4455667788",
-      bank: "Bank I",
-      bankOwner: "Samuel Green",
-      status: "Processed",
-    },
-    {
-      key: "10",
-      GroupName: "Group 10 - Sustainability Fund",
-      totalFund: 12000000,
-      fundUsed: 5000000,
-      remaining: 7000000,
-      bankNumber: "3344556677",
-      bank: "Bank J",
-      bankOwner: "Charlotte Lee",
-      status: "Pending",
-    },
-    {
-      key: "11",
-      GroupName: "Group 11 - Technology Fund",
-      totalFund: 15000000,
-      fundUsed: 7000000,
-      remaining: 8000000,
-      bankNumber: "5566778899",
-      bank: "Bank K",
-      bankOwner: "Ethan Scott",
-      status: "Processed",
-    },
-    {
-      key: "12",
-      GroupName: "Group 12 - Marketing Fund",
-      totalFund: 4000000,
-      fundUsed: 1000000,
-      remaining: 3000000,
-      bankNumber: "9988776655",
-      bank: "Bank L",
-      bankOwner: "Olivia Turner",
-      status: "Pending",
-    },
-    {
-      key: "13",
-      GroupName: "Group 13 - Travel Fund",
-      totalFund: 2000000,
-      fundUsed: 500000,
-      remaining: 1500000,
-      bankNumber: "1122334455",
-      bank: "Bank M",
-      bankOwner: "Liam Harris",
-      status: "Processed",
-    },
-    {
-      key: "14",
-      GroupName: "Group 14 - Education & Research Fund",
-      totalFund: 10000000,
-      fundUsed: 2000000,
-      remaining: 8000000,
-      bankNumber: "6677889900",
-      bank: "Bank N",
-      bankOwner: "Sophia Allen",
-      status: "Pending",
-    },
-    {
-      key: "15",
-      GroupName: "Group 15 - Health Fund",
-      totalFund: 5000000,
-      fundUsed: 1500000,
-      remaining: 3500000,
-      bankNumber: "5566778899",
-      bank: "Bank O",
-      bankOwner: "Lucas Young",
-      status: "Processed",
-    },
-    {
-      key: "16",
-      GroupName: "Group 16 - Humanitarian Fund",
-      totalFund: 8000000,
-      fundUsed: 2500000,
-      remaining: -100000, // Negative remaining value
-      bankNumber: "1122334455",
-      bank: "Bank P",
-      bankOwner: "Ava Adams",
-      status: "Pending",
-    },
-    {
-      key: "17",
-      GroupName: "Group 17 - Community Fund",
-      totalFund: 12000000,
-      fundUsed: 4000000,
-      remaining: 8000000,
-      bankNumber: "4455667788",
-      bank: "Bank Q",
-      bankOwner: "Mason Carter",
-      status: "Processed",
-    },
-    {
-      key: "18",
-      GroupName: "Group 18 - Scientific Fund",
-      totalFund: 20000000,
-      fundUsed: 10000000,
-      remaining: -500000, // Negative remaining value
-      bankNumber: "3344556677",
-      bank: "Bank R",
-      bankOwner: "Isabella Murphy",
-      status: "Pending",
-    },
-    {
-      key: "19",
-      GroupName: "Group 19 - Fundraising Fund",
-      totalFund: 1000000,
-      fundUsed: 200000,
-      remaining: 800000,
-      bankNumber: "9988776655",
-      bank: "Bank S",
-      bankOwner: "Elijah Walker",
-      status: "Processed",
-    },
-    {
-      key: "20",
-      GroupName: "Group 20 - Sports Fund",
-      totalFund: 3000000,
-      fundUsed: 1500000,
-      remaining: -100000, // Negative remaining value
-      bankNumber: "6677889900",
-      bank: "Bank T",
-      bankOwner: "Mia King",
-      status: "Pending",
-    },
-    {
-      key: "21",
-      GroupName: "Group 21 - Government Fund",
-      totalFund: 20000000,
-      fundUsed: 5000000,
-      remaining: 15000000,
-      bankNumber: "4455667788",
-      bank: "Bank U",
-      bankOwner: "Zoe Wright",
-      status: "Processed",
-    },
-    {
-      key: "22",
-      GroupName: "Group 22 - Charitable Fund",
-      totalFund: 3000000,
-      fundUsed: 1000000,
-      remaining: 2000000,
-      bankNumber: "3344556677",
-      bank: "Bank V",
-      bankOwner: "Jacob Moore",
-      status: "Pending",
-    },
-    {
-      key: "23",
-      GroupName: "Group 23 - Agriculture Fund",
-      totalFund: 7000000,
-      fundUsed: 2500000,
-      remaining: 4500000,
-      bankNumber: "1122334455",
-      bank: "Bank W",
-      bankOwner: "Amelia Taylor",
-      status: "Processed",
-    },
-    {
-      key: "24",
-      GroupName: "Group 24 - Education Fund",
-      totalFund: 9000000,
-      fundUsed: 4000000,
-      remaining: -100000, // Negative remaining value
-      bankNumber: "6677889900",
-      bank: "Bank X",
-      bankOwner: "Daniel Martin",
-      status: "Pending",
-    },
-    {
-      key: "25",
-      GroupName: "Group 25 - Research & Development Fund",
-      totalFund: 10000000,
-      fundUsed: 5000000,
-      remaining: 5000000,
-      bankNumber: "9988776655",
-      bank: "Bank Y",
-      bankOwner: "Olivia Harris",
-      status: "Processed",
-    },
-    {
-      key: "26",
-      GroupName: "Group 26 - Environmental Fund",
-      totalFund: 9000000,
-      fundUsed: 3500000,
-      remaining: 5500000,
-      bankNumber: "1122334455",
-      bank: "Bank Z",
-      bankOwner: "Nora King",
-      status: "Pending",
-    },
-    {
-      key: "27",
-      GroupName: "Group 27 - Legal Fund",
-      totalFund: 5000000,
-      fundUsed: 3000000,
-      remaining: 2000000,
-      bankNumber: "4455667788",
-      bank: "Bank A",
-      bankOwner: "Liam Nelson",
-      status: "Processed",
-    },
-    {
-      key: "28",
-      GroupName: "Group 28 - Energy Fund",
-      totalFund: 12000000,
-      fundUsed: 5000000,
-      remaining: 7000000,
-      bankNumber: "3344556677",
-      bank: "Bank B",
-      bankOwner: "Catherine Lee",
-      status: "Pending",
-    },
-    {
-      key: "29",
-      GroupName: "Group 29 - Cultural Fund",
-      totalFund: 8000000,
-      fundUsed: 1000000,
-      remaining: 7000000,
-      bankNumber: "6677889900",
-      bank: "Bank C",
-      bankOwner: "George Adams",
-      status: "Processed",
-    },
-    {
-      key: "30",
-      GroupName: "Group 30 - Business Fund",
-      totalFund: 2000000,
-      fundUsed: 1500000,
-      remaining: 500000,
-      bankNumber: "9988776655",
-      bank: "Bank D",
-      bankOwner: "Ava Brooks",
-      status: "Pending",
-    },
-    {
-      key: "31",
-      GroupName: "Group 31 - Disaster Fund",
-      totalFund: 6000000,
-      fundUsed: 4000000,
-      remaining: 2000000,
-      bankNumber: "5566778899",
-      bank: "Bank E",
-      bankOwner: "Ethan Morgan",
-      status: "Processed",
-    },
-    {
-      key: "32",
-      GroupName: "Group 32 - Family Fund",
-      totalFund: 8000000,
-      fundUsed: 5000000,
-      remaining: 3000000,
-      bankNumber: "6677889900",
-      bank: "Bank F",
-      bankOwner: "Julia Brown",
-      status: "Pending",
-    },
-    {
-      key: "33",
-      GroupName: "Group 33 - National Fund",
-      totalFund: 20000000,
-      fundUsed: 15000000,
-      remaining: 5000000,
-      bankNumber: "1122334455",
-      bank: "Bank G",
-      bankOwner: "Samuel Lee",
-      status: "Processed",
-    },
-    {
-      key: "34",
-      GroupName: "Group 34 - Technological Advancement Fund",
-      totalFund: 10000000,
-      fundUsed: 3000000,
-      remaining: -500000, // Negative remaining value
-      bankNumber: "4455667788",
-      bank: "Bank H",
-      bankOwner: "Sophia Harris",
-      status: "Pending",
-    },
-    {
-      key: "35",
-      GroupName: "Group 35 - Marketing Strategy Fund",
-      totalFund: 4000000,
-      fundUsed: 1000000,
-      remaining: 3000000,
-      bankNumber: "3344556677",
-      bank: "Bank I",
-      bankOwner: "Emily Turner",
-      status: "Processed",
-    },
-    {
-      key: "36",
-      GroupName: "Group 36 - Water Conservation Fund",
-      totalFund: 5000000,
-      fundUsed: 2000000,
-      remaining: 3000000,
-      bankNumber: "5566778899",
-      bank: "Bank J",
-      bankOwner: "David Martin",
-      status: "Pending",
-    },
-    {
-      key: "37",
-      GroupName: "Group 37 - Fundraising and Charity Fund",
-      totalFund: 15000000,
-      fundUsed: 7000000,
-      remaining: 8000000,
-      bankNumber: "6677889900",
-      bank: "Bank K",
-      bankOwner: "Olivia Scott",
-      status: "Processed",
-    },
-    {
-      key: "38",
-      GroupName: "Group 38 - Youth Education Fund",
-      totalFund: 3000000,
-      fundUsed: 1000000,
-      remaining: 2000000,
-      bankNumber: "9988776655",
-      bank: "Bank L",
-      bankOwner: "James Evans",
-      status: "Pending",
-    },
-    {
-      key: "39",
-      GroupName: "Group 39 - Global Initiative Fund",
-      totalFund: 10000000,
-      fundUsed: 6000000,
-      remaining: 4000000,
-      bankNumber: "1122334455",
-      bank: "Bank M",
-      bankOwner: "Grace Hill",
-      status: "Processed",
-    },
-    {
-      key: "40",
-      GroupName: "Group 40 - Sustainability and Growth Fund",
-      totalFund: 15000000,
-      fundUsed: 9000000,
-      remaining: -500000, // Negative remaining value
-      bankNumber: "4455667788",
-      bank: "Bank N",
-      bankOwner: "Jack Moore",
-      status: "Pending",
-    },
-    {
-      key: "41",
-      GroupName: "Group 41 - Infrastructure and Development Fund",
-      totalFund: 8000000,
-      fundUsed: 4000000,
-      remaining: 4000000,
-      bankNumber: "3344556677",
-      bank: "Bank O",
-      bankOwner: "Lily Taylor",
-      status: "Processed",
-    },
-    {
-      key: "42",
-      GroupName: "Group 42 - Global Health Fund",
-      totalFund: 20000000,
-      fundUsed: 12000000,
-      remaining: 8000000,
-      bankNumber: "5566778899",
-      bank: "Bank P",
-      bankOwner: "Matthew Clark",
-      status: "Pending",
-    },
-    {
-      key: "43",
-      GroupName: "Group 43 - Community Development Fund",
-      totalFund: 6000000,
-      fundUsed: 2000000,
-      remaining: 4000000,
-      bankNumber: "6677889900",
-      bank: "Bank Q",
-      bankOwner: "Sophia Jones",
-      status: "Processed",
-    },
-    {
-      key: "44",
-      GroupName: "Group 44 - Business and Technology Fund",
-      totalFund: 10000000,
-      fundUsed: 5000000,
-      remaining: 5000000,
-      bankNumber: "9988776655",
-      bank: "Bank R",
-      bankOwner: "Alexander Hill",
-      status: "Pending",
-    },
-    {
-      key: "45",
-      GroupName: "Group 45 - Regional Development Fund",
-      totalFund: 12000000,
-      fundUsed: 7000000,
-      remaining: 5000000,
-      bankNumber: "1122334455",
-      bank: "Bank S",
-      bankOwner: "Isabella Davis",
-      status: "Processed",
-    },
-    {
-      key: "46",
-      GroupName: "Group 46 - International Aid Fund",
-      totalFund: 5000000,
-      fundUsed: 2000000,
-      remaining: 3000000,
-      bankNumber: "4455667788",
-      bank: "Bank T",
-      bankOwner: "Ethan Thomas",
-      status: "Pending",
-    },
-    {
-      key: "47",
-      GroupName: "Group 47 - Public Health Fund",
-      totalFund: 3000000,
-      fundUsed: 1000000,
-      remaining: 2000000,
-      bankNumber: "3344556677",
-      bank: "Bank U",
-      bankOwner: "Olivia Lewis",
-      status: "Processed",
-    },
-    {
-      key: "48",
-      GroupName: "Group 48 - Disaster Relief Fund",
-      totalFund: 7000000,
-      fundUsed: 2000000,
-      remaining: 5000000,
-      bankNumber: "5566778899",
-      bank: "Bank V",
-      bankOwner: "Benjamin Roberts",
-      status: "Pending",
-    },
-    {
-      key: "49",
-      GroupName: "Group 49 - Environmental Protection Fund",
-      totalFund: 10000000,
-      fundUsed: 4000000,
-      remaining: 6000000,
-      bankNumber: "6677889900",
-      bank: "Bank W",
-      bankOwner: "Liam Clark",
-      status: "Processed",
-    },
-    {
-      key: "50",
-      GroupName: "Group 50 - Educational and Research Fund",
-      totalFund: 20000000,
-      fundUsed: 10000000,
-      remaining: 10000000,
-      bankNumber: "9988776655",
-      bank: "Bank X",
-      bankOwner: "Charlotte Hall",
-      status: "Pending",
+      title: "Bill",
+      // dataIndex: "evidences",
+
+      render: (record: any) => {
+        return record?.evidences
+          .filter((e: any) => e.type == "phase2")
+          .map((ev: any) => (
+            <div className="flex">
+              {ev.status == "declined" ? (
+                <Badge count={<FcCancel />}>
+                  <Image
+                    width={100}
+                    height={100}
+                    className="object-contain"
+                    src={ev.image}
+                  />{" "}
+                </Badge>
+              ) : (
+                <>
+                  <Image
+                    width={100}
+                    height={100}
+                    className="object-contain"
+                    src={ev.image}
+                  />{" "}
+                </>
+              )}
+
+              {record.returnStatus !== "processed" &&
+                ev.status == "pending" && (
+                  <div className="flex flex-col">
+                    <Button
+                      onClick={() => {
+                        updateEvidenceStatus.mutate({
+                          requestId: record._id,
+                          status: "approved",
+                          evidenceImage: ev.image,
+                        });
+                      }}
+                    >
+                      <FaCheck color="green" />
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        updateEvidenceStatus.mutate({
+                          requestId: record._id,
+                          status: "declined",
+                          evidenceImage: ev.image,
+                        });
+                      }}
+                    >
+                      <FcCancel />
+                    </Button>
+                  </div>
+                )}
+            </div>
+          ));
+      },
     },
   ];
 
+  const items: CollapseProps["items"] = request?.group?.transactions?.map(
+    (t: any) => {
+      return {
+        key: t?._id,
+        label: (
+          <div className="flex justify-between">
+            <span>
+              {t?.title} -{" "}
+              <span className="text-textSecondary">
+                {dayjs(t?.createdAt).format("ddd, MMM D, YYYY")}
+              </span>
+            </span>
+            <span
+              className={
+                t.status === "pending"
+                  ? "text-pendingStatus"
+                  : t.status === "approved"
+                  ? "text-green-500"
+                  : t.status === "rejected"
+                  ? "text-red-500"
+                  : ""
+              }
+            >
+              {t.status}
+            </span>{" "}
+          </div>
+        ),
+        children: (
+          <>
+            <div className="">
+              <div className="flex items-center justify-between">
+                <span>
+                  <span className="font-semibold">Fund Used:</span>&nbsp;
+                  {t?.fundUsed?.toLocaleString()} vnđ
+                </span>
+                <span className="flex">
+                  {t.status == "pending" ? (
+                    <>
+                      {" "}
+                      <Popconfirm
+                        title="Approved Transasction"
+                        description="Are you sure to approve this transactions?"
+                        onConfirm={() => {
+                          verifyTransaction.mutate({
+                            transactionId: t._id,
+                            status: "approved",
+                          });
+                        }}
+                        // onCancel={}
+                        okText="Approve"
+                        cancelText="Cancel"
+                      >
+                        <Button>
+                          <FaCheck color="green" size={17} />
+                        </Button>
+                      </Popconfirm>
+                      <Popconfirm
+                        title="Reject Transasction"
+                        description="Are you sure to reject this transactions?"
+                        onConfirm={() => {
+                          verifyTransaction.mutate({
+                            transactionId: t._id,
+                            status: "rejected",
+                          });
+                        }}
+                        // onCancel={}
+                        okText="Reject"
+                        cancelText="Cancel"
+                      >
+                        <Button>
+                          <FcCancel size={17} />
+                        </Button>
+                      </Popconfirm>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </span>
+              </div>
+              <div className="pt-2">
+                <div className="bg-backgroundSecondary/70 p-2 border border-textSecondary/50 rounded flex flex-wrap gap-1">
+                  <Image.PreviewGroup>
+                    {t?.evidence?.map((e: any) => (
+                      <Image
+                        width={97}
+                        height={97}
+                        src={e}
+                        className="border border-primary/30 object-cover object-center"
+                      />
+                    ))}
+                  </Image.PreviewGroup>
+                </div>
+              </div>
+            </div>
+          </>
+        ),
+      };
+    }
+  );
   return (
     <div className={classNames(styles.customTable, "p-3 bg-white rounded")}>
-      <Table dataSource={dataSource} columns={columns} />
+      <Table dataSource={returnRequest?.data.data} columns={columns} />
+      <Modal
+        open={open}
+        onCancel={() => setOpen(false)}
+        onOk={() => setOpen(false)}
+        title={`Evidence of groups ${request?.group?.GroupName}`}
+        width={700}
+        footer={() => (
+          <>
+            <Button type="default" onClick={() => setOpen(false)}>
+              Close
+            </Button>
+          </>
+        )}
+      >
+        <Collapse items={items} accordion />
+        <div className="text-lg font-semibold">
+          Total fund use:{" "}
+          {request?.group?.transactions &&
+            request?.group?.transactions
+              .filter((acc: any) => acc.status === "approved")
+              .reduce((total: any, acc: any) => total + acc.fundUsed, 0)
+              .toLocaleString()}{" "}
+          vnđ
+        </div>
+      </Modal>
+      <Modal
+        open={openRemind}
+        onCancel={() => setOpenRemind(false)}
+        onOk={() => setOpenRemind(false)}
+        title={`Remind group ${request?.group?.GroupName}`}
+        width={700}
+        footer={() => (
+          <>
+            <Button type="default" onClick={() => setOpenRemind(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              loading={updateReturnStatus.isPending}
+              onClick={() => {
+                updateReturnStatus.mutate({
+                  requestId: request?._id,
+                  returnStatus: "processing",
+                });
+                setOpenRemind(false);
+              }}
+            >
+              Remind
+            </Button>
+          </>
+        )}
+      >
+        <div className="flex flex-col items-center">
+          <div className="self-start">Your request will look like this</div>
+          <div className="border w-">
+            {" "}
+            <div className="text-center ">
+              <div>You have an excess amount of money.</div>
+              <div>Please return the spare amount of </div>
+              <span>
+                <Statistic
+                  value={
+                    verifyFund > requestFund
+                      ? Math.round(requestFund * 0.3)
+                      : Math.round((verifyFund - requestFund * 0.7) * -1)
+                  }
+                  suffix=" VNĐ"
+                />
+              </span>
+            </div>{" "}
+            <div className="text-center">
+              <Image
+                width={300}
+                height={300}
+                className="object-contain "
+                src={`https://img.vietqr.io/image/MB-222409092002-compact2.png?amount=${
+                  verifyFund > requestFund
+                    ? Math.round(requestFund * 0.3)
+                    : Math.round((verifyFund - requestFund * 0.7) * -1)
+                }&addInfo=${encodeURIComponent(
+                  `Hoàn phí khởi nghiệp dư của nhóm ${request?.group?.GroupName}`
+                )}&accountName=${encodeURIComponent(`Phòng kế toán`)}}`}
+              />
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        open={openDis}
+        height={500}
+        onCancel={() => setOpenDis(false)}
+        onOk={() => setOpenDis(false)}
+        title={`Remind of groups ${request?.group.GroupName}`}
+        width={700}
+        footer={() => (
+          <>
+            <Button
+              type="default"
+              onClick={() => {
+                setOpenDis(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              loading={updateReturnStatus.isPending}
+              onClick={() => {
+                updateReturnStatus.mutate({
+                  requestId: request?._id,
+                  returnStatus: "processed",
+                  evidence: selectedFile,
+                });
+              }}
+            >
+              Send
+            </Button>
+          </>
+        )}
+      >
+        <div className="">
+          <div className="self-start">Your remind will look like this</div>
+          <div className="flex justify-around !h-[60vh]">
+            <div className="flex flex-col  justify-between text-center border  p-4 rounded-md w-full ">
+              <div className="pt-5">
+                <div className="flex justify-around">
+                  <Statistic
+                    value={requestFund}
+                    className="w-[50%] "
+                    title="Requested Fund(VNĐ)"
+                  />
+                  <Statistic
+                    value={Math.round(requestFund * 0.7)}
+                    className="w-[50%]"
+                    title="Funded (VNĐ)"
+                  />
+                </div>
+                <div className="flex justify-around pt-2">
+                  <Statistic
+                    value={verifyFund}
+                    className="w-[50%] "
+                    title="Spent (VNĐ)"
+                  />
+                  <Statistic
+                    value={
+                      verifyFund > requestFund
+                        ? Math.round(requestFund * 0.3)
+                        : Math.round(verifyFund - requestFund * 0.7)
+                    }
+                    className="w-[50%]"
+                    valueStyle={{
+                      color: "green",
+                    }}
+                    title="Spare (VNĐ)"
+                  />
+                </div>
+              </div>
+              <div className="pt-4">
+                <div>The school have sent you the amount of</div>
+                <span>
+                  <Statistic
+                    valueStyle={{
+                      color: "green",
+                    }}
+                    value={
+                      verifyFund > requestFund
+                        ? Math.round(requestFund * 0.3)
+                        : Math.round(verifyFund - requestFund * 0.7)
+                    }
+                    suffix=" VNĐ"
+                  />
+                </span>
+              </div>
+              <div className="text-start pt-4">
+                <div>Please check your account: </div>
+                <div>
+                  <span className="text-gray-500 text-sm">Account Name:</span>{" "}
+                  <span>{request?.bankingInfo.accountName}</span>{" "}
+                </div>
+                <div>
+                  <span className="text-gray-500 text-sm">Account Number</span>{" "}
+                  <span>
+                    {request?.bankingInfo.accountNumber
+                      ? request.bankingInfo.accountNumber
+                          .slice(0, -3)
+                          .replace(/./g, "*") +
+                        request.bankingInfo.accountNumber.slice(-3)
+                      : ""}
+                  </span>{" "}
+                </div>
+              </div>
+            </div>
+            <div className="text-center w-full">
+              <Image
+                width={200}
+                height={200}
+                className="object-contain "
+                src={`https://img.vietqr.io/image/${
+                  request?.bankingInfo?.bankCode
+                }-${request?.bankingInfo?.accountNumber}-compact2.png?amount=${
+                  verifyFund > requestFund
+                    ? Math.round(requestFund * 0.3)
+                    : Math.round(verifyFund - requestFund * 0.7)
+                }&addInfo=${encodeURIComponent(
+                  `Thanh toán phí tài trợ lần 2 cho nhóm ${request?.group?.GroupName}`
+                )}&accountName=${encodeURIComponent(
+                  `${request?.bankingInfo?.accountName}`
+                )}}`}
+              />
+              <div className="flex flex-col">
+                <div className="flex flex-wrap mt-2 overflow-auto">
+                  {imageRef && (
+                    <img
+                      ref={imageRef}
+                      src=""
+                      key="preview"
+                      className="w-[200px] h-[200px] object-contain"
+                      alt="Selected Image Preview"
+                    />
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg"
+                  onChange={handleFileChange}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

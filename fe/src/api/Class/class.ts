@@ -84,7 +84,7 @@ export const classApi = {
     return await axios.post(`api/class/create`, requestBody);
   },
   getClassDetail: async (classId: any) => {
-    return await axios.get(`api/class/${classId}`);
+    return await axios.get(`api/class/classdetail/${classId}`);
   },
   getUnGroupStudentOfClass: async (classId: any) => {
     return await axios.get(`api/student/${classId}`);
