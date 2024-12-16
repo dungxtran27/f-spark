@@ -13,6 +13,7 @@ import {
   SearchOutlined,
   UserDeleteOutlined,
   CloseCircleOutlined,
+  PlusOutlined
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
@@ -21,6 +22,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../utils/const";
 import { Admin } from "../../../../api/manageAccoount";
 import dayjs from "dayjs";
+import AddTeacherModal from "./AddTeacherModal";
 const { Option } = Select;
 
 interface Teacher {
@@ -43,7 +45,7 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<
     AutoCompleteProps["options"]
   >([]);
-
+  const [openAddTeacher, setOpenAddTeacher] = useState<boolean>(false);
   const handleSearch = () => {
     setCurrentPage(1);
   };
@@ -183,7 +185,7 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       <Row gutter={[16, 16]} className="mb-4">
-        <Col span={6}>
+        <Col span={5}>
           <AutoComplete
             placeholder="Search name, email..."
             value={searchText}
@@ -193,7 +195,7 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
             className="w-full"
           />
         </Col>
-        <Col span={4}>
+        <Col span={3}>
           {terms?.data?.data && (
             <Select
               placeholder="Term"
@@ -210,7 +212,7 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
             />
           )}
         </Col>
-        <Col span={4}>
+        <Col span={3}>
           <Select
             placeholder="Status"
             value={statusFilter}
@@ -221,7 +223,7 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
             <Option value="Deactive">Deactive</Option>
           </Select>
         </Col>
-        <Col span={4}>
+        <Col span={2}>
           <Button
             icon={<CloseCircleOutlined />}
             onClick={handleClearFilters}
@@ -230,7 +232,7 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
             Clear
           </Button>
         </Col>
-        <Col span={4}>
+        <Col span={3}>
           <Button
             type="primary"
             icon={<SearchOutlined />}
@@ -238,6 +240,17 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
             className="w-full"
           >
             Search
+          </Button>
+        </Col>
+        <Col span={4}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => {
+            setOpenAddTeacher(true);
+            }}
+            >
+            Add Teacher
           </Button>
         </Col>
       </Row>
@@ -277,6 +290,10 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
           showTotal={(total) => `Total ${total} teachers`}
         />
       </div>
+      <AddTeacherModal
+              isOpen={openAddTeacher}
+              setIsOpen={setOpenAddTeacher}
+            />
     </div>
   );
 };

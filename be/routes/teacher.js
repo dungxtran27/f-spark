@@ -6,5 +6,6 @@ teacherRouter.get("/getStudentByClassId/:classId",verifyToken, TeacherController
 teacherRouter.post("/", TeacherController.getAllAccTeacher);
 teacherRouter.get('/:teacherId', TeacherController.getTeacherInfo);
 teacherRouter.post("/totalTeacher", TeacherController.getTotalTeachers);
+teacherRouter.post("/createTeacher", TeacherController.createTeacher);
 
 export default teacherRouter;
