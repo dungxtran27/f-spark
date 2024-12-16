@@ -67,6 +67,7 @@ const Router = () => {
 
         {/* Accountant */}
         <Route path="/accountant" element={<AccountantPage />} />
+        <Route path="/confirmSignUp/:token" element={<ConfirmSignUp />} />
       </Routes>
     </BrowserRouter>
   );
