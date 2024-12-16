@@ -179,7 +179,7 @@ const importStudent = async (req, res) => {
         term: activeTerm._id,
         email: g?.Email,
       };
-    });    
+    });
     const newStudents = await StudentRepository.bulkCreateStudentsFromExcel(
       newStudentsExcel
     );
@@ -241,6 +241,59 @@ const getGroupAndClassInfo = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const addStudent = async (req, res) => {
+  try {
+    const { name, studentId, email, group, major, gen } = req.body;
+    if (!name || !studentId || !email || !major || !gen) {
+      return res.status(400).json({ error: "Tất cả các trường đều là bắt buộc." });
+    }
+    const activeTerm = await TermRepository.getActiveTerm();
+    if (!activeTerm) {
+      return res.status(404).json({ error: "No active term found." });
+    }
+    // Kiểm tra xem có nhóm hay không
+    let newStudent;
+    if (group) {
+      // Nếu có nhóm, kiểm tra xem nhóm có lớp không
+      const existingGroup = await GroupRepository.findGroupById({ groupId: group });
+      if (!existingGroup) {
+        return res.status(404).json({ error: "Nhóm không tồn tại." });
+      }
+
+      const groupClass = existingGroup.class;
+      newStudent = await StudentRepository.addStudent({
+        name,
+        studentId,
+        email,
+        group,
+        major,
+        gen,
+        activeTerm: activeTerm._id,
+      });
+
+      // Nếu nhóm có lớp, thêm sinh viên vào lớp
+      if (groupClass) {
+        await StudentRepository.addManyStudentNoClassToClass([newStudent._id], groupClass._id);
+      }
+    } else {
+      // Nếu không có nhóm, chỉ tạo sinh viên mà không thêm vào lớp
+      newStudent = await StudentRepository.addStudent({
+        name,
+        studentId,
+        email,
+        group,
+        major,
+        gen,
+        activeTerm: activeTerm._id,
+      });
+    }
+
+    return res.status(201).json({ message: "Thêm sinh viên thành công.", data: newStudent });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   getStudentsInSameGroup,
   getTeacherByStudentId,
@@ -253,4 +306,5 @@ export default {
   getTotalStudentsByTerm,
   // findById
   getGroupAndClassInfo,
+  addStudent
 };

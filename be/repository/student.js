@@ -396,7 +396,7 @@ const getAllAccStudent = async (
         term: new mongoose.Types.ObjectId(term),
       });
     }
-    
+
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
@@ -617,6 +617,23 @@ const updateClass = async (studentId, classId) => {
   }
 };
 
+const addStudent = async ({ name, studentId, email, group, major, gen, activeTerm }) => {
+  try {
+    const newStudent = new Student({
+      name,
+      studentId,
+      email,
+      group,
+      major,
+      gen,
+      term: activeTerm,
+    });
+    const result = await newStudent.save();
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   findByStudentId,
   bulkCreateStudentsFromExcel,
@@ -635,5 +652,6 @@ export default {
   getTotalStudentsByTerm,
   findStudentsByIds,
   updateClass,
-  findByStudentIdPopulated
+  findByStudentIdPopulated,
+  addStudent
 };

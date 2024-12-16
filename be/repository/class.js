@@ -353,7 +353,7 @@ const getAllClass = async (
         $match: filterCondition,
       },
       {
-        $sort: { classCode: 1 },
+        $sort: { totalStudents: 1 }, // Sắp xếp tăng dần theo totalStudents
       },
       {
         $skip: (page - 1) * limit,
