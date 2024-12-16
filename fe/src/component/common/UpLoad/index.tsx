@@ -28,7 +28,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onClose }) => {
   const mutation = useMutation({
     mutationFn: async () => {
       if (selectedFiles.length === 0) {
-        throw new Error("No files selected");
+        message.error("Please select some images before upload");
+        return;
       }
 
       const formData = new FormData();

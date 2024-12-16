@@ -349,7 +349,7 @@ const approveJoinRequest = async (
     { _id: groupId },
     { $addToSet: { teamMembers: studentId } }
   );
-
+  const group = Group.findById(groupId);
   await Student.updateOne({ _id: studentId }, { group: groupId });
 
   return Request.updateOne(
@@ -359,22 +359,13 @@ const approveJoinRequest = async (
 };
 
 const approveRequestIsSponsorship = async (groupId, requestId) => {
-  await Group.updateOne(
-    { _id: groupId },
-    { isSponsorship: true }
-  );
+  await Group.updateOne({ _id: groupId }, { isSponsorship: true });
 
-  return Request.updateOne(
-    { _id: requestId },
-    { status: "approved" }
-  );
+  return Request.updateOne({ _id: requestId }, { status: "approved" });
 };
 
 const declineRequestIsSponsorship = async (requestId) => {
-  return Request.updateOne(
-    { _id: requestId },
-    { status: "declined" }
-  );
+  return Request.updateOne({ _id: requestId }, { status: "declined" });
 };
 
 const approveDeleteStudentRequest = async (groupId, studentId, requestId) => {

@@ -82,10 +82,14 @@ const pinClasswork = async (req, res) => {
 };
 
 const getAllClasses = async (req, res) => {
+  console.log("hhh");
+
   try {
     const classes = await ClassRepository.getAllClasses();
     return res.status(200).json({ data: classes });
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json({ error: error.message });
   }
 };
@@ -151,6 +155,7 @@ const createClass = async (req, res) => {
 };
 
 const getClassDetail = async (req, res) => {
+  console.log("kkk");
   try {
     const { classId } = req.params;
     const result = await ClassRepository.findClassById(classId);

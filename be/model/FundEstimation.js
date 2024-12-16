@@ -39,6 +39,24 @@ const BankingInfoSchema = new Schema(
   },
   { _id: false }
 );
+const EvidenceSchema = new Schema(
+  {
+    status: {
+      type: String,
+      enum: ["pending", "approved", "declined"],
+      default: "pending",
+    },
+    type: {
+      type: String,
+      enum: ["phase1", "phase2"],
+    },
+    image: {
+      type: String,
+      required: true,
+    },
+  },
+  { _id: false }
+);
 const FundEstimationSchema = new Schema(
   {
     group: {
@@ -49,6 +67,11 @@ const FundEstimationSchema = new Schema(
     status: {
       type: String,
       enum: ["pending", "approved", "declined", "received"],
+      default: "pending",
+    },
+    returnStatus: {
+      type: String,
+      enum: ["pending", "processing", "sent", "processed"],
       default: "pending",
     },
     sender: {
@@ -67,6 +90,11 @@ const FundEstimationSchema = new Schema(
     note: {
       type: String,
     },
+    evidences: {
+      type: [EvidenceSchema],
+      default: [],
+    },
+    default: [],
   },
   { timestamps: true }
 );

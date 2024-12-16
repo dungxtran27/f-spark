@@ -21,6 +21,9 @@ export const term = {
   getTimelineOfTerm: async (termId: string | undefined) => {
     return await axios.get(`/api/term/getTimelineOfTerm/${termId}`);
   },
+  getTermByTermId: async (termId: string | undefined) => {
+    return await axios.get(`/api/term/getTermByTermId/${termId}`);
+  },
   createTimelineOfTerm: async (requestBody: any) => {
     return await axios.post(`/api/term/createTimelineOfTerm`, requestBody);
   },
