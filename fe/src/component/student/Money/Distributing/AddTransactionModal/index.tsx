@@ -1,4 +1,4 @@
-import { DatePicker, Form, Input, InputNumber, Modal, UploadProps } from "antd";
+import { Form, Input, InputNumber, Modal, UploadProps } from "antd";
 import { ModalProps } from "../../../../../model/common";
 import { useForm } from "antd/es/form/Form";
 import Dragger from "antd/es/upload/Dragger";
@@ -35,13 +35,13 @@ const AddTransactionModal = ({ isOpen, setIsOpen }: ModalProps) => {
       return student.createTransaction({
         title: form.getFieldValue("title"),
         fundUsed: form.getFieldValue("fundUsed"),
-        transactionDate: form.getFieldValue("transactionDate"),
+        // transactionDate: form.getFieldValue("transactionDate"),
         evidence: uploadedFiles?.current,
       });
     },
-    onSuccess: () =>{
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEY.STUDENT_OF_GROUP] });
-    }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.STUDENT_OF_GROUP] });
+    },
   });
   return (
     <Modal
@@ -82,7 +82,7 @@ const AddTransactionModal = ({ isOpen, setIsOpen }: ModalProps) => {
             <InputNumber min={0} className="w-full" placeholder="Fund used" />
           </Form.Item>
         </div>
-        <Form.Item
+        {/* <Form.Item
           className="w-full"
           name={"transactionDate"}
           label={"Date"}
@@ -94,7 +94,7 @@ const AddTransactionModal = ({ isOpen, setIsOpen }: ModalProps) => {
           ]}
         >
           <DatePicker showTime className="w-full" />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item className="w-full" name={"evidence"} label={"Evidence"}>
           <Dragger {...props}>
             <p className="ant-upload-drag-icon">
