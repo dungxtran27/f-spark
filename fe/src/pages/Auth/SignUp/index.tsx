@@ -165,15 +165,19 @@ const PersonalInfo: React.FC<{ form: FormInstance }> = ({ form }) => {
   const majorChoices = [
     {
       value: "SE",
-      label: <span>Software Engineering</span>,
+      label: <span>SE</span>,
     },
     {
-      value: "AI",
-      label: <span>Artificial Intelligence</span>,
+      value: "HS",
+      label: <span>HS</span>,
+    },
+    {
+      value: "GD",
+      label: <span>GD</span>,
     },
     {
       value: "IB",
-      label: <span>International bussiness</span>,
+      label: <span>IB</span>,
     },
   ];
 
