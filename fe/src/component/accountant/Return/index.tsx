@@ -22,6 +22,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AccountantApi from "../../../api/accountant";
 import { QUERY_KEY } from "../../../utils/const";
 import { groupApi } from "../../../api/group/group";
+import { BsExclamationCircle } from "react-icons/bs";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Term } from "../../../model/auth";
+import moment from "moment";
 interface Transaction {
   _id: string;
   status: string;
@@ -481,241 +486,290 @@ const Return = ({ termId }: { termId: string }) => {
       };
     }
   );
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const deadline =
+    activeTerm?.timeLine?.filter((r: any) => r.type === "fundReturn") || [];
+
+  const startDate = deadline[0]?.startDate;
+  const endDate = deadline[0]?.endDate;
+
+  let message;
+  if (moment().isBefore(moment(startDate))) {
+    message = `Start time for the fund distribution is ${moment(
+      startDate
+    ).format("DD MMM YYYY")}`;
+  } else {
+    message = `Deadline for the fund distribution is ${moment(endDate).format(
+      "DD MMM YYYY"
+    )}`;
+  }
   return (
-    <div className={classNames(styles.customTable, "p-3 bg-white rounded")}>
-      <Table dataSource={returnRequest?.data.data} columns={columns} />
-      <Modal
-        open={open}
-        onCancel={() => setOpen(false)}
-        onOk={() => setOpen(false)}
-        title={`Evidence of groups ${request?.group?.GroupName}`}
-        width={700}
-        footer={() => (
-          <>
-            <Button type="default" onClick={() => setOpen(false)}>
-              Close
-            </Button>
-          </>
+    <>
+      <div
+        className={classNames(
+          "rounded-md border flex items-center gap-3 p-3 mb-3",
+          {
+            "border-green-500 bg-green-100": moment().isBefore(
+              moment(startDate)
+            ),
+            "border-pendingStatus bg-pendingStatus/20": !moment().isBefore(
+              moment(startDate)
+            ),
+          }
         )}
       >
-        <Collapse items={items} accordion />
-        <div className="text-lg font-semibold">
-          Total fund use:{" "}
-          {request?.group?.transactions &&
-            request?.group?.transactions
-              .filter((acc: any) => acc.status === "approved")
-              .reduce((total: any, acc: any) => total + acc.fundUsed, 0)
-              .toLocaleString()}{" "}
-          vnđ
-        </div>
-      </Modal>
-      <Modal
-        open={openRemind}
-        onCancel={() => setOpenRemind(false)}
-        onOk={() => setOpenRemind(false)}
-        title={`Remind group ${request?.group?.GroupName}`}
-        width={700}
-        footer={() => (
-          <>
-            <Button type="default" onClick={() => setOpenRemind(false)}>
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              loading={updateReturnStatus.isPending}
-              onClick={() => {
-                updateReturnStatus.mutate({
-                  requestId: request?._id,
-                  returnStatus: "processing",
-                });
-                setOpenRemind(false);
-              }}
-            >
-              Remind
-            </Button>
-          </>
-        )}
-      >
-        <div className="flex flex-col items-center">
-          <div className="self-start">Your request will look like this</div>
-          <div className="border w-">
-            {" "}
-            <div className="text-center ">
-              <div>You have an excess amount of money.</div>
-              <div>Please return the spare amount of </div>
-              <span>
-                <Statistic
-                  value={
-                    verifyFund > requestFund
-                      ? Math.round(requestFund * 0.3)
-                      : Math.round((verifyFund - requestFund * 0.7) * -1)
-                  }
-                  suffix=" VNĐ"
-                />
-              </span>
-            </div>{" "}
-            <div className="text-center">
-              <Image
-                width={300}
-                height={300}
-                className="object-contain "
-                src={`https://img.vietqr.io/image/MB-222409092002-compact2.png?amount=${
-                  verifyFund > requestFund
-                    ? Math.round(requestFund * 0.3)
-                    : Math.round((verifyFund - requestFund * 0.7) * -1)
-                }&addInfo=${encodeURIComponent(
-                  `Hoàn phí khởi nghiệp dư của nhóm ${request?.group?.GroupName}`
-                )}&accountName=${encodeURIComponent(`Phòng kế toán`)}}`}
-              />
-            </div>
+        <BsExclamationCircle
+          className={
+            moment().isBefore(moment(startDate))
+              ? "text-green-500"
+              : "text-pendingStatus"
+          }
+        />
+        {message}
+      </div>
+      <div className={classNames(styles.customTable, "p-3 bg-white rounded")}>
+        <Table dataSource={returnRequest?.data.data} columns={columns} />
+        <Modal
+          open={open}
+          onCancel={() => setOpen(false)}
+          onOk={() => setOpen(false)}
+          title={`Evidence of groups ${request?.group?.GroupName}`}
+          width={700}
+          footer={() => (
+            <>
+              <Button type="default" onClick={() => setOpen(false)}>
+                Close
+              </Button>
+            </>
+          )}
+        >
+          <Collapse items={items} accordion />
+          <div className="text-lg font-semibold">
+            Total fund use:{" "}
+            {request?.group?.transactions &&
+              request?.group?.transactions
+                .filter((acc: any) => acc.status === "approved")
+                .reduce((total: any, acc: any) => total + acc.fundUsed, 0)
+                .toLocaleString()}{" "}
+            vnđ
           </div>
-        </div>
-      </Modal>
-      <Modal
-        open={openDis}
-        height={500}
-        onCancel={() => setOpenDis(false)}
-        onOk={() => setOpenDis(false)}
-        title={`Remind of groups ${request?.group.GroupName}`}
-        width={700}
-        footer={() => (
-          <>
-            <Button
-              type="default"
-              onClick={() => {
-                setOpenDis(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              loading={updateReturnStatus.isPending}
-              onClick={() => {
-                updateReturnStatus.mutate({
-                  requestId: request?._id,
-                  returnStatus: "processed",
-                  evidence: selectedFile,
-                });
-              }}
-            >
-              Send
-            </Button>
-          </>
-        )}
-      >
-        <div className="">
-          <div className="self-start">Your remind will look like this</div>
-          <div className="flex justify-around !h-[60vh]">
-            <div className="flex flex-col  justify-between text-center border  p-4 rounded-md w-full ">
-              <div className="pt-5">
-                <div className="flex justify-around">
-                  <Statistic
-                    value={requestFund}
-                    className="w-[50%] "
-                    title="Requested Fund(VNĐ)"
-                  />
-                  <Statistic
-                    value={Math.round(requestFund * 0.7)}
-                    className="w-[50%]"
-                    title="Funded (VNĐ)"
-                  />
-                </div>
-                <div className="flex justify-around pt-2">
-                  <Statistic
-                    value={verifyFund}
-                    className="w-[50%] "
-                    title="Spent (VNĐ)"
-                  />
-                  <Statistic
-                    value={
-                      verifyFund > requestFund
-                        ? Math.round(requestFund * 0.3)
-                        : Math.round(verifyFund - requestFund * 0.7)
-                    }
-                    className="w-[50%]"
-                    valueStyle={{
-                      color: "green",
-                    }}
-                    title="Spare (VNĐ)"
-                  />
-                </div>
-              </div>
-              <div className="pt-4">
-                <div>The school have sent you the amount of</div>
+        </Modal>
+        <Modal
+          open={openRemind}
+          onCancel={() => setOpenRemind(false)}
+          onOk={() => setOpenRemind(false)}
+          title={`Remind group ${request?.group?.GroupName}`}
+          width={700}
+          footer={() => (
+            <>
+              <Button type="default" onClick={() => setOpenRemind(false)}>
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                loading={updateReturnStatus.isPending}
+                onClick={() => {
+                  updateReturnStatus.mutate({
+                    requestId: request?._id,
+                    returnStatus: "processing",
+                  });
+                  setOpenRemind(false);
+                }}
+              >
+                Remind
+              </Button>
+            </>
+          )}
+        >
+          <div className="flex flex-col items-center">
+            <div className="self-start">Your request will look like this</div>
+            <div className="border w-">
+              {" "}
+              <div className="text-center ">
+                <div>You have an excess amount of money.</div>
+                <div>Please return the spare amount of </div>
                 <span>
                   <Statistic
-                    valueStyle={{
-                      color: "green",
-                    }}
                     value={
                       verifyFund > requestFund
                         ? Math.round(requestFund * 0.3)
-                        : Math.round(verifyFund - requestFund * 0.7)
+                        : Math.round((verifyFund - requestFund * 0.7) * -1)
                     }
                     suffix=" VNĐ"
                   />
                 </span>
-              </div>
-              <div className="text-start pt-4">
-                <div>Please check your account: </div>
-                <div>
-                  <span className="text-gray-500 text-sm">Account Name:</span>{" "}
-                  <span>{request?.bankingInfo.accountName}</span>{" "}
-                </div>
-                <div>
-                  <span className="text-gray-500 text-sm">Account Number</span>{" "}
-                  <span>
-                    {request?.bankingInfo.accountNumber
-                      ? request.bankingInfo.accountNumber
-                          .slice(0, -3)
-                          .replace(/./g, "*") +
-                        request.bankingInfo.accountNumber.slice(-3)
-                      : ""}
-                  </span>{" "}
-                </div>
-              </div>
-            </div>
-            <div className="text-center w-full">
-              <Image
-                width={200}
-                height={200}
-                className="object-contain "
-                src={`https://img.vietqr.io/image/${
-                  request?.bankingInfo?.bankCode
-                }-${request?.bankingInfo?.accountNumber}-compact2.png?amount=${
-                  verifyFund > requestFund
-                    ? Math.round(requestFund * 0.3)
-                    : Math.round(verifyFund - requestFund * 0.7)
-                }&addInfo=${encodeURIComponent(
-                  `Thanh toán phí tài trợ lần 2 cho nhóm ${request?.group?.GroupName}`
-                )}&accountName=${encodeURIComponent(
-                  `${request?.bankingInfo?.accountName}`
-                )}}`}
-              />
-              <div className="flex flex-col">
-                <div className="flex flex-wrap mt-2 overflow-auto">
-                  {imageRef && (
-                    <img
-                      ref={imageRef}
-                      src=""
-                      key="preview"
-                      className="w-[200px] h-[200px] object-contain"
-                      alt="Selected Image Preview"
-                    />
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/png, image/jpeg"
-                  onChange={handleFileChange}
+              </div>{" "}
+              <div className="text-center">
+                <Image
+                  width={300}
+                  height={300}
+                  className="object-contain "
+                  src={`https://img.vietqr.io/image/MB-222409092002-compact2.png?amount=${
+                    verifyFund > requestFund
+                      ? Math.round(requestFund * 0.3)
+                      : Math.round((verifyFund - requestFund * 0.7) * -1)
+                  }&addInfo=${encodeURIComponent(
+                    `Hoàn phí khởi nghiệp dư của nhóm ${request?.group?.GroupName}`
+                  )}&accountName=${encodeURIComponent(`Phòng kế toán`)}}`}
                 />
               </div>
             </div>
           </div>
-        </div>
-      </Modal>
-    </div>
+        </Modal>
+        <Modal
+          open={openDis}
+          height={500}
+          onCancel={() => setOpenDis(false)}
+          onOk={() => setOpenDis(false)}
+          title={`Remind of groups ${request?.group.GroupName}`}
+          width={700}
+          footer={() => (
+            <>
+              <Button
+                type="default"
+                onClick={() => {
+                  setOpenDis(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                loading={updateReturnStatus.isPending}
+                onClick={() => {
+                  updateReturnStatus.mutate({
+                    requestId: request?._id,
+                    returnStatus: "processed",
+                    evidence: selectedFile,
+                  });
+                }}
+              >
+                Send
+              </Button>
+            </>
+          )}
+        >
+          <div className="">
+            <div className="self-start">Your remind will look like this</div>
+            <div className="flex justify-around !h-[60vh]">
+              <div className="flex flex-col  justify-between text-center border  p-4 rounded-md w-full ">
+                <div className="pt-5">
+                  <div className="flex justify-around">
+                    <Statistic
+                      value={requestFund}
+                      className="w-[50%] "
+                      title="Requested Fund(VNĐ)"
+                    />
+                    <Statistic
+                      value={Math.round(requestFund * 0.7)}
+                      className="w-[50%]"
+                      title="Funded (VNĐ)"
+                    />
+                  </div>
+                  <div className="flex justify-around pt-2">
+                    <Statistic
+                      value={verifyFund}
+                      className="w-[50%] "
+                      title="Spent (VNĐ)"
+                    />
+                    <Statistic
+                      value={
+                        verifyFund > requestFund
+                          ? Math.round(requestFund * 0.3)
+                          : Math.round(verifyFund - requestFund * 0.7)
+                      }
+                      className="w-[50%]"
+                      valueStyle={{
+                        color: "green",
+                      }}
+                      title="Spare (VNĐ)"
+                    />
+                  </div>
+                </div>
+                <div className="pt-4">
+                  <div>The school have sent you the amount of</div>
+                  <span>
+                    <Statistic
+                      valueStyle={{
+                        color: "green",
+                      }}
+                      value={
+                        verifyFund > requestFund
+                          ? Math.round(requestFund * 0.3)
+                          : Math.round(verifyFund - requestFund * 0.7)
+                      }
+                      suffix=" VNĐ"
+                    />
+                  </span>
+                </div>
+                <div className="text-start pt-4">
+                  <div>Please check your account: </div>
+                  <div>
+                    <span className="text-gray-500 text-sm">Account Name:</span>{" "}
+                    <span>{request?.bankingInfo.accountName}</span>{" "}
+                  </div>
+                  <div>
+                    <span className="text-gray-500 text-sm">
+                      Account Number
+                    </span>{" "}
+                    <span>
+                      {request?.bankingInfo.accountNumber
+                        ? request.bankingInfo.accountNumber
+                            .slice(0, -3)
+                            .replace(/./g, "*") +
+                          request.bankingInfo.accountNumber.slice(-3)
+                        : ""}
+                    </span>{" "}
+                  </div>
+                </div>
+              </div>
+              <div className="text-center w-full">
+                <Image
+                  width={200}
+                  height={200}
+                  className="object-contain "
+                  src={`https://img.vietqr.io/image/${
+                    request?.bankingInfo?.bankCode
+                  }-${
+                    request?.bankingInfo?.accountNumber
+                  }-compact2.png?amount=${
+                    verifyFund > requestFund
+                      ? Math.round(requestFund * 0.3)
+                      : Math.round(verifyFund - requestFund * 0.7)
+                  }&addInfo=${encodeURIComponent(
+                    `Thanh toán phí tài trợ lần 2 cho nhóm ${request?.group?.GroupName}`
+                  )}&accountName=${encodeURIComponent(
+                    `${request?.bankingInfo?.accountName}`
+                  )}}`}
+                />
+                <div className="flex flex-col">
+                  <div className="flex flex-wrap mt-2 overflow-auto">
+                    {imageRef && (
+                      <img
+                        ref={imageRef}
+                        src=""
+                        key="preview"
+                        className="w-[200px] h-[200px] object-contain"
+                        alt="Selected Image Preview"
+                      />
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg"
+                    onChange={handleFileChange}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      </div>
+    </>
   );
 };
 export default Return;

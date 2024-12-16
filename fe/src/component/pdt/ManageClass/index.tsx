@@ -17,6 +17,8 @@ import { IoDownloadOutline } from "react-icons/io5";
 import ImportClassesModal from "./ImportClassesModal";
 import * as XLSX from "xlsx";
 import { BsExclamationCircle } from "react-icons/bs";
+import { groupApi } from "../../../api/group/group";
+import { student } from "../../../api/student/student";
 const { Option } = Select;
 interface Term {
   _id: string;
@@ -45,10 +47,30 @@ const ManageClassWrapper = () => {
         classCode: classCode || undefined,
         teacherName: teacherName || undefined,
         category: category || undefined,
-        termCode: semester,
+        term: semester,
       });
     },
   });
+  const { data: groupData } = useQuery({
+    queryKey: [QUERY_KEY.ALLGROUP, semester],
+    queryFn: async () => {
+      return groupApi.getAllGroupsNoClass({
+        term: semester,
+      });
+    },
+  });
+  const { data: studentsData } = useQuery({
+    queryKey: [QUERY_KEY.ALLSTUDENT,page, semester],
+    queryFn: async () => {
+      return student.getAllStudentsNoClass({
+        term: semester,
+        page:1,
+        limit: 8,
+      });
+    },
+  });
+  console.log(studentsData?.data?.data);
+  
   const { data: termData } = useQuery({
     queryKey: [QUERY_KEY.TERM],
     queryFn: async () => {
@@ -59,8 +81,8 @@ const ManageClassWrapper = () => {
     (t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
   );
   useEffect(() => {
-    if (activeTerm?.termCode) {
-      setSemester(activeTerm.termCode);
+    if (activeTerm?._id) {
+      setSemester(activeTerm._id);
     }
   }, [activeTerm]);
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +175,11 @@ const ManageClassWrapper = () => {
                   totalClasses={classData?.data?.totalItems}
                   totalClassesMissStudents={classData?.data.classMissStudent}
                   totalClassesFullStudents={classData?.data.classFullStudent}
+                  totalGroup={groupData?.data?.data?.totalGroup}
+                  totalStudent={studentsData?.data?.data?.totalStudent}
+                  totalStudentNotHaveClass={studentsData?.data?.data?.countStudentNotHaveClass}
+                  totalGroupNotHaveClass={groupData?.data?.data?.countGroupNotHaveClass}
+
                   setCategory={setCategory}
                   totalMembers={
                     classData?.data.data.reduce(
@@ -177,15 +204,16 @@ const ManageClassWrapper = () => {
                 <div>
                   <div className="flex mb-4 justify-between">
                     <div className="flex items-center space-x-3">
-                      <span>Semester:</span>
+                      <span>Term:</span>
                       <Select
+                        defaultValue={semester}
                         value={semester}
                         onChange={handleSemesterChange}
                         className="w-24"
                         allowClear
                       >
                         {termData?.data?.data.map((term: Term) => (
-                          <Option key={term.termCode} value={term.termCode}>
+                          <Option key={term._id} value={term._id}>
                             {term.termCode} {/* Display termCode */}
                           </Option>
                         ))}
@@ -236,17 +264,16 @@ const ManageClassWrapper = () => {
                             <ClassCard
                               key={classItem._id}
                               classCode={classItem.classCode}
-                              teacherName={
-                                classItem?.teacherDetails?.name || "No teacher"
-                              }
+                              teacherName={classItem?.teacherDetails?.name || "No teacher"}
                               groups={classItem.totalGroups}
                               isSponsorship={sponsorshipCount}
                               totalMembers={classItem?.totalStudents}
                               onClick={() => {
                                 setSelectedClass(classItem._id);
                                 setShowClass(false);
-                              }}
-                            />
+                              }} onDeleteClick={function (): void {
+                                throw new Error("Function not implemented.");
+                              }} />
                           );
                         })}
                       </div>

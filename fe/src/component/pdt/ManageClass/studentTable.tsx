@@ -60,29 +60,30 @@ const StudentTable = () => {
     (t: any) => dayjs().isAfter(t?.startTime) && dayjs().isBefore(t?.endTime)
   );
   useEffect(() => {
-    if (activeTerm?.termCode) {
-      setSemester(activeTerm.termCode);
+    if (activeTerm?._id) {
+      setSemester(activeTerm._id);
     }
   }, [activeTerm]);
 
   const { data: classData, refetch: refetchClasses } = useQuery({
-    queryKey: [QUERY_KEY.CLASSES],
+    queryKey: [QUERY_KEY.CLASSES, term],
     queryFn: async () => {
       return classApi.getClassListPagination({
         limit: 12,
         page: 1,
+        term: activeTerm._id
       });
     },
   });
   const { data: studentsData, refetch: refetchStudent } = useQuery({
-    queryKey: [QUERY_KEY.ALLSTUDENT, page, searchText, pageSize, majorFilter, semester],
+    queryKey: [QUERY_KEY.ALLSTUDENT, page, searchText, pageSize, majorFilter,semester ],
     queryFn: async () => {
       return student.getAllStudentsNoClass({
         limit: itemsPerPage,
         page: page || 1,
         searchText: searchText || "",
         major: majorFilter?.length ? majorFilter : null,
-        termCode: semester,
+        term: semester,
       });
     },
   });
@@ -196,7 +197,7 @@ const StudentTable = () => {
             className="w-24"
           >
             {termData?.data?.data.map((term: Term) => (
-              <Option key={term.termCode} value={term.termCode}>
+              <Option key={term._id} value={term._id}>
                 {term.termCode} {/* Display termCode */}
               </Option>
             ))}

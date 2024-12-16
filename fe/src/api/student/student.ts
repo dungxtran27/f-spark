@@ -33,5 +33,8 @@ export const student = {
   },
   getGroupAndClass: async () =>{
     return await axios.get("/api/student/viewStudentGroupInfo")
-  }
+  },
+  addStudent: async (requestBody: any) =>{
+    return await axios.post("/api/student/students", requestBody)
+  },
 };

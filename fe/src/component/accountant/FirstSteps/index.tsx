@@ -22,6 +22,10 @@ import AccountantApi from "../../../api/accountant";
 import { TableRowSelection } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import DeclineModal from "./DeclineModal";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Term } from "../../../model/auth";
+import moment from "moment";
 const FirstStep = ({ termId }: { termId: string }) => {
   const [fundEstimationFilterMin, setFundEstimationFilterMin] = useState(0);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -253,6 +257,29 @@ const FirstStep = ({ termId }: { termId: string }) => {
       return AccountantApi.getActiveSponsorRequest(termId);
     },
   });
+
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+
+  const deadline =
+    activeTerm?.timeLine?.filter((r: any) => r.type === "fundEstimation") || [];
+
+  const startDate = deadline[0]?.startDate;
+  const endDate = deadline[0]?.endDate;
+
+  let message;
+  if (moment().isBefore(moment(startDate))) {
+    message = `Start time for the first fund distribution is ${moment(
+      startDate
+    ).format("DD MMM YYYY")}`;
+  } else {
+    message = `Deadline for the first fund distribution is ${moment(
+      endDate
+    ).format("DD MMM YYYY")}, please
+        finish reviewing fund estimation documents`;
+  }
+
   const FilterContent = () => {
     const [statusFilter, setStatusFilter] = useState("pending");
     return (
@@ -327,10 +354,27 @@ const FirstStep = ({ termId }: { termId: string }) => {
 
   return (
     <div>
-      <div className="rounded-md border border-pendingStatus bg-pendingStatus/20 flex items-center gap-3 p-3 mb-3">
-        <BsExclamationCircle className="text-pendingStatus" />
-        Deadline for the first fund distribution is 30/11/2024, please finish
-        reviewing fund estimation documents
+      <div
+        className={classNames(
+          "rounded-md border flex items-center gap-3 p-3 mb-3",
+          {
+            "border-green-500 bg-green-100": moment().isBefore(
+              moment(startDate)
+            ),
+            "border-pendingStatus bg-pendingStatus/20": !moment().isBefore(
+              moment(startDate)
+            ),
+          }
+        )}
+      >
+        <BsExclamationCircle
+          className={
+            moment().isBefore(moment(startDate))
+              ? "text-green-500"
+              : "text-pendingStatus"
+          }
+        />
+        {message}
       </div>
       <div className={classNames(styles.customTable, "bg-white p-3")}>
         <div className="flex mb-3 justify-between">
