@@ -6,7 +6,7 @@ import {
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { sendConfirmEmail, sendMail } from "../utils/mailTransport.js";
+import { sendConfirmEmail } from "../utils/mailTransport.js";
 import jwksClient from "jwks-rsa";
 import emailTemplate from "../utils/emailTemplate.js";
 import { io } from "../index.js";
@@ -112,8 +112,8 @@ const signUp = async (req, res) => {
       hashedPassword,
       imgLink,
     });
-
-    await sendMail(email, newUser._id);
+    const userId = newUser.accountNew._id
+    await sendConfirmEmail(email, userId);
 
     return res.status(201).json({
       message:
@@ -129,6 +129,7 @@ const verifyUser = async (req, res) => {
     const token = req.params.token;
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
     const { userId } = decodedToken;
+
     const result = await AuthenticateRepository.verifyUser(userId);
     return res
       .status(200)
@@ -161,9 +162,12 @@ const login = async (req, res) => {
     if (!passwordMatch) {
       return res.status(400).json({ error: "Bad Credential" });
     }
-    let userDetail = {};
-    console.log(role);
 
+    if (!existingAccount.verify) {
+      return res.status(400).json({ error: "The account is not verified, please check your email again !" });
+    }
+    
+    let userDetail = {};
     switch (role) {
       case ROLE_NAME.student:
         const student = await StudentRepository.findStudentByAccountId(
@@ -222,9 +226,6 @@ const login = async (req, res) => {
       default:
         return res.status(500).json({ error: "Bad request" });
     }
-    // if (!existingAccount.verify) {
-    //   return res.status(400).json({ error: "The account is not verified!" });
-    // }
     const socket = io.sockets.sockets.get(req.body.socketId);
     if (socket) {
       socket.accountId = existingAccount._id.toString();

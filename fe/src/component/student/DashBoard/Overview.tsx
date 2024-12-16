@@ -60,13 +60,13 @@ const Overview = () => {
       ) : (
         <ul className="space-y-1">
           <li className="flex items-center justify-between">
-            <span>Mô hình Journey Map</span>
+            <span>Customer Journey Map</span>
             <span className={isJourneyMap ? "text-green-500" : "text-red-500"}>
               {isJourneyMap ? <FaCheck /> : <FaTimes />}
             </span>
           </li>
           <li className="flex items-center justify-between">
-            <span>Mô hình Business Canvas</span>
+            <span>Business model Canvas</span>
             <span
               className={isBusinessModel ? "text-green-500" : "text-red-500"}
             >
@@ -74,7 +74,7 @@ const Overview = () => {
             </span>
           </li>
           <li className="flex items-center justify-between">
-            <span>Mô hình Customer Personas</span>
+            <span>Customer Personas</span>
             <span
               className={isCustomerPersonas ? "text-green-500" : "text-red-500"}
             >
