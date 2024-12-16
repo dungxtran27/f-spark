@@ -53,7 +53,7 @@ const signUp = async (req, res) => {
       imgLink = "https://phongreviews.com/wp-content/uploads/2022/11/avatar-facebook-mac-dinh-8.jpg"
     } else {
       imgLink = await uploadImage(img);
-      if (imgLink) {
+      if (!imgLink) {
         return res
           .status(400)
           .json({ error: "Upload Failed !" });

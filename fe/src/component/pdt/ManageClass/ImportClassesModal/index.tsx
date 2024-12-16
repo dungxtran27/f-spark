@@ -441,7 +441,7 @@ const ImportClassesModal = ({ isOpen, setIsOpen, excelData }: Props) => {
                   label: (
                     <Badge
                       count={
-                        mappedData?.filter((c: any) => c?.students?.length < 4)
+                        mappedData?.filter((c: any) => c?.students?.length < 30)
                           ?.length
                       }
                     >
@@ -452,7 +452,7 @@ const ImportClassesModal = ({ isOpen, setIsOpen, excelData }: Props) => {
                     <Table
                       className=" border border-primary/30 rounded"
                       dataSource={mappedData?.filter(
-                        (c: any) => c?.students?.length < 4
+                        (c: any) => c?.students?.length < 30
                       )}
                       columns={col}
                       pagination={false}
