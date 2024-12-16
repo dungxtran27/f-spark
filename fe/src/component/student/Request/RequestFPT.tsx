@@ -216,14 +216,10 @@ const RequestFPT = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex items-center text-red-500">
-                    <span className="text-lg">
-                      Your group has decline the sponsorship request
-                    </span>
-                  </div>
+                  <></>
                 )}
               </div>
-              {request.upVoteYes.length > 0 || request.upVoteNo.length > 0
+              {request.upVoteYes.length >= 0 || request.upVoteNo.length >= 0
                 ? renderVoteIcons(request)
                 : null}
             </div>
