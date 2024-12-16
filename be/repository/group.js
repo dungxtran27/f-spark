@@ -1250,7 +1250,7 @@ const updateGroupSponsorStatus = async ({ groupId, status }) => {
     const updateStatus = await Group.findByIdAndUpdate(groupId, {
       sponsorStatus: status,
       isSponsorship: isSponsorship,
-    });
+    }, { new: true });
     return updateStatus;
   } catch (error) {
     throw new Error(error.message);

@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import { Button} from 'antd';
 import OutcomeNoti from "../../../common/Notification/OutcomeNoti";
 import AssignmentNoti from "../../../common/Notification/AssignmentNoti";
-
+import { UserOutlined } from '@ant-design/icons';
 const Group = () => {
   const { data: groupNotification, isFetched } = useQuery({
     queryKey: [QUERY_KEY.GROUP_NOTIFICATION_DETAIL],
@@ -133,6 +133,20 @@ const Group = () => {
       </div>
     );
   };
+  const sponsorNotification = (n: any) => {
+    return (
+      <div className="flex-grow pt-3 flex flex-col gap-3">
+        <span>
+        Your group's sponsorship request has been{' '}
+          {n?.action?.newVersion?.sponsorStatus == 'normal' ? (
+            <span className="text-red-600 font-bold">denied</span>
+          ) : (
+            <span className="text-green-600 font-bold">approved</span>
+          )}
+        </span>
+      </div>
+    );
+  }
   const getNotificationContent = (n: any) => {
     switch (n?.action?.actionType) {
       case NOTIFICATION_ACTION_TYPE.RESPONSE_REQUEST_DEADLINE:
@@ -145,6 +159,8 @@ const Group = () => {
         return taskCreateNotification(n);
       case NOTIFICATION_ACTION_TYPE.REMIND_GROUP_SUBMIT:
         return remindNotification(n);
+      case NOTIFICATION_ACTION_TYPE.RESPONSE_REQUEST_SPONSOR:
+        return sponsorNotification(n);
       default:
         return <></>;
     }
@@ -158,11 +174,11 @@ const Group = () => {
         >
           <div className="flex items-center gap-3">
             <img
-              src={n?.sender?.account?.profilePicture}
+              src={n?.sender?.account?.profilePicture || "https://icons.iconarchive.com/icons/papirus-team/papirus-status/512/avatar-default-icon.png"}
               className="w-[35px] border border-primary aspect-square rounded-full object-cover object-center"
             />
             <div className="flex flex-col">
-              <span className="font-medium">{n?.sender?.name}</span>
+              <span className="font-medium">{n?.sender?.name || "Head Of Subject"}</span>
               <span className="text-textSecondary text-sm">
                 {dayjs(n?.createdAt).format(DATE_FORMAT.withYearAndTime)}
               </span>

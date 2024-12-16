@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CLASS_NOTIFICATION_ACTION_TYPE,
   DATE_FORMAT,
+  NOTIFICATION_ACTION_TYPE,
   QUERY_KEY,
 } from "../../../../utils/const";
 import { notificationApi } from "../../../../api/notification/notification";
@@ -16,6 +17,7 @@ import { classApi } from "../../../../api/Class/class";
 import { useState, useEffect } from "react";
 import { Button} from 'antd';
 import AssignmentNoti from "../../../common/Notification/AssignmentNoti";
+import OutcomeNoti from "../../../common/Notification/OutcomeNoti";
 const Class = () => {
   const { data: classNotification, isFetched  } = useQuery({
     queryKey: [QUERY_KEY.CLASS_NOTIFICATION_DETAIL],
@@ -94,7 +96,73 @@ const Class = () => {
       </div>
     );
   };
-
+  const sponsorNotification = (n: any) => {
+    return (
+      <div className="flex-grow pt-3 flex flex-col gap-3">
+        <span className="flex items-center">
+        <p className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+          {n?.group?.GroupName}
+        </p>
+        <span className="mr-1 ml-1">sponsorship request has been</span>
+          {n?.action?.newVersion?.sponsorStatus == 'normal' ? (
+            <span className="text-red-600 font-bold">denied</span>
+          ) : (
+            <span className="text-green-600 font-bold">approved</span>
+          )}
+        </span>
+      </div>
+    );
+  }
+  const remindNotification = (n: any) => {
+    return (
+      <div className="flex-grow pt-3 flex flex-col gap-3">
+        <span className="flex items-center">
+        <p className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+          {n?.group?.GroupName}
+        </p>
+        <span className="mr-1 ml-1">has been reminded about submitting assignments for</span>
+          <Link
+            className="text-primaryBlue hover:underline font-bold"
+            to={`${n?.action?.extraUrl}`}
+          >
+            {n?.action?.newVersion?.title}
+          </Link>
+        </span>
+        <div>
+            <AssignmentNoti post={n?.action?.newVersion} sender={n?.sender} />
+        </div>
+      </div>
+    );
+  };
+  const deadlineNotification = (n: any) => {
+    const priorDueDate = new Date(n?.action?.priorVersion?.endDate);
+    const newDueDate = new Date(n?.action?.newVersion?.endDate);
+    return (
+      <div className="flex-grow pt-3 flex flex-col gap-3">
+        <span className="flex items-center">
+        <p className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+          {n?.group?.GroupName}
+        </p>
+          <span className="mr-1 ml-1">deadline request has been</span>
+          {newDueDate > priorDueDate ? (
+            <span className="text-green-600 font-bold mr-1">approved</span>
+          ) : (
+            <span className="text-red-600 font-bold mr-1">denied</span>
+          )}
+          for
+          <Link
+            className="text-primaryBlue hover:underline font-bold ml-1"
+            to={`${n?.action?.extraUrl}`}
+          >
+            {n?.action?.priorVersion?.title}
+          </Link>
+        </span>
+        <div>
+            <OutcomeNoti sen={n?.sender} sub={n?.action?.priorVersion} post={n?.action?.newVersion}/>
+        </div>
+      </div>
+    );
+  };
   const getNotificationContent = (n: any) => {
     switch (n?.action?.actionType) {
       case CLASS_NOTIFICATION_ACTION_TYPE.CREATE_ANNOUNCEMENT:
@@ -102,6 +170,12 @@ const Class = () => {
         return classworkNotification(n);
       case CLASS_NOTIFICATION_ACTION_TYPE.GRADE_OUTCOME_SUBMISSION:
         return <></>;
+      case NOTIFICATION_ACTION_TYPE.RESPONSE_REQUEST_SPONSOR:
+        return sponsorNotification(n);
+      case NOTIFICATION_ACTION_TYPE.REMIND_GROUP_SUBMIT:
+        return remindNotification(n);
+      case NOTIFICATION_ACTION_TYPE.RESPONSE_REQUEST_DEADLINE:
+        return deadlineNotification(n)
       default:
         return <></>;
     }
@@ -116,11 +190,11 @@ const Class = () => {
         >
           <div className="flex items-center gap-3">
             <img
-              src={n?.sender?.account?.profilePicture}
+              src={n?.sender?.account?.profilePicture  || "https://icons.iconarchive.com/icons/papirus-team/papirus-status/512/avatar-default-icon.png"}
               className="w-[35px] border border-primary aspect-square rounded-full object-cover object-center"
             />
             <div className="flex flex-col">
-              <span className="font-medium">{n?.sender?.name}</span>
+              <span className="font-medium">{n?.sender?.name || "Head Of Subject"}</span>
               <span className="text-textSecondary text-sm">
                 {dayjs(n?.createdAt).format(DATE_FORMAT.withYearAndTime)}
               </span>

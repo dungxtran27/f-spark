@@ -38,6 +38,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   const activeTerm = useSelector(
     (state: RootState) => state.auth.activeTerm
   ) as Term | null;
+  
   const { data: groupData, isLoading } = useQuery({
     queryKey: [QUERY_KEY.GROUP_CUSTOMER_JOURNEY_MAP, userInfo?.group],
     queryFn: async () => {
@@ -163,7 +164,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
         )}
         <Divider variant="dashed" style={{ borderColor: "black" }} dashed />
         <span className="font-medium text-[18px]">Submissions</span>
-        {dayjs().isAfter(deadline?.endDate, "day") && !o?.groupSubmission ? (
+        {!isTeacher && dayjs().isAfter(deadline?.endDate, "day") && !o?.groupSubmission ? (
           <div className="flex flex-col justify-center items-center mt-10 gap-3">
             <p className="font-semibold text-red-500 text-lg">
               Deadline is overdue. You can still request for a deadline change{" "}

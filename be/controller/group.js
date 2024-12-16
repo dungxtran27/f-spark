@@ -699,14 +699,15 @@ const updateGroupSponsorStatus = async (req, res) => {
       groupId,
       status,
     });
+    
     if (groupUpdate) {
       const notificationData = {
         class: groupUpdate.class,
-        receivers: members,
-        //sender: req.decodedToken.role.id,
+        receivers: members,        
+        sender: req.decodedToken.account,
         group: groupId,
-        senderType: "Head Of Subject",
-        type: "Group",
+        senderType: "Teacher",
+        type: "Class",
         action: {
           action: `request for funding`,
           target: groupId,

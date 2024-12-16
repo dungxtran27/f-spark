@@ -98,7 +98,7 @@ const updateClassWorkFollowRequestDeadline = async (req, res) => {
         sender: req.decodedToken.role.id,
         group: requestDeadline.groupId,
         senderType: "Teacher",
-        type: "Group",
+        type: "Class",
         action: {
           action: `request deadline response`,
           target: requestDeadlineId,
