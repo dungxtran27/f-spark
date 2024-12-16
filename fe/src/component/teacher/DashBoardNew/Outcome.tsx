@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const Outcome = ({ infoData }: { infoData: any }) => {
   return (
     <div className="w-2/3 bg-white rounded p-2 h-full">
-      <h1 className="font-bold mb-2">Outcome</h1>
+      <h1 className="font-bold mb-2">Submissions</h1>
       <div>
         {infoData?.groupedClassWorks?.map((item: any) => (
           <div className="bg-gray-200 p-2 rounded mb-2">

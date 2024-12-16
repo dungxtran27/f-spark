@@ -1,49 +1,30 @@
-import {  useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Tabs, TabsProps } from "antd";
 import DefaultLayout from "../../../layout/DefaultLayout";
 import Banner from "./Banner";
-import { TEACHER_CLASS_DETAIL_TABS } from "../../../utils/const";
+import { QUERY_KEY, TEACHER_CLASS_DETAIL_TABS } from "../../../utils/const";
 import classNames from "classnames";
 import styles from "./styles.module.scss";
+import { useQuery } from "@tanstack/react-query";
+import { classApi } from "../../../api/Class/class";
+// types/ClassDetail.ts
 
 const ClassDetailWrapper = () => {
   const { classId } = useParams();
   const [searchParams] = useSearchParams();
   const tab = searchParams.get("tab");
 
-  const classDetail = {
-    name: "SE1704_NJ",
-    groups: 6,
-    students: 33,
-    redundantStudents: 3,
-    schedule: [
-      "Tuesday - 7:30 - 9:30 a.m",
-      "Tuesday - 7:30 - 9:30 a.m",
-      "Tuesday - 7:30 - 9:30 a.m",
-      "Tuesday - 7:30 - 9:30 a.m",
-      "Tuesday - 7:30 - 9:30 a.m",
-      "Tuesday - 7:30 - 9:30 a.m",
-    ],
-    notifications: [
-      {
-        content: "New submissions on Outcomes 2",
-        type: "outcomes",
-      },
-      {
-        content: "There are redundant students in this class.",
-        type: "people",
-      },
-    ],
-    location: "AL-R-201",
-    background:
-      "https://e1.pxfuel.com/desktop-wallpaper/107/730/desktop-wallpaper-the-windows-11-in-pantone-s-color-of-the-year-2022-very-peri.jpg",
-  };
-
+  const { data: classData } = useQuery({
+    queryKey: [QUERY_KEY.CLASS_DETAIL, classId],
+    queryFn: async () => {
+      return classApi.getClassDetail(classId);
+    },
+  });
   const items: TabsProps["items"] = TEACHER_CLASS_DETAIL_TABS;
   const defaultActiveKey = tab !== null ? tab : "stream";
   return (
     <DefaultLayout>
-      <Banner name={classDetail?.name} classId={classId || ""} />
+      <Banner name={classData?.data?.data?.classCode} classId={classId || ""} />
       <div className={classNames(styles.customTabs)}>
         <Tabs items={items} defaultActiveKey={defaultActiveKey} />
       </div>

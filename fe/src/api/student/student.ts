@@ -19,6 +19,9 @@ export const student = {
   addManyStudentNoClassToClass: async (requestBody: any) => {
     return await axios.patch(`/api/student/addStudentToClass`, requestBody);
   },
+  getTotalStudentsByTerm: async (requestBody: any) => {
+    return await axios.post(`/api/student/getTotalStudent`, requestBody);
+  },
   createFundEstimation: async (requestBody: any) => {
     return await axios.post(`/api/fundEstimation`, requestBody);
   },

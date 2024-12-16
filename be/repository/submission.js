@@ -104,12 +104,20 @@ const getSubmissionsByGroupId = async (groupId) => {
     throw new Error("Error fetching submissions: " + error.message);
   }
 };
-
+const getSubmissionById = async (submissionId) => {
+  try {
+    const submission = await Submission.findById(submissionId);
+    return submission;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 export default {
   createSubmission,
   getSubmissionsOfGroup,
   addGrade,
   findSubmissionOfStudent,
   getSubmissionsOfClassWork,
-  getSubmissionsByGroupId
+  getSubmissionsByGroupId,
+  getSubmissionById
 };

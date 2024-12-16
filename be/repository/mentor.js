@@ -14,21 +14,21 @@ const getAllMentors = async (tagIds, name, page, limit, order, term) => {
           $and: [
             ...(tagIdArray.length > 0
               ? [
-                  {
-                    "tag.id": {
-                      $all: tagIdArray.map(
-                        (id) => new mongoose.Types.ObjectId(id)
-                      ),
-                    },
+                {
+                  "tag.id": {
+                    $all: tagIdArray.map(
+                      (id) => new mongoose.Types.ObjectId(id)
+                    ),
                   },
-                ]
+                },
+              ]
               : []),
             ...(name
               ? [
-                  {
-                    name: { $regex: name, $options: "i" },
-                  },
-                ]
+                {
+                  name: { $regex: name, $options: "i" },
+                },
+              ]
               : []),
             { isActive: true },
           ],
@@ -385,10 +385,81 @@ const getMentorAssignedGroupInfo = async (mentorId) => {
   }
 };
 
+const getTotalMentors = async (term) => {
+  try {
+    const mentors = await Mentor.aggregate([
+      // Lookup để lấy thông tin các group được assign cho mentor
+      {
+        $lookup: {
+          from: "Groups",
+          localField: "assignedGroup",
+          foreignField: "_id",
+          as: "assignedGroups",
+        },
+      },
+      // Làm phẳng mảng assignedGroups
+      {
+        $unwind: {
+          path: "$assignedGroups",
+          preserveNullAndEmptyArrays: false, // Bỏ qua nếu không có assignedGroups
+        },
+      },
+      // Lookup để lấy thông tin term của group đó
+      {
+        $lookup: {
+          from: "Term",
+          localField: "assignedGroups.term",
+          foreignField: "_id",
+          as: "groupTerm",
+        },
+      },
+      // Làm phẳng groupTerm
+      {
+        $unwind: {
+          path: "$groupTerm",
+          preserveNullAndEmptyArrays: false, // Chỉ lấy group có term hợp lệ
+        },
+      },
+      // Lọc những group có term trùng với term truyền vào
+      {
+        $match: {
+          "groupTerm._id": new mongoose.Types.ObjectId(term),
+        },
+      },
+      // Nhóm theo mentor để loại bỏ trùng lặp
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" }, // Lấy tên mentor
+          assignedGroups: { $push: "$assignedGroups" }, // Lưu lại danh sách group
+        },
+      },
+      // Chỉ lấy các trường cần thiết
+      {
+        $project: {
+          _id: 0,
+          name: 1,
+          assignedGroups: 1,
+        },
+      },
+    ]);
+
+    // Trả về tổng số mentor và danh sách mentor
+    return {
+      totalMentor: mentors.length,
+      mentors: mentors,
+    };
+  } catch (error) {
+    throw new Error(`Failed to fetch mentor data: ${error.message}`);
+  }
+};
+
+
 export default {
   getMentor,
   assignMentor,
   getAllMentors,
   getAllAccMentor,
   getMentorAssignedGroupInfo,
+  getTotalMentors
 };

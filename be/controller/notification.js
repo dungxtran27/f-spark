@@ -72,7 +72,6 @@ const getDetailGroupNotification = async (req, res) => {
       existingStudent?.group,
       existingStudent?._id
     );
-    console.log(result);
     
     return res.status(200).json({
       data: result,
@@ -103,7 +102,6 @@ const getDetailClassNotification = async (req, res) => {
 const getTeacherClassNotification = async (req, res) => {
   try {
     const teacherId = req.decodedToken.account;
-    console.log(teacherId);
     
     const teacher = await TeacherRepository.findByAccountId(teacherId);
     const classNotification = await NotificationRepository.getTeacherClassNotification(teacher?._id)
@@ -201,7 +199,6 @@ const remindGroupSubmitOutcome = async (req, res) => {
       const studentsOfGroup = await StudentRepository.getAllStudentByGroupId(
         new mongoose.Types.ObjectId(groupId)
       );
-      console.log(studentsOfGroup[0].account?.toString());
       
       studentsOfGroup.forEach((s) => {
         const socketIds = userSocketMap[s?.account?.toString()];

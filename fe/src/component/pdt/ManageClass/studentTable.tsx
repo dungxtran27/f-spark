@@ -295,7 +295,6 @@ const StudentTable = () => {
           pageSize={itemsPerPage}
           total={totalItems}
           onChange={handlePageChange}
-          showTotal={(total) => `Total ${total} student`}
         />
       </div>
 

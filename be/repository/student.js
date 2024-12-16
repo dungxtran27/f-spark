@@ -3,6 +3,7 @@ import Student from "../model/Student.js";
 import Class from "../model/Class.js";
 import Teacher from "../model/Teacher.js";
 import Mentor from "../model/Mentor.js";
+import Term from "../model/Term.js";
 import Group from "../model/Group.js";
 const findStudentByAccountId = async (accountId) => {
   try {
@@ -387,11 +388,15 @@ const getAllAccStudent = async (
         });
       }
     }
-
     if (status) {
       filterCondition.$and.push({ isActive: status });
     }
-
+    if (term) {
+      filterCondition.$and.push({
+        term: new mongoose.Types.ObjectId(term),
+      });
+    }
+    
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
@@ -400,11 +405,11 @@ const getAllAccStudent = async (
     const maxPages = Math.ceil(totalItems / limit);
 
     const students = await Student.aggregate([
-      {
-        $match: {
-          term: new mongoose.Types.ObjectId(term),
-        },
-      },
+      // {
+      //   $match: {
+      //     term: new mongoose.Types.ObjectId(term),
+      //   },
+      // },
       {
         $lookup: {
           from: "Accounts",
@@ -448,6 +453,9 @@ const getAllAccStudent = async (
         },
       },
       {
+        $match: filterCondition,
+      },
+      {
         $project: {
           name: 1,
           studentId: 1,
@@ -463,9 +471,7 @@ const getAllAccStudent = async (
           updatedAt: 1,
         },
       },
-      {
-        $match: filterCondition,
-      },
+
       {
         $sort: { isActive: -1, name: 1 },
       },
@@ -525,6 +531,57 @@ const bulkCreateStudentsFromExcel = async (studentsData) => {
     throw new Error(error.message);
   }
 };
+const getTotalStudentsByTerm = async (term) => {
+  try {
+    const termObjectId = new mongoose.Types.ObjectId(term);
+    const filterCondition = { "termDetails._id": termObjectId };
+    const students = await Student.aggregate([
+      {
+        $lookup: {
+          from: "Term",
+          localField: "term",
+          foreignField: "_id",
+          as: "termDetails"
+        }
+      },
+      {
+        $unwind: "$termDetails"
+      },
+      {
+        $match: { "termDetails._id": termObjectId },
+      },
+      {
+        $group: {
+          _id: null,
+          totalStudents: { $sum: 1 },
+          totalStudentsNoClass: {
+            $sum: { $cond: [{ $or: [{ $eq: ["$classId", null] }, { $not: ["$classId"] }] }, 1, 0] },
+          },
+          totalStudentsHaveClass: {
+            $sum: { $cond: [{ $and: [{ $ne: ["$classId", null] }, { $not: [{ $not: ["$classId"] }] }] }, 1, 0] },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalStudents: 1,
+          totalStudentsNoClass: 1,
+          totalStudentsHaveClass: 1,
+        },
+      },
+    ]);
+
+    return students[0] || { totalStudents: 0, totalStudentsNoClass: 0, totalStudentsHaveClass: 0 };
+  } catch (error) {
+    throw new Error(`Failed to fetch students: ${error.message}`);
+  }
+};
+const findStudentsByIds = async (studentIds) => {
+  return await Student.find({ '_id': { $in: studentIds } });
+};
+
+
 
 const findByStudentId = async (studentId) => {
   try {
@@ -575,6 +632,8 @@ export default {
   getAllStudentUngroupByClassIds,
   findStudentDetailByAccountId,
   getAllStudentByGroupId,
+  getTotalStudentsByTerm,
+  findStudentsByIds,
   updateClass,
   findByStudentIdPopulated
 };

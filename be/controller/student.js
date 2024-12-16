@@ -1,5 +1,4 @@
 import {
-  ClassworkRepository,
   GroupRepository,
   StudentRepository,
   TermRepository,
@@ -118,6 +117,22 @@ const addManyStudentNoClassToClass = async (req, res) => {
     if (!classId) {
       return res.status(400).json({ message: "Class ID must be provided." });
     }
+    // const classExists = await ClassRepository.findClassById(classId);
+    // if (!classExists) {
+    //   return res.status(404).json({ message: `Class not found.` });
+    // }
+    // const students = await StudentRepository.findStudentsByIds(studentIds);
+    // if (students.length !== studentIds.length) {
+    //   const missingStudents = studentIds.filter(id => !students.some(student => student._id.toString() === id));
+    //   return res.status(404).json({ message: `Students with IDs ${missingStudents.join(", ")} not found.` });
+    // }
+    // const studentsAlreadyInClass = students.filter(student => student.classId);
+    // if (studentsAlreadyInClass.length > 0) {
+    //   const studentNames = studentsAlreadyInClass.map(student => student.name);
+    //   return res.status(400).json({
+    //     message: `The following students are already assigned to a class: ${studentNames.join(", ")}`
+    //   });
+    // }
     const updatedStudents =
       await StudentRepository.addManyStudentNoClassToClass(studentIds, classId);
     return res.status(200).json({
@@ -164,7 +179,7 @@ const importStudent = async (req, res) => {
         term: activeTerm._id,
         email: g?.Email,
       };
-    });
+    });    
     const newStudents = await StudentRepository.bulkCreateStudentsFromExcel(
       newStudentsExcel
     );
@@ -190,6 +205,30 @@ const importStudent = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+const getTotalStudentsByTerm = async (req, res) => {
+  try {
+    const { term } = req.body;
+    const students = await StudentRepository.getTotalStudentsByTerm(term);
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: "No students found for the given termCode" });
+    }
+
+    return res.status(200).json({
+      data: students
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+// const findById = async (studentId) => {
+//   try {
+//     const student = await StudentRepository.findById(studentId);
+//     return student
+//   } catch (error) {
+//     throw new Error("Student not found");
+//   }
+// };
+
 
 const getGroupAndClassInfo = async (req, res) => {
   try {
@@ -211,5 +250,7 @@ export default {
   addManyStudentNoClassToClass,
   getAllAccStudent,
   importStudent,
+  getTotalStudentsByTerm,
+  // findById
   getGroupAndClassInfo,
 };

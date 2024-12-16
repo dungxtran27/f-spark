@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AutoComplete,
   Button,
@@ -32,9 +32,11 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 import { Term } from "../../../../model/auth";
 import EmptyTerm from "../../../common/EmptyTerm";
+import { classApi } from "../../../../api/Class/class";
 const { Option } = Select;
 
 interface Student {
+  class: any;
   _id: string;
   name: string;
   studentId: string;
@@ -55,6 +57,7 @@ const AccountManagement: React.FC<{
   const [classFilter, setClassFilter] = useState<string | undefined>(undefined);
   const [termFilter, setTermFilter] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<boolean>(true);
+
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<
     AutoCompleteProps["options"]
   >([]);
@@ -83,12 +86,14 @@ const AccountManagement: React.FC<{
         page: page || 1,
         searchText: searchText || null,
         classId: classFilter || null,
-        term: term || activeTerm?._id,
+        term: term || null,
         // status: statusFilter || null,
       });
     },
   });
-
+  const handleClassChange = (value: any) => {
+    setClassFilter(value);
+  };
   const { data: terms } = useQuery({
     queryKey: [QUERY_KEY.TERM_LIST],
     queryFn: async () => {
@@ -101,12 +106,22 @@ const AccountManagement: React.FC<{
       label: t?.termCode,
     };
   });
+
   const totalItems = studentData?.data?.data?.totalItems || 0;
 
   const data: Student[] = Array.isArray(studentData?.data?.data?.students)
     ? studentData.data.data.students
     : [];
 
+  const { data: classData } = useQuery({
+    queryKey: [QUERY_KEY.CLASSES],
+    queryFn: async () => {
+      return classApi.getClassListPagination({
+        limit: 12,
+        page: 1,
+      });
+    },
+  });
   const handleAutoCompleteSearch = (input: string) => {
     const normalizedInput = input.toLowerCase();
     const filteredOptions = studentData?.data?.data?.students
@@ -218,7 +233,7 @@ const AccountManagement: React.FC<{
       {activeTerm?._id ? (
         <div className="flex flex-col gap-3">
           <span className="bg-pendingStatus/20 border border-pendingStatus rounded p-2 flex items-center gap-2">
-            <BsExclamationCircle className="text-pendingStatus" size={20}/>
+            <BsExclamationCircle className="text-pendingStatus" size={20} />
             Student's group transfer will start at{" "}
             <span className="font-semibold text-pendingStatus">
               Dec 27, 2024
@@ -241,43 +256,46 @@ const AccountManagement: React.FC<{
                   </Col>
                   <Col span={5}>
                     <Select
-                      placeholder="Class"
-                      value={classFilter}
-                      onChange={setClassFilter}
+                      placeholder="Select Class Code"
                       className="w-full"
+                      onChange={handleClassChange}
+                      value={classFilter || undefined}
+                      allowClear
                       showSearch
                     >
-                      {terms?.data?.data?.map((term: any) => (
-                        <Option key={term?._id} value={term?._id}>
-                          {term?._termCode}
+                      {classData?.data?.data.map((option: any) => (
+                        <Option key={option.classCode} value={option.classCode}>
+                          {option.classCode}
                         </Option>
                       ))}
                     </Select>
                   </Col>
-                  <Col span={4}>
+                  {/* <Col span={4}>
                     {terms?.data?.data && (
                       <Select
                         placeholder="Term"
-                        value={termFilter}
-                        onChange={setTermFilter}
+                        // value={termFilter}
+                        onChange={(value) => {
+                          setTerm(value);
+                        }}
                         options={termOptions}
                         className="w-full"
-                        defaultValue={`${
-                          terms?.data?.data?.find(
-                            (t: any) =>
-                              dayjs().isAfter(t?.startTime) &&
-                              dayjs().isBefore(t?.endTime)
-                          )?._id
-                        }`}
+                        defaultValue={`${terms?.data?.data?.find(
+                          (t: any) =>
+                            dayjs().isAfter(t?.startTime) &&
+                            dayjs().isBefore(t?.endTime)
+                        )?._id
+                          }`}
                       />
                     )}
-                  </Col>
+                  </Col> */}
                   <Col span={3}>
                     <Select
                       placeholder="Status"
                       value={statusFilter}
                       onChange={setStatusFilter}
                       className="w-full"
+                      
                     >
                       <Option value="Active">Active</Option>
                       <Option value="Deactive">Deactive</Option>

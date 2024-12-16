@@ -10,4 +10,7 @@ export const mentorList = {
   getMentorGroups: async (mentorId:string |undefined) => {
     return await axios.get(`/api/mentor/${mentorId}`);
   },
+  getTotalMentors: async (requestBody: any) => {
+    return await axios.post(`/api/mentor/totalMentors`, requestBody);
+  },
 };

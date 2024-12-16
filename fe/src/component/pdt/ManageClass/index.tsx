@@ -8,7 +8,7 @@ import GroupTable from "./groupTable";
 import { QUERY_KEY } from "../../../utils/const";
 import { useQuery } from "@tanstack/react-query";
 import { classApi } from "../../../api/Class/class";
-import { SearchOutlined } from "@ant-design/icons";
+import { EditOutlined, SearchOutlined } from "@ant-design/icons";
 import AutoCreateClass from "./autoCreateClass";
 import dayjs from "dayjs";
 import { term } from "../../../api/term/term";
@@ -22,6 +22,10 @@ interface Term {
   _id: string;
   termCode: string;
 }
+interface ClassPreview {
+  classCode: string;
+  teacherDetails: null;
+}
 const ManageClassWrapper = () => {
   const [classCode, setClassCode] = useState("");
   const [teacherName, setTeacherName] = useState("");
@@ -32,12 +36,12 @@ const ManageClassWrapper = () => {
     setPage(page);
   };
 
-  const { data: classData } = useQuery({
-    queryKey: [QUERY_KEY.CLASSES, classCode, teacherName, category, semester],
+  const { data: classData, refetch: refetchClasses } = useQuery({
+    queryKey: [QUERY_KEY.CLASSES, page, classCode, teacherName, category, semester],
     queryFn: async () => {
       return classApi.getClassListPagination({
-        limit: 12,
-        page: 1,
+        limit: 9,
+        page: page,
         classCode: classCode || undefined,
         teacherName: teacherName || undefined,
         category: category || undefined,
@@ -134,7 +138,7 @@ const ManageClassWrapper = () => {
             <div className="w-1/4 pr-6">
               <div className="mb-6 space-y-4">
                 <div className="bg-pendingStatus/15 border-pendingStatus rounded border shadow p-3 flex gap-3">
-                  <BsExclamationCircle className="text-pendingStatus flex-shrink-0" size={20}/>{" "}
+                  <BsExclamationCircle className="text-pendingStatus flex-shrink-0" size={20} />{" "}
                   <span className="font-semibold">
                     Dividing Students into classes starts at{" "}
                     <span className="text-pendingStatus">05 Jan 2025</span>,
@@ -225,8 +229,8 @@ const ManageClassWrapper = () => {
                             classItem.groups
                           )
                             ? classItem.groups.filter(
-                                (group: any) => group.isSponsorship === true
-                              ).length
+                              (group: any) => group.isSponsorship === true
+                            ).length
                             : 0;
                           return (
                             <ClassCard
@@ -261,6 +265,7 @@ const ManageClassWrapper = () => {
                         showTotal={(total, range) =>
                           `${range[0]}-${range[1]} of ${total} classes`
                         }
+                        pageSize={9}
                       />
                     </div>
                   </div>
