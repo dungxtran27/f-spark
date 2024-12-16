@@ -37,6 +37,7 @@ const PostModal = ({ open, setOpen, postType }: Props) => {
   const props: UploadProps = {
     name: "file",
     multiple: false,
+    accept: ".docx,.pdf,.xlsx",
     customRequest: handleFileChange,
   };
   const { classId } = useParams();

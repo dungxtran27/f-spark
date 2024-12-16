@@ -1,10 +1,17 @@
-import { DatePicker, Form, Input, Modal, Select, UploadProps } from "antd";
+import {
+  DatePicker,
+  Form,
+  Input,
+  message,
+  Modal,
+  Select,
+  UploadProps,
+} from "antd";
 import FormItem from "antd/es/form/FormItem";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   CREATE_TASK_FILTER,
   QUERY_KEY,
-  TASK_STATUS_FILTER,
   TASK_TYPE,
 } from "../../../../../utils/const";
 import TextArea from "antd/es/input/TextArea";
@@ -18,7 +25,6 @@ import { taskBoard } from "../../../../../api/Task/Task";
 import { student } from "../../../../../api/student/student";
 import PrioritySelect from "../../../../common/Task/PrioritySelect";
 import dayjs from "dayjs";
-import StatusSelect from "../../../../common/Task/StatusSelect";
 interface CreateTaskProps {
   _id?: string;
   status?: string;
@@ -30,6 +36,7 @@ interface CreateTaskProps {
   dueDate?: string;
   priority?: string;
   parentTask?: string;
+  fileName?: string;
 }
 interface ModalProps {
   open: boolean;
@@ -47,7 +54,6 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
-  const uploadedFiles = useRef<string[]>([]);
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
@@ -56,18 +62,32 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
   const assignee = Form.useWatch(CREATE_TASK_FILTER.assignee, form);
   const dueDate = Form.useWatch(CREATE_TASK_FILTER.dueDate, form);
   const priority = Form.useWatch(CREATE_TASK_FILTER.priority, form);
+  const attachment = Form.useWatch(CREATE_TASK_FILTER.attachment, form);
+
+  const [fileName, setFileName] = useState<string>("");
+  const beforeUpload = (file: File) => {
+    const isLt2M = file.size / 1024 / 1024 < 5; //5mb
+    if (!isLt2M) {
+      message.error("File must be smaller than 5MB!");
+    }
+    return isLt2M;
+  };
+  const handleFileChange = async (info: any) => {
+    const file = info.file;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      form.setFieldValue("attachment", base64String);
+    };
+    reader.readAsDataURL(file);
+  };
   const props: UploadProps = {
     name: "file",
-    multiple: true,
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    onChange(info) {
-      if (uploadedFiles?.current && info.file?.status !== "uploading") {
-        uploadedFiles.current.push(
-          "https://www.youtube.com/watch?v=eAs7NGvjiiI"
-        );
-        form.setFieldValue("attachment", uploadedFiles);
-      }
-    },
+    multiple: false,
+    accept: ".docx,.pdf,.xlsx",
+    customRequest: handleFileChange,
+    beforeUpload,
   };
   const createTask = useMutation({
     mutationFn: ({
@@ -78,13 +98,16 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
       dueDate,
       parentTask,
       priority,
+      attachment,
+      fileName,
     }: CreateTaskProps) => {
       return mode === "CREATE"
         ? taskBoard.create(userInfo?.group || "", {
             taskType,
             taskName,
             assignee,
-            attachment: uploadedFiles?.current,
+            attachment,
+            fileName,
             description,
             dueDate,
             parentTask: parentTask || null,
@@ -94,9 +117,10 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
             taskType,
             taskName,
             assignee,
-            attachment: uploadedFiles?.current,
+            attachment,
             description,
             dueDate,
+            fileName,
             parentTask: parentTask || null,
             priority: priority,
           });
@@ -153,9 +177,11 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
           taskName: taskName,
           dueDate: dueDate,
           priority: priority,
+          attachment: attachment,
+          fileName: fileName,
           parentTask: task?.parentTask,
         });
-        uploadedFiles.current = [];
+
         form.resetFields();
       }}
       onCancel={() =>
@@ -237,8 +263,7 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
               Click or drag file to this area to upload
             </p>
             <p className="ant-upload-hint">
-              Support for a single or bulk upload. Strictly prohibited from
-              uploading company data or other banned files.
+              Support for .docx, .pdf or .xlsx files.
             </p>
           </Dragger>
         </FormItem>

@@ -37,7 +37,7 @@ const PaymentModal = ({ isOpen, setIsOpen, request }: Props) => {
 
   const updateRequests = useMutation({
     mutationFn: (formData: FormData) => {
-      return AccountantApi.updateRequests(formData);
+      return AccountantApi.accountantUpdateRequest(formData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

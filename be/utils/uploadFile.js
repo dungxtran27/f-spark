@@ -12,7 +12,7 @@ export const uploadFile = async (file, fileName) => {
     if (typeof file === "string" && file.startsWith("data:")) {
       const result = await cloudinary.uploader.upload(file, {
         resource_type: "raw",
-        public_id: fileName, // Set the public ID to the file name
+        public_id: fileName, 
       });
       return result.secure_url;
     }

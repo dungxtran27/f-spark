@@ -148,6 +148,7 @@ const OutcomeDetail = ({
   const props: UploadProps = {
     name: "file",
     multiple: false,
+    accept: ".docx,.pdf,.xlsx",
     customRequest: handleFileChange,
   };
   const createSubmission = useMutation({

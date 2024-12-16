@@ -10,12 +10,23 @@ const AccountantApi = {
   getReturnSponsorRequest: async (termId: string) => {
     return await axios.get(`api/fundEstimation/getReturn/${termId}`);
   },
-  updateRequests: async (formData: FormData) => {
-    return await axios.patch(`api/fundEstimation/updateRequests`, formData, {
+  updateRequests: async (requestBody: any) => {
+    return await axios.patch(`api/fundEstimation/updateRequests`, requestBody, {
       headers: {
         Accept: "application/json; charset=UTF-8",
       },
     });
+  },
+  accountantUpdateRequest: async (formData: FormData) => {
+    return await axios.patch(
+      `api/fundEstimation/accountantUpdateRequest`,
+      formData,
+      {
+        headers: {
+          Accept: "application/json; charset=UTF-8",
+        },
+      }
+    );
   },
   updateReturnStatus: async ({
     requestId,
