@@ -139,7 +139,7 @@ const getAllStudentsNoClass = async (
   page,
   limit,
   searchText,
-  termCode,
+  term,
   major
 ) => {
   try {
@@ -166,11 +166,6 @@ const getAllStudentsNoClass = async (
       classId: student.classId?.classCode,
       updatedAt: student.updatedAt,
     }));
-    const totalStudent = await Student.countDocuments(students);
-    const queryNotHaveClass = {
-      classId: { $in: [null, undefined] },
-      group: { $in: [null, undefined] },
-    };
     let filterCondition = { $and: [] };
     if (searchText) {
       filterCondition.$and.push({
@@ -180,9 +175,9 @@ const getAllStudentsNoClass = async (
         ],
       });
     }
-    if (termCode) {
+    if (term) {
       filterCondition.$and.push({
-        $or: [{ termCode: { $regex: termCode, $options: "i" } }],
+        term: new mongoose.Types.ObjectId(term),
       });
     }
     if (major && Array.isArray(major)) {
@@ -197,6 +192,8 @@ const getAllStudentsNoClass = async (
     if (filterCondition.$and.length === 0) {
       filterCondition = {};
     }
+    const totalStudent = await Student.countDocuments({ ...filterCondition });
+
     const StudentNotHaveClass = await Student.aggregate([
       [
         {
@@ -272,7 +269,7 @@ const getAllStudentsNoClass = async (
             group: "$groupDetails.name",
             email: "$accountDetails.email",
             classId: "$classDetails.classCode",
-            termId: "$termDetails._id",
+            term: "$termDetails._id",
             termCode: "$termDetails.termCode",
             isActive: 1,
             createdAt: 1,
@@ -308,13 +305,16 @@ const getAllStudentsNoClass = async (
       major: student.major,
       email: student.account?.email,
       group: student.group?.GroupName,
-      termId: student._id,
+      term: student._id,
       termCode: student.termCode,
       classId: student.classId?.classCode,
       updatedAt: student.updatedAt,
     }));
     const countStudentNotHaveClass = await Student.countDocuments(
-      queryNotHaveClass
+      {
+        classId: { $in: [null, undefined] },
+        group: { $in: [null, undefined] }, ...filterCondition
+      }
     );
     const uniqueMajors = await Student.distinct("major");
     return {

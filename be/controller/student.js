@@ -79,7 +79,7 @@ const getAllAccStudent = async (req, res) => {
 
 const getAllStudentsNoClass = async (req, res) => {
   try {
-    const { page, limit, searchText, termCode, major } = req.body;
+    const { page, limit, searchText, term, major } = req.body;
     const {
       students,
       totalStudent,
@@ -90,7 +90,7 @@ const getAllStudentsNoClass = async (req, res) => {
       page,
       limit,
       searchText,
-      termCode,
+      term,
       major
     );
     return res.status(200).json({
