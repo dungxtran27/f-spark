@@ -1,7 +1,7 @@
 import { Button, Form, Modal, Upload, UploadProps } from "antd";
 import QuillEditor from "../../QuillEditor";
 import { UploadOutlined } from "@ant-design/icons";
-import { useRef, useState } from "react";
+import {  useState } from "react";
 import { classApi } from "../../../../api/Class/class";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";

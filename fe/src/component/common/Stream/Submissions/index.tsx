@@ -49,9 +49,11 @@ const Submissions = ({ openSubmission, setOpen }: Props) => {
                   {s?.attachment && (
                     <div className="flex items-center group text-primaryBlue">
                       <TiAttachment size={20} />
-                      <span className="group-hover: underline">
-                        {s?.attachment}
-                      </span>
+                      <a
+                        download
+                        href={s?.attachment}
+                        className="group-hover: underline"
+                      >download</a>
                     </div>
                   )}
                 </div>
