@@ -1,6 +1,7 @@
 import group from "../repository/group.js";
 import {
   ClassRepository,
+  FundEstimationRepository,
   GroupRepository,
   NotificationRepository,
   StudentRepository,
@@ -608,6 +609,13 @@ const addTransaction = async (req, res) => {
     if (!student) {
       return res.status(403).json({ error: "Invalid Student Credential" });
     }
+    const reqSent = await FundEstimationRepository.findGroupRequestApproved(
+      student?.group
+    );
+    if (reqSent)
+      return res
+        .status(400)
+        .json({ error: "Fund is confirmed, cannot add transactions" });
     const result = await GroupRepository.addTransaction(student?.group, {
       title,
       fundUsed,
@@ -699,11 +707,11 @@ const updateGroupSponsorStatus = async (req, res) => {
       groupId,
       status,
     });
-    
+
     if (groupUpdate) {
       const notificationData = {
         class: groupUpdate.class,
-        receivers: members,        
+        receivers: members,
         sender: req.decodedToken.account,
         group: groupId,
         senderType: "Teacher",

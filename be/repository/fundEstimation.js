@@ -142,6 +142,18 @@ const updateEvidenceStatus = async ({ requestId, status, evidenceImage }) => {
     throw new Error(error.message);
   }
 };
+const findGroupRequestApproved = async (groupId) => {
+  try {
+    const result = await FundEstimation.find({
+      group: groupId,
+      returnStatus: { $ne: "pending" },
+    });
+
+    return result;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 export default {
   create,
   findTermsRequest,
@@ -151,4 +163,5 @@ export default {
   accountantUpdateRequest,
   updateReturnStatuswithEvidence,
   updateEvidenceStatus,
+  findGroupRequestApproved,
 };
