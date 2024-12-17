@@ -139,7 +139,7 @@ const PaymentModal = ({ isOpen, setIsOpen, request }: Props) => {
 
             <Dragger
               accept="image/png, image/jpeg"
-              className="flex-grow"
+              className="flex-grow w-[330px]"
               {...props}
             >
               <p className="ant-upload-drag-icon">

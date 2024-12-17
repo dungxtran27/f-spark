@@ -92,11 +92,13 @@ const Return = () => {
                    / ${receivedEstimation?.group?.transactions.length}`}
             </span>
           </div>
-          {receivedEstimation?.group?.transactions.length > 0 ? (
-            <Collapse items={items} accordion />
-          ) : (
-            <Empty description="No transaction were made" />
-          )}
+          <div className="p-4">
+            {receivedEstimation?.group?.transactions.length > 0 ? (
+              <Collapse items={items} accordion />
+            ) : (
+              <Empty description="No transaction were made" />
+            )}
+          </div>
         </div>
         <Divider type="vertical" className="b" />
         <Response req={receivedEstimation} refetch={refetch} />

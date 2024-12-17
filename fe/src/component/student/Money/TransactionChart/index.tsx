@@ -81,9 +81,9 @@ const TransactionChart: React.FC<TransactionProp> = ({ transactions }) => {
           text: "Amount Spent (VND)",
         },
         min: 0,
-        max: 10000000,
+        max: 50000000,
         ticks: {
-          stepSize: 100000,
+          stepSize: 1000000,
           callback: (value: any) =>
             value.toLocaleString("vi-VN", {
               style: "currency",

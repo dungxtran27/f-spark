@@ -1,9 +1,16 @@
-import { Button, Steps } from "antd";
+import { Button, Result, Steps } from "antd";
 import { useState } from "react";
 import Requesting from "./Requesting";
 import Distributing from "./Distributing/Distributing";
 import { IoDownloadOutline } from "react-icons/io5";
 import Return from "./Return";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY } from "../../../utils/const";
+import { businessModelCanvas } from "../../../api/apiOverview/businessModelCanvas";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { UserInfo } from "../../../model/auth";
+import { useNavigate } from "react-router-dom";
 const Process = ({
   current,
   setCurrentStep,
@@ -30,7 +37,6 @@ const Process = ({
         items={[
           {
             title: "Requesting",
-     
           },
           {
             title: "Distributing And Executing",
@@ -47,7 +53,17 @@ const Process = ({
   );
 };
 const MoneyWrapper = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
+  const userInfo = useSelector(
+    (state: RootState) => state.auth.userInfo
+  ) as UserInfo | null;
+  const { data: groupInfo } = useQuery({
+    queryKey: [QUERY_KEY.STUDENT_OF_GROUP],
+    queryFn: async () =>
+      (await businessModelCanvas.getBusinessModelCanvas(userInfo?.group)).data
+        .data,
+  });
   const renderStepDetail = () => {
     switch (currentStep) {
       case 0:
@@ -58,6 +74,20 @@ const MoneyWrapper = () => {
         return <Return />;
     }
   };
+  if (groupInfo?.sponsorStatus !== "sponsored") {
+    return (
+      <Result
+        status="403"
+        title="403"
+        subTitle="Your group is not sponsored, uou are not authorized to access this page."
+        extra={
+          <Button type="primary" onClick={() => navigate("/")}>
+            Back Home
+          </Button>
+        }
+      />
+    );
+  }
   return (
     <div className="p-5 w-full min-h-screen flex flex-col gap-3">
       <Process current={currentStep} setCurrentStep={setCurrentStep} />

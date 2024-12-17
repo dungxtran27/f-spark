@@ -112,7 +112,7 @@ const signUp = async (req, res) => {
       hashedPassword,
       imgLink,
     });
-    const userId = newUser.accountNew._id
+    const userId = newUser.accountNew._id;
     await sendConfirmEmail(email, userId);
 
     return res.status(201).json({
@@ -164,9 +164,13 @@ const login = async (req, res) => {
     }
 
     if (!existingAccount.verify) {
-      return res.status(400).json({ error: "The account is not verified, please check your email again !" });
+      return res
+        .status(400)
+        .json({
+          error: "The account is not verified, please check your email again !",
+        });
     }
-    
+
     let userDetail = {};
     switch (role) {
       case ROLE_NAME.student:

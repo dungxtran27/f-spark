@@ -10,7 +10,8 @@ import { Modal } from "antd";
 import Outcome from "./Outcome";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
-import { UserInfo } from "../../../../model/auth";
+import { Term, UserInfo } from "../../../../model/auth";
+import { customerJourneyMapApi } from "../../../../api/apiOverview/customerJourneyMap";
 const DeadlineAndOutcome = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
@@ -33,6 +34,26 @@ const DeadlineAndOutcome = () => {
     },
     enabled: !!classId,
   });
+  const { data: groupData } = useQuery({
+    queryKey: [QUERY_KEY.GROUP_CUSTOMER_JOURNEY_MAP, userInfo?.group],
+    queryFn: async () => {
+      return await customerJourneyMapApi.getGroupData(userInfo?.group);
+    },
+    enabled: !!userInfo?.group,
+  });
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+  const timeRange = (classwork: any) => {
+
+    return userInfo?.role === ROLE.student
+      ? groupData?.data?.data?.timeline?.find(
+          (d: any) => d?.outcome === classwork?.outcome
+        )
+      : activeTerm?.timeLine?.filter(
+          (d: any) => d?.outcome === classwork?.outcome
+        );
+  };
   const getStatusClass = (o: any) => {
     const isInDateRange = dayjs().isAfter(o.startDate);
     if (!isInDateRange) {
@@ -50,7 +71,6 @@ const DeadlineAndOutcome = () => {
 
   return (
     <div className="w-full bg-white shadow-lg rounded border border-black/15 p-2">
-
       <div className="flex flex-col gap-2 w-full">
         <span className="font-medium text-[18px]">Outcomes</span>
         {outcomeListData?.data?.data?.map((o: any, index: number) => (
@@ -82,8 +102,8 @@ const DeadlineAndOutcome = () => {
             <div className="flex items-center gap-3">
               <RiCalendarScheduleFill size={20} />
               <span className="text-[16px]">
-                {dayjs(o?.startDate).format(DATE_FORMAT.withoutYear)} -{" "}
-                {dayjs(o?.dueDate).format(DATE_FORMAT.withYear)}
+                {dayjs(timeRange(o)?.startDate).format(DATE_FORMAT.withoutYear)}{" "}
+                - {dayjs(timeRange(o)?.endDate).format(DATE_FORMAT.withYear)}
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -99,7 +119,7 @@ const DeadlineAndOutcome = () => {
                 size={20}
               />
               <span className="text-[16px]">
-              {/* code gay lu, can sua lai */}
+                {/* code gay lu, can sua lai */}
                 {isTeacher
                   ? `${
                       o?.submissions?.filter((s: any) => !!s?.grade)?.length
@@ -115,7 +135,7 @@ const DeadlineAndOutcome = () => {
         ))}
       </div>
       <Modal
-      centered
+        centered
         title={outcome?.name}
         open={!!outcome}
         onCancel={() => {
@@ -124,7 +144,7 @@ const DeadlineAndOutcome = () => {
         footer={<></>}
         width={1000}
       >
-        <Outcome o={outcome} classID={userInfo?.classId}/>
+        <Outcome o={outcome} classID={userInfo?.classId} />
       </Modal>
     </div>
   );

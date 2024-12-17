@@ -256,6 +256,7 @@ const FirstStep = ({ termId }: { termId: string }) => {
     queryFn: () => {
       return AccountantApi.getActiveSponsorRequest(termId);
     },
+    enabled: !!termId,
   });
 
   const activeTerm = useSelector(

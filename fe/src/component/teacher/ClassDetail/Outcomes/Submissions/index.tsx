@@ -105,6 +105,7 @@ const Submissions = ({
         queryKey: [QUERY_KEY?.TEACHER_OUTCOMES_LIST],
       });
       setIsFormVisible(false);
+      window.location.reload()
     },
   });
   const groupsOfClass = groups?.data?.data?.groupStudent;

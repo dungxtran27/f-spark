@@ -360,7 +360,10 @@ const approveJoinRequest = async (
 
 const approveRequestIsSponsorship = async (groupId, requestId) => {
   try {
-    await Group.updateOne({ _id: groupId }, { isSponsorship: true });
+    await Group.updateOne(
+      { _id: groupId },
+      { isSponsorship: true, sponsorStatus: "pending" }
+    );
     return await Request.updateOne({ _id: requestId }, { status: "approved" });
   } catch (error) {
     throw new Error(error.message);
@@ -605,5 +608,5 @@ export default {
   approveRequestIsSponsorship,
   declineRequestIsSponsorship,
   createRequestFPT,
-  findRequestByTypeRequestFPTSended
+  findRequestByTypeRequestFPTSended,
 };
