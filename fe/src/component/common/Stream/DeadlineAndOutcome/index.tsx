@@ -44,6 +44,9 @@ const DeadlineAndOutcome = () => {
   const activeTerm = useSelector(
     (state: RootState) => state.auth.activeTerm
   ) as Term | null;
+  const filteredOutcomes =
+    activeTerm?.timeLine.filter((item) => item.type == "outcome") ?? [];
+
   const timeRange = (classwork: any) => {
     return userInfo?.role === ROLE.student
       ? groupData?.data?.data?.timeline?.find(
@@ -53,8 +56,9 @@ const DeadlineAndOutcome = () => {
           (d: any) => d?.outcome === classwork?.outcome
         );
   };
-  const getStatusClass = (o: any, g: any) => {
+  const getStatusClass = (o: any, g: any, classWork: any) => {
     let isInDateRange;
+    console.log(o);
 
     if (isTeacher) {
       isInDateRange = dayjs().isAfter(o.startDate);
@@ -71,11 +75,22 @@ const DeadlineAndOutcome = () => {
       o?.submissions?.filter((s: any) => !!s?.grade)?.length <
       groups?.data?.data?.groupStudent?.length;
 
-    return (isTeacher && hasFewerGrades) || (!isTeacher && !o?.groupSubmission)
-      ? !isTeacher && dayjs().isBefore(g?.endDate)
+    // return (isTeacher && hasFewerGrades) || (!isTeacher && !o?.groupSubmission)
+    //   ? (!isTeacher && dayjs().isBefore(g?.endDate)
+    //     ? "bg-pendingStatus/15 border-pendingStatus"
+    //     : "bg-red-500/30 border-red-500")
+    //   : "bg-okStatus/15 border-okStatus";
+    return isTeacher
+      ? dayjs().isAfter(o?.startDate) && dayjs().isBefore(o?.endDate)
         ? "bg-pendingStatus/15 border-pendingStatus"
+        : hasFewerGrades
+        ? "bg-okStatus/15 border-okStatus"
         : "bg-red-500/30 border-red-500"
-      : "bg-okStatus/15 border-okStatus";
+      : dayjs().isAfter(g?.startDate) && dayjs().isBefore(g?.endDate)
+      ? "bg-pendingStatus/15 border-pendingStatus"
+      : classWork?.groupSubmission
+      ? "bg-okStatus/15 border-okStatus"
+      : "bg-red-500/30 border-red-500";
   };
   const [outcome, setOutcome] = useState<any>(null);
 
@@ -89,12 +104,13 @@ const DeadlineAndOutcome = () => {
             {outcomeListData?.data?.data?.map((o: any, index: number) => (
               <div
                 className={`p-2 w-full flex flex-col gap-1 rounded border cursor-pointer ${getStatusClass(
-                  o,
+                  filteredOutcomes.find((f) => f.title == o.name),
                   groupData?.data?.data?.timeline.find(
                     (timeline: any) => timeline?.outcome === o?.outcome
-                  )
+                  ),
+                  o
                 )} shadow-md`}
-                key={o?._id}
+                // key={o?._id}
                 onClick={() => {
                   setOutcome(o);
                 }}
@@ -120,8 +136,15 @@ const DeadlineAndOutcome = () => {
                   <span className="text-[16px]">
                     {isTeacher ? (
                       <>
-                        {dayjs(o?.startDate).format(DATE_FORMAT.withYear)} -{" "}
-                        {dayjs(o?.dueDate).format(DATE_FORMAT.withYear)}
+                        {dayjs(
+                          filteredOutcomes.find((f) => f.title == o.name)
+                            ?.startDate
+                        ).format(DATE_FORMAT.withYear)}{" "}
+                        -{" "}
+                        {dayjs(
+                          filteredOutcomes.find((f) => f.title == o.name)
+                            ?.endDate
+                        ).format(DATE_FORMAT.withYear)}
                       </>
                     ) : (
                       <>

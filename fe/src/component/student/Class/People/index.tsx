@@ -106,9 +106,7 @@ const People = () => {
         <div className="pl-5">
           <div className="">
             <span className="font-bold">Name: </span>
-            <span>
-              {classPeople?.data?.data?.teacher?.name}
-            </span>
+            <span>{classPeople?.data?.data?.teacher?.name}</span>
           </div>
           <div className="">
             <span className="font-bold">Email: </span>
@@ -130,7 +128,7 @@ const People = () => {
     <>
       <div>{classPeople?.data.data?.groupStudent.length} groups</div>
       <div className=" w-full rounded-md p-3 flex">
-        <div className="flex flex-wrap  bg-red-400 ">
+        <div className="flex flex-wrap ">
           {classPeople?.data.data?.groupStudent.map((s: any) => (
             <GroupCard
               info={s}
