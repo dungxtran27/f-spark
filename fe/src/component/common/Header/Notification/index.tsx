@@ -27,21 +27,26 @@ const Notification = () => {
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
-  
+
   const { data: notificationStatistic, isLoading } = useQuery({
     queryKey: [QUERY_KEY.NOTIFICATION_STATISTIC],
     queryFn: () => {
-      if(userInfo?.role == ROLE.student){
+      if (userInfo?.role == ROLE.student) {
         return notificationApi.getStudentNotificationStatistic();
       } else {
         return notificationApi.getTeacherNotificationStatistic();
       }
     },
-    enabled: openNotification,
   });
   return (
     <div>
-      <Badge count={10} className="cursor-pointer">
+      <Badge
+        count={
+          notificationStatistic?.data?.data?.groupNotification +
+          notificationStatistic?.data?.data?.classNotification
+        }
+        className="cursor-pointer"
+      >
         <SlBell size={20} onClick={() => setOpenNotification(true)} />
       </Badge>
       <Modal
@@ -66,50 +71,49 @@ const Notification = () => {
           </div>
         </div>
         <Spin spinning={isLoading}>
-          {userInfo?.role == ROLE.student ? 
-          <div className="grid grid-cols-3 gap-3">
-          <Link to={"/notification/group"}>
-              <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
-                <span className="text-4xl font-semibold">
-                  {notificationStatistic?.data?.data?.groupNotification}
-                </span>
-                <span>Group</span>
-              </div>
-            </Link>
-            <Link to={"/notification/class"}>
-              <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
-                <span className="text-4xl font-semibold">
-                  {notificationStatistic?.data?.data?.classNotification}
-                </span>
-                <span>Class</span>
-              </div>
-            </Link>
-            <Link to={"/notification/system"}>
-              <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
-                <span className="text-4xl font-semibold">10</span>
-                <span>System</span>
-              </div>
-            </Link>
-          </div>
-          : 
-          <div className="grid grid-cols-2 gap-3">
-            <Link to={"/notification/class"}>
-              <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
-                <span className="text-4xl font-semibold">
-                  {notificationStatistic?.data?.data?.classNotification}
-                </span>
-                <span>Class</span>
-              </div>
-            </Link>
-            <Link to={"/notification/system"}>
-              <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
-                <span className="text-4xl font-semibold">10</span>
-                <span>System</span>
-              </div>
-            </Link>
-          </div>
-          }
-          
+          {userInfo?.role == ROLE.student ? (
+            <div className="grid grid-cols-3 gap-3">
+              <Link to={"/notification/group"}>
+                <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
+                  <span className="text-4xl font-semibold">
+                    {notificationStatistic?.data?.data?.groupNotification}
+                  </span>
+                  <span>Group</span>
+                </div>
+              </Link>
+              <Link to={"/notification/class"}>
+                <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
+                  <span className="text-4xl font-semibold">
+                    {notificationStatistic?.data?.data?.classNotification}
+                  </span>
+                  <span>Class</span>
+                </div>
+              </Link>
+              <Link to={"/notification/system"}>
+                <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
+                  <span className="text-4xl font-semibold">10</span>
+                  <span>System</span>
+                </div>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <Link to={"/notification/class"}>
+                <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
+                  <span className="text-4xl font-semibold">
+                    {notificationStatistic?.data?.data?.classNotification}
+                  </span>
+                  <span>Class</span>
+                </div>
+              </Link>
+              <Link to={"/notification/system"}>
+                <div className="h-40 border border-textSecondary/70 cursor-pointer rounded flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary/10">
+                  <span className="text-4xl font-semibold">10</span>
+                  <span>System</span>
+                </div>
+              </Link>
+            </div>
+          )}
         </Spin>
       </Modal>
     </div>

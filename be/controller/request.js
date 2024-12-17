@@ -378,14 +378,22 @@ const cancelLeaveClassRequest = async (req, res) => {
 };
 const getAllLeaveClassRequest = async (req, res) => {
   try {
+    const { termId } = req.query;
+    if(!termId){
+      return res.status(400).json({error: "Bad request"})
+    }
     const pendingRequest = await RequestRepository.getPendingLeaveClassRequest(
-      {}
+      termId
     );
     const processedRequest =
-      await RequestRepository.getProcessedLeaveClassRequest({});
+      await RequestRepository.getProcessedLeaveClassRequest(termId);
     return res.status(200).json({
-      pendingRequest: pendingRequest,
-      processedRequest: processedRequest,
+      pendingRequest: pendingRequest.filter(
+        (r) => r?.createBy?.term.toString() === termId
+      ),
+      processedRequest: processedRequest.filter(
+        (r) => r?.createBy?.term.toString() === termId
+      ),
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -481,10 +489,12 @@ const updateIsSponsorship = async () => {
         const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
         const requestId = request._id;
         const groupId = request.group._id;
-        const group = await GroupRepository.findGroupById(groupId)
+        const group = await GroupRepository.findGroupById(groupId);
         if (totalVotes === totalMembers) {
-
-          if (totalYesVotes === totalMembers && group?.sponsorStatus === 'normal') {
+          if (
+            totalYesVotes === totalMembers &&
+            group?.sponsorStatus === "normal"
+          ) {
             await RequestRepository.approveRequestIsSponsorship(
               groupId,
               requestId
