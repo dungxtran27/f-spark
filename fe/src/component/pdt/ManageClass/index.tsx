@@ -68,9 +68,7 @@ const ManageClassWrapper = () => {
         limit: 8,
       });
     },
-  });
-  console.log(studentsData?.data?.data);
-  
+  });  
   const { data: termData } = useQuery({
     queryKey: [QUERY_KEY.TERM],
     queryFn: async () => {

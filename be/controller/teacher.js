@@ -47,33 +47,41 @@ const getAllAccTeacher = async (req, res) => {
 const getTeacherInfo = async (req, res) => {
   try {
     const teacherId = req.params.teacherId;
+    const activeTerm = await TermRepository.getActiveTerm();
+    if (!activeTerm) {
+      return res.status(404).json({ message: "No active term found" });
+    }    
     const teacher = await TeacherRepository.getTeacherWithClasses(teacherId);
     if (!teacher) {
       return res.status(404).json({ message: "Teacher not found" });
-    }
+    }    
+    const filteredClasses = Array.isArray(teacher.assignedClasses)
+      ? teacher.assignedClasses.filter(
+          (assignedClass) =>
+            assignedClass.term && assignedClass.term.toString() === activeTerm._id.toString()
+        )
+      : [];
     const formattedData = {
       salutation: teacher.salutation,
       name: teacher.name,
       phoneNumber: teacher.phoneNumber,
       email: teacher.email,
       profilePicture: teacher.profilePicture,
-      classes:
-        Array.isArray(teacher.assignedClasses) &&
-          teacher.assignedClasses.length > 0
-          ? teacher.assignedClasses.map((assignedClass) => ({
-            classCode: assignedClass.classCode,
-            backgroundImage: assignedClass.backgroundImage,
-            studentCount: assignedClass.studentCount || 0,
-            groupCount: assignedClass.groupCount || 0,
-          }))
-          : [],
+      classes: filteredClasses.map((assignedClass) => ({
+        classCode: assignedClass.classCode,
+        backgroundImage: assignedClass.backgroundImage,
+        studentCount: assignedClass.studentCount || 0,
+        groupCount: assignedClass.groupCount || 0,
+      })),
     };
+
     res.status(200).json({ data: formattedData });
   } catch (error) {
     console.error("Error fetching teacher information:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 const getTotalTeachers = async (req, res) => {
   try {
     const { term } = req.body;

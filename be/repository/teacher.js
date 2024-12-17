@@ -204,7 +204,7 @@ const getTeacherWithClasses = async (teacherId) => {
       {
         $lookup: {
           from: "Classes",
-          localField: "assignedClasses.id",
+          localField: "assignedClasses._id",
           foreignField: "_id",
           as: "assignedClasses",
         },
