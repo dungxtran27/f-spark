@@ -359,123 +359,186 @@ const approveJoinRequest = async (
 };
 
 const approveRequestIsSponsorship = async (groupId, requestId) => {
-  await Group.updateOne({ _id: groupId }, { isSponsorship: true });
-
-  return Request.updateOne({ _id: requestId }, { status: "approved" });
+  try {
+    await Group.updateOne({ _id: groupId }, { isSponsorship: true });
+    return await Request.updateOne({ _id: requestId }, { status: "approved" });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const declineRequestIsSponsorship = async (requestId) => {
-  return Request.updateOne({ _id: requestId }, { status: "declined" });
+  try {
+    return await Request.updateOne({ _id: requestId }, { status: "declined" });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const approveDeleteStudentRequest = async (groupId, studentId, requestId) => {
-  await Group.updateOne(
-    { _id: groupId },
-    { $pull: { teamMembers: studentId } }
-  );
-
-  await Student.updateOne({ _id: studentId }, { group: null });
-
-  return Request.updateOne({ _id: requestId }, { status: "approved" });
+  try {
+    await Group.updateOne(
+      { _id: groupId },
+      { $pull: { teamMembers: studentId } }
+    );
+    await Student.updateOne({ _id: studentId }, { group: null });
+    return await Request.updateOne({ _id: requestId }, { status: "approved" });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const declineRequest = async (requestId, totalMembers) => {
-  return Request.updateOne(
-    { _id: requestId },
-    { status: "declined", totalMembers }
-  );
+  try {
+    return await Request.updateOne(
+      { _id: requestId },
+      { status: "declined", totalMembers }
+    );
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const getUpdatedRequests = async (groupId) => {
-  return Request.find({ group: groupId })
-    .populate({
-      path: "group",
-      select: "teamMembers leader",
-    })
-    .populate({
-      path: "createBy",
-      select: "_id name studentId major",
-      populate: {
-        path: "account",
-        select: "profilePicture",
-      },
-    });
+  try {
+    return await Request.find({ group: groupId })
+      .populate({
+        path: "group",
+        select: "teamMembers leader",
+      })
+      .populate({
+        path: "createBy",
+        select: "_id name studentId major",
+        populate: {
+          path: "account",
+          select: "profilePicture",
+        },
+      });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const findRequestByTypeRequestFPT = async () => {
-  return Request.find({ typeRequest: "FPT" }).populate({
-    path: "group",
-    select: "teamMembers term",
-  });
+  try {
+    return await Request.find({ typeRequest: "FPT" }).populate({
+      path: "group",
+      select: "teamMembers term",
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const findRequestByTypeRequestFPTSended = async (groupId) => {
-  return Request.find({ typeRequest: "FPT", group: groupId }).populate({
-    path: "group",
-    select: "teamMembers term",
-  });
+  try {
+    return await Request.find({ typeRequest: "FPT", group: groupId }).populate({
+      path: "group",
+      select: "teamMembers term",
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const createRequestFPT = async (request) => {
-  return Request.create(request);
+  try {
+    return await Request.create(request);
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const findRequestById = async (requestId) => {
-  return Request.findOne({ _id: requestId }).populate({
-    path: "group",
-    select: "teamMembers",
-  });
+  try {
+    return await Request.findOne({ _id: requestId }).populate({
+      path: "group",
+      select: "teamMembers",
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const findExistingRequest = async (studentId, groupId, actionType) => {
-  return Request.findOne({
-    createBy: studentId,
-    group: groupId,
-    actionType,
-    status: "pending",
-  });
+  try {
+    return await Request.findOne({
+      createBy: studentId,
+      group: groupId,
+      actionType,
+      status: "pending",
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
+
 const findExistingDeleteStudentRequest = async (
   groupId,
   actionType,
   studentDeleted
 ) => {
-  return Request.findOne({
-    group: groupId,
-    actionType,
-    status: "pending",
-    studentDeleted: studentDeleted,
-  });
+  try {
+    return await Request.findOne({
+      group: groupId,
+      actionType,
+      status: "pending",
+      studentDeleted: studentDeleted,
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const findGroupForLeaveRequest = async (groupId, studentId) => {
-  return Group.findOne({
-    _id: groupId,
-    teamMembers: studentId,
-  });
+  try {
+    return await Group.findOne({
+      _id: groupId,
+      teamMembers: studentId,
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
+
 };
 
 const createLeaveRequest = async ({ studentId, groupId, teamMembersCount }) => {
-  return Request.create({
-    typeRequest: "Student",
-    createBy: studentId,
-    actionType: "leave",
-    group: groupId,
-    status: "approved",
-    totalMembers: teamMembersCount,
-  });
+  try {
+    return await Request.create({
+      typeRequest: "Student",
+      createBy: studentId,
+      actionType: "leave",
+      group: groupId,
+      status: "approved",
+      totalMembers: teamMembersCount,
+    });
+  } catch (error) {
+    throw new Error(error.message);
+
+  }
 };
 
 const updateGroupMembers = async (groupId, studentId) => {
-  return Group.updateOne(
-    { _id: groupId },
-    { $pull: { teamMembers: studentId } }
-  );
+  try {
+    return await Group.updateOne(
+      { _id: groupId },
+      { $pull: { teamMembers: studentId } }
+    );
+  } catch (error) {
+    throw new Error(error.message);
+  }
+
 };
 
 const updateStudentGroup = async (studentId) => {
-  return Student.updateOne({ _id: studentId }, { group: null });
+  try {
+    return await Student.updateOne({ _id: studentId }, { group: null });
+  } catch (error) {
+    throw new Error(error.message);
+
+  }
 };
+
 const getRequestDeleteStudentFromGroup = async ({ groupId }) => {
   try {
     const result = await Request.find({

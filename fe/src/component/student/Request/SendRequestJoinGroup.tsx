@@ -209,21 +209,19 @@ const RequestJoinGroup: React.FC = () => {
                     groups={c.groupCount}
                     isSponsorship={c.sponsorshipCount}
                     role={"student"}
-                    icon={
-                      <Tooltip title="Move to this class">
-                        {/* <span className="text-white text-xl "> */}
-                        <HiOutlineLogin
-                          size={25}
-                          onClick={() => {
-                            setClassSelected(c);
-                            handleOpenconfirm();
-                          }}
-                        />
-                        {/* </span> */}
-                      </Tooltip>
-                    }
-                    onClick={() => {}}
-                  />
+                    icon={<Tooltip title="Move to this class">
+                      {/* <span className="text-white text-xl "> */}
+                      <HiOutlineLogin
+                        size={25}
+                        onClick={() => {
+                          setClassSelected(c);
+                          handleOpenconfirm();
+                        } } />
+                      {/* </span> */}
+                    </Tooltip>}
+                    onClick={() => { } } onDeleteClick={function (): void {
+                      throw new Error("Function not implemented.");
+                    } }                  />
                 ))}
               </div>
               <Badge
