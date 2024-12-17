@@ -74,6 +74,7 @@ const Return = ({ termId }: { termId: string }) => {
     queryFn: () => {
       return AccountantApi.getReturnSponsorRequest(termId);
     },
+    enabled: !!termId,
   });
 
   const getStatusColor = (status: string) => {

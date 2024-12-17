@@ -45,6 +45,7 @@ const AddTransactionModal = ({ isOpen, setIsOpen }: ModalProps) => {
   });
   return (
     <Modal
+      destroyOnClose
       title={"Add transaction"}
       open={isOpen}
       onCancel={() => setIsOpen(false)}

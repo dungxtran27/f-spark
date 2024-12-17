@@ -185,8 +185,8 @@ const ViewInfoPoject: React.FC<ViewInfoPojectProps> = ({ groupId, userId }) => {
                           <div className="flex items-center">
                             <Text
                               className={`text-gray-600 font-bold text-center ${
-                                member?.account?._id === userId
-                                  ? "!text-blue-500 font-semibold"
+                                member?._id === userId
+                                  ? "text-primary"
                                   : ""
                               } `}
                             >

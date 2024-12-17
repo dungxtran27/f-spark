@@ -436,7 +436,7 @@ const createDeleteStudentFromGroupRequest = async (req, res) => {
       });
     }
     console.log(groupId, studentId);
-    
+
     const group = await RequestRepository.findGroupForLeaveRequest(
       groupId,
       studentId
@@ -466,22 +466,25 @@ const updateIsSponsorship = async () => {
     const activeTerm = await TermRepository.getActiveTerm();
     const currentTime = moment().toISOString();
     const endDate = activeTerm.timeLine.find(
-      (t) => t.type === "sponsorShip"
+      (t) => t.type === "sponsorShipVote"
     ).endDate;
     if (moment(endDate).isBefore(currentTime)) {
       const requests = await RequestRepository.findRequestByTypeRequestFPT();
-      const filterRequestByTerm = requests.filter(
-        (r) => r.group.term.toString() === activeTerm._id.toString()
-      );
-
+      const filterRequestByTerm = requests.filter((r) => {
+        return (
+          !!r?.group && r.group.term.toString() === activeTerm._id.toString()
+        );
+      });
       for (const request of filterRequestByTerm) {
         const totalMembers = request.group.teamMembers.length;
         const totalYesVotes = request.upVoteYes.length;
         const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
         const requestId = request._id;
         const groupId = request.group._id;
+        const group = await GroupRepository.findGroupById(groupId)
         if (totalVotes === totalMembers) {
-          if (totalYesVotes === totalMembers) {
+
+          if (totalYesVotes === totalMembers && group?.sponsorStatus === 'normal') {
             await RequestRepository.approveRequestIsSponsorship(
               groupId,
               requestId
@@ -495,7 +498,9 @@ const updateIsSponsorship = async () => {
       return;
     }
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.log(error);
+
+    return;
   }
 };
 
@@ -503,17 +508,21 @@ const sendRequestSponsorship = async () => {
   try {
     const activeTerm = await TermRepository.getActiveTerm();
     const currentTime = moment().toISOString();
-    const startDate = activeTerm.timeLine.find((t) => t.type === "sponsorShip").startDate;
+    const startDate = activeTerm.timeLine.find(
+      (t) => t.type === "sponsorShipVote"
+    ).startDate;
     if (moment(startDate).isBefore(currentTime)) {
       const groups = await GroupRepository.findGroupByOldMark();
-
       if (!groups || groups.length === 0) {
         return res.status(404).json({ message: "Group not found." });
       }
 
       const requests = await Promise.all(
         groups.map(async (group) => {
-          const existingRequests = await RequestRepository.findRequestByTypeRequestFPTSended(group._id);
+          const existingRequests =
+            await RequestRepository.findRequestByTypeRequestFPTSended(
+              group._id
+            );
           if (existingRequests && existingRequests.length > 0) {
             return null;
           } else {
@@ -522,7 +531,8 @@ const sendRequestSponsorship = async () => {
               createBy: null,
               actionType: null,
               title: "Thông báo: Mở đơn xin tài trợ",
-              content: "Chào em,\nNhóm em đủ điều kiện nhận hỗ trợ kinh phí khởi nghiệp. Sinh viên đọc kỹ nội dung ở file đính kèm.\nThân mến.",
+              content:
+                "Chào em,\nNhóm em đủ điều kiện nhận hỗ trợ kinh phí khởi nghiệp. Sinh viên đọc kỹ nội dung ở file đính kèm.\nThân mến.",
               status: "pending",
               attachmentUrl: "https://example.com/file.docx",
               group: group._id,
@@ -535,12 +545,12 @@ const sendRequestSponsorship = async () => {
           }
         })
       );
-    }
-    else {
+    } else {
       return;
     }
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.log(error);
+    return;
   }
 };
 
@@ -560,5 +570,5 @@ export default {
   getLeaveClassRequestOfStudent,
   createDeleteStudentFromGroupRequest,
   updateIsSponsorship,
-  sendRequestSponsorship
+  sendRequestSponsorship,
 };

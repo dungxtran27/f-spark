@@ -39,7 +39,7 @@ const GradingSubmission = ({
         queryKey: [QUERY_KEY.TEACHER_OUTCOMES_LIST, QUERY_KEY.GROUPS_OF_CLASS],
       });
       setSubmission(null);
-      
+      window.location.reload();
     },
   });
   return (

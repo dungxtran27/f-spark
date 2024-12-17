@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { UserInfo } from "../../../model/auth";
-import { Empty, Input } from "antd";
+import { Empty, Input, Result } from "antd";
 import { useState } from "react";
 import {
   CLASS_WORK_TYPE,
@@ -50,6 +50,20 @@ const Stream = () => {
     open: false,
     classworkId: null,
   });
+  const { data: classData } = useQuery({
+    queryKey: [QUERY_KEY.CLASS_DETAIL, classId||userInfo?.classId],
+    queryFn: async () => {
+      return classApi.getClassDetail(classId||userInfo?.classId);
+    },
+  });
+  if (!classData?.data?.data?.teacher) {
+    return (
+      <Result
+        status="warning"
+        title="The class does not have a teacher assigned, please wait while our admin working on this!"
+      />
+    );
+  }
   return (
     <div className="w-full py-3 flex gap-3">
       <div className="w-9/12">

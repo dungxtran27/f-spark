@@ -39,7 +39,7 @@ const Assignment = ({
               </span>
               <span className="text-textSecondary"> - </span>
               <span className="text-textSecondary">
-                {dayjs(post?.dueDate).format(DATE_FORMAT.withYear)}
+                {dayjs(post?.endDate).format(DATE_FORMAT.withYear)}
               </span>
             </span>
           </div>
@@ -143,12 +143,12 @@ const Assignment = ({
                     }}
                   ></span>
                   {post?.mySubmission?.attachment?.length > 0 &&
-                    post?.mySubmission?.attachment?.map((a: any) => {
+                    post?.mySubmission?.attachment?.map((a: any) => (
                       <div className="flex items-center group text-primaryBlue">
                         <TiAttachment size={20} />
                         <span className="group-hover: underline">ppp</span>
-                      </div>;
-                    })}
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>

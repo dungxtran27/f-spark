@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Empty } from "antd";
+import { Avatar, Empty, Popover } from "antd";
 import {
   DATE_FORMAT,
   NOTIFICATION_ACTION_TYPE,
   QUERY_KEY,
+  TASK_STATUS_FILTER,
 } from "../../../utils/const";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
@@ -23,6 +24,9 @@ const Team = () => {
       return dashBoard.getGroupNotification(userInfo?.group);
     },
   });
+  const getStatusColor = (status: string | undefined) => {
+    return TASK_STATUS_FILTER.find((s) => s.value === status)?.color;
+  };
   const getNotificationContent = (noti: any) => {
     switch (noti?.action?.actionType) {
       case NOTIFICATION_ACTION_TYPE.CREATE_TASK:
@@ -30,11 +34,27 @@ const Team = () => {
       case NOTIFICATION_ACTION_TYPE.UPDATE_TASK_STATUS:
         return (
           <div className="flex items-center gap-3">
-            <span className="px-2 rounded bg-[#facc15]/20 text-[#facc15]">
+            <span
+              className="px-2 rounded"
+              style={{
+                color: getStatusColor(noti?.action.priorVersion),
+                backgroundColor: `${getStatusColor(
+                  noti?.action.priorVersion
+                )}30`,
+              }}
+            >
               {noti?.action?.priorVersion}
             </span>
             <GoArrowRight />
-            <span className="px-2 rounded bg-[#3B82F6]/30 text-[#3B82F6]">
+            <span
+              className="px-2 rounded"
+              style={{
+                color: getStatusColor(noti?.action.newVersion),
+                backgroundColor: `${getStatusColor(
+                  noti?.action.newVersion
+                )}30`,
+              }}
+            >
               {noti?.action?.newVersion}
             </span>
           </div>
@@ -66,7 +86,21 @@ const Team = () => {
               <div className="flex items-center">
                 <span className="text-textSecondary">
                   Description:{" "}
-                  <span className="text-primaryBlue">Content Of Change</span>
+                  <Popover
+                    content={
+                      <div className="flex items-center justify-center gap-3">
+                        <span className="text-sm text-textSecondary">
+                          {noti?.action?.priorVersion?.description}
+                        </span>
+                        <GoArrowRight />
+                        <span className="text-sm">
+                          {noti?.action?.newVersion?.description}
+                        </span>
+                      </div>
+                    }
+                  >
+                    <span className="text-primaryBlue">Content Of Change</span>
+                  </Popover>
                 </span>
               </div>
             ) : (
@@ -293,13 +327,13 @@ const Team = () => {
         </h3>
       </div>
       <div className="space-y-4 overflow-y-auto h-[412px] pr-2">
-        {
-          groupNoti?.data?.data.length > 0 ? (
-            groupNoti?.data?.data.map((item: any) => notificationCard(item))
-          ): (<div className="w-full h-full flex items-center justify-center">
+        {groupNoti?.data?.data.length > 0 ? (
+          groupNoti?.data?.data.map((item: any) => notificationCard(item))
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
             <Empty />
-          </div>)
-        }
+          </div>
+        )}
       </div>
     </div>
   );
