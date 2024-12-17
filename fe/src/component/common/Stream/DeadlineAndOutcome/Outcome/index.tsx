@@ -38,6 +38,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   const activeTerm = useSelector(
     (state: RootState) => state.auth.activeTerm
   ) as Term | null;
+  
   const { data: groupData, isLoading } = useQuery({
     queryKey: [QUERY_KEY.GROUP_CUSTOMER_JOURNEY_MAP, userInfo?.group],
     queryFn: async () => {
@@ -47,10 +48,10 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   });
   const deadline =
     userInfo?.role === ROLE.student
-      ? groupData?.data?.data?.timeline?.filter(
+      ? groupData?.data?.data?.timeline?.find(
           (d: any) => d?.outcome === o?.outcome
         )
-      : activeTerm?.timeLine?.filter((d: any) => d?.outcome === o?.outcome);
+      : activeTerm?.timeLine?.find((d: any) => d?.outcome === o?.outcome);
   const isTeacher = userInfo?.role === ROLE.teacher;
   const [submission, setSubmission] = useState(null);
   const [form] = Form.useForm();
@@ -87,7 +88,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
       return;
     }
 
-    if (!newDate.isAfter(dayjs(deadline[0]?.endDate))) {
+    if (!newDate.isAfter(dayjs(deadline?.endDate))) {
       message.error("Request due date must be after the original due date.");
       form.setFields([
         {
@@ -102,7 +103,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
       newDate: dayjs(values.newDate),
       classworkId: o._id,
       classworkName: o.title,
-      dueDate: dayjs(deadline[0]?.endDate),
+      dueDate: dayjs(deadline?.endDate),
       classId: o.classId,
     };
     requestDeadlineApi.createRequestDeadline(data);
@@ -130,7 +131,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
       <div className="flex items-center justify-between">
         <span className="font-medium text-[16px]">
           Deadline:&nbsp;
-          {dayjs(deadline[0]?.endDate).format(DATE_FORMAT.withYear)}
+          {dayjs(deadline?.endDate).format(DATE_FORMAT.withYear)}
         </span>
 
         <div className="flex items-center gap-3">
@@ -163,7 +164,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
         )}
         <Divider variant="dashed" style={{ borderColor: "black" }} dashed />
         <span className="font-medium text-[18px]">Submissions</span>
-        {!isTeacher && dayjs().isAfter(deadline[0]?.endDate, "day") && !o?.groupSubmission ? (
+        {!isTeacher && dayjs().isAfter(deadline?.endDate, "day") && !o?.groupSubmission ? (
           <div className="flex flex-col justify-center items-center mt-10 gap-3">
             <p className="font-semibold text-red-500 text-lg">
               Deadline is overdue. You can still request for a deadline change{" "}
@@ -219,20 +220,18 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
                   Due date{" "}
                   <span className="text-red-500 pl-1">
                     Left:{" "}
-                    {getRemainingTime(deadline[0]?.endDate).daysLeft <= 0 &&
-                    getRemainingTime(deadline[0]?.endDate).hoursLeft <= 0
+                    {getRemainingTime(deadline?.endDate).daysLeft <= 0 &&
+                    getRemainingTime(deadline?.endDate).hoursLeft <= 0
                       ? "00:00 "
-                      : `${getRemainingTime(deadline[0]?.endDate).daysLeft}d ${
-                          getRemainingTime(deadline[0]?.endDate).hoursLeft
+                      : `${getRemainingTime(deadline?.endDate).daysLeft}d ${
+                          getRemainingTime(deadline?.endDate).hoursLeft
                         }h`}
                   </span>
                 </>
               }
             >
               <DatePicker
-                value={
-                  deadline[0]?.endDate ? dayjs(deadline[0]?.endDate) : null
-                }
+                value={deadline?.endDate ? dayjs(deadline?.endDate) : null}
                 format="DD/MM/YYYY"
                 className="w-56 mr-4"
                 disabled={true}

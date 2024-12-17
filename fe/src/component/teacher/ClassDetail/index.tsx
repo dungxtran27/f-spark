@@ -1,5 +1,5 @@
 import { useParams, useSearchParams } from "react-router-dom";
-import { Tabs, TabsProps } from "antd";
+import { Button, Result, Tabs, TabsProps } from "antd";
 import DefaultLayout from "../../../layout/DefaultLayout";
 import Banner from "./Banner";
 import { QUERY_KEY, TEACHER_CLASS_DETAIL_TABS } from "../../../utils/const";
@@ -22,6 +22,14 @@ const ClassDetailWrapper = () => {
   });
   const items: TabsProps["items"] = TEACHER_CLASS_DETAIL_TABS;
   const defaultActiveKey = tab !== null ? tab : "stream";
+  if (!classData?.data?.data?.teacher) {
+    return (
+      <Result
+        status="warning"
+        title="The class does not have a teacher assigned, please wait while our admin working on this!"
+      />
+    );
+  }
   return (
     <DefaultLayout>
       <Banner name={classData?.data?.data?.classCode} classId={classId || ""} />

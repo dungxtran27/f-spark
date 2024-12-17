@@ -11,6 +11,7 @@ import {
   Input,
   Select,
   Skeleton,
+  Empty,
 } from "antd";
 import { PlusOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
 import { GoQuestion } from "react-icons/go";
@@ -155,16 +156,16 @@ const CustomerPersonas: React.FC<CustomerPersonasProps> = ({ groupId }) => {
   const handleDeletePersona = () => {
     if (editingPersona?._id) {
       Modal.confirm({
-          title: "Are you sure you want to delete this customer personas?",
-          content: "Once deleted, the data cannot be recovered.",
-          okText: "Yes, delete it",
-          okType: "danger",
-          cancelText: "No",
-          onOk: () => {
-            deleteCustomerPersona.mutate(editingPersona._id);
-            setIsModalVisible(false);
-          },
-            });
+        title: "Are you sure you want to delete this customer personas?",
+        content: "Once deleted, the data cannot be recovered.",
+        okText: "Yes, delete it",
+        okType: "danger",
+        cancelText: "No",
+        onOk: () => {
+          deleteCustomerPersona.mutate(editingPersona._id);
+          setIsModalVisible(false);
+        },
+      });
     }
   };
 
@@ -255,56 +256,65 @@ const CustomerPersonas: React.FC<CustomerPersonasProps> = ({ groupId }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-4">
-        {personas.map((persona, index) => (
-          <Card
-            key={index}
-            className="shadow-lg"
-            onClick={() => showModal(index)}
-          >
-            <div style={{ cursor: "pointer" }} className="w-full aspect-square">
-              {persona.detail.image ? (
-                <img
-                  src={persona.detail.image}
-                  alt="Avatar"
-                  className="w-full aspect-square object-cover rounded-lg mb-4"
-                />
-              ) : (
-                <Avatar
-                  className="w-full h-full object-cover rounded-lg mb-4"
-                  icon={<UserOutlined style={{ fontSize: "100px" }} />}
-                />
-              )}
-            </div>
-            <Title className="mt-2" level={5}>
-              {persona.detail.name || "Personal Info"}
-            </Title>
-            <Text className="font-semibold mr-2">Age:</Text>
-            <Text>{persona.detail.age || "N/A"}</Text>
-            <br />
-            <Text className="font-semibold mr-2">Job Title:</Text>
-            <Text>{persona.detail.jobTitle || "N/A"}</Text>
-            <br />
-            <Text className="font-semibold mr-2">Status:</Text>
-            <Text>{persona.detail.relationshipStatus}</Text>
-            <br />
-            <Text className="font-semibold mr-2">Address:</Text>
-            <Text>{persona.detail.address || "N/A"}</Text>
-            <br />
-            <Text className="font-semibold mr-2">Income:</Text>
-            <Text>{persona.detail.income || "N/A"} VND</Text>
-            <br />
-            <Text className="font-semibold mr-2">Bio:</Text>
-            <Text>{persona.bio || "N/A"}</Text>
-            <br />
-            <Text className="font-semibold mr-2">Needs: </Text>
-            <Text>
-              {persona.needs && persona.needs.length > 0
-                ? persona.needs.join(" , ")
-                : "N/A"}
-            </Text>
-          </Card>
-        ))}
+      <div>
+        {personas?.length > 0 ? (
+          <div className="grid grid-cols-5 gap-4" >
+            {personas.map((persona, index) => (
+              <Card
+                key={index}
+                className="shadow-lg"
+                onClick={() => showModal(index)}
+              >
+                <div
+                  style={{ cursor: "pointer" }}
+                  className="w-full aspect-square"
+                >
+                  {persona.detail.image ? (
+                    <img
+                      src={persona.detail.image}
+                      alt="Avatar"
+                      className="w-full aspect-square object-cover rounded-lg mb-4"
+                    />
+                  ) : (
+                    <Avatar
+                      className="w-full h-full object-cover rounded-lg mb-4"
+                      icon={<UserOutlined style={{ fontSize: "100px" }} />}
+                    />
+                  )}
+                </div>
+                <Title className="mt-2" level={5}>
+                  {persona.detail.name || "Personal Info"}
+                </Title>
+                <Text className="font-semibold mr-2">Age:</Text>
+                <Text>{persona.detail.age || "N/A"}</Text>
+                <br />
+                <Text className="font-semibold mr-2">Job Title:</Text>
+                <Text>{persona.detail.jobTitle || "N/A"}</Text>
+                <br />
+                <Text className="font-semibold mr-2">Status:</Text>
+                <Text>{persona.detail.relationshipStatus}</Text>
+                <br />
+                <Text className="font-semibold mr-2">Address:</Text>
+                <Text>{persona.detail.address || "N/A"}</Text>
+                <br />
+                <Text className="font-semibold mr-2">Income:</Text>
+                <Text>{persona.detail.income || "N/A"} VND</Text>
+                <br />
+                <Text className="font-semibold mr-2">Bio:</Text>
+                <Text>{persona.bio || "N/A"}</Text>
+                <br />
+                <Text className="font-semibold mr-2">Needs: </Text>
+                <Text>
+                  {persona.needs && persona.needs.length > 0
+                    ? persona.needs.join(" , ")
+                    : "N/A"}
+                </Text>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Empty />
+        )}
       </div>
 
       <Modal

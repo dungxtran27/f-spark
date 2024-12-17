@@ -90,10 +90,12 @@ const updateRequest = async (req, res) => {
 const accountantUpdateRequest = async (req, res) => {
   try {
     const { file, status, requestId } = req.body;
-
-    const evidence = await uploadImage(file);
-    if (!evidence) {
-      throw new Error("Failed to upload image");
+    let evidence;
+    if (file) {
+      evidence = await uploadImage(file);
+      if (!evidence) {
+        throw new Error("Failed to upload image");
+      }
     }
 
     const result = await FundEstimationRepository.accountantUpdateRequest(

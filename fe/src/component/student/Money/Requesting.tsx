@@ -336,7 +336,7 @@ const Requesting = () => {
                 </div>
               </div>
             ) : (
-              <Empty />
+              <Empty description={"No request sent"}/>
             )}
           </div>
         </div>

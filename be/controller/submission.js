@@ -106,6 +106,7 @@ const addGrade = async (req, res) => {
       grade,
       criteria: criteriaObjectIds,
     });
+    
     if (updateGrade) {
       const notificationData = {
         group: updateGrade?.group,

@@ -3,8 +3,7 @@ import { FaUser } from "react-icons/fa";
 import { FaUserGroup } from "react-icons/fa6";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { MdOutlineMessage } from "react-icons/md";
-import { Dropdown, Menu, Tooltip } from "antd";
-import { ImNotification } from "react-icons/im";
+import { Dropdown, Menu } from "antd";
 import { DeleteOutlined, EditOutlined, MoreOutlined } from "@ant-design/icons";
 
 interface ClassCardProps {
@@ -21,7 +20,7 @@ interface ClassCardProps {
   isEditing?: boolean;
   onEditClick?: () => void;
   onDeleteClick: () => void;
-  isMenuVisible?: boolean,
+  isMenuVisible?: boolean;
 }
 
 const ClassCard: React.FC<ClassCardProps> = ({
@@ -31,13 +30,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
   role = "teacher",
   groups = 0,
   totalMembers = 0,
-  // icon = (
-  //   <Tooltip title="Class Information">
-  //     <span className="text-white text-xl cursor-pointer">
-  //       <ImNotification />
-  //     </span>
-  //   </Tooltip>
-  // ),
+  icon = <></>,
   onEditClick,
   onClick,
   isSelected = false,
@@ -68,15 +61,16 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
   return (
     <div
-      className={`rounded-lg overflow-hidden shadow-md cursor-pointer ${isSelected ? "border-2 border-purple-400" : ""
-        }`}
+      className={`rounded-lg overflow-hidden shadow-md cursor-pointer ${
+        isSelected ? "border-2 border-purple-400" : ""
+      }`}
       onClick={onClick}
     >
       <div className={`${getCardColor()} opacity-100 p-2 text-white`}>
         <div className="flex text-lg font-semibold">
           {classCode}
           <div className="ml-auto flex items-center">
-            {/* {icon} */}
+            {icon}
             {isMenuVisible && (
               <Dropdown overlay={menu} trigger={["click"]}>
                 <button className="text-2xl font-bold text-white-700 p-0.2 hover:text-gray-900">
@@ -84,7 +78,6 @@ const ClassCard: React.FC<ClassCardProps> = ({
                 </button>
               </Dropdown>
             )}
-
           </div>
         </div>
         <div className="text-sm">Teacher: {teacherName ?? "N/A"}</div>
