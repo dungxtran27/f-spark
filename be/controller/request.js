@@ -389,10 +389,10 @@ const getAllLeaveClassRequest = async (req, res) => {
       await RequestRepository.getProcessedLeaveClassRequest(termId);
     return res.status(200).json({
       pendingRequest: pendingRequest.filter(
-        (r) => r?.createBy?.term.toString() === termId
+        (r) => r?.createBy?.term?.toString() === termId
       ),
       processedRequest: processedRequest.filter(
-        (r) => r?.createBy?.term.toString() === termId
+        (r) => r?.createBy?.term?.toString() === termId
       ),
     });
   } catch (error) {
@@ -443,8 +443,6 @@ const createDeleteStudentFromGroupRequest = async (req, res) => {
         error: "Request already exists for this student and group.",
       });
     }
-    console.log(groupId, studentId);
-
     const group = await RequestRepository.findGroupForLeaveRequest(
       groupId,
       studentId

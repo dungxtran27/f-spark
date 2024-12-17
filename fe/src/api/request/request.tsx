@@ -4,7 +4,7 @@ export const requestList = {
   getRequest: async (groupId: string) => {
     return await axios.get(`api/request?groupId=${groupId}`);
   },
-  getLeaveClassRequest: async (termId: string | null) => {
+  getLeaveClassRequest: async (termId: string | undefined) => {
     return await axios.get(`api/request/getAllLeaveClassRequest`, {
       params: {
         termId,

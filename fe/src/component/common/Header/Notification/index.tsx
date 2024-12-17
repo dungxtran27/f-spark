@@ -38,15 +38,23 @@ const Notification = () => {
       }
     },
   });
+  const getStatisticByRole = () => {
+    switch (userInfo?.role) {
+      case ROLE.student:
+        return (
+          notificationStatistic?.data?.data?.groupNotification +
+          notificationStatistic?.data?.data?.classNotification +
+          10
+        );
+      case ROLE.teacher:
+        return notificationStatistic?.data?.data?.classNotification + 10;
+      default:
+        return 10;
+    }
+  };
   return (
     <div>
-      <Badge
-        count={
-          notificationStatistic?.data?.data?.groupNotification +
-          notificationStatistic?.data?.data?.classNotification
-        }
-        className="cursor-pointer"
-      >
+      <Badge count={getStatisticByRole()} className="cursor-pointer">
         <SlBell size={20} onClick={() => setOpenNotification(true)} />
       </Badge>
       <Modal

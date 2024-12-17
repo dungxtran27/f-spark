@@ -52,7 +52,7 @@ const SideBar: React.FC<HeaderProps> = () => {
       case ROLE.teacher:
         return TeacherRoutes;
       case ROLE.admin:
-        return AdminRoutes;
+        return AdminRoutes();
       case ROLE.headOfSubject:
         return HeadOfSubjectRouter;
       case ROLE.accountant:

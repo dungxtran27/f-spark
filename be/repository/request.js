@@ -211,14 +211,13 @@ const getProcessedLeaveClassRequest = async () => {
       .populate({ path: "group", select: " GroupName " })
       .populate({
         path: "createBy",
-        select: "studentId name major group",
+        select: "studentId name major group term",
       })
       .populate({
         path: "studentDeleted",
-        select: "studentId name major group term",
+        select: "studentId name major group",
       })
       .sort({ createdAt: -1 });
-
     return result;
   } catch (error) {
     throw new Error(error.message);

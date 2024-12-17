@@ -11,8 +11,12 @@ import {
 import { RiMailSendFill } from "react-icons/ri";
 import { IoTime } from "react-icons/io5";
 import { Badge } from "antd";
-
-
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_KEY } from "./const";
+import { requestList } from "../api/request/request";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { Term } from "../model/auth";
 
 export const StudentRoutes = [
   {
@@ -63,32 +67,44 @@ export const TeacherRoutes = [
     icon: <FaPeopleGroup size={20} />,
   },
 ];
-export const AdminRoutes = [
-  {
-    route: "/manageClass",
-    page: "Manage Class",
-    icon: <SiGoogleclassroom size={20} />,
-  },
-  {
-    route: "/manageAccount",
-    page: "Manage Account",
-    icon: <BiSolidUserAccount size={20} />,
-  },
-  {
-    route: "/manageRequest",
-    page: "Requests",
-    icon: (
-      <Badge count={2}>
-        <BiSolidUserAccount size={20} />
-      </Badge>
-    ),
-  },
-  {
-    route: "/manageTerms",
-    page: "Terms",
-    icon: <IoTime size={20} />,
-  },
-];
+export const AdminRoutes = () => {
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
+  const { data: reqData } = useQuery({
+    queryKey: [QUERY_KEY?.REQUEST_LEAVE_CLASS],
+    queryFn: async () => {
+      return requestList?.getLeaveClassRequest(activeTerm?._id);
+    },
+    enabled: !!activeTerm?._id
+  });
+  return [
+    {
+      route: "/manageClass",
+      page: "Manage Class",
+      icon: <SiGoogleclassroom size={20} />,
+    },
+    {
+      route: "/manageAccount",
+      page: "Manage Account",
+      icon: <BiSolidUserAccount size={20} />,
+    },
+    {
+      route: "/manageRequest",
+      page: "Requests",
+      icon: (
+        <Badge count={reqData?.data?.pendingRequest?.length}>
+          <BiSolidUserAccount size={20} />
+        </Badge>
+      ),
+    },
+    {
+      route: "/manageTerms",
+      page: "Terms",
+      icon: <IoTime size={20} />,
+    },
+  ];
+};
 
 export const SecondaryMenu = [
   {
@@ -118,7 +134,7 @@ export const HeadOfSubjectRouter = [
     route: "/hos/groups",
     page: "Groups",
     icon: <FaTasks size={20} />,
-  }
+  },
 ];
 export const AccountantRouter = [
   {
@@ -126,5 +142,4 @@ export const AccountantRouter = [
     page: "Money",
     icon: <FaMoneyBill size={20} />,
   },
- 
 ];
