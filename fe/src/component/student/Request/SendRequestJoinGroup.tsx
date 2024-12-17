@@ -1,5 +1,5 @@
 import ProjectCard from "./ProjectCard";
-import { QUERY_KEY } from "../../../utils/const";
+import { DATE_FORMAT, QUERY_KEY } from "../../../utils/const";
 import { requestList } from "../../../api/request/request";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -28,7 +28,6 @@ import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdCancelPresentation } from "react-icons/md";
 import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
-import moment from "moment";
 import { TbClockX } from "react-icons/tb";
 
 interface Leader {
@@ -280,14 +279,19 @@ const RequestJoinGroup: React.FC = () => {
       ) : (
         <>
           {dayjs().isAfter(dayjs(deadlineRequestJoinGroup)) ? (
-            <Result
-              icon={
-                <div className="place-items-center text-red-500">
-                  <TbClockX size={100} />
-                </div>
-              }
-              title={`The deadline for requesting to join the group over due.!${moment(deadlineRequestJoinGroup).format()}`}
-            />
+            <>
+              <h2 className="text-xl font-semibold mb-4">Join Group</h2>
+              <Result
+                icon={
+                  <div className="place-items-center text-red-500">
+                    <TbClockX size={100} />
+                  </div>
+                }
+                title={`The deadline for requesting to join the group has been overdue at ${dayjs(
+                  deadlineRequestJoinGroup
+                ).format(DATE_FORMAT.withYear)}`}
+              />
+            </>
           ) : (
             <div className="bg-white rounded-md shadow-md w-full p-4">
               <h2 className="text-xl font-semibold mb-4">Join Group</h2>

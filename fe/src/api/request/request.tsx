@@ -4,8 +4,12 @@ export const requestList = {
   getRequest: async (groupId: string) => {
     return await axios.get(`api/request?groupId=${groupId}`);
   },
-  getLeaveClassRequest: async () => {
-    return await axios.get(`api/request/getAllLeaveClassRequest`);
+  getLeaveClassRequest: async (termId: string | undefined) => {
+    return await axios.get(`api/request/getAllLeaveClassRequest`, {
+      params: {
+        termId,
+      },
+    });
   },
   getLeaveClassRequestOfStudent: async () => {
     return await axios.get(`api/request/getLeaveClassRequestOfStudent`);

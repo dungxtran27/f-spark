@@ -41,7 +41,7 @@ instance.interceptors.response.use(
             }
             delete updatedPersistRoot.auth;
             localStorage.setItem("persist:root", updatedPersistRoot);
-            setInterval(() => {
+            setTimeout(() => {
               window.location.href = `/${role}/login`;
             }, 1000);
           }
@@ -49,8 +49,8 @@ instance.interceptors.response.use(
       }
     }
     if (error.response.status === 403) {
-      setInterval(() => {
-        window.location.href = `/`;
+      setTimeout(() => {
+        window.location.href = `/error/403`;
       }, 1000);
     }
     if (error.response.data.error) {

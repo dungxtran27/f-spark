@@ -4,6 +4,8 @@ import { RootState } from "../../../redux/store";
 import { useSelector } from "react-redux";
 import { Term } from "../../../model/auth";
 import { useState, useEffect, useRef } from "react";
+import { DATE_FORMAT } from "../../../utils/const";
+import dayjs from "dayjs";
 
 const TimeLine = () => {
   const activeTerm = useSelector(
@@ -36,9 +38,12 @@ const TimeLine = () => {
     }
   }, [filteredOutcomes]);
 
-  const items = filteredOutcomes.map((item, index) => ({
+  const items = filteredOutcomes.map((item) => ({
     key: item.title,
-    title: index === currentStep ? "" : item.title,
+    title: item.title,
+    subTitle: `${dayjs(item?.startDate).format(DATE_FORMAT.withYear)} - ${dayjs(
+      item?.endDate
+    ).format(DATE_FORMAT.withYear)}`,
   }));
 
   const customDot: StepsProps["progressDot"] = (dot, { index }) => (
@@ -48,16 +53,13 @@ const TimeLine = () => {
           <strong className="flex justify-center">
             {filteredOutcomes[index].title}
           </strong>
-          <div className="text-md text-gray-500 mt-1">
-            {moment(filteredOutcomes[index].startDate).format("DD MMM, YYYY")}
-            <span> - </span>
-            {moment(filteredOutcomes[index].endDate).format("DD MMM, YYYY")}
+          <div className="text-md text-gray-500 mt-1 w-[300px]">
+            {filteredOutcomes[index]?.description}
           </div>
         </div>
       }
       trigger="click"
       placement="top"
-      open={index === currentStep}
     >
       {dot}
     </Popover>

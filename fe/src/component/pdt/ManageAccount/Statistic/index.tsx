@@ -32,51 +32,69 @@ const Statistic: React.FC<{
   const { data: studentData } = useQuery({
     queryKey: [QUERY_KEY.ALLSTUDENT, term],
     queryFn: async () => {
-      return student.getTotalStudentsByTerm({ term: term });
+      return student.getTotalStudentsByTerm({ term: term || activeTerm?._id });
     },
+    enabled: !!(term || activeTerm),
   });
 
   const { data: teacherData } = useQuery({
     queryKey: [QUERY_KEY.ALLTEACHER, term],
     queryFn: async () => {
-      return teacherApi.getTotalTeachers({ term: term });
+      return teacherApi.getTotalTeachers({ term: term || activeTerm?._id });
     },
+    enabled: !!(term || activeTerm),
   });
 
   const { data: mentorData } = useQuery({
     queryKey: [QUERY_KEY.ALLMENTOR, term],
     queryFn: async () => {
-      return mentorList.getTotalMentors({ term: term });
+      return mentorList.getTotalMentors({ term: term || activeTerm?._id });
     },
+    enabled: !!(term || activeTerm),
   });
   return (
     <div className="border rounded w-full p-5 flex items-center gap-5 shadow-lg bg-white border-primary/30">
-      <div className="flex items-center justify-between w-4/6">
-        <div className="flex items-end gap-5">
-          <AntdStatistic title="Student" value={studentData?.data?.data?.totalStudents} prefix={<PiStudent />} />
-          <div className="font-semibold">
-            <p className="text-red-500">{studentData?.data?.data?.totalStudentsNoClass} Student No Class</p>
-            <p className="text-textSecondary">{studentData?.data?.data?.totalStudentsHaveClass
-            } Student Have Class</p>
+      {!!(term || activeTerm) && (
+        <div className="flex items-center justify-between w-4/6">
+          <div className="flex items-end gap-5">
+            <AntdStatistic
+              title="Student"
+              value={studentData?.data?.data?.totalStudents}
+              prefix={<PiStudent />}
+            />
+            <div className="font-semibold">
+              <p className="text-red-500">
+                {studentData?.data?.data?.totalStudentsNoClass} Student No Class
+              </p>
+              <p className="text-textSecondary">
+                {studentData?.data?.data?.totalStudentsHaveClass} Student Have
+                Class
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-end gap-5">
+          <div className="flex items-end gap-5">
+            <AntdStatistic
+              title="Teachers"
+              value={teacherData?.data?.data?.totalTeacher}
+              prefix={<PiChalkboardTeacherLight />}
+            />
+            <div className="font-semibold">
+              <p className="text-pendingStatus">
+                {teacherData?.data?.data?.totalTeacherNoClass} Teacher No Class
+              </p>
+              <p className="text-textSecondary">
+                {teacherData?.data?.data?.totalTeacherHaveClass} Teacher
+                Available{" "}
+              </p>
+            </div>
+          </div>
           <AntdStatistic
-            title="Teachers"
-            value={teacherData?.data?.data?.totalTeacher}
-            prefix={<PiChalkboardTeacherLight />}
+            title="Active Supporting Mentor"
+            value={mentorData?.data?.data?.totalMentor}
+            prefix={<LiaChalkboardTeacherSolid />}
           />
-          <div className="font-semibold">
-            <p className="text-pendingStatus">{teacherData?.data?.data?.totalTeacherNoClass} Teacher No Class</p>
-            <p className="text-textSecondary">{teacherData?.data?.data?.totalTeacherHaveClass} Teacher Available </p>
-          </div>
         </div>
-        <AntdStatistic
-          title="Mentor"
-          value={mentorData?.data?.data?.totalMentor}
-          prefix={<LiaChalkboardTeacherSolid />}
-        />
-      </div>
+      )}
       <Form
         className="flex justify-end flex-grow relative top-2"
         layout="vertical"
@@ -91,12 +109,13 @@ const Statistic: React.FC<{
               onChange={(value) => {
                 setTerm(value);
               }}
-              defaultValue={`${terms?.data?.data?.find(
-                (t: any) =>
-                  dayjs().isAfter(t?.startTime) &&
-                  dayjs().isBefore(t?.endTime)
-              )?._id
-                }`}
+              defaultValue={`${
+                terms?.data?.data?.find(
+                  (t: any) =>
+                    dayjs().isAfter(t?.startTime) &&
+                    dayjs().isBefore(t?.endTime)
+                )?._id
+              }`}
             />
           </FormItem>
         )}

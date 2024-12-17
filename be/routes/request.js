@@ -61,7 +61,6 @@ requestRouter.get(
   "/getAllLeaveClassRequest",
   verifyToken,
   authorization.checkRole("ADMIN"),
-
   RequestController.getAllLeaveClassRequest
 );
 requestRouter.get(

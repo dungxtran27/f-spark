@@ -151,7 +151,6 @@ const createClass = async (req, res) => {
 };
 
 const getClassDetail = async (req, res) => {
-  console.log("kkk");
   try {
     const { classId } = req.params;
     const result = await ClassRepository.findClassById(classId);
