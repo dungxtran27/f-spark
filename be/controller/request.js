@@ -472,8 +472,8 @@ const updateIsSponsorship = async () => {
     const activeTerm = await TermRepository.getActiveTerm();
     const currentTime = moment().toISOString();
     const endDate = activeTerm.timeLine.find(
-      (t) => t.type === "sponsorShipVote"
-    ).endDate;
+      (t) => t.type === "sponsorship_finalized"
+    ).startDate;
     if (moment(endDate).isBefore(currentTime)) {
       const requests = await RequestRepository.findRequestByTypeRequestFPT();
       const filterRequestByTerm = requests.filter((r) => {
@@ -486,13 +486,14 @@ const updateIsSponsorship = async () => {
         const totalYesVotes = request.upVoteYes.length;
         const totalVotes = request.upVoteYes.length + request.upVoteNo.length;
         const requestId = request._id;
-        const groupId = request.group._id;
-        const group = await GroupRepository.findGroupById(groupId);
+        const groupId = request.group._id;        
+        const group = await GroupRepository.findbyId(groupId.toString());
         if (totalVotes === totalMembers) {
           if (
             totalYesVotes === totalMembers &&
             group?.sponsorStatus === "normal"
           ) {
+            
             await RequestRepository.approveRequestIsSponsorship(
               groupId,
               requestId
