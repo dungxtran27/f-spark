@@ -151,7 +151,9 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
       return await student.getStudentOfGroup();
     },
   });
+
   useEffect(() => {
+    form.setFieldValue(CREATE_TASK_FILTER.priority, 'Normal')
     if (task) {
       form.setFieldsValue({
         [CREATE_TASK_FILTER.taskName]: task?.taskName,

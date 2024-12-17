@@ -58,7 +58,8 @@ const createAccount = async ({email, profilePicture}) => {
     const result = await Account.create({
       email: email,
       profilePicture: profilePicture,
-      password: hashedPassword
+      password: hashedPassword,
+      verify: true
     })
     return result;
   } catch (error) {
