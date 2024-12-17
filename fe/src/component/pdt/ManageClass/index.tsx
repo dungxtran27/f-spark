@@ -1,4 +1,13 @@
-import { Select, Input, Pagination, Modal, Button, Upload, Empty } from "antd";
+import {
+  Select,
+  Input,
+  Pagination,
+  Modal,
+  Button,
+  Upload,
+  Empty,
+  Result,
+} from "antd";
 import ClassCard from "./classCard";
 import TotalClassCard from "./totalClassCard";
 import StudentTable from "./studentTable";
@@ -19,6 +28,7 @@ import * as XLSX from "xlsx";
 import { BsExclamationCircle } from "react-icons/bs";
 import { groupApi } from "../../../api/group/group";
 import { student } from "../../../api/student/student";
+import moment from "moment";
 const { Option } = Select;
 interface Term {
   _id: string;
@@ -39,7 +49,14 @@ const ManageClassWrapper = () => {
   };
 
   const { data: classData, refetch: refetchClasses } = useQuery({
-    queryKey: [QUERY_KEY.CLASSES, page, classCode, teacherName, category, semester],
+    queryKey: [
+      QUERY_KEY.CLASSES,
+      page,
+      classCode,
+      teacherName,
+      category,
+      semester,
+    ],
     queryFn: async () => {
       return classApi.getClassListPagination({
         limit: 9,
@@ -60,17 +77,16 @@ const ManageClassWrapper = () => {
     },
   });
   const { data: studentsData } = useQuery({
-    queryKey: [QUERY_KEY.ALLSTUDENT,page, semester],
+    queryKey: [QUERY_KEY.ALLSTUDENT, page, semester],
     queryFn: async () => {
       return student.getAllStudentsNoClass({
         term: semester,
-        page:1,
+        page: 1,
         limit: 8,
       });
     },
   });
-  console.log(studentsData?.data?.data);
-  
+
   const { data: termData } = useQuery({
     queryKey: [QUERY_KEY.TERM],
     queryFn: async () => {
@@ -148,187 +164,230 @@ const ManageClassWrapper = () => {
     showUploadList: false, // Disable showing the upload list
     accept: ".xlsx,.xls", // Restrict file types to Excel files
   };
+
+  const deadline =
+    activeTerm?.timeLine?.filter(
+      (r: any) => r.type === "studentAccountCreate"
+    ) || [];
+
+  const startDate = deadline[0]?.startDate;
+
   return (
     <div className="m-5 h-full flex flex-col">
-      {activeTerm || !!semester ? (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-xl font-bold">Manage Class</div>
-          </div>
-          <div className="flex flex-grow">
-            {/* Total Cards */}
-            <div className="w-1/4 pr-6">
-              <div className="mb-6 space-y-4">
-                <div className="bg-pendingStatus/15 border-pendingStatus rounded border shadow p-3 flex gap-3">
-                  <BsExclamationCircle className="text-pendingStatus flex-shrink-0" size={20} />{" "}
-                  <span className="font-semibold">
-                    Dividing Students into classes starts at{" "}
-                    <span className="text-pendingStatus">05 Jan 2025</span>,
-                    after Students have finished transferring member
-                  </span>
-                </div>
-                <TotalClassCard
-                  toggleStudentTable={toggleStudentTable}
-                  toggleGroupTable={toggleGroupTable}
-                  toggleClass={toggleClass}
-                  handleClassClick={handleClassClick}
-                  totalClasses={classData?.data?.totalItems}
-                  totalClassesMissStudents={classData?.data.classMissStudent}
-                  totalClassesFullStudents={classData?.data.classFullStudent}
-                  totalGroup={groupData?.data?.data?.totalGroup}
-                  totalStudent={studentsData?.data?.data?.totalStudent}
-                  totalStudentNotHaveClass={studentsData?.data?.data?.countStudentNotHaveClass}
-                  totalGroupNotHaveClass={groupData?.data?.data?.countGroupNotHaveClass}
-
-                  setCategory={setCategory}
-                  totalMembers={
-                    classData?.data.data.reduce(
-                      (acc: any, classItem: any) =>
-                        acc + classItem.totalStudents,
-                      0
-                    ) || 0
-                  }
-                  groups={
-                    classData?.data.data.reduce(
-                      (acc: any, classItem: any) => acc + classItem.totalGroups,
-                      0
-                    ) || 0
-                  }
-                />
+      {moment().isBefore(moment(startDate)) ? (
+        <Result
+          status="warning"
+          title={
+            <>
+              It is not yet the start time. Please check again on the{" "}
+              <a className="text-blue-500 hover:underline" href="/manageAccount">
+              Manage Account
+              </a>{" "}
+              page.
+            </>
+          }
+        />
+      ) : (
+        <>
+          {activeTerm || !!semester ? (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xl font-bold">Manage Class</div>
               </div>
-            </div>
-
-            <div className="w-3/4 flex flex-col">
-              {/* Bấm bấm*/}
-              {!showStudentTable && !showGroupTable && showClass && (
-                <div>
-                  <div className="flex mb-4 justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span>Term:</span>
-                      <Select
-                        defaultValue={semester}
-                        value={semester}
-                        onChange={handleSemesterChange}
-                        className="w-24"
-                        allowClear
-                      >
-                        {termData?.data?.data.map((term: Term) => (
-                          <Option key={term._id} value={term._id}>
-                            {term.termCode} {/* Display termCode */}
-                          </Option>
-                        ))}
-                      </Select>
-                      <span>Class Code:</span>
-                      <Select
-                        placeholder="Select Class"
-                        className="w-36"
-                        onChange={handleClassChange}
-                        allowClear
-                        showSearch
-                      >
-                        {classData?.data?.data.map((option: any) => (
-                          <Option key={option._id} value={option.classCode}>
-                            {option.classCode}
-                          </Option>
-                        ))}
-                      </Select>
-                      <Input
-                        placeholder="Search Teacher"
-                        className="w-64"
-                        onChange={handleSearch}
-                        suffix={<SearchOutlined />}
-                      />
+              <div className="flex flex-grow">
+                {/* Total Cards */}
+                <div className="w-1/4 pr-6">
+                  <div className="mb-6 space-y-4">
+                    <div className="bg-pendingStatus/15 border-pendingStatus rounded border shadow p-3 flex gap-3">
+                      <BsExclamationCircle
+                        className="text-pendingStatus flex-shrink-0"
+                        size={20}
+                      />{" "}
+                      <span className="font-semibold">
+                        Dividing Students into classes starts at{" "}
+                        <span className="text-pendingStatus">05 Jan 2025</span>,
+                        after Students have finished transferring member
+                      </span>
                     </div>
-                    <div className="gap-1 flex items-center">
-                      <Upload {...props}>
-                        <Button type={"primary"}>
-                          <IoDownloadOutline />
-                          Import classes data
-                        </Button>
-                      </Upload>
-                      {/* |<Button onClick={showModal}>Auto create class</Button> */}
-                    </div>
+                    <TotalClassCard
+                      toggleStudentTable={toggleStudentTable}
+                      toggleGroupTable={toggleGroupTable}
+                      toggleClass={toggleClass}
+                      handleClassClick={handleClassClick}
+                      totalClasses={classData?.data?.totalItems}
+                      totalClassesMissStudents={
+                        classData?.data.classMissStudent
+                      }
+                      totalClassesFullStudents={
+                        classData?.data.classFullStudent
+                      }
+                      totalGroup={groupData?.data?.data?.totalGroup}
+                      totalStudent={studentsData?.data?.data?.totalStudent}
+                      totalStudentNotHaveClass={
+                        studentsData?.data?.data?.countStudentNotHaveClass
+                      }
+                      totalGroupNotHaveClass={
+                        groupData?.data?.data?.countGroupNotHaveClass
+                      }
+                      setCategory={setCategory}
+                      totalMembers={
+                        classData?.data.data.reduce(
+                          (acc: any, classItem: any) =>
+                            acc + classItem.totalStudents,
+                          0
+                        ) || 0
+                      }
+                      groups={
+                        classData?.data.data.reduce(
+                          (acc: any, classItem: any) =>
+                            acc + classItem.totalGroups,
+                          0
+                        ) || 0
+                      }
+                    />
                   </div>
-                  <div className="h-full flex flex-col">
-                    {classData?.data?.data?.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-4 mb-6">
-                        {classData?.data?.data?.map((classItem: any) => {
-                          const sponsorshipCount = Array.isArray(
-                            classItem.groups
-                          )
-                            ? classItem.groups.filter(
-                              (group: any) => group.isSponsorship === true
-                            ).length
-                            : 0;
-                          return (
-                            <ClassCard
-                              key={classItem._id}
-                              classCode={classItem.classCode}
-                              teacherName={classItem?.teacherDetails?.name || "No teacher"}
-                              groups={classItem.totalGroups}
-                              isSponsorship={sponsorshipCount}
-                              totalMembers={classItem?.totalStudents}
-                              onClick={() => {
-                                setSelectedClass(classItem._id);
-                                setShowClass(false);
-                              }} onDeleteClick={function (): void {
-                                throw new Error("Function not implemented.");
-                              }} />
-                          );
-                        })}
+                </div>
+
+                <div className="w-3/4 flex flex-col">
+                  {/* Bấm bấm*/}
+                  {!showStudentTable && !showGroupTable && showClass && (
+                    <div>
+                      <div className="flex mb-4 justify-between">
+                        <div className="flex items-center space-x-3">
+                          <span>Term:</span>
+                          <Select
+                            defaultValue={semester}
+                            value={semester}
+                            onChange={handleSemesterChange}
+                            className="w-24"
+                            allowClear
+                          >
+                            {termData?.data?.data.map((term: Term) => (
+                              <Option key={term._id} value={term._id}>
+                                {term.termCode} {/* Display termCode */}
+                              </Option>
+                            ))}
+                          </Select>
+                          <span>Class Code:</span>
+                          <Select
+                            placeholder="Select Class"
+                            className="w-36"
+                            onChange={handleClassChange}
+                            allowClear
+                            showSearch
+                          >
+                            {classData?.data?.data.map((option: any) => (
+                              <Option key={option._id} value={option.classCode}>
+                                {option.classCode}
+                              </Option>
+                            ))}
+                          </Select>
+                          <Input
+                            placeholder="Search Teacher"
+                            className="w-64"
+                            onChange={handleSearch}
+                            suffix={<SearchOutlined />}
+                          />
+                        </div>
+                        <div className="gap-1 flex items-center">
+                          <Upload {...props}>
+                            <Button type={"primary"}>
+                              <IoDownloadOutline />
+                              Import classes data
+                            </Button>
+                          </Upload>
+                          {/* |<Button onClick={showModal}>Auto create class</Button> */}
+                        </div>
                       </div>
-                    ) : (
-                      <Empty
-                        description="No class created for this term"
-                        className="mt-40 min-h-[300px]"
+                      <div className="h-full flex flex-col">
+                        {classData?.data?.data?.length > 0 ? (
+                          <div className="grid grid-cols-3 gap-4 mb-6">
+                            {classData?.data?.data?.map((classItem: any) => {
+                              const sponsorshipCount = Array.isArray(
+                                classItem.groups
+                              )
+                                ? classItem.groups.filter(
+                                    (group: any) => group.isSponsorship === true
+                                  ).length
+                                : 0;
+                              return (
+                                <ClassCard
+                                  key={classItem._id}
+                                  classCode={classItem.classCode}
+                                  teacherName={
+                                    classItem?.teacherDetails?.name ||
+                                    "No teacher"
+                                  }
+                                  groups={classItem.totalGroups}
+                                  isSponsorship={sponsorshipCount}
+                                  totalMembers={classItem?.totalStudents}
+                                  onClick={() => {
+                                    setSelectedClass(classItem._id);
+                                    setShowClass(false);
+                                  }}
+                                  onDeleteClick={function (): void {
+                                    throw new Error(
+                                      "Function not implemented."
+                                    );
+                                  }}
+                                />
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <Empty
+                            description="No class created for this term"
+                            className="mt-40 min-h-[300px]"
+                          />
+                        )}
+
+                        <div className="w-full flex justify-center">
+                          <Pagination
+                            defaultCurrent={page}
+                            onChange={onChangePage}
+                            total={classData?.data.totalItems}
+                            showTotal={(total, range) =>
+                              `${range[0]}-${range[1]} of ${total} classes`
+                            }
+                            pageSize={9}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {!showStudentTable &&
+                    !showGroupTable &&
+                    !showClass &&
+                    selectedClass && (
+                      <ClassDetail
+                        classId={selectedClass}
+                        onCancel={() => setShowClass(true)}
                       />
                     )}
-
-                    <div className="w-full flex justify-center">
-                      <Pagination
-                        defaultCurrent={page}
-                        onChange={onChangePage}
-                        total={classData?.data.totalItems}
-                        showTotal={(total, range) =>
-                          `${range[0]}-${range[1]} of ${total} classes`
-                        }
-                        pageSize={9}
-                      />
-                    </div>
-                  </div>
+                  {showStudentTable && !showGroupTable && <StudentTable />}
+                  {!showStudentTable && showGroupTable && <GroupTable />}
                 </div>
-              )}
-              {!showStudentTable &&
-                !showGroupTable &&
-                !showClass &&
-                selectedClass && (
-                  <ClassDetail
-                    classId={selectedClass}
-                    onCancel={() => setShowClass(true)}
-                  />
-                )}
-              {showStudentTable && !showGroupTable && <StudentTable />}
-              {!showStudentTable && showGroupTable && <GroupTable />}
+              </div>
+              <Modal
+                title="Preview New Class"
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                footer={null}
+                width={1000}
+              >
+                <AutoCreateClass onSave={() => setIsModalOpen(false)} />
+              </Modal>
+              <ImportClassesModal
+                isOpen={importClassesModalOpen}
+                setIsOpen={setImportClassesModalOpen}
+                excelData={excelData}
+              />
             </div>
-          </div>
-          <Modal
-            title="Preview New Class"
-            open={isModalOpen}
-            onOk={handleOk}
-            onCancel={handleCancel}
-            footer={null}
-            width={1000}
-          >
-            <AutoCreateClass onSave={() => setIsModalOpen(false)} />
-          </Modal>
-          <ImportClassesModal
-            isOpen={importClassesModalOpen}
-            setIsOpen={setImportClassesModalOpen}
-            excelData={excelData}
-          />
-        </div>
-      ) : (
-        <EmptyTerm setSemester={setSemester} />
+          ) : (
+            <EmptyTerm setSemester={setSemester} />
+          )}
+        </>
       )}
     </div>
   );
