@@ -44,7 +44,7 @@ const getRequestDeadlineByTeacher = async ({ teacherId, classId, status, page })
       .limit(limit)
       .populate({
         path: "classworkId",
-        select: "_id title",
+        select: "_id name",
       })
     const totalItems = await RequestDeadline.countDocuments(query);
     requestDeadline.totalItems = totalItems;

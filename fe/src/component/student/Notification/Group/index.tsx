@@ -104,7 +104,7 @@ const Group = () => {
           for{' '}
           <Link
             className="text-primaryBlue hover:underline font-bold"
-            to={`${n?.action?.extraUrl}`}
+            to={`class`}
           >
             {n?.action?.priorVersion?.title}
           </Link>

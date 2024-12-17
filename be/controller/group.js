@@ -613,10 +613,10 @@ const addTransaction = async (req, res) => {
     const reqSent = await FundEstimationRepository.findGroupRequestApproved(
       student?.group
     );
-    if (reqSent)
-      return res
-        .status(400)
-        .json({ error: "Fund is confirmed, cannot add transactions" });
+    // if (reqSent)
+    //   return res
+    //     .status(400)
+    //     .json({ error: "Fund is confirmed, cannot add transactions" });
     const result = await GroupRepository.addTransaction(student?.group, {
       title,
       fundUsed,

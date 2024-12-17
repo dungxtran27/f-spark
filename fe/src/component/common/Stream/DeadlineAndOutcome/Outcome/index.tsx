@@ -55,8 +55,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
   const isTeacher = userInfo?.role === ROLE.teacher;
   const [submission, setSubmission] = useState(null);
   const [form] = Form.useForm();
-  const { TextArea } = Input;
-
+  const { TextArea } = Input;        
   const [isModalOpenRequest, setIsModalOpenRequest] = useState(false);
   const showModalRequestDeadline = () => {
     setIsModalOpenRequest(true);
@@ -203,6 +202,7 @@ const Outcome = ({ o, classID }: { o: any; classID: any }) => {
             gradingCriteria={o?.GradingCriteria}
             form={form}
             setSubmission={setSubmission}
+            Groupname={submission?.group?.GroupName}
           />
         </Modal>
       )}

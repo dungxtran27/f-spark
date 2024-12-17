@@ -291,8 +291,10 @@ const ClassGroupListWrapper = () => {
 
     onSuccess: (data) => {
       setGroup(data?.data.data.group);
-
+      
       queryClient.invalidateQueries({ queryKey: [classId] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY.MENTORLIST] });
+
     },
   });
   const createGroup = useMutation({
@@ -747,7 +749,7 @@ const ClassGroupListWrapper = () => {
       {/* modal confirm */}
       <Modal
         centered
-        className="z-50"
+        className="z-[999]"
         title={"Confirm"}
         open={confirm}
         onCancel={handleCloseconfirm}
