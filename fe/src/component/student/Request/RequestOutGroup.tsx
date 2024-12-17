@@ -1,7 +1,7 @@
 import { Button, Empty, message, Modal, Skeleton, Table, Tag } from "antd";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { colorMap, QUERY_KEY } from "../../../utils/const";
+import { colorMap, QUERY_KEY, ROLE } from "../../../utils/const";
 import { requestList } from "../../../api/request/request";
 import { Term, UserInfo } from "../../../model/auth";
 import { RootState } from "../../../redux/store";
@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import classNames from "classnames";
 import styles from "./styles.module.scss";
 import dayjs from "dayjs";
+import { authApi } from "../../../api/auth";
 
 interface Request {
   _id: string;
@@ -37,7 +38,25 @@ interface Request {
 const RequestOutGroup = () => {
   const queryClient = useQueryClient();
   const [isOutGroupModal, setIsOutGroupModal] = useState(false);
-
+  const logOutMutation = useMutation({
+    mutationFn: () => authApi.logOut(),
+    onSuccess: () => {
+      const persistRoot = localStorage.getItem("persist:root");
+      if (persistRoot) {
+        const updatedPersistRoot = JSON.parse(persistRoot);
+        let role = null;
+        if (updatedPersistRoot.auth) {
+          role = JSON.parse(updatedPersistRoot?.auth).userInfo?.role;
+        }
+        localStorage.clear();
+        setInterval(() => {
+          window.location.href = `${
+            role === ROLE.student ? "" : `/${role.toLowerCase()}`
+          }/login`;
+        }, 1000);
+      }
+    },
+  });
   const userInfo = useSelector(
     (state: RootState) => state.auth.userInfo
   ) as UserInfo | null;
@@ -66,7 +85,12 @@ const RequestOutGroup = () => {
         queryKey: [QUERY_KEY.REQUESTS, groupId],
       });
       setIsOutGroupModal(false);
-      message.success("Out group request created successfully");
+      message.success(
+        "Out group request created successfully, please log in again"
+      );
+      setTimeout(() => {
+        logOutMutation.mutate();
+      }, 1000);
     },
   });
 

@@ -1,4 +1,5 @@
 import {
+  Button,
   DatePicker,
   Form,
   Input,
@@ -136,6 +137,7 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
           lastTaskRef?.current?.scrollIntoView();
         }, 1000);
       }
+      message.success("Task created!")
       setOpen({
         isOpen: false,
         mode: "CREATE",
@@ -168,22 +170,30 @@ const CreateOrUpdateTask: React.FC<ModalProps> = ({
     <Modal
       title={mode === "CREATE" ? "Create Task" : "Update Task"}
       open={open}
-      onOk={async () => {
-        await form.validateFields();
-        createTask.mutate({
-          assignee: assignee,
-          description: description,
-          taskType: TASK_TYPE.GROUP_WORK,
-          taskName: taskName,
-          dueDate: dueDate,
-          priority: priority,
-          attachment: attachment,
-          fileName: fileName,
-          parentTask: task?.parentTask,
-        });
+      footer={
+        <Button
+          type="primary"
+          loading={createTask.isPending}
+          onClick={async () => {
+            await form.validateFields();
+            createTask.mutate({
+              assignee: assignee,
+              description: description,
+              taskType: TASK_TYPE.GROUP_WORK,
+              taskName: taskName,
+              dueDate: dueDate,
+              priority: priority,
+              attachment: attachment,
+              fileName: fileName,
+              parentTask: task?.parentTask,
+            });
 
-        form.resetFields();
-      }}
+            form.resetFields();
+          }}
+        >
+          Save
+        </Button>
+      }
       onCancel={() =>
         setOpen({
           isOpen: false,

@@ -78,7 +78,7 @@ const Return = () => {
     <div className="flex bg-white min-h-[70vh] ">
       {receivedEstimation?.returnStatus == "pending" && (
         <>
-          <div className="w-[35%] justify-center text-center place-items-center ">
+          <div className="w-[35%] mx-auto h-full items-center justify-center text-center place-items-center ">
             <Result
               className="place-items-center"
               icon={

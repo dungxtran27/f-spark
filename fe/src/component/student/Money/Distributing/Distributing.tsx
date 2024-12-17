@@ -217,7 +217,7 @@ const Distributing = () => {
                   >
                     <div
                       style={{ width: `${calWidthFundUsed}%` }}
-                      className={` flex items-center h-3  absolute top-[50%] left-0 hover:border-2 hover:border-red-500 hover:h-[0.85rem]`}
+                      className={` flex items-center h-3 max-w-[100%] absolute top-[50%] left-0 hover:border-2 hover:border-red-500 hover:h-[0.85rem]`}
                     >
                       <div className="bg-gray-500 h-[1rem]  w-[4px] rounded-lg z-20"></div>
                       <div className="bg-blue-400 h-3  w-full"></div>
