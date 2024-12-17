@@ -1,6 +1,7 @@
 import group from "../repository/group.js";
 import {
   ClassRepository,
+  ClassworkRepository,
   FundEstimationRepository,
   GroupRepository,
   NotificationRepository,

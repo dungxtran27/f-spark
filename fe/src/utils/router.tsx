@@ -27,6 +27,7 @@ import Money from "../pages/Student/Money";
 import AccountantPage from "../pages/Accountant";
 import ManageTerm from "../pages/PDT/ManageTerm";
 import ConfirmSignUp from "../pages/Auth/SignUp/confirmSignUp";
+import Error from "../pages/ErrorPage/Error";
 const Router = () => {
   return (
     <BrowserRouter>
@@ -68,6 +69,9 @@ const Router = () => {
         {/* Accountant */}
         <Route path="/accountant" element={<AccountantPage />} />
         <Route path="/confirmSignUp/:token" element={<ConfirmSignUp />} />
+
+        {/* Error page */}
+        <Route path="/error/:status" element={<Error />} />
       </Routes>
     </BrowserRouter>
   );

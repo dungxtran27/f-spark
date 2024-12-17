@@ -130,7 +130,7 @@ const People = () => {
     <>
       <div>{classPeople?.data.data?.groupStudent.length} groups</div>
       <div className=" w-full rounded-md p-3 flex">
-        <div className="flex flex-wrap ">
+        <div className="flex flex-wrap  bg-red-400 ">
           {classPeople?.data.data?.groupStudent.map((s: any) => (
             <GroupCard
               info={s}
@@ -145,7 +145,6 @@ const People = () => {
             content={TeacherPopoverContent}
             trigger="click"
             placement="leftTop"
-
           >
             <Button>
               <FaChalkboardTeacher size={16} />
