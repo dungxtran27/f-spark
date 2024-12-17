@@ -1,6 +1,6 @@
-import { Collapse, CollapseProps, Divider, Empty, Image, Result } from "antd";
+import { Collapse, CollapseProps, Divider, Empty, Image } from "antd";
 import Response from "../ResponseFromAccountant";
-import { FaQuestion, FaRegClock } from "react-icons/fa6";
+import { FaQuestion } from "react-icons/fa6";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEY } from "../../../../utils/const";
@@ -76,48 +76,34 @@ const Return = () => {
     });
   return (
     <div className="flex bg-white min-h-[70vh] ">
-      {receivedEstimation?.returnStatus == "pending" && (
-        <>
-          <div className="w-[35%] mx-auto h-full items-center justify-center text-center place-items-center ">
-            <Result
-              className="place-items-center"
-              icon={
-                <FaRegClock
-                  size={150}
-                  className="items-center place-item-center text-center"
-                />
+      {/* {receivedEstimation?.returnStatus !== "pending" && ( */}
+      <>
+        <div className="!w-[65%] bg-white">
+          <div className=" p-4 ">
+            <span className="text-lg font-semibold">
+              Transaction verified:{" "}
+            </span>
+            <span>
+              {`${
+                receivedEstimation?.group?.transactions.filter(
+                  (t: any) => t.status != "pending"
+                ).length
               }
-              title="Please wait for confirming"
-            />
-          </div>
-        </>
-      )}
-      {receivedEstimation?.returnStatus !== "pending" && (
-        <>
-          <div className="w-full bg-white">
-            <div className="p-4">
-              <span className="text-lg font-semibold">
-                Transaction verified:{" "}
-              </span>
-              <span>
-                {`${
-                  receivedEstimation?.group?.transactions.filter(
-                    (t: any) => t.status != "pending"
-                  ).length
-                }
                    / ${receivedEstimation?.group?.transactions.length}`}
-              </span>
-            </div>
+            </span>
+          </div>
+          <div className="p-4">
             {receivedEstimation?.group?.transactions.length > 0 ? (
               <Collapse items={items} accordion />
             ) : (
               <Empty description="No transaction were made" />
             )}
           </div>
-          <Divider type="vertical" className="b" />
-          <Response req={receivedEstimation} refetch={refetch} />
-        </>
-      )}
+        </div>
+        <Divider type="vertical" className="b" />
+        <Response req={receivedEstimation} refetch={refetch} />
+      </>
+      {/* )} */}
     </div>
   );
 };

@@ -76,6 +76,7 @@ const Distributing = ({ termId }: { termId: string }) => {
     queryFn: () => {
       return AccountantApi.getApprovedSponsorRequest(termId);
     },
+    enabled: !!termId,
   });
 
   const activeTerm = useSelector(
@@ -109,8 +110,9 @@ const Distributing = ({ termId }: { termId: string }) => {
             "border-green-500 bg-green-100": moment().isBefore(
               moment(startDate)
             ),
-            "border-pendingStatus bg-pendingStatus/20":
-              !moment().isBefore(moment(startDate)),
+            "border-pendingStatus bg-pendingStatus/20": !moment().isBefore(
+              moment(startDate)
+            ),
           }
         )}
       >

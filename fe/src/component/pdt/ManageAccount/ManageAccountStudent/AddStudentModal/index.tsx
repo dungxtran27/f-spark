@@ -1,4 +1,4 @@
-import { Form, Input, Modal, Select } from "antd";
+import { Form, Input, Modal, notification, Select } from "antd";
 import { useForm } from "antd/es/form/Form";
 import FormItem from "antd/es/form/FormItem";
 import classNames from "classnames";
@@ -7,8 +7,9 @@ import { majors, QUERY_KEY } from "../../../../../utils/const";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
 import { Term } from "../../../../../model/auth";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { groupApi } from "../../../../../api/group/group";
+import { student } from "../../../../../api/student/student";
 interface Props {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
@@ -24,13 +25,32 @@ const AddStudentModal = ({ isOpen, setIsOpen }: Props) => {
       return groupApi.getGroupOfTerm(activeTerm?._id);
     },
   });
+  const { mutate: addStudent } = useMutation({
+    mutationFn: student.addStudent,  // Đảm bảo rằng bạn chỉ định đúng mutationFn
+    onSuccess: () => {
+      form.resetFields();
+      setIsOpen(false);
+    },
+  });
+
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      addStudent({
+        ...values,
+        activeTerm: activeTerm?._id,
+      });
+    } catch (error) {
+      console.error("Validation failed:", error);
+    }
+  };
   return (
     <Modal
       title="Add Student"
       open={isOpen}
-      onCancel={() => {
-        setIsOpen(false);
-      }}
+      onOk={handleSubmit}
+      onCancel={() => setIsOpen(false)}
       destroyOnClose
     >
       <Form form={form} layout="vertical" className={styles.customForm}>
@@ -38,7 +58,7 @@ const AddStudentModal = ({ isOpen, setIsOpen }: Props) => {
           <FormItem
             className="flex-1"
             label="Name"
-            name="Name"
+            name="name"
             rules={[
               {
                 required: true,
@@ -98,7 +118,30 @@ const AddStudentModal = ({ isOpen, setIsOpen }: Props) => {
             />
           </FormItem>
         </div>
-        <FormItem name="Group" label="Group">
+        <FormItem
+          className="flex-1"
+          label="Gen"
+          name="gen"
+          rules={[
+            {
+              required: true,
+              message: "Gen is required",
+            },
+            {
+              validator: (_, value) => {
+                const numValue = parseFloat(value);
+                if (isNaN(numValue) || numValue <= 0) {
+                  return Promise.reject(new Error("Gen must be a number greater than 0"));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
+          <Input type="number" size="middle" />
+        </FormItem>
+
+        <FormItem name="group" label="Group">
           <Select
             size="middle"
             options={groupsOfTerm?.data?.data?.map((g: any) => {

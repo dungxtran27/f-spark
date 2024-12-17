@@ -19,7 +19,11 @@ interface TotalClassCardProps {
   totalClasses: number;
   totalClassesMissStudents: number;
   totalClassesFullStudents: number;
+  totalGroup: number;
+  totalStudent:number;
   totalMembers: number;
+  totalGroupNotHaveClass:number
+  totalStudentNotHaveClass:number;
   groups: number;
   setCategory: (category: string) => void;
 }
@@ -29,6 +33,10 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
   toggleGroupTable,
   toggleClass,
   handleClassClick,
+  totalGroup,
+  totalStudent,
+  totalStudentNotHaveClass,
+  totalGroupNotHaveClass,
   totalClasses,
   totalClassesMissStudents,
   totalClassesFullStudents,
@@ -150,7 +158,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
       <div className="bg-white p-4 shadow-md rounded-md border-2 border-transparent hover:border-orange-400">
         <div className="flex justify-between items-center mb-2">
           <div className="text-lg font-semibold">
-            Total students: {studentsData?.data?.data.totalStudent}
+            Total students: {totalStudent}
           </div>
           <span className="-ml-12"></span>
           <Tooltip title="Group Information">
@@ -161,7 +169,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
         </div>
         <div className="text-lg font-semibold ">
           {" "}
-          Total Groups: {groupsData?.data?.data.totalGroup} groups
+          Total Groups: {totalGroup} groups
         </div>
         <hr className="my-2" />
         <div
@@ -170,7 +178,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
         >
           <span>
             Groups not have class:{" "}
-            {groupsData?.data?.data.countGroupNotHaveClass}
+            {totalGroupNotHaveClass}
           </span>
           <MdGroups3 className="text-2xl text-red-500" />
         </div>
@@ -180,7 +188,7 @@ const TotalClassCard: React.FC<TotalClassCardProps> = ({
         >
           <span>
             Students not have class:{" "}
-            {studentsData?.data?.data.countStudentNotHaveClass}
+            {totalStudentNotHaveClass}
           </span>
           <MdPersonSearch className="text-2xl text-red-500" />
         </div>

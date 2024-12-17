@@ -100,7 +100,13 @@ const Evidence = () => {
   ];
   return (
     <div className="w-[65%]">
-      <Button type="default" className="relative left-[80%] top-6" onClick={()=>{setOpen(true)}}>
+      <Button
+        type="default"
+        className="relative left-[80%] top-6"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
         Add Evidence <FaPlus />
       </Button>
       <div className="pt-2">
@@ -110,7 +116,12 @@ const Evidence = () => {
             <div className="pl-4">
               <Image.PreviewGroup>
                 {ed.evidences.map((e: any) => (
-                  <Image width={200} height={200} className="object-contain "  src={e?.image} />
+                  <Image
+                    width={200}
+                    height={200}
+                    className="object-contain "
+                    src={e?.image}
+                  />
                 ))}
               </Image.PreviewGroup>
             </div>
@@ -136,7 +147,7 @@ const Evidence = () => {
 
           <div className="flex items-center justify-between">
             <FormItem>
-              <Input type="file" />
+              <Input type="file" accept="image/png, image/jpeg" />
             </FormItem>
           </div>
         </Form>

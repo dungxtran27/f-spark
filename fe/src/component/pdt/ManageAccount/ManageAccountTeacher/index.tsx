@@ -13,7 +13,8 @@ import {
   SearchOutlined,
   UserDeleteOutlined,
   CloseCircleOutlined,
-  PlusOutlined
+  PlusOutlined,
+  UploadOutlined
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { AutoCompleteProps } from "antd/es/auto-complete";
@@ -242,7 +243,8 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
             Search
           </Button>
         </Col>
-        <Col span={4}>
+        <Col span={2}></Col>
+        <Col span={6} className="flex justify-end">
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -252,7 +254,14 @@ const Teacher: React.FC<{ classId?: string }> = ({ classId }) => {
             >
             Add Teacher
           </Button>
-        </Col>
+          <Button
+                  className="ml-2"
+                  type="default"
+                  icon={<UploadOutlined />}
+                >
+                  Add File
+          </Button>
+          </Col>
       </Row>
 
       <Table
