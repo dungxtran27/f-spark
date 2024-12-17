@@ -4,12 +4,14 @@ import { QUERY_KEY } from "../../../../../utils/const";
 import { classApi } from "../../../../../api/Class/class";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 interface Props {
+  Groupname: any;
   gradingCriteria: any;
   submission: any;
   form: any;
   setSubmission: (oc: any) => void;
 }
 const GradingSubmission = ({
+  Groupname,
   gradingCriteria,
   submission,
   form,
@@ -58,7 +60,7 @@ const GradingSubmission = ({
         <FormItem
           label="Group"
           name="Group"
-          initialValue={"Ăn vặt kiểu Nhật Bản - Maneki chan"}
+          initialValue={Groupname}
         >
           <Input disabled size="large" readOnly />
         </FormItem>

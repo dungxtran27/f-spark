@@ -40,6 +40,8 @@ const AddTransactionModal = ({ isOpen, setIsOpen }: ModalProps) => {
       });
     },
     onSuccess: () => {
+      uploadedFiles.current = []
+      form.resetFields();
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY.STUDENT_OF_GROUP] });
     },
   });

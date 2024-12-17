@@ -64,7 +64,7 @@ const Classes = () => {
                           ) : (
                             <div className="flex items-center">
                               <p className="font-medium mr-1">{item?.senderType}</p>
-                              <Link to={`${item?.action?.extraUrl}`} className="disabled:inline-block hover:underline">
+                              <Link to={`/class`} className="disabled:inline-block hover:underline">
                                 <p className="m-0">{item?.action?.action}</p>
                               </Link>
                             </div>
