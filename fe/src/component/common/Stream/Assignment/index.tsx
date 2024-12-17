@@ -107,13 +107,19 @@ const Assignment = ({
                       )}
                     </div>
                     <div className="bg-backgroundPrimary w-full rounded-lg p-3 border border-textSecondary/30">
-                      {s?.content}
+                      <span
+                        dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(s?.content),
+                        }}
+                      ></span>
                       {s?.attachment && (
                         <div className="flex items-center group text-primaryBlue">
                           <TiAttachment size={20} />
-                          <span className="group-hover: underline">
-                            {s?.attachment}
-                          </span>
+                          <a
+                            download
+                            href={s?.attachment}
+                            className="group-hover: underline"
+                          >Download attachment</a>
                         </div>
                       )}
                     </div>
@@ -146,7 +152,9 @@ const Assignment = ({
                     post?.mySubmission?.attachment?.map((a: any) => (
                       <div className="flex items-center group text-primaryBlue">
                         <TiAttachment size={20} />
-                        <span className="group-hover: underline">ppp</span>
+                        <a href={post?.mySubmission?.attachment}>
+                        <span className="group-hover: underline">Download attachment</span>
+                        </a>
                       </div>
                     ))}
                 </div>

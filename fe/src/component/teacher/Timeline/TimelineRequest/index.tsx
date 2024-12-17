@@ -99,7 +99,7 @@ const TimelineRequest = () => {
           <tbody className="text-md">
             {requestDeadlineList?.data.data.map((r: any) => (
               <tr className="border-b" key={r._id}>
-                <td className="p-1">{r.classworkId.title}</td>
+                <td className="p-1">{r.classworkId.name}</td>
                 <td className="p-1">{r.groupId.GroupName}</td>
                 <td className="p-1">{r.reason}</td>
                 <td

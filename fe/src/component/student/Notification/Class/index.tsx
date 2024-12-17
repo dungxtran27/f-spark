@@ -75,7 +75,7 @@ const Class = () => {
           {_.upperFirst(n?.action?.action)}&nbsp;
           <Link
             className="text-primaryBlue hover:underline font-bold"
-            to={`${n?.action?.extraUrl}`}
+            to={`/class`}
           >
             {n?.class?.classCode}
           </Link>

@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { DATE_FORMAT } from "../../../../utils/const";
+import { DATE_FORMAT, ROLE } from "../../../../utils/const";
 import { Popover } from "antd";
 import { CiEdit } from "react-icons/ci";
 import { FaRegTrashCan, FaStar } from "react-icons/fa6";
@@ -33,7 +33,9 @@ const Announcement = ({post, userInfo, upvoteAnnouncement,sender}: Props) =>{
               />
             )}
             <div className="flex flex-col">
-              <span className="font-medium">You</span>
+              <span className="font-medium">
+                {userInfo?.role === ROLE.teacher ? "You" : "Teacher"}
+              </span>
               <span className="text-textSecondary">
                 {dayjs(post?.createdAt).format(DATE_FORMAT.withYearAndTime)}
               </span>

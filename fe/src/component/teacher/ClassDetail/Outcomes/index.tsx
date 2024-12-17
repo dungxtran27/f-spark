@@ -23,7 +23,7 @@ const TeacherOutcomes = () => {
   });
 
   const outcomesTabs: TabsProps["items"] = outcomeListData?.data?.data.map(
-    (o: any) => {
+    (o: any) => {      
       return {
         key: o._id,
         label: (

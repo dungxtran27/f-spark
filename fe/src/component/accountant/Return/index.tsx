@@ -500,11 +500,11 @@ const Return = ({ termId }: { termId: string }) => {
 
   let message;
   if (moment().isBefore(moment(startDate))) {
-    message = `Start time for the fund distribution is ${moment(
+    message = `Start time for the fund return is ${moment(
       startDate
     ).format("DD MMM YYYY")}`;
   } else {
-    message = `Deadline for the fund distribution is ${moment(endDate).format(
+    message = `Deadline for the fund return is ${moment(endDate).format(
       "DD MMM YYYY"
     )}`;
   }

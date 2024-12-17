@@ -4,7 +4,7 @@ import { DATE_FORMAT, QUERY_KEY } from "../../../../utils/const";
 import { classApi } from "../../../../api/Class/class";
 import dayjs from "dayjs";
 import { TiAttachment } from "react-icons/ti";
-
+import DOMPurify from "dompurify";
 interface Props {
   openSubmission: any;
   setOpen: (value: any) => void;
@@ -45,7 +45,11 @@ const Submissions = ({ openSubmission, setOpen }: Props) => {
                   {dayjs(s?.createdAt).format(DATE_FORMAT.withYearAndTime)}
                 </div>
                 <div className="bg-backgroundPrimary w-full rounded-lg p-3 border border-textSecondary/30">
-                  {s?.content}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(s?.content),
+                    }}
+                  ></span>
                   {s?.attachment && (
                     <div className="flex items-center group text-primaryBlue">
                       <TiAttachment size={20} />
@@ -53,7 +57,7 @@ const Submissions = ({ openSubmission, setOpen }: Props) => {
                         download
                         href={s?.attachment}
                         className="group-hover: underline"
-                      >download</a>
+                      >Download attachment</a>
                     </div>
                   )}
                 </div>
