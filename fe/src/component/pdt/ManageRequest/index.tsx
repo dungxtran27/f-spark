@@ -5,13 +5,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { requestList } from "../../../api/request/request";
 import { ColumnsType } from "antd/es/table";
 import Statistic from "./Statistic";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
+import { Term } from "../../../model/auth";
 const { Text } = Typography;
 const RequestWrapper = () => {
+  const activeTerm = useSelector(
+    (state: RootState) => state.auth.activeTerm
+  ) as Term | null;
   const { data: reqData } = useQuery({
     queryKey: [QUERY_KEY?.REQUEST_LEAVE_CLASS],
     queryFn: async () => {
-      return requestList?.getLeaveClassRequest();
+      return requestList?.getLeaveClassRequest(activeTerm?._id);
     },
+    enabled: !!activeTerm?._id
   });
 
   const queryClient = useQueryClient();

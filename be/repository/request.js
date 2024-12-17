@@ -174,7 +174,7 @@ const deleteRequestJoinByStudentId = async ({ groupId, studentId }) => {
     throw new Error(error.message);
   }
 };
-const getPendingLeaveClassRequest = async () => {
+const getPendingLeaveClassRequest = async (termId) => {
   try {
     const result = await Request.find({
       status: "pending",
@@ -191,7 +191,7 @@ const getPendingLeaveClassRequest = async () => {
       .populate({ path: "fromClass", select: "classCode" })
       .populate({ path: "toClass", select: "classCode" })
       .populate({ path: "group", select: "GroupName" })
-      .populate({ path: "createBy", select: "studentId name major" })
+      .populate({ path: "createBy", select: "studentId name major term" })
       .populate({ path: "studentDeleted", select: "studentId name major" })
       .sort({ createdAt: -1 });
 
@@ -211,14 +211,13 @@ const getProcessedLeaveClassRequest = async () => {
       .populate({ path: "group", select: " GroupName " })
       .populate({
         path: "createBy",
-        select: "studentId name major group",
+        select: "studentId name major group term",
       })
       .populate({
         path: "studentDeleted",
         select: "studentId name major group",
       })
       .sort({ createdAt: -1 });
-
     return result;
   } catch (error) {
     throw new Error(error.message);
