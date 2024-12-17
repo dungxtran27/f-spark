@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import AccountantApi from "../../../api/accountant";
 import { QUERY_KEY } from "../../../utils/const";
 import { FaClock } from "react-icons/fa6";
+import { FaRegClock } from "react-icons/fa";
 const Response = ({ req, refetch }: any) => {
   const [selectedFile, setSelectedFile] = useState<string>("");
   const imageRef = useRef<HTMLImageElement>(null);
@@ -67,6 +68,22 @@ const Response = ({ req, refetch }: any) => {
   return (
     <>
       <div className="w-[35%] bg-white">
+        {req?.returnStatus == "pending" && (
+          <>
+            <div className="w-full justify-center text-center place-items-center ">
+              <Result
+                className="place-items-center"
+                icon={
+                  <FaRegClock
+                    size={150}
+                    className="items-center place-item-center text-center"
+                  />
+                }
+                title="Please wait for confirming"
+              />
+            </div>
+          </>
+        )}
         {req?.returnStatus === "processing" && (
           <>
             <div className="pt-4">
@@ -191,11 +208,11 @@ const Response = ({ req, refetch }: any) => {
             <Image
               width={300}
               height={200}
-              className="object-contain place-content-center text-center justify-center"
-              src={req.evidences.find((e: any) => (e.type = "phase2")).image}
+              className="object-contain place-content-center text-center w-full justify-center"
+              src={req.evidences.find((e: any) => e.type == "phase2").image}
             />
-            {req.evidences.find((e: any) => (e.type = "phase2")).status ==
-            "pending" ? (
+            {req.evidences.find((e: any) => e.type == "phase2").status ==
+              "pending" && (
               <Result
                 title="Payment is verifying"
                 icon={
@@ -205,7 +222,9 @@ const Response = ({ req, refetch }: any) => {
                 }
                 status="info"
               />
-            ) : (
+            )}
+            {req.evidences.find((e: any) => e.type == "phase2").status ==
+              "declined" && (
               <>
                 <Result title="Payment decline" status="warning" />
                 <div className=" text-center">

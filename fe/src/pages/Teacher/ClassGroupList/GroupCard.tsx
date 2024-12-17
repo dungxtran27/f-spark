@@ -74,8 +74,8 @@ const GroupCard = ({
             className="font-semibold pr-3 text-[16px] hover:text-purple-600 cursor-pointer"
             onClick={() => {
               setGroup(info);
-              setTagSearch(info?.tag.map((t: any) => t._id));
               handleOpengroupDetailModal();
+              setTagSearch(info?.tag.map((t: any) => t._id));
             }}
           >
             {info.GroupName}
